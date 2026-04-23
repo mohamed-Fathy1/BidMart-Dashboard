@@ -1,0 +1,40 @@
+{
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "export": "Export",
+    "search": "Search",
+    "filter": "Filter",
+    "reset": "Reset",
+    "back": "Back",
+    "submit": "Submit"
+  },
+  "states": {
+    "loading": "Loading...",
+    "empty": "No data",
+    "error": "An error occurred",
+    "no_data": "No data to display",
+    "no_results": "No results found"
+  },
+  "errors": {
+    "permission_denied": "You do not have permission to perform this action",
+    "unexpected": "An unexpected error occurred",
+    "network": "Network connection error"
+  },
+  "labels": {
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "total": "Total",
+    "page": "Page",
+    "of": "of",
+    "rows_per_page": "Rows per page"
+  }
+}

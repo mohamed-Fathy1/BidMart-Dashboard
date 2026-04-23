@@ -1,0 +1,28 @@
+{
+  "nav": {
+    "overview": "Overview",
+    "users": "Users",
+    "moderators": "Moderators",
+    "roles": "Roles",
+    "providers": "Providers",
+    "withdrawals": "Withdrawals",
+    "orders": "Orders",
+    "complaints": "Complaints",
+    "ratings": "Ratings",
+    "live_streams": "Live Streams",
+    "content": "Content",
+    "categories": "Categories",
+    "settings": "Settings",
+    "notifications": "Notifications"
+  },
+  "topbar": {
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "logout": "Logout",
+    "language": "Language"
+  },
+  "sidebar": {
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar"
+  }
+}

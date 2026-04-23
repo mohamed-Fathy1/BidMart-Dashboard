@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__plugin_context7_context7__query-docs",
+      "Bash(pnpm create:*)",
+      "Bash(export PATH=\"$HOME/.nvm/versions/node/v18.20.8/bin:$PATH\")",
+      "Bash(corepack enable:*)",
+      "Bash(corepack prepare:*)",
+      "Bash(pnpm --version)",
+      "Bash(cp:*)",
+      "Bash(python3 -c \":*)",
+      "Bash(mv /tmp/pkg.json package.json)",
+      "Bash(pnpm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm install:*)"
+    ]
+  }
+}
