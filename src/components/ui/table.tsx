@@ -52,7 +52,6 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
 
 function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   return (
-    // If the table row contains table data, it should have a hover effect.
     <tr
       data-slot="table-row"
       className={cn(
