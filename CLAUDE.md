@@ -37,6 +37,82 @@
 - `cn()` from `lib/utils` for conditional classes
 - Tailwind classes only — no custom CSS unless unavoidable
 
+## Color Rules
+
+- Single emerald accent `#059669` — used sparingly: primary button, active nav, focus ring, positive deltas
+- Warm stone neutrals for everything else — canvas `#F5F3F0`, card `#FFFFFF`, sidebar `#FAFAF8`
+- Destructive is `#DC2626` — reserved for block/reject/delete only
+- No blues, no purples, no secondary accents, no gradients
+- Borders do structure, not shadows — universally `1px solid var(--color-border)`
+
+## Shadow Rules
+
+- 3-tier elevation: `--shadow-rest` (cards at rest), `--shadow-raised` (content shell, dialogs), `--shadow-floating` (popovers, dropdowns, toasts)
+- Hover NEVER adds shadow — use background change instead
+- Shadow = depth tier = state, not feedback
+- Sidebar has no shadow — separates from canvas by background color only
+
+## Motion Rules
+
+Three house patterns — the difference between "transitions" and "smooth":
+
+1. **Two-speed transitions.** Never animate structure and color on the same timeline. Width/height = `--duration-layout` (280ms) + `--ease-sidebar`. Color/opacity = `--duration-hover` (150ms) + `--ease-default`. Split them across two transition properties when both change at once.
+2. **Morph, don't swap.** State changes (active/inactive, expanded/collapsed, chevron flip) animate existing element properties. `display: none` ↔ `display: block` is banned. Use opacity + scale-y/rotate for appear/disappear.
+3. **Background as a sibling, not a style.** For surfaces that resize AND recolor (sidebar rows, segmented controls, tab bars), render the hover/active fill as an absolutely-positioned `<span>` behind content. The fill resizes on `--duration-layout`, its color cross-fades on `--duration-hover`.
+
+Duration/easing pairings:
+- `--duration-instant` (90ms) + `--ease-default` — checkbox, focus ring, icon swap
+- `--duration-hover` (150ms) + `--ease-default` — color, opacity, fill
+- `--duration-emphasized` (180ms) + `--ease-emphasized` — tooltip/popover/menu/toast entry
+- `--duration-layout` (280ms) + `--ease-sidebar` — width, height, margin, collapse
+- Exit transitions always use `--ease-exit` (ease-in), faster than entry
+- No springs. No bounces. No stagger.
+
+## Z-index Rules
+
+- Use tokens from `tokens.css` (`var(--z-sidebar)`, etc.), never raw numbers
+- Scale: base(0), sticky(10), overlay(20), sidebar(30), topbar(40), popover(50), tooltip(60), backdrop(70), dialog(80), toast(90)
+
+## Interaction State Rules
+
+| Component | Hover | Active/Selected | Focus (keyboard) | Disabled |
+|---|---|---|---|---|
+| Nav link | `bg-muted-foreground/10` | `bg-primary/10`, `text-primary`, 3px edge bar | 3px `ring/50` | — |
+| Primary button | `bg-primary/90` | — | 3px `ring/50` | `opacity:.5`, `pointer-events:none` |
+| Ghost/outline button | `bg-accent` | — | 3px `ring/50` | `opacity:.5` |
+| Destructive button | `bg-destructive/90` | — | 3px `ring/50` on destructive | `opacity:.5` |
+| Input | no change | — | `border-ring` + 3px `ring/50` | `bg-muted`, `opacity:.6` |
+| Table row | `bg-muted/50` | `bg-primary/10` (multi-select only) | outline offset 2px | — |
+| Card | static (no hover) | — | — | — |
+
+- Focus ring is always 3px at `primary/50` — never another color, never dashed
+- No scale-down or translate on press — opacity only (`.95`)
+
+## Radius Rules
+
+- `6px` — inputs, small buttons
+- `8px` — default (cards, popovers)
+- `12px` — elevated cards/panels
+- `16px` — outer content shell
+- Nothing over 16px. Full-pill (`rounded-full`) only on badges.
+
+## Iconography Rules
+
+- `lucide-react` is the sole icon library
+- Sizes: `h-4 w-4` (inline/buttons), `h-[18px] w-[18px]` (nav items), `h-5 w-5` (emphasis)
+- Icon buttons: `size-9` (default), `size-8` (sm), `size-10` (lg)
+- Icons inherit text color — never apply color tint directly
+- Directional icons (chevrons, arrows) flip via `rtl:rotate-180`
+- No emoji, no unicode-as-icon
+
+## Content/Copy Rules
+
+- Operator copy: dense, literal, denotational — tells admins what a thing is
+- Title Case for nav items and page titles; Sentence case for button labels
+- Short, declarative, verb-first. No marketing adjectives ("powerful", "seamless")
+- No exclamation points, no em-dashes for drama, no rhetorical questions
+- Currency is SAR (Saudi Riyal), always locale-formatted via `format.currency()`
+
 ## RTL Rules
 
 - Logical properties only: `ps-`*/`pe-*` (not `pl-*`/`pr-*`), `ms-*`/`me-*`, `text-start`/`text-end` (not `text-left`/`text-right`)
@@ -47,10 +123,12 @@
 ## i18n Rules
 
 - No hardcoded strings in components, ever
-- One namespace per feature (e.g., `users.json`), plus `common.json` and `shell.json`
+- One namespace per feature (e.g., `users.json`), plus `common.json`, `components.json`, and `shell.json`
+- Current namespaces: `common`, `components`, `shell`, `users`, `countries`, `categories`, `providers`
 - Use `t('namespace:key')` pattern
 - Pluralization via i18next
-- Locale persisted to localStorage, applied to `<html dir>` and `<html lang>` on change
+- Locale persisted to localStorage (`bidmart-lang` key), applied to `<html dir>` and `<html lang>` on change
+- When adding a new feature, register its namespace in `src/lib/i18n.ts` (import + add to `resources` and `ns`)
 
 ## Table Rules
 
@@ -62,10 +140,11 @@
 
 ## Permission Rules
 
-- Every protected route declares `requiredPermissions` in route context
-- Every mutation button wrapped in `<Can permission="...">` component
-- Permission format: `resource.action` (e.g., `users.read`, `withdrawals.approve`)
-- `PERMISSIONS` constant in `lib/permissions.ts` is the source of truth
+- Every protected route guards via `usePermission(PERMISSIONS.resource.action)` in the route component, rendering `<PermissionDenied />` on failure
+- Every mutation button wrapped in `<Can permission="...">` component (`components/permissions/can.tsx`)
+- Permission format: `admin:resource:action` (e.g., `admin:users:view`, `admin:providers:approve`)
+- `PERMISSIONS` constant in `lib/permissions.ts` is the source of truth — maps to actual JWT permission strings
+- Available permission groups: `users`, `providers`, `countries`, `categories`, `subCategories`, `roles`, `admins`
 
 ## Formatting Rules
 

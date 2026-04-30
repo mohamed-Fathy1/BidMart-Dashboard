@@ -1,0 +1,82 @@
+{
+  "status": {
+    "active": "نشط",
+    "suspended": "موقوف",
+    "banned": "محظور",
+    "pending_verification": "قيد التحقق",
+    "deleted": "محذوف",
+    "PENDING": "قيد المراجعة",
+    "APPROVED": "مقبول",
+    "REJECTED": "مرفوض",
+    "SUSPENDED": "موقوف",
+    "pending": "قيد المراجعة",
+    "approved": "مقبول",
+    "rejected": "مرفوض",
+    "enabled": "مفعّل",
+    "disabled": "معطّل",
+    "verified": "موثّق",
+    "unverified": "غير موثّق",
+    "user_only": "مستخدم",
+    "upgraded_to_seller": "بائع"
+  },
+  "search": {
+    "placeholder": "بحث...",
+    "clear": "مسح البحث"
+  },
+  "empty": {
+    "title": "لا توجد نتائج",
+    "action": "مسح الفلاتر"
+  },
+  "confirm_dialog": {
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "delete_title": "حذف السجل",
+    "delete_description": "لا يمكن التراجع عن هذا الإجراء."
+  },
+  "reason_dialog": {
+    "reason_label": "السبب",
+    "reason_placeholder": "اذكر السبب...",
+    "reason_required": "السبب مطلوب"
+  },
+  "form_dialog": {
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "create": "إنشاء",
+    "saving": "جاري الحفظ..."
+  },
+  "detail": {
+    "not_available": "غير متوفر"
+  },
+  "image_preview": {
+    "no_image": "لا توجد صورة"
+  },
+  "password_input": {
+    "show": "إظهار كلمة المرور",
+    "hide": "إخفاء كلمة المرور"
+  },
+  "otp_input": {
+    "label": "رمز التحقق"
+  },
+  "page_header": {
+    "back": "رجوع"
+  },
+  "stat_card": {
+    "increase": "زيادة",
+    "decrease": "انخفاض"
+  },
+  "image_upload": {
+    "drop_or_click": "اسحب صورة هنا أو انقر للاختيار",
+    "uploading": "جاري الرفع...",
+    "remove": "إزالة",
+    "change": "تغيير",
+    "invalid_type": "يُسمح فقط بصور PNG و JPG و WebP",
+    "too_large": "يجب أن يكون حجم الملف أقل من 5 ميغابايت",
+    "upload_failed": "فشل الرفع. حاول مرة أخرى."
+  },
+  "data_table": {
+    "select_all": "تحديد الكل",
+    "select_row": "تحديد الصف",
+    "row_actions": "إجراءات الصف",
+    "selected": "{{count}} محدد"
+  }
+}

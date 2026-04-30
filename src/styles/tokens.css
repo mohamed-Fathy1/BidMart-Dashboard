@@ -40,15 +40,52 @@
   --radius-lg: 12px;
   --radius-xl: 16px;
 
-  /* Motion */
+  /* ---------- Motion ----------
+     Four durations, four easings. Pair them by intent:
+       instant     — tick/check, focus ring                        (ease-default)
+       hover       — color, opacity, fill                          (ease-default)
+       emphasized  — tooltip, popover, menu, toast ENTRY           (ease-emphasized)
+       layout      — width/height/margin, collapse, reflow         (ease-sidebar)
+     Exit transitions use --ease-exit. Never animate layout on hover-duration.
+  */
+  --duration-instant: 90ms;
   --duration-hover: 150ms;
+  --duration-emphasized: 180ms;
   --duration-layout: 280ms;
-  --ease-default: ease-out;
-  --ease-sidebar: cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* Depth */
-  --shadow-sidebar: 2px 0 8px -2px rgba(28, 25, 23, 0.05), 0 0 1px rgba(28, 25, 23, 0.04);
-  --shadow-content: 0 0 0 1px rgba(28, 25, 23, 0.03), 0 1px 3px rgba(28, 25, 23, 0.02), 0 4px 12px rgba(28, 25, 23, 0.04), 0 12px 32px -4px rgba(28, 25, 23, 0.03);
+  --ease-default: ease-out;
+  --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-sidebar: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-exit: ease-in;
+
+  /* ---------- Elevation — 3 tiers ----------
+     Rule: hover NEVER adds shadow. Shadow = depth tier = state. Use background instead.
+  */
+  --shadow-rest: 0 0 0 1px rgba(28, 25, 23, 0.03),
+                 0 1px 2px rgba(28, 25, 23, 0.03);
+  --shadow-raised: 0 0 0 1px rgba(28, 25, 23, 0.03),
+                   0 1px 3px rgba(28, 25, 23, 0.02),
+                   0 4px 12px rgba(28, 25, 23, 0.04),
+                   0 12px 32px -4px rgba(28, 25, 23, 0.03);
+  --shadow-floating: 0 0 0 1px rgba(28, 25, 23, 0.04),
+                     0 2px 6px rgba(28, 25, 23, 0.04),
+                     0 8px 24px -4px rgba(28, 25, 23, 0.08);
+
+  /* Legacy aliases */
+  --shadow-content: var(--shadow-raised);
+  --shadow-sidebar: none;
+
+  /* ---------- Z-index scale ---------- */
+  --z-base: 0;
+  --z-sticky: 10;
+  --z-overlay: 20;
+  --z-sidebar: 30;
+  --z-topbar: 40;
+  --z-popover: 50;
+  --z-tooltip: 60;
+  --z-backdrop: 70;
+  --z-dialog: 80;
+  --z-toast: 90;
 
   /* Shell dimensions */
   --sidebar-width: 260px;
@@ -68,4 +105,45 @@
   --sidebar-primary: #059669;
   --sidebar-primary-foreground: #FFFFFF;
   --sidebar-ring: #059669;
+
+  /* ---------- Semantic type tokens (rem — scales with user font-size) ---------- */
+
+  /* Display / page titles */
+  --type-h1-size: 1.5rem;       /* 24px */
+  --type-h1-weight: 600;
+  --type-h1-leading: 1.2;
+  --type-h1-tracking: -0.01em;
+
+  --type-h2-size: 1.25rem;      /* 20px */
+  --type-h2-weight: 600;
+  --type-h2-leading: 1.25;
+  --type-h2-tracking: -0.005em;
+
+  --type-h3-size: 1rem;         /* 16px */
+  --type-h3-weight: 600;
+  --type-h3-leading: 1.3;
+  --type-h3-tracking: 0;
+
+  /* Body */
+  --type-body-size: 0.875rem;   /* 14px */
+  --type-body-weight: 400;
+  --type-body-leading: 1.5;
+
+  --type-body-lg-size: 1rem;    /* 16px */
+  --type-body-lg-weight: 400;
+  --type-body-lg-leading: 1.55;
+
+  /* Meta / UI chrome */
+  --type-label-size: 0.875rem;  /* 14px */
+  --type-label-weight: 500;
+  --type-label-leading: 1.4;
+
+  --type-caption-size: 0.75rem; /* 12px */
+  --type-caption-weight: 500;
+  --type-caption-leading: 1.4;
+
+  /* Mono / numeric */
+  --type-mono-size: 0.8125rem;  /* 13px */
+  --type-mono-weight: 500;
+  --type-mono-leading: 1.4;
 }

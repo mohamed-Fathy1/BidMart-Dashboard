@@ -1,0 +1,46 @@
+{
+  "page_title": "Countries",
+  "page_description": "Manage supported countries",
+  "columns": {
+    "flag": "Flag",
+    "name_en": "Name (EN)",
+    "name_ar": "Name (AR)",
+    "iso_code": "ISO Code",
+    "enabled": "Enabled",
+    "sort_order": "Sort Order",
+    "created_at": "Created At"
+  },
+  "filters": {
+    "enabled": "Status"
+  },
+  "enabled_options": {
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "actions": {
+    "create": "Add Country",
+    "edit": "Edit",
+    "delete": "Delete",
+    "create_success": "Country created",
+    "update_success": "Country updated",
+    "delete_success": "Country deleted"
+  },
+  "form": {
+    "create_title": "Add Country",
+    "edit_title": "Edit Country",
+    "name_en": "Name (English)",
+    "name_en_placeholder": "Saudi Arabia",
+    "name_ar": "Name (Arabic)",
+    "name_ar_placeholder": "السعودية",
+    "iso_code": "ISO Code",
+    "iso_code_placeholder": "SAU",
+    "image_url": "Flag Image URL",
+    "image_url_placeholder": "https://flagcdn.com/w320/sa.png",
+    "is_enabled": "Enabled",
+    "sort_order": "Sort Order"
+  },
+  "delete_dialog": {
+    "title": "Delete Country",
+    "description": "Are you sure you want to delete this country? This action is permanent."
+  }
+}

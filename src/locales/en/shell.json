@@ -11,7 +11,9 @@
     "ratings": "Ratings",
     "live_streams": "Live Streams",
     "content": "Content",
+    "countries": "Countries",
     "categories": "Categories",
+    "sub_categories": "Sub-categories",
     "settings": "Settings",
     "notifications": "Notifications"
   },

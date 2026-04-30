@@ -1,0 +1,58 @@
+{
+  "page_title": "Users",
+  "page_description": "Manage registered users and sellers",
+  "columns": {
+    "account_name": "Account Name",
+    "phone": "Phone",
+    "email": "Email",
+    "status": "Status",
+    "account_type": "Account Type",
+    "registration_date": "Registration Date"
+  },
+  "filters": {
+    "search_placeholder": "Search by name, email, or phone",
+    "status": "Status",
+    "account_type": "Account Type"
+  },
+  "actions": {
+    "view": "View Details",
+    "ban": "Ban User",
+    "suspend": "Suspend User",
+    "activate": "Activate User",
+    "delete": "Delete User"
+  },
+  "ban_dialog": {
+    "title": "Ban User",
+    "description": "This will permanently ban the user from accessing the platform. Provide a reason for the ban."
+  },
+  "suspend_dialog": {
+    "title": "Suspend User",
+    "description": "This will temporarily suspend the user's account. Provide a reason for the suspension."
+  },
+  "delete_dialog": {
+    "title": "Delete User",
+    "description": "This will soft-delete the user account. This action cannot be undone."
+  },
+  "activate_dialog": {
+    "title": "Activate User",
+    "description": "This will reactivate the user's account, allowing them to log in again."
+  },
+  "detail": {
+    "page_title": "User Details",
+    "user_info": "User Information",
+    "store_info": "Store Information",
+    "full_name": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "role": "Role",
+    "active": "Active",
+    "verified": "Verified",
+    "language": "Language",
+    "created_at": "Created At",
+    "updated_at": "Updated At",
+    "store_name": "Store Name",
+    "store_status": "Store Status",
+    "yes": "Yes",
+    "no": "No"
+  }
+}

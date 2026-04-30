@@ -1,0 +1,46 @@
+{
+  "page_title": "الدول",
+  "page_description": "إدارة الدول المدعومة",
+  "columns": {
+    "flag": "العلم",
+    "name_en": "الاسم (EN)",
+    "name_ar": "الاسم (AR)",
+    "iso_code": "رمز ISO",
+    "enabled": "مفعّل",
+    "sort_order": "ترتيب العرض",
+    "created_at": "تاريخ الإنشاء"
+  },
+  "filters": {
+    "enabled": "الحالة"
+  },
+  "enabled_options": {
+    "enabled": "مفعّل",
+    "disabled": "معطّل"
+  },
+  "actions": {
+    "create": "إضافة دولة",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "create_success": "تم إنشاء الدولة",
+    "update_success": "تم تحديث الدولة",
+    "delete_success": "تم حذف الدولة"
+  },
+  "form": {
+    "create_title": "إضافة دولة",
+    "edit_title": "تعديل دولة",
+    "name_en": "الاسم (إنجليزي)",
+    "name_en_placeholder": "Saudi Arabia",
+    "name_ar": "الاسم (عربي)",
+    "name_ar_placeholder": "السعودية",
+    "iso_code": "رمز ISO",
+    "iso_code_placeholder": "SAU",
+    "image_url": "رابط صورة العلم",
+    "image_url_placeholder": "https://flagcdn.com/w320/sa.png",
+    "is_enabled": "مفعّل",
+    "sort_order": "ترتيب العرض"
+  },
+  "delete_dialog": {
+    "title": "حذف الدولة",
+    "description": "هل أنت متأكد من حذف هذه الدولة؟ لا يمكن التراجع عن هذا الإجراء."
+  }
+}

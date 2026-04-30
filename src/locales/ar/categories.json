@@ -1,0 +1,80 @@
+{
+  "page_title": "التصنيفات",
+  "page_description": "إدارة تصنيفات المنتجات والتصنيفات الفرعية",
+  "columns": {
+    "image": "الصورة",
+    "name_en": "الاسم (EN)",
+    "name_ar": "الاسم (AR)",
+    "display_order": "ترتيب العرض",
+    "active": "نشط",
+    "sub_count": "التصنيفات الفرعية",
+    "created_at": "تاريخ الإنشاء"
+  },
+  "actions": {
+    "create": "إضافة تصنيف",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "view_subs": "عرض التصنيفات الفرعية",
+    "create_success": "تم إنشاء التصنيف",
+    "update_success": "تم تحديث التصنيف",
+    "delete_success": "تم حذف التصنيف"
+  },
+  "form": {
+    "create_title": "إضافة تصنيف",
+    "edit_title": "تعديل تصنيف",
+    "name_en": "الاسم (إنجليزي)",
+    "name_en_placeholder": "Electronics",
+    "name_ar": "الاسم (عربي)",
+    "name_ar_placeholder": "إلكترونيات",
+    "image_url": "رابط الصورة",
+    "image_url_placeholder": "https://cdn.bidmart.com/cats/electronics.png",
+    "icon_url": "رابط الأيقونة",
+    "icon_url_placeholder": "https://cdn.bidmart.com/cats/electronics-icon.png",
+    "sub_category_image_url": "رابط صورة التصنيف الفرعي الافتراضية",
+    "sub_category_image_url_placeholder": "https://cdn.bidmart.com/cats/sub-default.png",
+    "display_order": "ترتيب العرض",
+    "is_active": "نشط"
+  },
+  "delete_dialog": {
+    "title": "حذف التصنيف",
+    "description": "سيتم تعطيل التصنيف وجميع تصنيفاته الفرعية. هل أنت متأكد؟"
+  },
+  "sub": {
+    "page_title": "التصنيفات الفرعية",
+    "page_description": "التصنيفات الفرعية لـ {{category}}",
+    "select_category": "اختر تصنيفاً",
+    "columns": {
+      "image": "الصورة",
+      "name_en": "الاسم (EN)",
+      "name_ar": "الاسم (AR)",
+      "display_order": "ترتيب العرض",
+      "active": "نشط",
+      "created_at": "تاريخ الإنشاء"
+    },
+    "actions": {
+      "create": "إضافة تصنيف فرعي",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "create_success": "تم إنشاء التصنيف الفرعي",
+      "update_success": "تم تحديث التصنيف الفرعي",
+      "delete_success": "تم حذف التصنيف الفرعي"
+    },
+    "form": {
+      "create_title": "إضافة تصنيف فرعي",
+      "edit_title": "تعديل تصنيف فرعي",
+      "category": "التصنيف",
+      "name_en": "الاسم (إنجليزي)",
+      "name_en_placeholder": "Phones & Tablets",
+      "name_ar": "الاسم (عربي)",
+      "name_ar_placeholder": "هواتف وتابلت",
+      "image_url": "رابط الصورة",
+      "image_url_placeholder": "https://cdn.bidmart.com/cats/phones.png",
+      "display_order": "ترتيب العرض",
+      "is_active": "نشط"
+    },
+    "delete_dialog": {
+      "title": "حذف التصنيف الفرعي",
+      "description": "سيتم تعطيل التصنيف الفرعي. هل أنت متأكد؟"
+    }
+  }
+}

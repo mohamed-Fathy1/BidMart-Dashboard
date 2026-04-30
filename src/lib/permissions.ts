@@ -1,21 +1,59 @@
 import { useAuthStore } from '@/features/auth/auth.store'
 
 export const PERMISSIONS = {
-  providers: ['read', 'approve', 'reject', 'verify'],
-  withdrawals: ['read', 'approve', 'reject'],
-  users: ['read', 'block', 'activate'],
-  moderators: ['read', 'create', 'edit', 'block'],
-  roles: ['read', 'create', 'edit', 'delete'],
-  reports: ['read', 'export'],
-  complaints: ['read', 'resolve'],
-  ratings: ['read'],
-  streams: ['read'],
-  content: ['edit'],
-  categories: ['edit'],
-  settings: ['edit'],
+  users: {
+    view: 'admin:users:view',
+    ban: 'admin:users:ban',
+    unban: 'admin:users:unban',
+    suspend: 'admin:users:suspend',
+    activate: 'admin:users:activate',
+    delete: 'admin:users:delete',
+  },
+  providers: {
+    view: 'admin:providers:view',
+    approve: 'admin:providers:approve',
+    reject: 'admin:providers:reject',
+    verify: 'admin:providers:verify',
+    block: 'admin:providers:block',
+    unblock: 'admin:providers:unblock',
+  },
+  countries: {
+    view: 'admin:countries:view',
+    create: 'admin:countries:create',
+    update: 'admin:countries:update',
+    delete: 'admin:countries:delete',
+  },
+  categories: {
+    view: 'admin:categories:view',
+    create: 'admin:categories:create',
+    update: 'admin:categories:update',
+    delete: 'admin:categories:delete',
+  },
+  subCategories: {
+    view: 'admin:sub-categories:view',
+    create: 'admin:sub-categories:create',
+    update: 'admin:sub-categories:update',
+    delete: 'admin:sub-categories:delete',
+  },
+  roles: {
+    view: 'admin:roles:view',
+    create: 'admin:roles:create',
+    update: 'admin:roles:update',
+    delete: 'admin:roles:delete',
+  },
+  admins: {
+    view: 'admin:admins:view',
+    create: 'admin:admins:create',
+    update: 'admin:admins:update',
+    delete: 'admin:admins:delete',
+  },
 } as const
 
-export type Permission = `${keyof typeof PERMISSIONS}.${string}`
+type PermissionValues<T> = T extends Record<string, Record<string, string>>
+  ? T[keyof T][keyof T[keyof T]]
+  : never
+
+export type Permission = PermissionValues<typeof PERMISSIONS>
 
 export function can(permissions: string[], required: Permission): boolean {
   return permissions.includes(required)

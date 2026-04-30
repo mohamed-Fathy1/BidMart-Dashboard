@@ -13,7 +13,21 @@
       "Bash(mv /tmp/pkg.json package.json)",
       "Bash(pnpm install:*)",
       "Bash(npx tsc:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "WebFetch(domain:api.anthropic.com)",
+      "Read(//private/tmp/design-extract/**)",
+      "Bash(tar xf *)",
+      "Bash(npx vite *)",
+      "Bash(npx *)",
+      "Bash(curl -s http://localhost:5174)",
+      "Bash(lsof -ti:5173 -ti:5174)",
+      "Bash(xargs kill *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5174/)",
+      "Bash(lsof *)",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)",
+      "Bash(kill %1)",
+      "Bash(curl -s http://bidmart-dev.eba-4yufrrmi.eu-north-1.elasticbeanstalk.com/api/v1/admin/categories)"
     ]
   }
 }

@@ -1,0 +1,80 @@
+{
+  "page_title": "Categories",
+  "page_description": "Manage product categories and sub-categories",
+  "columns": {
+    "image": "Image",
+    "name_en": "Name (EN)",
+    "name_ar": "Name (AR)",
+    "display_order": "Display Order",
+    "active": "Active",
+    "sub_count": "Sub-categories",
+    "created_at": "Created At"
+  },
+  "actions": {
+    "create": "Add Category",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view_subs": "View Sub-categories",
+    "create_success": "Category created",
+    "update_success": "Category updated",
+    "delete_success": "Category deleted"
+  },
+  "form": {
+    "create_title": "Add Category",
+    "edit_title": "Edit Category",
+    "name_en": "Name (English)",
+    "name_en_placeholder": "Electronics",
+    "name_ar": "Name (Arabic)",
+    "name_ar_placeholder": "إلكترونيات",
+    "image_url": "Image URL",
+    "image_url_placeholder": "https://cdn.bidmart.com/cats/electronics.png",
+    "icon_url": "Icon URL",
+    "icon_url_placeholder": "https://cdn.bidmart.com/cats/electronics-icon.png",
+    "sub_category_image_url": "Default Sub-category Image URL",
+    "sub_category_image_url_placeholder": "https://cdn.bidmart.com/cats/sub-default.png",
+    "display_order": "Display Order",
+    "is_active": "Active"
+  },
+  "delete_dialog": {
+    "title": "Delete Category",
+    "description": "This will deactivate the category and all its sub-categories. Are you sure?"
+  },
+  "sub": {
+    "page_title": "Sub-categories",
+    "page_description": "Sub-categories of {{category}}",
+    "select_category": "Select a category",
+    "columns": {
+      "image": "Image",
+      "name_en": "Name (EN)",
+      "name_ar": "Name (AR)",
+      "display_order": "Display Order",
+      "active": "Active",
+      "created_at": "Created At"
+    },
+    "actions": {
+      "create": "Add Sub-category",
+      "edit": "Edit",
+      "delete": "Delete",
+      "create_success": "Sub-category created",
+      "update_success": "Sub-category updated",
+      "delete_success": "Sub-category deleted"
+    },
+    "form": {
+      "create_title": "Add Sub-category",
+      "edit_title": "Edit Sub-category",
+      "category": "Category",
+      "name_en": "Name (English)",
+      "name_en_placeholder": "Phones & Tablets",
+      "name_ar": "Name (Arabic)",
+      "name_ar_placeholder": "هواتف وتابلت",
+      "image_url": "Image URL",
+      "image_url_placeholder": "https://cdn.bidmart.com/cats/phones.png",
+      "display_order": "Display Order",
+      "is_active": "Active"
+    },
+    "delete_dialog": {
+      "title": "Delete Sub-category",
+      "description": "This will deactivate the sub-category. Are you sure?"
+    }
+  }
+}

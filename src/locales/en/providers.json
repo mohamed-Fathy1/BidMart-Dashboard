@@ -1,0 +1,56 @@
+{
+  "page_title": "Providers",
+  "page_description": "Manage seller stores and applications",
+  "columns": {
+    "name_en": "Store Name (EN)",
+    "name_ar": "Store Name (AR)",
+    "owner": "Owner",
+    "email": "Email",
+    "status": "Status",
+    "verified": "Verified",
+    "created_at": "Created At"
+  },
+  "filters": {
+    "search_placeholder": "Search by store name...",
+    "status": "Status"
+  },
+  "actions": {
+    "view": "View Details",
+    "approve": "Approve",
+    "reject": "Reject",
+    "verify": "Verify",
+    "unverify": "Remove Verification",
+    "approve_success": "Provider approved",
+    "reject_success": "Provider rejected",
+    "verified_success": "Provider verified",
+    "unverified_success": "Verification removed"
+  },
+  "approve_dialog": {
+    "title": "Approve Provider",
+    "description": "This will set the store status to APPROVED and grant the user SELLER role. Continue?"
+  },
+  "reject_dialog": {
+    "title": "Reject Provider",
+    "description": "Provide a reason for rejection. The seller will see this message."
+  },
+  "verify_dialog": {
+    "verify_title": "Verify Provider",
+    "verify_description": "This will add the verified badge to the store. Continue?",
+    "unverify_title": "Remove Verification",
+    "unverify_description": "This will remove the verified badge from the store. Continue?"
+  },
+  "detail": {
+    "page_title": "Provider Details",
+    "store_info": "Store Information",
+    "name_en": "Store Name (EN)",
+    "name_ar": "Store Name (AR)",
+    "status": "Status",
+    "verified": "Verified",
+    "avg_rating": "Average Rating",
+    "total_sold": "Total Sold",
+    "created_at": "Created At",
+    "owner_info": "Owner Information",
+    "owner_name": "Full Name",
+    "owner_email": "Email"
+  }
+}

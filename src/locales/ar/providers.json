@@ -1,0 +1,56 @@
+{
+  "page_title": "مقدمو الخدمات",
+  "page_description": "إدارة متاجر البائعين والطلبات",
+  "columns": {
+    "name_en": "اسم المتجر (EN)",
+    "name_ar": "اسم المتجر (AR)",
+    "owner": "المالك",
+    "email": "البريد الإلكتروني",
+    "status": "الحالة",
+    "verified": "موثّق",
+    "created_at": "تاريخ الإنشاء"
+  },
+  "filters": {
+    "search_placeholder": "بحث باسم المتجر...",
+    "status": "الحالة"
+  },
+  "actions": {
+    "view": "عرض التفاصيل",
+    "approve": "قبول",
+    "reject": "رفض",
+    "verify": "توثيق",
+    "unverify": "إزالة التوثيق",
+    "approve_success": "تم قبول مقدم الخدمة",
+    "reject_success": "تم رفض مقدم الخدمة",
+    "verified_success": "تم توثيق مقدم الخدمة",
+    "unverified_success": "تم إزالة التوثيق"
+  },
+  "approve_dialog": {
+    "title": "قبول مقدم الخدمة",
+    "description": "سيتم تغيير حالة المتجر إلى مقبول ومنح المستخدم صلاحية بائع. هل تريد المتابعة؟"
+  },
+  "reject_dialog": {
+    "title": "رفض مقدم الخدمة",
+    "description": "اذكر سبب الرفض. سيرى البائع هذه الرسالة."
+  },
+  "verify_dialog": {
+    "verify_title": "توثيق مقدم الخدمة",
+    "verify_description": "سيتم إضافة شارة التوثيق للمتجر. هل تريد المتابعة؟",
+    "unverify_title": "إزالة التوثيق",
+    "unverify_description": "سيتم إزالة شارة التوثيق من المتجر. هل تريد المتابعة؟"
+  },
+  "detail": {
+    "page_title": "تفاصيل مقدم الخدمة",
+    "store_info": "معلومات المتجر",
+    "name_en": "اسم المتجر (EN)",
+    "name_ar": "اسم المتجر (AR)",
+    "status": "الحالة",
+    "verified": "موثّق",
+    "avg_rating": "متوسط التقييم",
+    "total_sold": "إجمالي المبيعات",
+    "created_at": "تاريخ الإنشاء",
+    "owner_info": "معلومات المالك",
+    "owner_name": "الاسم الكامل",
+    "owner_email": "البريد الإلكتروني"
+  }
+}

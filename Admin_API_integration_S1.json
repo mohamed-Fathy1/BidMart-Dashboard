@@ -1,0 +1,3375 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v1/admin/users": {
+      "get": {
+        "operationId": "UserAdminController_listUsers",
+        "summary": "List all registered buyers",
+        "description": "Returns buyers (USER and SELLER roles) ordered by registration date (newest first). Supports search, account status, and account type filters. Default page size is 10.",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Matches name, email, or phone number",
+            "schema": {
+              "example": "ahmed",
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter by account status (Active / Banned / Suspended)",
+            "schema": {
+              "enum": ["active", "banned", "suspended"],
+              "type": "string"
+            }
+          },
+          {
+            "name": "accountType",
+            "required": false,
+            "in": "query",
+            "description": "user_only = role USER with no store; upgraded_to_seller = has a store",
+            "schema": {
+              "enum": ["user_only", "upgraded_to_seller"],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated buyer list (admins and deleted/pending accounts excluded)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedAdminUsersDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          }
+        },
+        "tags": ["Admin — Users"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/users/{userId}": {
+      "get": {
+        "operationId": "UserAdminController_getUser",
+        "summary": "Get full user detail including store info",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "User UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User detail with store snapshot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "tags": ["Admin — Users"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "UserAdminController_deleteUser",
+        "summary": "Soft-delete a user account",
+        "description": "Sets deletedAt timestamp (GDPR-compliant removal). Cannot be applied to admin accounts.",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "User UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "User soft-deleted"
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "409": {
+            "description": "Cannot delete an admin account"
+          }
+        },
+        "tags": ["Admin — Users"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/users/{userId}/ban": {
+      "patch": {
+        "operationId": "UserAdminController_banUser",
+        "summary": "Ban a user",
+        "description": "Sets status to BANNED, revokes all refresh tokens, and force-logs-out any active access tokens within the next 15 minutes.",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "User UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModerateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "User banned"
+          },
+          "400": {
+            "description": "Invalid UUID or missing reason"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "409": {
+            "description": "User is already banned"
+          }
+        },
+        "tags": ["Admin — Users"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/users/{userId}/suspend": {
+      "patch": {
+        "operationId": "UserAdminController_suspendUser",
+        "summary": "Suspend a user",
+        "description": "Sets status to SUSPENDED. Suspended users cannot log in, interact with live streams, purchase, bid, or upgrade to seller. Force-logs-out any active access tokens.",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "User UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModerateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "User suspended"
+          },
+          "400": {
+            "description": "Invalid UUID or missing reason"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "409": {
+            "description": "User is already suspended or is deleted"
+          }
+        },
+        "tags": ["Admin — Users"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/users/{userId}/activate": {
+      "patch": {
+        "operationId": "UserAdminController_activateUser",
+        "summary": "Activate a banned or suspended user",
+        "description": "Restores the user to ACTIVE status and clears the force-logout flag.",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "User UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "User activated"
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "409": {
+            "description": "User is already active, deleted, or unverified"
+          }
+        },
+        "tags": ["Admin — Users"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/auth/login": {
+      "post": {
+        "operationId": "AdminAuthController_login",
+        "summary": "Admin login",
+        "description": "Authenticates an administrator against the `admins` table and returns a signed JWT. Default session is 8 hours; pass `rememberMe: true` to issue an extended-session token (30 days). The JWT embeds the admin role, super-admin flag, and the full permission list used by `PermissionGuard`.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminLoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Access token issued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminTokenResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed — email is not a valid format, or password is outside the 8–20 character range"
+          },
+          "401": {
+            "description": "Email or password is incorrect"
+          },
+          "403": {
+            "description": "Admin account has been disabled"
+          }
+        },
+        "tags": ["Admin — Auth"]
+      }
+    },
+    "/api/v1/admin/auth/forgot-password": {
+      "post": {
+        "operationId": "AdminAuthController_forgotPassword",
+        "summary": "Request a password reset OTP",
+        "description": "Sends a 6-digit OTP to the admin email that expires in 10 minutes. The OTP is only returned in the response body when NODE_ENV=development.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminForgotPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP dispatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminForgotPasswordResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid email format"
+          },
+          "403": {
+            "description": "Admin account has been disabled"
+          },
+          "404": {
+            "description": "No admin account registered with this email"
+          }
+        },
+        "tags": ["Admin — Auth"]
+      }
+    },
+    "/api/v1/admin/auth/forgot-password/resend": {
+      "post": {
+        "operationId": "AdminAuthController_resendForgotPasswordOtp",
+        "summary": "Resend the password reset OTP",
+        "description": "Re-issues the admin password-reset OTP. Subject to the same sliding-window rate limit as /forgot-password.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminForgotPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP re-sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminForgotPasswordResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid email format"
+          },
+          "403": {
+            "description": "Admin account has been disabled"
+          },
+          "404": {
+            "description": "No admin account registered with this email"
+          }
+        },
+        "tags": ["Admin — Auth"]
+      }
+    },
+    "/api/v1/admin/auth/reset-password": {
+      "post": {
+        "operationId": "AdminAuthController_resetPassword",
+        "summary": "Reset admin password using an OTP",
+        "description": "Validates the 6-digit OTP, enforces password strength (8–20 chars, uppercase, lowercase, digit, symbol), and stores the new bcrypt hash.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminResetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminResetPasswordResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Passwords do not match, password is weak, OTP is expired/invalid, or body validation failed"
+          },
+          "403": {
+            "description": "Admin account has been disabled"
+          },
+          "404": {
+            "description": "No admin account registered with this email"
+          }
+        },
+        "tags": ["Admin — Auth"]
+      }
+    },
+    "/api/v1/admin/auth/logout": {
+      "post": {
+        "operationId": "AdminAuthController_logout",
+        "summary": "Admin logout — blocklists the current JWT (JTI → Redis)",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Token revoked"
+          },
+          "401": {
+            "description": "Missing or expired token"
+          }
+        },
+        "tags": ["Admin — Auth"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/categories": {
+      "get": {
+        "operationId": "CategoryAdminController_listCategories",
+        "summary": "List all categories ordered by display_order, capped at 500",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Category list (sub_categories not populated)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          }
+        },
+        "tags": ["Admin — Categories"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "CategoryAdminController_createCategory",
+        "summary": "Create a root category",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Category created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (missing name_en, invalid image_url, etc.)"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          }
+        },
+        "tags": ["Admin — Categories"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/categories/{id}": {
+      "get": {
+        "operationId": "CategoryAdminController_getCategory",
+        "summary": "Get a single category with its sub-categories",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Category UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category with sub_categories array",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "Category not found"
+          }
+        },
+        "tags": ["Admin — Categories"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "CategoryAdminController_updateCategory",
+        "summary": "Update category name, image, display order, or is_active",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Category UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid UUID or validation failed"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "Category not found"
+          }
+        },
+        "tags": ["Admin — Categories"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "CategoryAdminController_deleteCategory",
+        "summary": "Soft-delete a category — sets is_active = false",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Category UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Category deactivated"
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "Category not found"
+          }
+        },
+        "tags": ["Admin — Categories"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/sub-categories": {
+      "get": {
+        "operationId": "SubCategoryAdminController_listSubCategories",
+        "summary": "List sub-categories for a given category",
+        "parameters": [
+          {
+            "name": "category_id",
+            "required": true,
+            "in": "query",
+            "description": "Parent category UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sub-category list ordered by display_order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SubCategoryDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid category_id"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "Category not found"
+          }
+        },
+        "tags": ["Admin — Sub-categories"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "SubCategoryAdminController_createSubCategory",
+        "summary": "Create a sub-category under an existing category",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSubCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sub-category created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubCategoryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed or invalid category_id"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "Parent category not found"
+          }
+        },
+        "tags": ["Admin — Sub-categories"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/sub-categories/{id}": {
+      "get": {
+        "operationId": "SubCategoryAdminController_getSubCategory",
+        "summary": "Get a single sub-category",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "SubCategory UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubCategoryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "SubCategory not found"
+          }
+        },
+        "tags": ["Admin — Sub-categories"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "SubCategoryAdminController_updateSubCategory",
+        "summary": "Update sub-category name, image, display order, or is_active",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "SubCategory UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSubCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated sub-category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubCategoryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid UUID or validation failed"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "SubCategory not found"
+          }
+        },
+        "tags": ["Admin — Sub-categories"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "SubCategoryAdminController_deleteSubCategory",
+        "summary": "Soft-delete a sub-category — sets is_active = false",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "SubCategory UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Sub-category deactivated"
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "SubCategory not found"
+          }
+        },
+        "tags": ["Admin — Sub-categories"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/countries": {
+      "get": {
+        "operationId": "CountryAdminController_listCountries",
+        "summary": "List countries with optional pagination and isEnabled filter",
+        "parameters": [
+          {
+            "name": "isEnabled",
+            "required": false,
+            "in": "query",
+            "description": "Filter by enabled/disabled status",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated country list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedCountriesDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          }
+        },
+        "tags": ["Admin — Countries"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "CountryAdminController_createCountry",
+        "summary": "Create a new country",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCountryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Country created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CountryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (invalid iso_code, missing image_url, etc.)"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "409": {
+            "description": "Country iso_code already exists"
+          }
+        },
+        "tags": ["Admin — Countries"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/countries/{id}": {
+      "patch": {
+        "operationId": "CountryAdminController_updateCountry",
+        "summary": "Update country details or toggle is_enabled",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Country UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCountryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated country",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CountryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid UUID or validation failed"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "Country not found"
+          }
+        },
+        "tags": ["Admin — Countries"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "CountryAdminController_deleteCountry",
+        "summary": "Delete a country permanently",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Country UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Country deleted"
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "Country not found"
+          }
+        },
+        "tags": ["Admin — Countries"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/providers": {
+      "get": {
+        "operationId": "SellerAdminController_listProviders",
+        "summary": "List providers (sellers) with optional status and search filter",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": ["PENDING", "APPROVED", "REJECTED", "SUSPENDED"],
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "Ahmed Store",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated provider list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedProvidersDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          }
+        },
+        "tags": ["Admin — Providers"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/providers/{storeId}": {
+      "get": {
+        "operationId": "SellerAdminController_getProvider",
+        "summary": "Get full provider (store) detail",
+        "parameters": [
+          {
+            "name": "storeId",
+            "required": true,
+            "in": "path",
+            "description": "Store UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Provider detail with ratings and sales",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "Provider not found"
+          }
+        },
+        "tags": ["Admin — Providers"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/providers/{storeId}/approve": {
+      "patch": {
+        "operationId": "SellerAdminController_approveProvider",
+        "summary": "Approve a pending provider application",
+        "description": "Sets store status → APPROVED and user role → SELLER. Creates a wallet if none exists.",
+        "parameters": [
+          {
+            "name": "storeId",
+            "required": true,
+            "in": "path",
+            "description": "Store UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Provider approved"
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "Provider not found"
+          },
+          "409": {
+            "description": "Provider is already approved"
+          }
+        },
+        "tags": ["Admin — Providers"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/providers/{storeId}/reject": {
+      "patch": {
+        "operationId": "SellerAdminController_rejectProvider",
+        "summary": "Reject a pending provider application with a reason",
+        "parameters": [
+          {
+            "name": "storeId",
+            "required": true,
+            "in": "path",
+            "description": "Store UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectProviderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Provider rejected"
+          },
+          "400": {
+            "description": "Invalid UUID or missing reason"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "Provider not found"
+          },
+          "409": {
+            "description": "Provider is not in PENDING status"
+          }
+        },
+        "tags": ["Admin — Providers"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/providers/{storeId}/verify": {
+      "patch": {
+        "operationId": "SellerAdminController_toggleVerification",
+        "summary": "Toggle verified badge on an approved provider",
+        "parameters": [
+          {
+            "name": "storeId",
+            "required": true,
+            "in": "path",
+            "description": "Store UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated isVerified value",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToggleVerificationResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "Provider not found"
+          },
+          "409": {
+            "description": "Provider must be APPROVED to toggle verification"
+          }
+        },
+        "tags": ["Admin — Providers"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "BidMart API",
+    "description": "BidMart live-commerce backend — auctions, live shows, wallet, orders, chat",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "Admin — Auth",
+      "description": "Admin panel authentication — login (with optional rememberMe), logout, forgot password & OTP resend, and password reset"
+    },
+    {
+      "name": "Admin — Countries",
+      "description": "Country management"
+    },
+    {
+      "name": "Admin — Categories",
+      "description": "Category management"
+    },
+    {
+      "name": "Admin — Sub-categories",
+      "description": "Sub-category management"
+    },
+    {
+      "name": "Admin — Users",
+      "description": "Buyer management — list, view, ban, suspend, activate, and soft-delete user accounts"
+    },
+    {
+      "name": "Admin — Providers",
+      "description": "Seller / provider management"
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Local"
+    },
+    {
+      "url": "http://bidmart-dev.eba-4yufrrmi.eu-north-1.elasticbeanstalk.com",
+      "description": "Dev"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "adminAuth": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "description": "Admin JWT — POST /v1/admin/auth/login (ADMIN_JWT_SECRET, 8 h)"
+      },
+      "sellerAuth": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "description": "Seller JWT — POST /v1/auth/login with SELLER role (JWT_SECRET, 15 min)"
+      },
+      "clientAuth": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "description": "Client/User JWT — POST /v1/auth/login (JWT_SECRET, 15 min)"
+      }
+    },
+    "schemas": {
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "Ahmed Ali Fathy"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+966500112233"
+          },
+          "countryId": {
+            "type": "string",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "password": {
+            "type": "string",
+            "example": "Str0ng@Pass"
+          },
+          "confirmPassword": {
+            "type": "string",
+            "example": "Str0ng@Pass"
+          },
+          "termsAccepted": {
+            "type": "boolean",
+            "example": true
+          },
+          "email": {
+            "type": "string",
+            "example": "user@example.com"
+          }
+        },
+        "required": [
+          "username",
+          "phone",
+          "countryId",
+          "password",
+          "confirmPassword",
+          "termsAccepted"
+        ]
+      },
+      "AuthOtpSentResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Registration successful. Please verify your phone number."
+          },
+          "phone": {
+            "type": "string",
+            "example": "+966500112233"
+          },
+          "otp": {
+            "type": "string",
+            "example": "1234",
+            "description": "Returned in development mode only"
+          }
+        },
+        "required": ["message", "phone"]
+      },
+      "SellerRegisterDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "Ahmed Ali Fathy"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+966500112233"
+          },
+          "countryId": {
+            "type": "string",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "password": {
+            "type": "string",
+            "example": "Str0ng@Pass"
+          },
+          "confirmPassword": {
+            "type": "string",
+            "example": "Str0ng@Pass"
+          },
+          "termsAccepted": {
+            "type": "boolean",
+            "example": true
+          },
+          "email": {
+            "type": "string",
+            "example": "seller@example.com"
+          },
+          "ownerFullName": {
+            "type": "string",
+            "example": "Ahmed Al-Rashidi",
+            "description": "Full legal name as on the CR document"
+          },
+          "city": {
+            "type": "string",
+            "example": "Riyadh"
+          },
+          "detailedAddress": {
+            "type": "string",
+            "example": "Al Olaya District, King Fahad Road, Building 12"
+          },
+          "commercialRegistrationNumber": {
+            "type": "string",
+            "example": "CR-SAU-2024-001"
+          },
+          "commercialRegistrationDoc": {
+            "type": "string",
+            "example": "https://cdn.bidmart.com/docs/cr-document.pdf",
+            "description": "URL of the uploaded CR document (image or PDF, max 10 MB). Upload the file first via POST /file-upload, then pass the returned URL here."
+          }
+        },
+        "required": [
+          "username",
+          "phone",
+          "countryId",
+          "password",
+          "confirmPassword",
+          "termsAccepted",
+          "ownerFullName",
+          "city",
+          "detailedAddress",
+          "commercialRegistrationNumber",
+          "commercialRegistrationDoc"
+        ]
+      },
+      "VerifyOtpDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+966500112233"
+          },
+          "otp": {
+            "type": "string",
+            "example": "1234",
+            "description": "4-digit OTP sent to the phone number"
+          },
+          "deviceId": {
+            "type": "string",
+            "example": "device-uuid-from-mobile"
+          }
+        },
+        "required": ["phone", "otp", "deviceId"]
+      },
+      "AuthVerifyOtpResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "isPendingReview": {
+            "type": "boolean",
+            "example": true,
+            "description": "Only present for seller accounts"
+          },
+          "message": {
+            "type": "string",
+            "example": "Your application has been submitted and is under review."
+          }
+        },
+        "required": ["accessToken"]
+      },
+      "ResendOtpDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+966500112233"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": ["registration", "password_reset"],
+            "example": "registration",
+            "description": "Only registration and password_reset are allowed on this public endpoint"
+          }
+        },
+        "required": ["phone", "purpose"]
+      },
+      "AuthMessageWithOtpResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "OTP sent successfully."
+          },
+          "otp": {
+            "type": "string",
+            "example": "1234",
+            "description": "Returned in development mode only"
+          }
+        },
+        "required": ["message"]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+966500112233"
+          },
+          "password": {
+            "type": "string",
+            "example": "Str0ng@Pass"
+          },
+          "deviceId": {
+            "type": "string",
+            "example": "device-uuid-from-mobile"
+          }
+        },
+        "required": ["phone", "password", "deviceId"]
+      },
+      "AuthTokenResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        },
+        "required": ["accessToken"]
+      },
+      "ForgotPasswordDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+966500112233"
+          }
+        },
+        "required": ["phone"]
+      },
+      "ResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+966500112233"
+          },
+          "otp": {
+            "type": "string",
+            "example": "1234",
+            "description": "4-digit OTP from the forgot-password flow"
+          },
+          "newPassword": {
+            "type": "string",
+            "example": "NewStr0ng@Pass"
+          },
+          "confirmPassword": {
+            "type": "string",
+            "example": "NewStr0ng@Pass"
+          }
+        },
+        "required": ["phone", "otp", "newPassword", "confirmPassword"]
+      },
+      "AuthMessageResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Password reset successfully."
+          }
+        },
+        "required": ["message"]
+      },
+      "GuestLoginDto": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "string",
+            "example": "device-uuid-from-mobile"
+          },
+          "platform": {
+            "type": "string",
+            "example": "android"
+          }
+        },
+        "required": ["deviceId"]
+      },
+      "GoogleSignInDto": {
+        "type": "object",
+        "properties": {
+          "idToken": {
+            "type": "string",
+            "description": "Google ID token received from the mobile Google Sign-In SDK"
+          },
+          "deviceId": {
+            "type": "string",
+            "description": "Client device identifier"
+          }
+        },
+        "required": ["idToken", "deviceId"]
+      },
+      "GoogleSignInResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "isNewUser": {
+            "type": "boolean",
+            "example": true,
+            "description": "True for first-time users — navigate to category selection. False → Home screen."
+          }
+        },
+        "required": ["accessToken", "isNewUser"]
+      },
+      "AppleSignInDto": {
+        "type": "object",
+        "properties": {
+          "identityToken": {
+            "type": "string",
+            "description": "Apple identity token received from the mobile Apple Sign-In SDK"
+          },
+          "deviceId": {
+            "type": "string",
+            "description": "Client device identifier"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "User full name — Apple only provides this on the very first sign-in; the mobile client must forward it.",
+            "maxLength": 100
+          }
+        },
+        "required": ["identityToken", "deviceId"]
+      },
+      "AppleSignInResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "isNewUser": {
+            "type": "boolean",
+            "example": true,
+            "description": "True for first-time users — navigate to category selection. False → Home screen."
+          }
+        },
+        "required": ["accessToken", "isNewUser"]
+      },
+      "AuthDeleteAccountOtpResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "A confirmation code has been sent to your email address."
+          },
+          "otp": {
+            "type": "string",
+            "example": "1234",
+            "description": "Returned in development mode only"
+          }
+        },
+        "required": ["message"]
+      },
+      "DeleteAccountDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "description": "Required for phone-registered accounts"
+          },
+          "otp": {
+            "type": "string",
+            "description": "Required for Google/Apple accounts — obtained via send-otp endpoint"
+          }
+        }
+      },
+      "UserInterestSubCategoryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "name_en": {
+            "type": "string",
+            "example": "Phones & Tablets"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "هواتف وتابلت"
+          },
+          "image_url": {
+            "type": "object",
+            "example": "https://cdn.bidmart.com/cats/phones.png",
+            "nullable": true
+          }
+        },
+        "required": ["id", "name_en", "name_ar"]
+      },
+      "UserInterestCategoryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "name_en": {
+            "type": "string",
+            "example": "Electronics"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "إلكترونيات"
+          },
+          "image_url": {
+            "type": "string",
+            "example": "https://cdn.bidmart.com/cats/electronics.png"
+          },
+          "subCategories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserInterestSubCategoryDto"
+            }
+          }
+        },
+        "required": ["id", "name_en", "name_ar", "image_url", "subCategories"]
+      },
+      "UserInterestsResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "You haven't selected any interests yet."
+          },
+          "interests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserInterestCategoryDto"
+            }
+          }
+        },
+        "required": ["interests"]
+      },
+      "SwaggerProfileCountryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "name_en": {
+            "type": "string",
+            "example": "Saudi Arabia"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "المملكة العربية السعودية"
+          },
+          "iso_code": {
+            "type": "string",
+            "example": "SAU"
+          }
+        },
+        "required": ["id", "name_en", "name_ar", "iso_code"]
+      },
+      "SwaggerProfileDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "username": {
+            "type": "string",
+            "example": "john_doe"
+          },
+          "fullName": {
+            "type": "object",
+            "example": "John Doe",
+            "nullable": true
+          },
+          "email": {
+            "type": "object",
+            "example": "user@example.com",
+            "nullable": true
+          },
+          "profileImage": {
+            "type": "object",
+            "example": "https://cdn.bidmart.com/avatars/abc.jpg",
+            "nullable": true
+          },
+          "phone": {
+            "type": "object",
+            "example": "+966500112233",
+            "nullable": true
+          },
+          "country": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SwaggerProfileCountryDto"
+              }
+            ]
+          },
+          "authProvider": {
+            "type": "string",
+            "enum": ["phone", "google", "apple"],
+            "example": "phone"
+          }
+        },
+        "required": ["id", "username", "authProvider"]
+      },
+      "UpdateProfileDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "example": "John Doe",
+            "description": "Display name (2–32 characters)"
+          },
+          "email": {
+            "type": "string",
+            "example": "user@example.com",
+            "description": "Valid email address. Cannot be changed for Google/Apple accounts."
+          },
+          "profileImage": {
+            "type": "object",
+            "example": "https://cdn.example.com/avatars/john.jpg",
+            "description": "Profile picture URL (use file-upload module to obtain URL first)",
+            "nullable": true
+          },
+          "countryId": {
+            "type": "string",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "description": "UUID of an enabled country"
+          }
+        },
+        "required": ["fullName"]
+      },
+      "UserUpdateProfileResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Profile updated successfully."
+          },
+          "user": {
+            "$ref": "#/components/schemas/SwaggerProfileDto"
+          }
+        },
+        "required": ["message", "user"]
+      },
+      "UserResendOtpResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "OTP sent successfully."
+          },
+          "otp": {
+            "type": "string",
+            "example": "1234",
+            "description": "Returned in development mode only"
+          }
+        },
+        "required": ["message"]
+      },
+      "RequestPhoneChangeOtpDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+201234567890",
+            "description": "New phone number in international format (E.164)"
+          }
+        },
+        "required": ["phone"]
+      },
+      "UserPhoneOtpSentResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "OTP sent to your new phone number. It expires in 5 minutes."
+          },
+          "otp": {
+            "type": "string",
+            "example": "1234",
+            "description": "Returned in development mode only"
+          }
+        },
+        "required": ["message"]
+      },
+      "VerifyPhoneChangeDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+201234567890",
+            "description": "The new phone number (must match the one used in request-otp)"
+          },
+          "otp": {
+            "type": "string",
+            "example": "1234",
+            "description": "4-digit OTP sent to the new number"
+          }
+        },
+        "required": ["phone", "otp"]
+      },
+      "UserPhoneChangedResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Phone number updated successfully."
+          }
+        },
+        "required": ["message"]
+      },
+      "ChangePasswordDto": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "example": "OldPassword123"
+          },
+          "newPassword": {
+            "type": "string",
+            "example": "NewPassword456",
+            "description": "Minimum 8 characters, at least one uppercase letter and one number"
+          },
+          "confirmPassword": {
+            "type": "string",
+            "example": "NewPassword456"
+          }
+        },
+        "required": ["currentPassword", "newPassword", "confirmPassword"]
+      },
+      "UserPasswordChangedResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Password changed successfully, please login again."
+          }
+        },
+        "required": ["message"]
+      },
+      "AdminUserRowDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "accountName": {
+            "type": "object",
+            "example": "Ahmed Ali",
+            "nullable": true
+          },
+          "phoneNumber": {
+            "type": "object",
+            "example": "+966500000000",
+            "nullable": true
+          },
+          "email": {
+            "type": "object",
+            "example": "ahmed@example.com",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending_verification",
+              "active",
+              "suspended",
+              "banned",
+              "deleted"
+            ],
+            "example": "active",
+            "description": "Active / Banned / Suspended"
+          },
+          "accountType": {
+            "type": "string",
+            "enum": ["user_only", "upgraded_to_seller"],
+            "example": "user_only",
+            "description": "user_only if the user has no store, upgraded_to_seller if they own one"
+          },
+          "registrationDate": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2025-11-03T14:23:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "accountName",
+          "phoneNumber",
+          "email",
+          "status",
+          "accountType",
+          "registrationDate"
+        ]
+      },
+      "PaginationMetaDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number",
+            "example": 1
+          },
+          "limit": {
+            "type": "number",
+            "example": 20
+          },
+          "total": {
+            "type": "number",
+            "example": 100
+          },
+          "totalPages": {
+            "type": "number",
+            "example": 5
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "example": true
+          },
+          "hasPrevPage": {
+            "type": "boolean",
+            "example": false
+          }
+        },
+        "required": [
+          "page",
+          "limit",
+          "total",
+          "totalPages",
+          "hasNextPage",
+          "hasPrevPage"
+        ]
+      },
+      "PaginatedAdminUsersDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminUserRowDto"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMetaDto"
+          }
+        },
+        "required": ["data", "meta"]
+      },
+      "UserStoreDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "nameEn": {
+            "type": "string",
+            "example": "Ahmed Store"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["PENDING", "APPROVED", "REJECTED", "SUSPENDED"]
+          }
+        },
+        "required": ["id", "nameEn", "status"]
+      },
+      "UserDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "fullName": {
+            "type": "string",
+            "example": "Ahmed Ali"
+          },
+          "email": {
+            "type": "string",
+            "example": "ahmed@example.com"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+966500000000"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["guest", "user", "seller", "admin"]
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "isVerified": {
+            "type": "boolean",
+            "example": true
+          },
+          "store": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserStoreDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "object",
+            "nullable": true,
+            "example": "https://cdn.bidmart.com/avatars/abc.jpg"
+          },
+          "language": {
+            "type": "string",
+            "example": "ar"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "fullName",
+          "email",
+          "phone",
+          "role",
+          "isActive",
+          "isVerified",
+          "createdAt",
+          "language",
+          "updatedAt"
+        ]
+      },
+      "ModerateUserDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "example": "Violation of terms of service",
+            "description": "Reason for the moderation action (ban or suspend). Used for audit purposes."
+          }
+        },
+        "required": ["reason"]
+      },
+      "AdminLoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "admin@bidmart.com",
+            "description": "Admin account email (normalized to lowercase server-side)"
+          },
+          "password": {
+            "type": "string",
+            "example": "Admin@123",
+            "minLength": 8,
+            "maxLength": 20,
+            "description": "Password — must be 8 to 20 characters"
+          },
+          "rememberMe": {
+            "type": "boolean",
+            "example": false,
+            "description": "When true, the issued JWT uses the extended-session TTL (ADMIN_JWT_REMEMBER_EXPIRES_IN, 30 days by default) instead of the standard 8-hour TTL."
+          },
+          "deviceId": {
+            "type": "string",
+            "example": "admin-panel",
+            "description": "Device identifier recorded in the JWT payload (defaults to \"admin-panel\")"
+          }
+        },
+        "required": ["email", "password"]
+      },
+      "AdminTokenResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "description": "Signed JWT — send in the Authorization header as `Bearer <token>` for all /admin/* routes"
+          }
+        },
+        "required": ["accessToken"]
+      },
+      "AdminForgotPasswordDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "admin@bidmart.com",
+            "description": "Admin account email. If registered, an OTP is sent to this address."
+          }
+        },
+        "required": ["email"]
+      },
+      "AdminForgotPasswordResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "OTP sent to your email address. It expires in 10 minutes."
+          },
+          "otp": {
+            "type": "string",
+            "example": "123456",
+            "description": "OTP code — returned only in development mode"
+          }
+        },
+        "required": ["message"]
+      },
+      "AdminResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "admin@bidmart.com"
+          },
+          "otp": {
+            "type": "string",
+            "example": "123456",
+            "description": "6-digit OTP delivered to the admin email",
+            "minLength": 6,
+            "maxLength": 6
+          },
+          "newPassword": {
+            "type": "string",
+            "example": "Admin@123",
+            "minLength": 8,
+            "maxLength": 20,
+            "description": "New password — 8 to 20 characters with uppercase, lowercase, number, and symbol"
+          },
+          "confirmPassword": {
+            "type": "string",
+            "example": "Admin@123",
+            "description": "Must match newPassword"
+          }
+        },
+        "required": ["email", "otp", "newPassword", "confirmPassword"]
+      },
+      "AdminResetPasswordResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Password reset successfully, please login"
+          }
+        },
+        "required": ["message"]
+      },
+      "SubCategoryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "category_id": {
+            "type": "string",
+            "example": "cat-uuid"
+          },
+          "name_en": {
+            "type": "string",
+            "example": "Phones & Tablets"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "هواتف وتابلت"
+          },
+          "image_url": {
+            "type": "object",
+            "nullable": true,
+            "example": null
+          },
+          "display_order": {
+            "type": "number",
+            "example": 1
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "category_id",
+          "name_en",
+          "name_ar",
+          "display_order",
+          "is_active",
+          "created_at"
+        ]
+      },
+      "CategoryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "name_en": {
+            "type": "string",
+            "example": "Electronics"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "إلكترونيات"
+          },
+          "image_url": {
+            "type": "string",
+            "example": "https://placehold.co/400x400.png"
+          },
+          "display_order": {
+            "type": "number",
+            "example": 1
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": true
+          },
+          "sub_categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SubCategoryDto"
+            }
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name_en",
+          "name_ar",
+          "image_url",
+          "display_order",
+          "is_active",
+          "created_at"
+        ]
+      },
+      "CreateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name_en": {
+            "type": "string",
+            "example": "Electronics"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "إلكترونيات"
+          },
+          "image_url": {
+            "type": "string",
+            "example": "https://cdn.bidmart.com/categories/electronics.png"
+          },
+          "display_order": {
+            "type": "number",
+            "default": 0,
+            "minimum": 0
+          }
+        },
+        "required": ["name_en", "name_ar", "image_url"]
+      },
+      "UpdateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name_en": {
+            "type": "string",
+            "example": "Electronics"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "إلكترونيات"
+          },
+          "image_url": {
+            "type": "string",
+            "example": "https://cdn.bidmart.com/categories/electronics.png"
+          },
+          "display_order": {
+            "type": "number",
+            "minimum": 0
+          },
+          "is_active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateSubCategoryDto": {
+        "type": "object",
+        "properties": {
+          "category_id": {
+            "type": "string",
+            "description": "Parent category UUID"
+          },
+          "name_en": {
+            "type": "string",
+            "example": "Phones & Tablets"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "هواتف وتابلت"
+          },
+          "image_url": {
+            "type": "string",
+            "nullable": true,
+            "example": "https://cdn.bidmart.com/sub-categories/phones.png"
+          },
+          "display_order": {
+            "type": "number",
+            "default": 0,
+            "minimum": 0
+          }
+        },
+        "required": ["category_id", "name_en", "name_ar"]
+      },
+      "UpdateSubCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name_en": {
+            "type": "string",
+            "example": "Phones & Tablets"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "هواتف وتابلت"
+          },
+          "image_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "display_order": {
+            "type": "number",
+            "minimum": 0
+          },
+          "is_active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CountryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "name_en": {
+            "type": "string",
+            "example": "Saudi Arabia"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "السعودية"
+          },
+          "iso_code": {
+            "type": "string",
+            "example": "SAU"
+          },
+          "image_url": {
+            "type": "string",
+            "example": "https://flagcdn.com/w320/sa.png"
+          },
+          "is_enabled": {
+            "type": "boolean",
+            "example": true
+          },
+          "sort_order": {
+            "type": "number",
+            "example": 1
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name_en",
+          "name_ar",
+          "iso_code",
+          "image_url",
+          "is_enabled",
+          "sort_order",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "PaginatedCountriesDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CountryDto"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMetaDto"
+          }
+        },
+        "required": ["data", "meta"]
+      },
+      "CreateCountryDto": {
+        "type": "object",
+        "properties": {
+          "name_en": {
+            "type": "string",
+            "example": "Saudi Arabia"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "السعودية"
+          },
+          "iso_code": {
+            "type": "string",
+            "example": "SAU",
+            "description": "ISO 3166-1 alpha-3 code (3 uppercase letters)"
+          },
+          "image_url": {
+            "type": "string",
+            "example": "https://flagcdn.com/w320/sa.png",
+            "description": "Flag image URL"
+          },
+          "is_enabled": {
+            "type": "boolean",
+            "default": true
+          },
+          "sort_order": {
+            "type": "number",
+            "default": 0,
+            "minimum": 0
+          }
+        },
+        "required": ["name_en", "name_ar", "iso_code", "image_url"]
+      },
+      "UpdateCountryDto": {
+        "type": "object",
+        "properties": {
+          "name_en": {
+            "type": "string",
+            "example": "Saudi Arabia"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "السعودية"
+          },
+          "image_url": {
+            "type": "string",
+            "example": "https://flagcdn.com/w320/sa.png"
+          },
+          "is_enabled": {
+            "type": "boolean"
+          },
+          "sort_order": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      },
+      "UpgradeToSellerDto": {
+        "type": "object",
+        "properties": {
+          "ownerFullName": {
+            "type": "string",
+            "example": "Ahmed Al-Rashidi",
+            "description": "Full legal name as it appears on the CR document"
+          },
+          "countryId": {
+            "type": "string",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "description": "ID of an enabled country"
+          },
+          "city": {
+            "type": "string",
+            "example": "Riyadh"
+          },
+          "detailedAddress": {
+            "type": "string",
+            "example": "Al Olaya District, King Fahad Road, Building 12"
+          },
+          "commercialRegistrationNumber": {
+            "type": "string",
+            "example": "CR-SAU-2024-001"
+          },
+          "commercialRegistrationDoc": {
+            "type": "string",
+            "example": "https://cdn.bidmart.com/docs/cr-document.pdf",
+            "description": "URL of the uploaded CR document (image or PDF, max 10 MB). Upload the file first via POST /file-upload, then pass the returned URL here."
+          },
+          "storeName": {
+            "type": "string",
+            "example": "Ahmed Electronics",
+            "description": "Store display name — can be set later"
+          }
+        },
+        "required": [
+          "ownerFullName",
+          "countryId",
+          "city",
+          "detailedAddress",
+          "commercialRegistrationNumber",
+          "commercialRegistrationDoc"
+        ]
+      },
+      "SellerUpgradeResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Your seller application has been submitted and is pending admin review. You will be notified once a decision is made."
+          }
+        },
+        "required": ["message"]
+      },
+      "SellerApplicationStatusResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["pending", "approved", "rejected"],
+            "nullable": true,
+            "example": "pending"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-04-18T10:00:00.000Z"
+          },
+          "rejectionReason": {
+            "type": "string",
+            "example": "Document was not legible"
+          }
+        },
+        "required": ["status"]
+      },
+      "SwaggerStoreDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["PENDING", "APPROVED", "REJECTED", "SUSPENDED"],
+            "example": "PENDING"
+          },
+          "store_name": {
+            "type": "object",
+            "example": "Ahmed Electronics",
+            "nullable": true
+          },
+          "store_logo": {
+            "type": "object",
+            "example": "https://cdn.bidmart.com/logos/store.jpg",
+            "nullable": true
+          },
+          "owner_full_name": {
+            "type": "string",
+            "example": "Ahmed Al-Rashidi"
+          },
+          "country_id": {
+            "type": "string",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "city": {
+            "type": "string",
+            "example": "Riyadh"
+          },
+          "detailed_address": {
+            "type": "string",
+            "example": "Al Olaya District, King Fahad Road, Building 12"
+          },
+          "commercial_registration_number": {
+            "type": "string",
+            "example": "CR-SAU-2024-001",
+            "description": "Read-only after registration"
+          },
+          "commercial_registration_doc": {
+            "type": "string",
+            "example": "https://cdn.bidmart.com/docs/cr.pdf",
+            "description": "Read-only"
+          },
+          "is_verified": {
+            "type": "boolean",
+            "example": false,
+            "description": "Verified badge — set by admin only"
+          },
+          "return_days_number": {
+            "type": "number",
+            "example": 7
+          },
+          "return_policy_ar": {
+            "type": "object",
+            "example": "يمكن إرجاع المنتج خلال 7 أيام",
+            "nullable": true
+          },
+          "return_policy_en": {
+            "type": "object",
+            "example": "Products can be returned within 7 days",
+            "nullable": true
+          },
+          "store_bio": {
+            "type": "object",
+            "example": "Top electronics at the best prices",
+            "nullable": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-01T00:00:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-06-15T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "owner_full_name",
+          "country_id",
+          "city",
+          "detailed_address",
+          "commercial_registration_number",
+          "commercial_registration_doc",
+          "is_verified",
+          "return_days_number",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "SubmitVerificationRequestDto": {
+        "type": "object",
+        "properties": {
+          "commercialRegistrationNumber": {
+            "type": "string",
+            "example": "CR-SAU-2024-001"
+          },
+          "commercialRegistrationDoc": {
+            "type": "string",
+            "example": "https://cdn.bidmart.com/docs/cr.pdf"
+          }
+        }
+      },
+      "VerificationRequestResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Your verification request has been submitted and is pending admin review."
+          }
+        },
+        "required": ["message"]
+      },
+      "UpdateStoreSettingsDto": {
+        "type": "object",
+        "properties": {
+          "storeName": {
+            "type": "string",
+            "example": "Ahmed Electronics"
+          },
+          "storeLogo": {
+            "type": "string",
+            "example": "https://cdn.bidmart.com/logos/store.jpg"
+          },
+          "storeBio": {
+            "type": "string",
+            "example": "Top electronics at the best prices"
+          },
+          "ownerFullName": {
+            "type": "string",
+            "example": "Ahmed Al-Rashidi"
+          },
+          "countryId": {
+            "type": "string",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "city": {
+            "type": "string",
+            "example": "Jeddah"
+          },
+          "detailedAddress": {
+            "type": "string",
+            "example": "Prince Sultan Road, Tower 5, Floor 2"
+          },
+          "returnPolicyAr": {
+            "type": "string",
+            "example": "يمكن إرجاع المنتج خلال 7 أيام"
+          },
+          "returnPolicyEn": {
+            "type": "string",
+            "example": "Products can be returned within 7 days"
+          },
+          "returnDaysNumber": {
+            "type": "number",
+            "example": 7,
+            "description": "Minimum 1 day"
+          }
+        }
+      },
+      "ProviderUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "fullName": {
+            "type": "string",
+            "example": "Ahmed Ali"
+          },
+          "email": {
+            "type": "string",
+            "example": "ahmed@example.com"
+          }
+        },
+        "required": ["id", "fullName", "email"]
+      },
+      "ProviderSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "nameEn": {
+            "type": "string",
+            "example": "Ahmed Store"
+          },
+          "nameAr": {
+            "type": "string",
+            "example": "متجر أحمد"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["PENDING", "APPROVED", "REJECTED", "SUSPENDED"],
+            "example": "PENDING"
+          },
+          "isVerified": {
+            "type": "boolean",
+            "example": false
+          },
+          "user": {
+            "$ref": "#/components/schemas/ProviderUserDto"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "nameEn",
+          "nameAr",
+          "status",
+          "isVerified",
+          "user",
+          "createdAt"
+        ]
+      },
+      "PaginatedProvidersDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderSummaryDto"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMetaDto"
+          }
+        },
+        "required": ["data", "meta"]
+      },
+      "ProviderDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "nameEn": {
+            "type": "string",
+            "example": "Ahmed Store"
+          },
+          "nameAr": {
+            "type": "string",
+            "example": "متجر أحمد"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["PENDING", "APPROVED", "REJECTED", "SUSPENDED"],
+            "example": "PENDING"
+          },
+          "isVerified": {
+            "type": "boolean",
+            "example": false
+          },
+          "user": {
+            "$ref": "#/components/schemas/ProviderUserDto"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "averageRating": {
+            "type": "number",
+            "example": 4.8
+          },
+          "totalSold": {
+            "type": "number",
+            "example": 142
+          }
+        },
+        "required": [
+          "id",
+          "nameEn",
+          "nameAr",
+          "status",
+          "isVerified",
+          "user",
+          "createdAt",
+          "averageRating",
+          "totalSold"
+        ]
+      },
+      "RejectProviderDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "example": "Commercial registration document is invalid or expired"
+          }
+        },
+        "required": ["reason"]
+      },
+      "ToggleVerificationResponseDto": {
+        "type": "object",
+        "properties": {
+          "isVerified": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": ["isVerified"]
+      },
+      "CategoryItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "name": {
+            "type": "string",
+            "example": "Electronics",
+            "description": "Localised name based on Accept-Language"
+          },
+          "image_url": {
+            "type": "string",
+            "example": "https://cdn.bidmart.com/cats/electronics.png"
+          },
+          "display_order": {
+            "type": "number",
+            "example": 1
+          },
+          "hasSelectedSubCategories": {
+            "type": "boolean",
+            "example": true,
+            "description": "True if the user has selected at least one sub-category under this category"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "image_url",
+          "display_order",
+          "hasSelectedSubCategories"
+        ]
+      },
+      "SubCategoryItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "name": {
+            "type": "string",
+            "example": "Phones & Tablets",
+            "description": "Localised name based on Accept-Language"
+          },
+          "image_url": {
+            "type": "object",
+            "example": "https://cdn.bidmart.com/cats/phones.png",
+            "nullable": true
+          },
+          "display_order": {
+            "type": "number",
+            "example": 1
+          },
+          "isSelected": {
+            "type": "boolean",
+            "example": true,
+            "description": "True if this sub-category is in the user's interests"
+          }
+        },
+        "required": ["id", "name", "display_order", "isSelected"]
+      },
+      "SavePreferencesDto": {
+        "type": "object",
+        "properties": {
+          "subCategoryIds": {
+            "description": "All selected sub-category UUIDs across all categories. Must contain at least one.",
+            "example": ["3fa85f64-5717-4562-b3fc-2c963f66afa6", "b2d3e4f5-..."],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["subCategoryIds"]
+      },
+      "OnboardingCompleteResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Onboarding completed. Your preferences have been saved."
+          }
+        },
+        "required": ["message"]
+      },
+      "FileItemDto": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "example": "image/jpeg",
+            "description": "MIME type of the file to upload"
+          },
+          "fileName": {
+            "type": "string",
+            "example": "Users/abc123-1700000000000.jpg",
+            "description": "Existing S3 key — providing this overwrites the file at that key"
+          }
+        },
+        "required": ["contentType"]
+      },
+      "UploadFilesDto": {
+        "type": "object",
+        "properties": {
+          "folder": {
+            "type": "string",
+            "example": "Offers",
+            "description": "S3 folder prefix (alphanumeric, hyphens, underscores — no slashes)"
+          },
+          "files": {
+            "description": "Files to generate pre-signed URLs for (1–10 per request)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileItemDto"
+            }
+          }
+        },
+        "required": ["folder", "files"]
+      },
+      "UploadResultDto": {
+        "type": "object",
+        "properties": {
+          "preSignedURL": {
+            "type": "string",
+            "example": "https://bucket.s3.region.amazonaws.com/folder/uuid-ts.jpg?X-Amz-..."
+          },
+          "mediaUrl": {
+            "type": "string",
+            "example": "https://bucket.s3.region.amazonaws.com/folder/uuid-ts.jpg"
+          }
+        },
+        "required": ["preSignedURL", "mediaUrl"]
+      },
+      "ApiSuccessUploadResultsDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UploadResultDto"
+            }
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2024-01-01T00:00:00.000Z"
+          }
+        },
+        "required": ["success", "data", "timestamp"]
+      },
+      "RegistrationUploadDto": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "example": "application/pdf",
+            "description": "MIME type of the registration document. Allowed: image/png, image/jpg, image/jpeg, application/pdf",
+            "enum": ["image/png", "image/jpg", "image/jpeg", "application/pdf"]
+          }
+        },
+        "required": ["contentType"]
+      },
+      "ApiSuccessUploadResultDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/UploadResultDto"
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2024-01-01T00:00:00.000Z"
+          }
+        },
+        "required": ["success", "data", "timestamp"]
+      },
+      "DeleteFileDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "Users/abc123-1700000000000.jpg",
+            "description": "S3 object key to delete"
+          }
+        },
+        "required": ["key"]
+      }
+    }
+  },
+  "x-tagGroups": [
+    {
+      "name": "Dashboard (Admin)",
+      "tags": [
+        "Admin — Auth",
+        "Admin — Countries",
+        "Admin — Categories",
+        "Admin — Sub-categories",
+        "Admin — Users",
+        "Admin — Providers"
+      ]
+    },
+    {
+      "name": "Seller",
+      "tags": ["Seller"]
+    },
+    {
+      "name": "Client & Guest",
+      "tags": ["Auth", "Users", "Onboarding", "Files", "Health", "Countries"]
+    }
+  ]
+}

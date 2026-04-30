@@ -3,7 +3,7 @@ import { Link, useMatchRoute } from '@tanstack/react-router'
 import { ChevronsLeft, ChevronsRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import { usePermission } from '@/lib/permissions'
+import { usePermission, type Permission } from '@/lib/permissions'
 import { useUIStore } from '@/features/ui/ui.store'
 import { navItems, type NavItem } from '@/components/layout/nav-items'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -96,8 +96,14 @@ function NavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
 }
 
 function FilteredNavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
-  const hasPermission = usePermission(item.permission ?? ('settings.edit' as const))
-  if (item.permission && !hasPermission) return null
+  // Items without a permission prop are visible to all authenticated admins
+  if (!item.permission) return <NavLink item={item} collapsed={collapsed} />
+  return <PermissionNavLink item={item} permission={item.permission} collapsed={collapsed} />
+}
+
+function PermissionNavLink({ item, permission, collapsed }: { item: NavItem; permission: Permission; collapsed: boolean }) {
+  const hasPermission = usePermission(permission)
+  if (!hasPermission) return null
   return <NavLink item={item} collapsed={collapsed} />
 }
 

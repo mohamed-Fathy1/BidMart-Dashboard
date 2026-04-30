@@ -18,7 +18,7 @@ export function Shell({ title, children }: ShellProps) {
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         <div
-          className="flex flex-1 flex-col"
+          className="flex min-w-0 flex-1 flex-col"
           style={{
             marginInlineStart: collapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)',
             transition: 'margin-inline-start var(--duration-layout) var(--ease-sidebar)',

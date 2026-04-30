@@ -1,0 +1,82 @@
+{
+  "status": {
+    "active": "Active",
+    "suspended": "Suspended",
+    "banned": "Banned",
+    "pending_verification": "Pending",
+    "deleted": "Deleted",
+    "PENDING": "Pending",
+    "APPROVED": "Approved",
+    "REJECTED": "Rejected",
+    "SUSPENDED": "Suspended",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "verified": "Verified",
+    "unverified": "Unverified",
+    "user_only": "User",
+    "upgraded_to_seller": "Seller"
+  },
+  "search": {
+    "placeholder": "Search...",
+    "clear": "Clear search"
+  },
+  "empty": {
+    "title": "No results found",
+    "action": "Clear filters"
+  },
+  "confirm_dialog": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete_title": "Delete record",
+    "delete_description": "This action cannot be undone."
+  },
+  "reason_dialog": {
+    "reason_label": "Reason",
+    "reason_placeholder": "Provide a reason...",
+    "reason_required": "Reason is required"
+  },
+  "form_dialog": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "create": "Create",
+    "saving": "Saving..."
+  },
+  "detail": {
+    "not_available": "N/A"
+  },
+  "image_preview": {
+    "no_image": "No image"
+  },
+  "password_input": {
+    "show": "Show password",
+    "hide": "Hide password"
+  },
+  "otp_input": {
+    "label": "Verification code"
+  },
+  "page_header": {
+    "back": "Back"
+  },
+  "stat_card": {
+    "increase": "increase",
+    "decrease": "decrease"
+  },
+  "image_upload": {
+    "drop_or_click": "Drop an image here or click to browse",
+    "uploading": "Uploading...",
+    "remove": "Remove",
+    "change": "Change",
+    "invalid_type": "Only PNG, JPG, and WebP images are allowed",
+    "too_large": "File must be under 5 MB",
+    "upload_failed": "Upload failed. Try again."
+  },
+  "data_table": {
+    "select_all": "Select all",
+    "select_row": "Select row",
+    "row_actions": "Row actions",
+    "selected": "{{count}} selected"
+  }
+}
