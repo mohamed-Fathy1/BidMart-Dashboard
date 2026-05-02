@@ -765,6 +765,7 @@
       "get": {
         "operationId": "SubCategoryAdminController_listSubCategories",
         "summary": "List sub-categories for a given category",
+        "description": "Paginated list sorted by newest first. Filter by parent category (required). Searchable by name (EN or AR). Includes parent category name per row.",
         "parameters": [
           {
             "name": "category_id",
@@ -774,18 +775,44 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search by English or Arabic name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 10,
+              "type": "number"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Sub-category list ordered by display_order",
+            "description": "Paginated sub-category list",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SubCategoryDto"
-                  }
+                  "$ref": "#/components/schemas/AdminSubCategoriesListResponseDto"
                 }
               }
             }
@@ -812,7 +839,7 @@
       },
       "post": {
         "operationId": "SubCategoryAdminController_createSubCategory",
-        "summary": "Create a sub-category under an existing category",
+        "summary": "Create a sub-category under a parent category",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -830,7 +857,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SubCategoryDto"
+                  "$ref": "#/components/schemas/AdminSubCategoryDetailResponseDto"
                 }
               }
             }
@@ -846,6 +873,9 @@
           },
           "404": {
             "description": "Parent category not found"
+          },
+          "409": {
+            "description": "Duplicate name under the same parent category"
           }
         },
         "tags": ["Admin — Sub-categories"],
@@ -873,11 +903,11 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Sub-category detail",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SubCategoryDto"
+                  "$ref": "#/components/schemas/AdminSubCategoryDetailResponseDto"
                 }
               }
             }
@@ -904,7 +934,8 @@
       },
       "patch": {
         "operationId": "SubCategoryAdminController_updateSubCategory",
-        "summary": "Update sub-category name, image, display order, or is_active",
+        "summary": "Update a sub-category",
+        "description": "Partial update. Can reassign to a different parent category via category_id. Name uniqueness is re-validated within the target parent.",
         "parameters": [
           {
             "name": "id",
@@ -932,7 +963,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SubCategoryDto"
+                  "$ref": "#/components/schemas/AdminSubCategoryDetailResponseDto"
                 }
               }
             }
@@ -947,7 +978,10 @@
             "description": "Insufficient permissions"
           },
           "404": {
-            "description": "SubCategory not found"
+            "description": "SubCategory or parent category not found"
+          },
+          "409": {
+            "description": "Duplicate name under the target parent category"
           }
         },
         "tags": ["Admin — Sub-categories"],
@@ -959,7 +993,8 @@
       },
       "delete": {
         "operationId": "SubCategoryAdminController_deleteSubCategory",
-        "summary": "Soft-delete a sub-category — sets is_active = false",
+        "summary": "Delete a sub-category",
+        "description": "Permanently deletes the sub-category.",
         "parameters": [
           {
             "name": "id",
@@ -973,7 +1008,7 @@
         ],
         "responses": {
           "204": {
-            "description": "Sub-category deactivated"
+            "description": "Sub-category deleted"
           },
           "400": {
             "description": "Invalid UUID"
@@ -3304,16 +3339,32 @@
         },
         "required": ["message"]
       },
-      "SubCategoryDto": {
+      "SubCategoryParentRefDto": {
         "type": "object",
+        "description": "Parent category summary included on each sub-category list row.",
         "properties": {
           "id": {
             "type": "string",
-            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+            "format": "uuid"
           },
-          "category_id": {
+          "name_en": {
             "type": "string",
-            "example": "cat-uuid"
+            "example": "Electronics"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "إلكترونيات"
+          }
+        },
+        "required": ["id", "name_en", "name_ar"]
+      },
+      "SubCategoryListItemDto": {
+        "type": "object",
+        "description": "Single row in GET /admin/sub-categories paginated list. May omit category_id when parentCategory is present.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
           },
           "name_en": {
             "type": "string",
@@ -3336,9 +3387,71 @@
             "type": "boolean",
             "example": true
           },
+          "parentCategory": {
+            "$ref": "#/components/schemas/SubCategoryParentRefDto"
+          },
           "created_at": {
-            "format": "date-time",
-            "type": "string"
+            "type": "string",
+            "format": "date-time"
+          },
+          "category_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Optional on list rows when parentCategory is returned instead"
+          }
+        },
+        "required": ["id", "name_en", "name_ar", "display_order", "is_active", "created_at"]
+      },
+      "SubCategoryDto": {
+        "type": "object",
+        "description": "Full sub-category record (detail, nested under CategoryDto, create/update response body in `data`).",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "category_id": {
+            "type": "string",
+            "example": "cat-uuid"
+          },
+          "name_en": {
+            "type": "string",
+            "example": "Phones & Tablets"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "هواتف وتابلت"
+          },
+          "image_url": {
+            "type": "string",
+            "nullable": true,
+            "example": "https://cdn.bidmart.com/sub-categories/phones.png"
+          },
+          "description_en": {
+            "type": "string",
+            "nullable": true,
+            "example": "Smartphones and tablets"
+          },
+          "description_ar": {
+            "type": "string",
+            "nullable": true,
+            "example": "الهواتف الذكية والأجهزة اللوحية"
+          },
+          "display_order": {
+            "type": "number",
+            "example": 1
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "required": [
@@ -3348,7 +3461,8 @@
           "name_ar",
           "display_order",
           "is_active",
-          "created_at"
+          "created_at",
+          "updated_at"
         ]
       },
       "CategoryListItemDto": {
@@ -3421,6 +3535,49 @@
           }
         },
         "required": ["success", "data", "meta"]
+      },
+      "AdminSubCategoriesListResponseDto": {
+        "type": "object",
+        "description": "Paginated sub-category list for GET /admin/sub-categories (newest first).",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SubCategoryListItemDto"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMetaDto"
+          }
+        },
+        "required": ["success", "data", "meta"]
+      },
+      "AdminSubCategoryDetailResponseDto": {
+        "type": "object",
+        "description": "Standard admin envelope for sub-category create, update, and detail (unwrap `data` on clients).",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/SubCategoryDto"
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string",
+                "example": "1.0.0"
+              }
+            }
+          }
+        },
+        "required": ["success", "data"]
       },
       "AdminCategoryDetailResponseDto": {
         "type": "object",
@@ -3627,6 +3784,16 @@
             "nullable": true,
             "example": "https://cdn.bidmart.com/sub-categories/phones.png"
           },
+          "description_en": {
+            "type": "string",
+            "nullable": true,
+            "example": "Smartphones and tablets"
+          },
+          "description_ar": {
+            "type": "string",
+            "nullable": true,
+            "example": "الهواتف الذكية والأجهزة اللوحية"
+          },
           "display_order": {
             "type": "number",
             "default": 0,
@@ -3638,6 +3805,10 @@
       "UpdateSubCategoryDto": {
         "type": "object",
         "properties": {
+          "category_id": {
+            "type": "string",
+            "description": "Reassign parent category UUID (optional partial update)"
+          },
           "name_en": {
             "type": "string",
             "example": "Phones & Tablets"
@@ -3647,6 +3818,14 @@
             "example": "هواتف وتابلت"
           },
           "image_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "description_en": {
+            "type": "string",
+            "nullable": true
+          },
+          "description_ar": {
             "type": "string",
             "nullable": true
           },

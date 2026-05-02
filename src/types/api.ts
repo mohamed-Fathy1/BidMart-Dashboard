@@ -158,19 +158,44 @@ export interface CategoryRecord {
 /*  Sub-categories                                                     */
 /* ------------------------------------------------------------------ */
 
-export interface SubCategory {
+export interface SubCategoryParentRef {
   id: string;
-  category_id: string;
+  name_en: string;
+  name_ar: string;
+}
+
+/** Row from GET /admin/sub-categories (paginated list). */
+export interface SubCategoryListItem {
+  id: string;
   name_en: string;
   name_ar: string;
   image_url: string | null;
   display_order: number;
   is_active: boolean;
+  parentCategory?: SubCategoryParentRef;
   created_at: string;
 }
 
+/** Full record from GET/PATCH/POST /admin/sub-categories/{id}. */
+export interface SubCategoryRecord {
+  id: string;
+  category_id: string;
+  name_en: string;
+  name_ar: string;
+  image_url: string | null;
+  description_en: string | null;
+  description_ar: string | null;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Alias — legacy name for full sub-category rows. */
+export type SubCategory = SubCategoryRecord;
+
 export interface CategoryDetail extends CategoryRecord {
-  sub_categories: SubCategory[];
+  sub_categories: SubCategoryRecord[];
 }
 
 /* ------------------------------------------------------------------ */

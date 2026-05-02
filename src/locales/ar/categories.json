@@ -1,6 +1,11 @@
 {
   "page_title": "التصنيفات",
   "page_description": "إدارة تصنيفات المنتجات والتصنيفات الفرعية",
+  "tabs": {
+    "aria": "مساحة التصنيفات",
+    "categories": "التصنيفات",
+    "sub_categories": "التصنيفات الفرعية"
+  },
   "meta": {
     "total": "{{count}} تصنيف"
   },
@@ -27,6 +32,7 @@
     "edit": "تعديل",
     "delete": "حذف",
     "view_subs": "عرض التصنيفات الفرعية",
+    "open_sub_hub": "فتح مركز التصنيفات الفرعية",
     "create_success": "تم إنشاء التصنيف",
     "update_success": "تم تحديث التصنيف",
     "delete_success": "تم حذف التصنيف"
@@ -68,8 +74,21 @@
       "total": "{{count}} تصنيف فرعي"
     },
     "list_hint": "تُعرض أدناه فقط التصنيفات الفرعية لهذا التصنيف الأب.",
+    "filters": {
+      "search_placeholder": "البحث بالاسم الإنجليزي أو العربي"
+    },
+    "hub": {
+      "page_description": "اختر تصنيفاً أباً ثم ابحث وصفّ بين التصنيفات الفرعية. استخدم هذه الصفحة للعمل على أجزاء متعددة من الكتالوج.",
+      "parent_label": "التصنيف الأب",
+      "parent_placeholder": "اختر تصنيفاً",
+      "parent_none": "لا شيء — اختر تصنيفاً",
+      "search_categories_label": "تصفية قائمة التصنيفات",
+      "search_categories_placeholder": "البحث في التصنيفات بالاسم",
+      "pick_parent_hint": "حدد التصنيف الأب أعلاه. تُحمَّل التصنيفات الفرعية بعد الاختيار."
+    },
     "columns": {
       "image": "الصورة",
+      "parent_category": "التصنيف الأب",
       "name_en": "الاسم (EN)",
       "name_ar": "الاسم (AR)",
       "display_order": "ترتيب العرض",
@@ -85,8 +104,17 @@
       "delete_success": "تم حذف التصنيف الفرعي"
     },
     "form": {
+      "section_parent": "التصنيف الأب",
+      "parent_category": "التصنيف الأب",
+      "parent_placeholder": "اختر التصنيف",
+      "parent_hint": "تغيير الأب يُعيد التحقق من تفرد الاسم ضمن التصنيف الجديد.",
       "section_names": "الأسماء",
       "section_media": "الصورة",
+      "section_descriptions": "الأوصاف",
+      "description_en": "الوصف (إنجليزي)",
+      "description_en_placeholder": "اختياري — يظهر للمشترين في القوائم",
+      "description_ar": "الوصف (عربي)",
+      "description_ar_placeholder": "اختياري — يظهر للمشترين في القوائم",
       "section_publishing": "الترتيب والظهور",
       "create_title": "إضافة تصنيف فرعي",
       "edit_title": "تعديل تصنيف فرعي",
@@ -104,7 +132,7 @@
     },
     "delete_dialog": {
       "title": "حذف التصنيف الفرعي",
-      "description": "سيتم تعطيل التصنيف الفرعي. هل أنت متأكد؟"
+      "description": "يُحذف التصنيف الفرعي نهائياً. هل تريد المتابعة؟"
     },
     "errors": {
       "create_failed": "تعذر إنشاء التصنيف الفرعي",

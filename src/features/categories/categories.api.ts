@@ -4,7 +4,8 @@ import type {
   CategoryDetail,
   CategoryRecord,
   PaginationMeta,
-  SubCategory,
+  SubCategoryListItem,
+  SubCategoryRecord,
 } from '@/types/api'
 
 /* ------------------------------------------------------------------ */
@@ -21,18 +22,6 @@ function unwrapEntity<T>(body: unknown): T {
     return (body as { data: T }).data
   }
   return body as T
-}
-
-function unwrapList<T>(body: unknown): T[] {
-  if (Array.isArray(body)) return body
-  if (
-    body &&
-    typeof body === 'object' &&
-    Array.isArray((body as { data: unknown }).data)
-  ) {
-    return (body as { data: T[] }).data
-  }
-  return []
 }
 
 /* ------------------------------------------------------------------ */
@@ -73,21 +62,33 @@ export interface UpdateCategoryPayload {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Sub-category mutation payloads                                     */
+/*  Sub-category list / mutation payloads                              */
 /* ------------------------------------------------------------------ */
+
+export interface ListSubCategoriesParams {
+  category_id: string
+  search?: string
+  page?: number
+  limit?: number
+}
 
 export interface CreateSubCategoryPayload {
   category_id: string
   name_en: string
   name_ar: string
   image_url?: string | null
+  description_en?: string | null
+  description_ar?: string | null
   display_order?: number
 }
 
 export interface UpdateSubCategoryPayload {
+  category_id?: string
   name_en?: string
   name_ar?: string
   image_url?: string | null
+  description_en?: string | null
+  description_ar?: string | null
   display_order?: number
   is_active?: boolean
 }
@@ -135,26 +136,35 @@ export async function deleteCategory(id: string): Promise<void> {
 /*  Sub-category API functions                                         */
 /* ------------------------------------------------------------------ */
 
-export async function listSubCategories(categoryId: string): Promise<SubCategory[]> {
-  const res = await api.get<unknown>('/admin/sub-categories', {
-    params: { category_id: categoryId },
-  })
-  return unwrapList<SubCategory>(res.data)
+export async function listSubCategories(
+  params: ListSubCategoriesParams,
+): Promise<{ data: SubCategoryListItem[]; meta: PaginationMeta }> {
+  const res = await api.get<{
+    success?: boolean
+    data: SubCategoryListItem[]
+    meta: PaginationMeta
+  }>('/admin/sub-categories', { params })
+  return { data: res.data.data, meta: res.data.meta }
+}
+
+export async function getSubCategoryDetail(id: string): Promise<SubCategoryRecord> {
+  const res = await api.get<unknown>(`/admin/sub-categories/${id}`)
+  return unwrapEntity<SubCategoryRecord>(res.data)
 }
 
 export async function createSubCategory(
   payload: CreateSubCategoryPayload,
-): Promise<SubCategory> {
+): Promise<SubCategoryRecord> {
   const res = await api.post<unknown>('/admin/sub-categories', payload)
-  return unwrapEntity<SubCategory>(res.data)
+  return unwrapEntity<SubCategoryRecord>(res.data)
 }
 
 export async function updateSubCategory(
   id: string,
   payload: UpdateSubCategoryPayload,
-): Promise<SubCategory> {
+): Promise<SubCategoryRecord> {
   const res = await api.patch<unknown>(`/admin/sub-categories/${id}`, payload)
-  return unwrapEntity<SubCategory>(res.data)
+  return unwrapEntity<SubCategoryRecord>(res.data)
 }
 
 export async function deleteSubCategory(id: string): Promise<void> {

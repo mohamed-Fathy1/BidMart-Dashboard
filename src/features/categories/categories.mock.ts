@@ -1,4 +1,4 @@
-import type { Category, SubCategory } from '@/types/api'
+import type { Category, SubCategoryRecord } from '@/types/api'
 
 export const mockCategories: Category[] = [
   {
@@ -69,7 +69,7 @@ export const mockCategories: Category[] = [
   },
 ]
 
-export const mockSubCategories: SubCategory[] = [
+export const mockSubCategories: SubCategoryRecord[] = [
   // Electronics subs
   {
     id: 'sub-001',
@@ -80,6 +80,9 @@ export const mockSubCategories: SubCategory[] = [
     display_order: 1,
     is_active: true,
     created_at: '2024-01-02T00:00:00.000Z',
+    updated_at: '2024-01-02T00:00:00.000Z',
+    description_en: null,
+    description_ar: null,
   },
   {
     id: 'sub-002',
@@ -90,6 +93,9 @@ export const mockSubCategories: SubCategory[] = [
     display_order: 2,
     is_active: true,
     created_at: '2024-01-02T00:00:00.000Z',
+    updated_at: '2024-01-02T00:00:00.000Z',
+    description_en: null,
+    description_ar: null,
   },
   {
     id: 'sub-003',
@@ -100,6 +106,9 @@ export const mockSubCategories: SubCategory[] = [
     display_order: 3,
     is_active: true,
     created_at: '2024-01-02T00:00:00.000Z',
+    updated_at: '2024-01-02T00:00:00.000Z',
+    description_en: null,
+    description_ar: null,
   },
   {
     id: 'sub-004',
@@ -110,6 +119,9 @@ export const mockSubCategories: SubCategory[] = [
     display_order: 4,
     is_active: false,
     created_at: '2024-01-02T00:00:00.000Z',
+    updated_at: '2024-01-02T00:00:00.000Z',
+    description_en: null,
+    description_ar: null,
   },
   // Fashion subs
   {
@@ -121,6 +133,9 @@ export const mockSubCategories: SubCategory[] = [
     display_order: 1,
     is_active: true,
     created_at: '2024-01-06T00:00:00.000Z',
+    updated_at: '2024-01-06T00:00:00.000Z',
+    description_en: null,
+    description_ar: null,
   },
   {
     id: 'sub-006',
@@ -131,6 +146,9 @@ export const mockSubCategories: SubCategory[] = [
     display_order: 2,
     is_active: true,
     created_at: '2024-01-06T00:00:00.000Z',
+    updated_at: '2024-01-06T00:00:00.000Z',
+    description_en: null,
+    description_ar: null,
   },
   {
     id: 'sub-007',
@@ -141,6 +159,9 @@ export const mockSubCategories: SubCategory[] = [
     display_order: 3,
     is_active: true,
     created_at: '2024-01-06T00:00:00.000Z',
+    updated_at: '2024-01-06T00:00:00.000Z',
+    description_en: null,
+    description_ar: null,
   },
   // Home & Garden subs
   {
@@ -152,6 +173,9 @@ export const mockSubCategories: SubCategory[] = [
     display_order: 1,
     is_active: true,
     created_at: '2024-01-11T00:00:00.000Z',
+    updated_at: '2024-01-11T00:00:00.000Z',
+    description_en: null,
+    description_ar: null,
   },
   {
     id: 'sub-009',
@@ -162,6 +186,9 @@ export const mockSubCategories: SubCategory[] = [
     display_order: 2,
     is_active: true,
     created_at: '2024-01-11T00:00:00.000Z',
+    updated_at: '2024-01-11T00:00:00.000Z',
+    description_en: null,
+    description_ar: null,
   },
   // Sports subs
   {
@@ -173,9 +200,12 @@ export const mockSubCategories: SubCategory[] = [
     display_order: 1,
     is_active: true,
     created_at: '2024-02-02T00:00:00.000Z',
+    updated_at: '2024-02-02T00:00:00.000Z',
+    description_en: null,
+    description_ar: null,
   },
 ]
 
-export function getMockSubCategories(categoryId: string): SubCategory[] {
+export function getMockSubCategories(categoryId: string): SubCategoryRecord[] {
   return mockSubCategories.filter((s) => s.category_id === categoryId)
 }

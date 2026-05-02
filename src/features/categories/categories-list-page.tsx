@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import type { PaginationState } from '@tanstack/react-table'
-import { Plus, Pencil, Trash2, List } from 'lucide-react'
+import { Plus, Pencil, Trash2, List, Table2 } from 'lucide-react'
 import type { Category } from '@/types/api'
 import { PageHeader } from '@/components/shared/page-header'
 import { SearchInput } from '@/components/shared/search-input'
@@ -59,6 +59,7 @@ export function CategoriesListPage() {
 
   const canUpdate = usePermission(PERMISSIONS.categories.update)
   const canDelete = usePermission(PERMISSIONS.categories.delete)
+  const canViewSubs = usePermission(PERMISSIONS.subCategories.view)
 
   const [search, setSearch] = useState('')
   const [pagination, setPagination] = useState<PaginationState>({
@@ -166,6 +167,22 @@ export function CategoriesListPage() {
           }),
       },
     ]
+
+    if (canViewSubs) {
+      items.push({
+        label: t('categories:actions.open_sub_hub'),
+        icon: Table2,
+        onClick: (r) =>
+          void navigate({
+            to: '/categories/sub-categories',
+            search: { parent: r.id },
+          }),
+      })
+    }
+
+    if (canUpdate || canDelete) {
+      items.push({ type: 'separator' })
+    }
 
     if (canUpdate) {
       items.push({

@@ -1,14 +1,20 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { Outlet, createFileRoute } from '@tanstack/react-router'
 import { PERMISSIONS, usePermission } from '@/lib/permissions'
-import { CategoriesListPage } from '@/features/categories/categories-list-page'
+import { CategoriesSectionTabs } from '@/features/categories/categories-section-tabs'
 import { PermissionDenied } from '@/routes/_authed'
 
 export const Route = createFileRoute('/_authed/categories')({
-  component: CategoriesRoute,
+  component: CategoriesLayoutRoute,
 })
 
-function CategoriesRoute() {
+function CategoriesLayoutRoute() {
   const allowed = usePermission(PERMISSIONS.categories.view)
   if (!allowed) return <PermissionDenied />
-  return <CategoriesListPage />
+
+  return (
+    <div className="space-y-6">
+      <CategoriesSectionTabs />
+      <Outlet />
+    </div>
+  )
 }

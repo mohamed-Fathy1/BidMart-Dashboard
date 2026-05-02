@@ -9,10 +9,12 @@ import {
   updateCategory,
   deleteCategory,
   listSubCategories,
+  getSubCategoryDetail,
   createSubCategory,
   updateSubCategory,
   deleteSubCategory,
   type ListCategoriesParams,
+  type ListSubCategoriesParams,
   type CreateCategoryPayload,
   type UpdateCategoryPayload,
   type CreateSubCategoryPayload,
@@ -46,7 +48,9 @@ export const categoryKeys = {
 export const subCategoryKeys = {
   all: ['sub-categories'] as const,
   lists: () => [...subCategoryKeys.all, 'list'] as const,
-  list: (categoryId: string) => [...subCategoryKeys.lists(), categoryId] as const,
+  list: (params: ListSubCategoriesParams) => [...subCategoryKeys.lists(), params] as const,
+  details: () => [...subCategoryKeys.all, 'detail'] as const,
+  detail: (id: string) => [...subCategoryKeys.details(), id] as const,
 }
 
 /* ------------------------------------------------------------------ */
@@ -126,11 +130,19 @@ export function useDeleteCategoryMutation() {
 /*  Sub-category queries                                               */
 /* ------------------------------------------------------------------ */
 
-export function useSubCategoriesQuery(categoryId: string) {
+export function useSubCategoriesQuery(params: ListSubCategoriesParams) {
   return useQuery({
-    queryKey: subCategoryKeys.list(categoryId),
-    queryFn: () => listSubCategories(categoryId),
-    enabled: !!categoryId,
+    queryKey: subCategoryKeys.list(params),
+    queryFn: () => listSubCategories(params),
+    enabled: !!params.category_id,
+  })
+}
+
+export function useSubCategoryDetailQuery(id: string, enabled = true) {
+  return useQuery({
+    queryKey: subCategoryKeys.detail(id),
+    queryFn: () => getSubCategoryDetail(id),
+    enabled: !!id && enabled,
   })
 }
 
@@ -163,8 +175,9 @@ export function useUpdateSubCategoryMutation() {
   return useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: UpdateSubCategoryPayload }) =>
       updateSubCategory(id, payload),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: subCategoryKeys.all })
+      queryClient.invalidateQueries({ queryKey: subCategoryKeys.detail(variables.id) })
       queryClient.invalidateQueries({ queryKey: categoryKeys.all })
       queryClient.invalidateQueries({ queryKey: categoryKeys.details() })
       toast.success(t('categories:sub.actions.update_success'))

@@ -111,7 +111,7 @@ CLAUDE.md
 components.json
 ```
 
-**Categories** (`features/categories/`): list + nested sub-category routes, `TableFiltersShell` + search, and admin API envelopes are documented in root **`CLAUDE.md`** — **Categories (product taxonomy)**.
+**Categories** (`features/categories/`): layout route with section tabs + **`/categories/sub-categories`** hub (optional **`?parent=`**) + nested **`/categories/$categoryId/sub-categories`** drill-down; **`TableFiltersShell`**, server pagination, and API envelopes — see root **`CLAUDE.md`** — **Categories (product taxonomy)**.
 
 Rules (baked into `CLAUDE.md`):
 

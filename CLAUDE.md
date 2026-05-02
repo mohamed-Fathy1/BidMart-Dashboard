@@ -25,7 +25,7 @@
 - **Roles example:** `roles.api.ts`, `roles.queries.ts`, `roles.columns.tsx`, `roles-list-page.tsx` (mounted from `routes/_authed.roles.tsx`)
 - **Admins example:** `admins.api.ts`, `admins.queries.ts`, `admins.columns.tsx`, `admins-list-page.tsx` (mounted from `routes/_authed.admins.tsx`)
 - **Providers example:** `providers.api.ts`, `providers.queries.ts`, `providers.columns.tsx`, `providers-list-page.tsx`, `provider-detail-page.tsx` (list `routes/_authed.providers.tsx`, detail `routes/_authed.providers.$storeId.tsx`)
-- **Categories example:** `categories.api.ts`, `categories.queries.ts`, `categories.columns.tsx`, `categories-list-page.tsx`, `sub-categories.columns.tsx`, `sub-categories-list-page.tsx` (list `routes/_authed.categories.tsx`, nested `routes/_authed.categories_.$categoryId.sub-categories.tsx`)
+- **Categories example:** `categories.api.ts`, `categories.queries.ts`, `categories.columns.tsx`, `categories-section-tabs.tsx`, `categories-list-page.tsx`, `sub-categories.columns.tsx`, `sub-categories-list-page.tsx` (layout `routes/_authed.categories.tsx` + index `routes/_authed.categories.index.tsx`, hub `routes/_authed.categories.sub-categories.tsx`, nested `routes/_authed.categories.$categoryId.sub-categories.tsx`)
 
 ## Roles (admin RBAC)
 
@@ -55,20 +55,24 @@
 
 ## Categories (product taxonomy)
 
-- **UI:** `/categories` list (`routes/_authed.categories.tsx` → `features/categories/categories-list-page.tsx`); sub-categories under `/categories/$categoryId/sub-categories` (`routes/_authed.categories_.$categoryId.sub-categories.tsx` → `sub-categories-list-page.tsx`). Row click and **View sub-categories** navigate to the nested route.
-- **Colocated files:** `categories.api.ts`, `categories.queries.ts`, `categories.columns.tsx`, `sub-categories.columns.tsx`, list pages as above (flat `features/categories/` — no nested `components/`).
-- **HTTP** (paths relative to Axios `baseURL`):  
+- **UI:** Layout **`routes/_authed.categories.tsx`** — **`CategoriesSectionTabs`** (`features/categories/categories-section-tabs.tsx`) + **`<Outlet />`**; guarded with **`PERMISSIONS.categories.view`**. Child routes:
+  - **Index** **`routes/_authed.categories.index.tsx`** → **`/categories`** (and **`/categories/`**) → **`categories-list-page.tsx`**.
+  - **Sub-categories hub** **`routes/_authed.categories.sub-categories.tsx`** → **`/categories/sub-categories`**, optional typed search **`parent`** (parent category UUID) → **`sub-categories-list-page.tsx`** with **`variant="hub"`**. Guarded with **`PERMISSIONS.subCategories.view`**.
+  - **Nested drill-down** **`routes/_authed.categories.$categoryId.sub-categories.tsx`** → **`/categories/$categoryId/sub-categories`** → **`sub-categories-list-page.tsx`** with **`variant="under-category"`**. Same permission as hub.
+- **Navigation:** Row click and **View sub-categories** open the **nested** route. **Open sub-categories hub** (when the user has **`subCategories.view`**) opens the hub with **`?parent=`** set. Tabs link **Categories** ↔ **Sub-categories** (hub); the hub tab is omitted if the user lacks **`subCategories.view`**.
+- **Colocated files:** `categories.api.ts`, `categories.queries.ts`, `categories.columns.tsx`, `categories-section-tabs.tsx`, `categories-list-page.tsx`, `sub-categories.columns.tsx`, `sub-categories-list-page.tsx` (flat **`features/categories/`** — no nested **`components/`**).
+- **HTTP** (paths relative to Axios **`baseURL`):**  
   - List **`GET /admin/categories`** — query **`search`** (EN/AR name), **`page`**, **`limit`** (default page size **10**). Response **`{ success, data, meta }`**; **`listCategories`** returns **`{ data, meta }`** (same idea as **`listProviders`**).  
   - Detail **`GET /admin/categories/{id}`** — full record + **`sub_categories`[]**; unwrap **`{ success, data }`** when present.  
   - **`POST /admin/categories`** / **`PATCH /admin/categories/{id}`** — **`name_en`**, **`name_ar`**, **`image_url`**, **`icon_url`**, **`sub_category_image_url`**, optional **`description_en`/`description_ar`**, **`display_order`**; **`PATCH`** may include **`is_active`**. Unwrap created/updated body from **`data`**.  
   - **`DELETE /admin/categories/{id}`** — **204**; **409** if sub-categories must be deleted first (dashboard delete copy reflects this).  
-  - Sub-categories: **`GET /admin/sub-categories?category_id=`**, **`POST`**, **`PATCH /admin/sub-categories/{id}`**, **`DELETE`** — **`categories.api.ts`** tolerates wrapped **`{ data }`** or raw array/entity where the backend varies.
-- **Types (`types/api.ts`):** List rows **`Category`** — **`subCategoriesCount`**, **`icon_url`**, timestamps **`created_at`**. **`CategoryRecord`** — full scalar fields (incl. **`sub_category_image_url`**, descriptions, **`updated_at`**) without nested subs. **`CategoryDetail`** extends **`CategoryRecord`** with **`sub_categories`**. **`SubCategory`** for nested/list rows.
-- **List UX:** **`TableFiltersShell`** + **`SearchInput`** + server **`DataTable`** pagination; optional **`meta`** line with **`format.number(meta.total)`**. **Media** column shows hero image + icon (**`ImagePreview`**).
-- **Forms:** Large **`FormDialog`** (**`sm:max-w-2xl`**), **`suppressInitialFocus`**, grouped sections (names / media / descriptions / order & visibility) with **`Separator`**. Edit prefetches detail via **`queryClient.fetchQuery`** + **`getCategoryDetail`**; gate the submit button with **`submitDisabled`** during prefill (**`isLoading`** only for mutation pending) so dismiss stays responsive. Sub-category form follows the same section pattern; parent **`PageHeader`** may use **`description` as `ReactNode`** (thumbnail + bilingual title).
+  - Sub-categories: **`GET /admin/sub-categories`** — required **`category_id`**; optional **`search`** (EN/AR name), **`page`**, **`limit`**. Response **`{ success, data, meta }`**; **`listSubCategories`** returns **`{ data, meta }`**. **`GET /admin/sub-categories/{id}`** — **`getSubCategoryDetail`**, unwrap **`data`**. **`POST`** / **`PATCH`** — names, optional **`image_url`**, **`description_en`/`description_ar`**, **`display_order`**; **`PATCH`** may include **`is_active`** and **`category_id`** (move to another parent). **`DELETE /admin/sub-categories/{id}`** — **204** per current product spec; confirm if deployment differs.
+- **Types (`types/api.ts`):** List rows **`Category`** — **`subCategoriesCount`**, **`icon_url`**, timestamps **`created_at`**. **`CategoryRecord`** — full scalar fields (incl. **`sub_category_image_url`**, descriptions, **`updated_at`**) without nested subs. **`CategoryDetail`** extends **`CategoryRecord`** with **`sub_categories`** (**`SubCategoryRecord[]`**). **`SubCategoryListItem`** — paginated list row (optional embedded **`parentCategory`**). **`SubCategoryRecord`** — full sub-category (**`description_en` / `description_ar`**, **`updated_at`**). **`SubCategory`** aliases **`SubCategoryRecord`**.
+- **List UX:** **`TableFiltersShell`** + **`SearchInput`** + server **`DataTable`** pagination; optional **`meta`** line with **`format.number(meta.total)`**. **Media** column shows hero image + icon (**`ImagePreview`**). Sub-category list is server-paginated; hub view may show a **parent** column.
+- **Forms:** Category: large **`FormDialog`** (**`sm:max-w-2xl`**). Sub-category: **`sm:max-w-2xl`**, **`suppressInitialFocus`**, sections (names / media / descriptions / order & parent on edit / visibility). Edit prefetches **`getCategoryDetail`** or **`getSubCategoryDetail`** via **`queryClient.fetchQuery`**; gate submit with **`submitDisabled`** during prefill. Parent **`PageHeader`** may use **`description` as `ReactNode`** (thumbnail + bilingual title on nested sub view; hub uses copy + picker in filters).
 - **Errors:** **`extractMutationError`** in **`categories.queries.ts`** → toasts **`categories:errors.*`** and **`categories:sub.errors.*`**.
-- **Guards:** **`PERMISSIONS.categories.view`** on list route; **`PERMISSIONS.categories.create`** / **`update`** / **`delete`** and **`PERMISSIONS.subCategories.*`** with **`<Can>`**. Row actions always expose **View sub-categories** where applicable.
-- **Spec / OpenAPI:** Repo **`Admin_API_integration_S1.json`** — tag **Admin — Categories** (`CategoryListItemDto`, **`AdminCategoriesListResponseDto`**, **`AdminCategoryDetailResponseDto`**, **`CategoryDto`**, create/update DTOs). If production responses differ, keep **`categories.api.ts`** aligned with deployment.
+- **Guards:** Layout uses **`categories.view`**; hub and nested sub routes use **`subCategories.view`**. Mutations use **`categories.*`** and **`subCategories.*`** with **`<Can>`**. Row actions expose **View sub-categories**; **Open sub-categories hub** when **`subCategories.view`**.
+- **Spec / OpenAPI:** Repo **`Admin_API_integration_S1.json`** — **Admin — Categories** (`CategoryListItemDto`, **`AdminCategoriesListResponseDto`**, **`AdminCategoryDetailResponseDto`**, **`CategoryDto`**) and **Admin — Sub-categories** (`SubCategoryListItemDto`, **`AdminSubCategoriesListResponseDto`**, **`AdminSubCategoryDetailResponseDto`**, **`SubCategoryDto`**, create/update DTOs). If production responses differ, keep **`categories.api.ts`** aligned with deployment.
 
 ## Context vs Zustand
 
@@ -192,6 +196,7 @@ Duration/easing pairings:
 
 - If a URL has nested children (e.g. `/providers` + `/providers/$storeId`), the parent layout must render **`<Outlet />`** when the child route is active. Rendering only the list component hides detail pages.
 - **Preferred:** layout route with **`<Outlet />`** and an **index** file for the table (e.g. `_authed.providers.index.tsx` with `createFileRoute('/_authed/providers/')`); avoid ad-hoc `useMatchRoute` branching when an index route keeps the tree obvious.
+- **Categories:** `_authed.categories.tsx` layout + `_authed.categories.index.tsx` for the main table; add sibling child files for **`/sub-categories`** (hub) and **`/$categoryId/sub-categories`** (drill-down). Do not use the old flat **`_authed.categories_.$categoryId...`** path-only trick unless a child cannot be nested under the layout.
 
 ## Permission Rules
 

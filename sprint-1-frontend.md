@@ -526,7 +526,8 @@ Response `204 No Content`. Permanent delete.
 ## 3 — Admin: Categories
 
 > Token required + permission `admin:categories:*`  
-> **OpenAPI:** repo **`Admin_API_integration_S1.json`** — tag **`Admin — Categories`** (`CategoryListItemDto`, **`AdminCategoriesListResponseDto`**, **`AdminCategoryDetailResponseDto`**, **`CategoryDto`**, **`CreateCategoryDto`**, **`UpdateCategoryDto`**).
+> **OpenAPI:** repo **`Admin_API_integration_S1.json`** — tag **`Admin — Categories`** (`CategoryListItemDto`, **`AdminCategoriesListResponseDto`**, **`AdminCategoryDetailResponseDto`**, **`CategoryDto`**, **`CreateCategoryDto`**, **`UpdateCategoryDto`**).  
+> **Dashboard UI:** layout + section tabs, category index, sub hub (`/categories/sub-categories?parent=`), nested drill-down — root **`CLAUDE.md`** (Categories).
 
 ### `GET /admin/categories`
 Paginated list, **newest first** (per deployed API). Includes **`subCategoriesCount`** per row. Search matches **English or Arabic** name.
@@ -649,34 +650,55 @@ Response **`200`**: updated category (unwrap **`data`** if wrapped). **`404`**, 
 ## 4 — Admin: Sub-Categories
 
 > Token required + permission `admin:sub-categories:*`  
-> **OpenAPI:** same file — tag **`Admin — Sub-categories`** (`SubCategoryDto`, create/update DTOs).
+> **OpenAPI:** same file — tag **`Admin — Sub-categories`** (`SubCategoryListItemDto`, **`SubCategoryParentRefDto`**, **`AdminSubCategoriesListResponseDto`**, **`AdminSubCategoryDetailResponseDto`**, **`SubCategoryDto`**, **`CreateSubCategoryDto`**, **`UpdateSubCategoryDto`**).
 
-### `GET /admin/sub-categories?category_id=<uuid>`
-`category_id` query param is **required**.
+### `GET /admin/sub-categories`
+Query params:
+| Param | Required | Description |
+|-------|----------|-------------|
+| `category_id` | **yes** | Parent category UUID |
+| `search` | no | English or Arabic name |
+| `page` | no | default **1** |
+| `limit` | no | default **10** |
 
-Response **`200`**: raw JSON array of sub-categories, or **`{ success, data: [...] }`** depending on gateway — clients should accept both (see **`listSubCategories`** in `categories.api.ts`).
+Response **`200`**: **`{ success, data: [...], meta }`** — paginated list, newest first; each row may include **`parentCategory`** (`id`, `name_en`, `name_ar`). The dashboard **`listSubCategories`** returns **`{ data, meta }`** (unwrap like other admin lists).
 
 ```json
-[
-  {
-    "id": "uuid",
-    "category_id": "parent-uuid",
-    "name_en": "Phones & Tablets",
-    "name_ar": "هواتف وتابلت",
-    "image_url": "https://...",
-    "display_order": 1,
-    "is_active": true,
-    "created_at": "..."
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "name_en": "Phones & Tablets",
+      "name_ar": "هواتف وتابلت",
+      "image_url": "https://...",
+      "display_order": 1,
+      "is_active": true,
+      "parentCategory": {
+        "id": "parent-uuid",
+        "name_en": "Electronics",
+        "name_ar": "إلكترونيات"
+      },
+      "created_at": "2026-05-01T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 10,
+    "total": 1,
+    "totalPages": 1,
+    "hasNextPage": false,
+    "hasPrevPage": false
   }
-]
+}
 ```
 
-> **`image_url`** is a nullable **string** (URL), not an object.
+> **`image_url`** is nullable. List rows may omit **`category_id`** when **`parentCategory`** is present — the dashboard resolves the parent from the query or from **`parentCategory.id`**.
 
 ---
 
 ### `GET /admin/sub-categories/:id`
-Response **`200`**: single sub-category object (same shape as list items). Body may be wrapped in **`data`** — unwrap if present.
+Response **`200`**: full sub-category (**`category_id`**, descriptions, **`created_at`**, **`updated_at`**, etc.). Body uses **`AdminSubCategoryDetailResponseDto`** — unwrap **`data`** (**`getSubCategoryDetail`**).
 
 ---
 
@@ -688,32 +710,38 @@ Request:
   "name_en": "Phones & Tablets",
   "name_ar": "هواتف وتابلت",
   "image_url": "https://cdn.bidmart.com/cats/phones.png",
+  "description_en": "Optional",
+  "description_ar": "اختياري",
   "display_order": 1
 }
 ```
-- `image_url` and `display_order` are optional
+- `image_url`, `description_en`, `description_ar`, and `display_order` are optional as allowed by the API.
 
-Response **`201`**: sub-category object (unwrap **`data`** if wrapped).
+Response **`201`**: created sub-category (unwrap **`data`** from **`AdminSubCategoryDetailResponseDto`** if wrapped). **`409`**: duplicate name under the same parent.
 
 ---
 
 ### `PATCH /admin/sub-categories/:id`
-All fields optional (same as create minus `category_id`):
+All fields optional (partial update). May include **`category_id`** to assign a new parent (name uniqueness re-checked for that parent).
+
 ```json
 {
+  "category_id": "other-parent-uuid",
   "name_en": "Phones",
   "name_ar": "هواتف",
   "image_url": "https://...",
+  "description_en": "...",
+  "description_ar": "...",
   "display_order": 2,
   "is_active": false
 }
 ```
-Response **`200`**: updated sub-category object.
+Response **`200`**: updated sub-category object. **`404`**: sub-category or parent not found. **`409`**: duplicate name under the target parent.
 
 ---
 
 ### `DELETE /admin/sub-categories/:id`
-Per **`Admin_API_integration_S1.json`**: soft-delete — sets **`is_active = false`**. Response **`204 No Content`**. Confirm behavior on your deployed service if it differs.
+**`204 No Content`** — permanently deletes the sub-category. See **`Admin_API_integration_S1.json`** (`SubCategoryAdminController_deleteSubCategory`).
 
 ---
 
@@ -1228,7 +1256,7 @@ The JWT payload contains a `permissions` array. Check that the required permissi
 
 **Providers (sellers):** full wire shapes, filters, and dashboard mapping — **§5b** above and root **`CLAUDE.md`** (Providers).
 
-**Categories (taxonomy):** list pagination, search, envelopes, sub-category nesting — **§3** above and root **`CLAUDE.md`** (Categories).
+**Categories (taxonomy):** layout + tabs, **`/categories/sub-categories`** hub (`?parent=`), nested sub-categories route — **§3**, **§4** above and root **`CLAUDE.md`** (Categories).
 
 ---
 
@@ -1237,7 +1265,7 @@ The JWT payload contains a `permissions` array. Check that the required permissi
 - All UUIDs follow **UUID v4** format — validate before sending to avoid unnecessary 400s.
 - All timestamps are **ISO 8601 UTC** strings (`2026-04-23T10:00:00.000Z`).
 - Admin token from login is stored in Zustand with localStorage persistence. User/permissions are decoded from the JWT payload at login (JWT contains `sub`, `role`, `role_id`, `is_super_admin`, `permissions[]`, `deviceId`).
-- The **`DELETE /admin/categories/:id`** contract in production may be a **204** hard delete with **409** when sub-categories remain — see **§3 — Admin: Categories** above and root **`CLAUDE.md`** (Categories). **`DELETE /admin/sub-categories/:id`** may still be implemented as **`is_active = false`** (soft-delete) per OpenAPI; confirm against the deployed API.
+- The **`DELETE /admin/categories/:id`** contract in production may be a **204** hard delete with **409** when sub-categories remain — see **§3 — Admin: Categories** above and root **`CLAUDE.md`** (Categories). **`DELETE /admin/sub-categories/:id`** is **204** permanent delete in **`Admin_API_integration_S1.json`**; confirm against your deployed API if an older stack differed.
 - The `DELETE /admin/countries/:id` and `DELETE /admin/users/:userId` are also soft-deletes from the user's perspective but behave differently: countries are permanently deleted, users get a `deletedAt` timestamp.
 - **Roles RBAC:** OpenAPI excerpt `Admin_API_integration_S1.json` includes `Admin — Roles` paths (`GET/POST /admin/roles`, `GET /admin/roles/permissions`, `GET/PATCH/DELETE /admin/roles/{roleId}`) and schemas (`RoleDetailDto`, `CreateRoleDto`, permission module DTOs).
 - **Admins (operators):** Same file adds tag **`Admin — Admins`** with paths `/api/v1/admin/admins`, `/api/v1/admin/admins/{adminId}`, `/api/v1/admin/admins/{adminId}/block`, `/api/v1/admin/admins/{adminId}/unblock` and DTOs **`AdministratorAccountDto`**, **`PaginatedAdministratorsDto`**, **`CreateAdministratorDto`**, **`UpdateAdministratorDto`**, **`AdministratorMutationResponseDto`**, **`AdministratorRoleSummaryDto`**.

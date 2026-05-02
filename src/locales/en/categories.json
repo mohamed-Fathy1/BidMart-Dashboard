@@ -1,6 +1,11 @@
 {
   "page_title": "Categories",
   "page_description": "Manage product categories and sub-categories",
+  "tabs": {
+    "aria": "Categories workspace",
+    "categories": "Categories",
+    "sub_categories": "Sub-categories"
+  },
   "meta": {
     "total": "{{count}} categories"
   },
@@ -27,6 +32,7 @@
     "edit": "Edit",
     "delete": "Delete",
     "view_subs": "View Sub-categories",
+    "open_sub_hub": "Open sub-categories hub",
     "create_success": "Category created",
     "update_success": "Category updated",
     "delete_success": "Category deleted"
@@ -68,8 +74,21 @@
       "total": "{{count}} sub-categories"
     },
     "list_hint": "Only sub-categories for this parent category appear below.",
+    "filters": {
+      "search_placeholder": "Search by English or Arabic name"
+    },
+    "hub": {
+      "page_description": "Choose a parent category, then search and paginate its sub-categories. Use this view to work across the catalog without leaving the table.",
+      "parent_label": "Parent category",
+      "parent_placeholder": "Select a category",
+      "parent_none": "None — pick a category",
+      "search_categories_label": "Find in category list",
+      "search_categories_placeholder": "Filter categories by English or Arabic name",
+      "pick_parent_hint": "Select a parent category above. Sub-categories load after you choose."
+    },
     "columns": {
       "image": "Image",
+      "parent_category": "Parent category",
       "name_en": "Name (EN)",
       "name_ar": "Name (AR)",
       "display_order": "Display Order",
@@ -85,8 +104,17 @@
       "delete_success": "Sub-category deleted"
     },
     "form": {
+      "section_parent": "Parent category",
+      "parent_category": "Parent category",
+      "parent_placeholder": "Select category",
+      "parent_hint": "Changing the parent re-checks name uniqueness under the new category.",
       "section_names": "Names",
       "section_media": "Image",
+      "section_descriptions": "Descriptions",
+      "description_en": "Description (English)",
+      "description_en_placeholder": "Optional — shown to buyers in listings",
+      "description_ar": "Description (Arabic)",
+      "description_ar_placeholder": "اختياري — يظهر للمشترين في القوائم",
       "section_publishing": "Order & visibility",
       "create_title": "Add Sub-category",
       "edit_title": "Edit Sub-category",
@@ -104,7 +132,7 @@
     },
     "delete_dialog": {
       "title": "Delete Sub-category",
-      "description": "This will deactivate the sub-category. Are you sure?"
+      "description": "This permanently deletes the sub-category. Continue?"
     },
     "errors": {
       "create_failed": "Could not create sub-category",
