@@ -1,7 +1,19 @@
 {
   "page_title": "التصنيفات",
   "page_description": "إدارة تصنيفات المنتجات والتصنيفات الفرعية",
+  "meta": {
+    "total": "{{count}} تصنيف"
+  },
+  "filters": {
+    "search_placeholder": "البحث بالاسم الإنجليزي أو العربي"
+  },
+  "errors": {
+    "create_failed": "تعذر إنشاء التصنيف",
+    "update_failed": "تعذر تحديث التصنيف",
+    "delete_failed": "تعذر حذف التصنيف"
+  },
   "columns": {
+    "media": "الوسائط",
     "image": "الصورة",
     "name_en": "الاسم (EN)",
     "name_ar": "الاسم (AR)",
@@ -20,6 +32,10 @@
     "delete_success": "تم حذف التصنيف"
   },
   "form": {
+    "section_names": "الأسماء",
+    "section_media": "الصور والأيقونة",
+    "section_descriptions": "الأوصاف",
+    "section_publishing": "الترتيب والظهور",
     "create_title": "إضافة تصنيف",
     "edit_title": "تعديل تصنيف",
     "name_en": "الاسم (إنجليزي)",
@@ -32,17 +48,26 @@
     "icon_url_placeholder": "https://cdn.bidmart.com/cats/electronics-icon.png",
     "sub_category_image_url": "رابط صورة التصنيف الفرعي الافتراضية",
     "sub_category_image_url_placeholder": "https://cdn.bidmart.com/cats/sub-default.png",
+    "description_en": "الوصف (إنجليزي)",
+    "description_en_placeholder": "اختياري — يظهر للمشترين في صفحة التصنيف",
+    "description_ar": "الوصف (عربي)",
+    "description_ar_placeholder": "اختياري — يظهر للمشترين في صفحة التصنيف",
     "display_order": "ترتيب العرض",
-    "is_active": "نشط"
+    "is_active": "نشط",
+    "is_active_hint": "التصنيفات غير النشطة لا تظهر في واجهة المتجر.",
+    "create_active_hint": "التصنيفات الجديدة نشطة افتراضياً. يمكنك تغيير ذلك بعد الحفظ."
   },
   "delete_dialog": {
     "title": "حذف التصنيف",
-    "description": "سيتم تعطيل التصنيف وجميع تصنيفاته الفرعية. هل أنت متأكد؟"
+    "description": "يُحذف التصنيف نهائياً. يجب حذف جميع التصنيفات الفرعية أولاً. هل تريد المتابعة؟"
   },
   "sub": {
     "page_title": "التصنيفات الفرعية",
     "page_description": "التصنيفات الفرعية لـ {{category}}",
-    "select_category": "اختر تصنيفاً",
+    "meta": {
+      "total": "{{count}} تصنيف فرعي"
+    },
+    "list_hint": "تُعرض أدناه فقط التصنيفات الفرعية لهذا التصنيف الأب.",
     "columns": {
       "image": "الصورة",
       "name_en": "الاسم (EN)",
@@ -60,6 +85,9 @@
       "delete_success": "تم حذف التصنيف الفرعي"
     },
     "form": {
+      "section_names": "الأسماء",
+      "section_media": "الصورة",
+      "section_publishing": "الترتيب والظهور",
       "create_title": "إضافة تصنيف فرعي",
       "edit_title": "تعديل تصنيف فرعي",
       "category": "التصنيف",
@@ -70,11 +98,18 @@
       "image_url": "رابط الصورة",
       "image_url_placeholder": "https://cdn.bidmart.com/cats/phones.png",
       "display_order": "ترتيب العرض",
-      "is_active": "نشط"
+      "is_active": "نشط",
+      "is_active_hint": "التصنيفات الفرعية غير النشطة لا تظهر عند تصفح هذا التصنيف.",
+      "create_active_hint": "التصنيفات الفرعية الجديدة نشطة افتراضياً."
     },
     "delete_dialog": {
       "title": "حذف التصنيف الفرعي",
       "description": "سيتم تعطيل التصنيف الفرعي. هل أنت متأكد؟"
+    },
+    "errors": {
+      "create_failed": "تعذر إنشاء التصنيف الفرعي",
+      "update_failed": "تعذر تحديث التصنيف الفرعي",
+      "delete_failed": "تعذر حذف التصنيف الفرعي"
     }
   }
 }

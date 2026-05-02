@@ -1,7 +1,19 @@
 {
   "page_title": "Categories",
   "page_description": "Manage product categories and sub-categories",
+  "meta": {
+    "total": "{{count}} categories"
+  },
+  "filters": {
+    "search_placeholder": "Search by English or Arabic name"
+  },
+  "errors": {
+    "create_failed": "Could not create category",
+    "update_failed": "Could not update category",
+    "delete_failed": "Could not delete category"
+  },
   "columns": {
+    "media": "Media",
     "image": "Image",
     "name_en": "Name (EN)",
     "name_ar": "Name (AR)",
@@ -20,6 +32,10 @@
     "delete_success": "Category deleted"
   },
   "form": {
+    "section_names": "Names",
+    "section_media": "Images & icon",
+    "section_descriptions": "Descriptions",
+    "section_publishing": "Order & visibility",
     "create_title": "Add Category",
     "edit_title": "Edit Category",
     "name_en": "Name (English)",
@@ -32,17 +48,26 @@
     "icon_url_placeholder": "https://cdn.bidmart.com/cats/electronics-icon.png",
     "sub_category_image_url": "Default Sub-category Image URL",
     "sub_category_image_url_placeholder": "https://cdn.bidmart.com/cats/sub-default.png",
+    "description_en": "Description (English)",
+    "description_en_placeholder": "Optional — shown to buyers on the category page",
+    "description_ar": "Description (Arabic)",
+    "description_ar_placeholder": "اختياري — يظهر للمشترين في صفحة التصنيف",
     "display_order": "Display Order",
-    "is_active": "Active"
+    "is_active": "Active",
+    "is_active_hint": "Inactive categories stay hidden from storefront navigation.",
+    "create_active_hint": "New categories are active by default. You can change this after saving."
   },
   "delete_dialog": {
     "title": "Delete Category",
-    "description": "This will deactivate the category and all its sub-categories. Are you sure?"
+    "description": "This permanently deletes the category. You must remove all sub-categories first. Continue?"
   },
   "sub": {
     "page_title": "Sub-categories",
     "page_description": "Sub-categories of {{category}}",
-    "select_category": "Select a category",
+    "meta": {
+      "total": "{{count}} sub-categories"
+    },
+    "list_hint": "Only sub-categories for this parent category appear below.",
     "columns": {
       "image": "Image",
       "name_en": "Name (EN)",
@@ -60,6 +85,9 @@
       "delete_success": "Sub-category deleted"
     },
     "form": {
+      "section_names": "Names",
+      "section_media": "Image",
+      "section_publishing": "Order & visibility",
       "create_title": "Add Sub-category",
       "edit_title": "Edit Sub-category",
       "category": "Category",
@@ -70,11 +98,18 @@
       "image_url": "Image URL",
       "image_url_placeholder": "https://cdn.bidmart.com/cats/phones.png",
       "display_order": "Display Order",
-      "is_active": "Active"
+      "is_active": "Active",
+      "is_active_hint": "Inactive sub-categories stay hidden when buyers browse this category.",
+      "create_active_hint": "New sub-categories are active by default."
     },
     "delete_dialog": {
       "title": "Delete Sub-category",
       "description": "This will deactivate the sub-category. Are you sure?"
+    },
+    "errors": {
+      "create_failed": "Could not create sub-category",
+      "update_failed": "Could not update sub-category",
+      "delete_failed": "Could not delete sub-category"
     }
   }
 }

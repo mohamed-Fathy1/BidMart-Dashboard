@@ -125,18 +125,33 @@ export interface Country {
 /*  Categories                                                         */
 /* ------------------------------------------------------------------ */
 
+/** Row from GET /admin/categories (paginated list; includes sub-category count). */
 export interface Category {
   id: string;
   name_en: string;
   name_ar: string;
   image_url: string;
+  icon_url: string;
   display_order: number;
   is_active: boolean;
+  subCategoriesCount: number;
   created_at: string;
 }
 
-export interface CategoryDetail extends Category {
-  sub_categories: SubCategory[];
+/** Full category fields from GET/PATCH/POST (no nested sub-categories). */
+export interface CategoryRecord {
+  id: string;
+  name_en: string;
+  name_ar: string;
+  image_url: string;
+  icon_url: string;
+  sub_category_image_url: string;
+  description_en: string | null;
+  description_ar: string | null;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -152,6 +167,10 @@ export interface SubCategory {
   display_order: number;
   is_active: boolean;
   created_at: string;
+}
+
+export interface CategoryDetail extends CategoryRecord {
+  sub_categories: SubCategory[];
 }
 
 /* ------------------------------------------------------------------ */

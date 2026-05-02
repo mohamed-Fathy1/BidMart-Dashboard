@@ -25,6 +25,7 @@
 - **Roles example:** `roles.api.ts`, `roles.queries.ts`, `roles.columns.tsx`, `roles-list-page.tsx` (mounted from `routes/_authed.roles.tsx`)
 - **Admins example:** `admins.api.ts`, `admins.queries.ts`, `admins.columns.tsx`, `admins-list-page.tsx` (mounted from `routes/_authed.admins.tsx`)
 - **Providers example:** `providers.api.ts`, `providers.queries.ts`, `providers.columns.tsx`, `providers-list-page.tsx`, `provider-detail-page.tsx` (list `routes/_authed.providers.tsx`, detail `routes/_authed.providers.$storeId.tsx`)
+- **Categories example:** `categories.api.ts`, `categories.queries.ts`, `categories.columns.tsx`, `categories-list-page.tsx`, `sub-categories.columns.tsx`, `sub-categories-list-page.tsx` (list `routes/_authed.categories.tsx`, nested `routes/_authed.categories_.$categoryId.sub-categories.tsx`)
 
 ## Roles (admin RBAC)
 
@@ -51,6 +52,23 @@
 - Status filter & badges: query **`status`** uses the same lowercase values as **`accountStatus`**. For **`StatusBadge`** `type="seller"`, map **`blocked` → `SUSPENDED`** via **`providerAccountStatusForSellerBadge()`** in `providers.api.ts`. Documents column uses **`StatusBadge`** `type="providerVerification"` (`pending_verification` \| `unverified` \| `verified`); locale keys live under **`components:provider_verification.*`**. Platform verified badge on detail uses **`type="sellerVerified"`** (`components:status.verified` / `unverified`).
 - Guards: routes use **`PERMISSIONS.providers.view`**; mutations use **`providers.approve`** \| **`reject`** \| **`verify`** \| **`block`** \| **`unblock`** with `<Can>` and row/menu actions. **`PATCH /verify`** is not the same field as list **`verificationStatus`** (documents vs storefront badge — list confirms toggle via neutral copy since **`isVerified`** is absent on list rows).
 - Errors: mutations use **`onError`** toasts with **`providers:errors.*`** (see **`extractMutationError`** pattern in **`providers.queries.ts`**, same idea as admins/roles).
+
+## Categories (product taxonomy)
+
+- **UI:** `/categories` list (`routes/_authed.categories.tsx` → `features/categories/categories-list-page.tsx`); sub-categories under `/categories/$categoryId/sub-categories` (`routes/_authed.categories_.$categoryId.sub-categories.tsx` → `sub-categories-list-page.tsx`). Row click and **View sub-categories** navigate to the nested route.
+- **Colocated files:** `categories.api.ts`, `categories.queries.ts`, `categories.columns.tsx`, `sub-categories.columns.tsx`, list pages as above (flat `features/categories/` — no nested `components/`).
+- **HTTP** (paths relative to Axios `baseURL`):  
+  - List **`GET /admin/categories`** — query **`search`** (EN/AR name), **`page`**, **`limit`** (default page size **10**). Response **`{ success, data, meta }`**; **`listCategories`** returns **`{ data, meta }`** (same idea as **`listProviders`**).  
+  - Detail **`GET /admin/categories/{id}`** — full record + **`sub_categories`[]**; unwrap **`{ success, data }`** when present.  
+  - **`POST /admin/categories`** / **`PATCH /admin/categories/{id}`** — **`name_en`**, **`name_ar`**, **`image_url`**, **`icon_url`**, **`sub_category_image_url`**, optional **`description_en`/`description_ar`**, **`display_order`**; **`PATCH`** may include **`is_active`**. Unwrap created/updated body from **`data`**.  
+  - **`DELETE /admin/categories/{id}`** — **204**; **409** if sub-categories must be deleted first (dashboard delete copy reflects this).  
+  - Sub-categories: **`GET /admin/sub-categories?category_id=`**, **`POST`**, **`PATCH /admin/sub-categories/{id}`**, **`DELETE`** — **`categories.api.ts`** tolerates wrapped **`{ data }`** or raw array/entity where the backend varies.
+- **Types (`types/api.ts`):** List rows **`Category`** — **`subCategoriesCount`**, **`icon_url`**, timestamps **`created_at`**. **`CategoryRecord`** — full scalar fields (incl. **`sub_category_image_url`**, descriptions, **`updated_at`**) without nested subs. **`CategoryDetail`** extends **`CategoryRecord`** with **`sub_categories`**. **`SubCategory`** for nested/list rows.
+- **List UX:** **`TableFiltersShell`** + **`SearchInput`** + server **`DataTable`** pagination; optional **`meta`** line with **`format.number(meta.total)`**. **Media** column shows hero image + icon (**`ImagePreview`**).
+- **Forms:** Large **`FormDialog`** (**`sm:max-w-2xl`**), **`suppressInitialFocus`**, grouped sections (names / media / descriptions / order & visibility) with **`Separator`**. Edit prefetches detail via **`queryClient.fetchQuery`** + **`getCategoryDetail`**; gate the submit button with **`submitDisabled`** during prefill (**`isLoading`** only for mutation pending) so dismiss stays responsive. Sub-category form follows the same section pattern; parent **`PageHeader`** may use **`description` as `ReactNode`** (thumbnail + bilingual title).
+- **Errors:** **`extractMutationError`** in **`categories.queries.ts`** → toasts **`categories:errors.*`** and **`categories:sub.errors.*`**.
+- **Guards:** **`PERMISSIONS.categories.view`** on list route; **`PERMISSIONS.categories.create`** / **`update`** / **`delete`** and **`PERMISSIONS.subCategories.*`** with **`<Can>`**. Row actions always expose **View sub-categories** where applicable.
+- **Spec / OpenAPI:** Repo **`Admin_API_integration_S1.json`** — tag **Admin — Categories** (`CategoryListItemDto`, **`AdminCategoriesListResponseDto`**, **`AdminCategoryDetailResponseDto`**, **`CategoryDto`**, create/update DTOs). If production responses differ, keep **`categories.api.ts`** aligned with deployment.
 
 ## Context vs Zustand
 
@@ -168,7 +186,7 @@ Duration/easing pairings:
 - 48px row height, sticky header, hairline borders
 - Empty state: one line of copy, one action, no illustration
 - **Filter bar:** Wrap search/filters above the table in **`TableFiltersShell`** (`components/shared/table-filters-shell.tsx`): `rounded-xl border border-border bg-card p-4 shadow-rest`, optional trailing **`meta`** (localized total using `format.number(meta.total)`). Avoid one-off `bg-muted/*` shells for primary list filters.
-- **List page layout:** `space-y-6` between `PageHeader` and the table block (aligned with admins, roles, users, countries, providers).
+- **List page layout:** `space-y-6` between `PageHeader` and the table block (aligned with admins, roles, users, countries, providers, categories).
 
 ## TanStack Router — list + detail under one path
 

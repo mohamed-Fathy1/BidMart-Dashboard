@@ -190,9 +190,11 @@ content
 | `name_en` | varchar(100) | unique, required |
 | `name_ar` | varchar(100) | required |
 | `image_url` | varchar(500) | required |
-| `icon_url` | varchar(500) | required — not in original OpenAPI spec |
-| `sub_category_image_url` | varchar(500) | required — not in original OpenAPI spec |
-| `display_order` | int | default 0 — lower = shown first |
+| `icon_url` | varchar(500) | required |
+| `sub_category_image_url` | varchar(500) | required |
+| `description_en` | text | nullable — optional storefront copy |
+| `description_ar` | text | nullable — optional storefront copy |
+| `display_order` | int | default 0 |
 | `is_active` | boolean | default true — inactive categories hidden from users |
 | `created_at` | timestamptz | — |
 | `updated_at` | timestamptz | — |
@@ -200,7 +202,8 @@ content
 **Relations:**
 - `sub_categories` → `sub_categories[]` (one-to-many)
 
----
+**Business rules:**
+- Admin **`DELETE /admin/categories/:id`** may require **all sub-categories removed first** (**409** until then); this is independent of whether the DB uses `ON DELETE CASCADE` for raw SQL maintenance jobs.
 
 ### `sub_categories` table
 
@@ -217,10 +220,8 @@ content
 | `updated_at` | timestamptz | — |
 
 **Business rules:**
-- Deleting a category cascades and deletes all its sub-categories
-- `(category_id, name_en)` is unique — same English name can exist in different categories
-
----
+- **`(category_id, name_en)`** is unique — the same English name may exist under different parent categories.
+- Admin removal of a **category** may be blocked while **any** sub-category row still exists (**409**) even if the relational model could otherwise cascade — see **§3**.
 
 ### `stores` table
 
@@ -524,61 +525,82 @@ Response `204 No Content`. Permanent delete.
 
 ## 3 — Admin: Categories
 
-> Token required + permission `admin:categories:*`
+> Token required + permission `admin:categories:*`  
+> **OpenAPI:** repo **`Admin_API_integration_S1.json`** — tag **`Admin — Categories`** (`CategoryListItemDto`, **`AdminCategoriesListResponseDto`**, **`AdminCategoryDetailResponseDto`**, **`CategoryDto`**, **`CreateCategoryDto`**, **`UpdateCategoryDto`**).
 
 ### `GET /admin/categories`
-No query params. Returns up to 500 categories ordered by `display_order`.
+Paginated list, **newest first** (per deployed API). Includes **`subCategoriesCount`** per row. Search matches **English or Arabic** name.
 
-Response `200`:
+Query params (typical):
+
+| Param | Type | Description |
+|-------|------|-------------|
+| `search` | string | Optional — name (EN or AR) |
+| `page` | number | Default `1` |
+| `limit` | number | Default `10` |
+
+Response **`200`** (envelope):
+
 ```json
-[
-  {
-    "id": "uuid",
-    "name_en": "Electronics",
-    "name_ar": "إلكترونيات",
-    "image_url": "https://cdn.bidmart.com/cats/electronics.png",
-    "display_order": 1,
-    "is_active": true,
-    "created_at": "2024-01-01T00:00:00.000Z"
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "name_en": "Electronics",
+      "name_ar": "إلكترونيات",
+      "image_url": "https://...",
+      "icon_url": "https://...",
+      "display_order": 1,
+      "is_active": true,
+      "subCategoriesCount": 2,
+      "created_at": "2026-05-01T23:06:18.866Z"
+    }
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "page": 1,
+    "limit": 10,
+    "total": 20,
+    "totalPages": 2,
+    "hasNextPage": true,
+    "hasPrevPage": false
   }
-]
+}
 ```
-> `sub_categories` field is **not** populated in the list — use `GET /admin/categories/:id` to get it.
+
+> **`sub_categories` is not populated on the list** — use **`GET /admin/categories/:id`** for nested sub-categories.
 
 ---
 
 ### `GET /admin/categories/:id`
-Returns the category **with** its sub-categories array.
+Returns the category **with** **`sub_categories`**, icon, sub-category page image, descriptions, timestamps.
 
-Response `200`:
+Response **`200`** (often wrapped as `{ "success": true, "data": { ... } }`):
+
 ```json
 {
   "id": "uuid",
   "name_en": "Electronics",
   "name_ar": "إلكترونيات",
   "image_url": "https://...",
-  "display_order": 1,
+  "icon_url": "https://...",
+  "sub_category_image_url": "https://...",
+  "description_en": "Optional EN copy",
+  "description_ar": "Optional AR copy",
+  "display_order": 0,
   "is_active": true,
-  "created_at": "...",
-  "sub_categories": [
-    {
-      "id": "uuid",
-      "category_id": "parent-uuid",
-      "name_en": "Phones & Tablets",
-      "name_ar": "هواتف وتابلت",
-      "image_url": null,
-      "display_order": 1,
-      "is_active": true,
-      "created_at": "..."
-    }
-  ]
+  "created_at": "2026-05-02T21:24:19.634Z",
+  "updated_at": "2026-05-02T21:24:19.634Z",
+  "sub_categories": []
 }
 ```
 
 ---
 
 ### `POST /admin/categories`
-Request:
+Request (bilingual names and three image URLs typically required; optional descriptions):
+
 ```json
 {
   "name_en": "Electronics",
@@ -586,46 +608,54 @@ Request:
   "image_url": "https://cdn.bidmart.com/cats/electronics.png",
   "icon_url": "https://cdn.bidmart.com/cats/electronics-icon.png",
   "sub_category_image_url": "https://cdn.bidmart.com/cats/electronics-sub.png",
-  "display_order": 1
+  "description_en": "All electronic devices and accessories",
+  "description_ar": "جميع الأجهزة والإكسسوارات الإلكترونية",
+  "display_order": 0
 }
 ```
-- `display_order` optional (default: `0`)
-- `icon_url` and `sub_category_image_url` are **required** by the API (not in original OpenAPI spec — discovered during integration)
 
-Response `201`: category object (no `sub_categories`).
+Response **`201`**: created category object (unwrap **`data`** if wrapped). **`409`**: name uniqueness conflict.
 
 ---
 
 ### `PATCH /admin/categories/:id`
-All fields optional:
+Partial update — only send fields that change (including **`icon_url`**, **`sub_category_image_url`**, descriptions, **`is_active`**).
+
 ```json
 {
   "name_en": "Electronics",
   "name_ar": "إلكترونيات",
   "image_url": "https://...",
+  "icon_url": "https://...",
+  "sub_category_image_url": "https://...",
+  "description_en": "...",
+  "description_ar": "...",
   "display_order": 2,
   "is_active": false
 }
 ```
-Response `200`: updated category object.
 
-> Setting `is_active: false` = soft-delete (use `DELETE` for explicit deactivation).
+Response **`200`**: updated category (unwrap **`data`** if wrapped). **`404`**, **`409`** as applicable.
 
 ---
 
 ### `DELETE /admin/categories/:id`
-Sets `is_active = false`. Response `204 No Content`.
+**204 No Content** — permanent delete when the category has **no** sub-categories. **`409`** if sub-categories must be removed first.
+
+> Older notes / some DB designs assumed **`is_active`**-only deactivation — the **spec + integrated dashboard** document **204** permanent delete and **409** when sub-categories remain. Reconcile with your deployed API.
 
 ---
 
 ## 4 — Admin: Sub-Categories
 
-> Token required + permission `admin:sub-categories:*`
+> Token required + permission `admin:sub-categories:*`  
+> **OpenAPI:** same file — tag **`Admin — Sub-categories`** (`SubCategoryDto`, create/update DTOs).
 
 ### `GET /admin/sub-categories?category_id=<uuid>`
 `category_id` query param is **required**.
 
-Response `200`:
+Response **`200`**: raw JSON array of sub-categories, or **`{ success, data: [...] }`** depending on gateway — clients should accept both (see **`listSubCategories`** in `categories.api.ts`).
+
 ```json
 [
   {
@@ -641,10 +671,12 @@ Response `200`:
 ]
 ```
 
+> **`image_url`** is a nullable **string** (URL), not an object.
+
 ---
 
 ### `GET /admin/sub-categories/:id`
-Response `200`: single sub-category object (same shape as above).
+Response **`200`**: single sub-category object (same shape as list items). Body may be wrapped in **`data`** — unwrap if present.
 
 ---
 
@@ -661,7 +693,7 @@ Request:
 ```
 - `image_url` and `display_order` are optional
 
-Response `201`: sub-category object.
+Response **`201`**: sub-category object (unwrap **`data`** if wrapped).
 
 ---
 
@@ -676,12 +708,12 @@ All fields optional (same as create minus `category_id`):
   "is_active": false
 }
 ```
-Response `200`: updated sub-category object.
+Response **`200`**: updated sub-category object.
 
 ---
 
 ### `DELETE /admin/sub-categories/:id`
-Sets `is_active = false`. Response `204 No Content`.
+Per **`Admin_API_integration_S1.json`**: soft-delete — sets **`is_active = false`**. Response **`204 No Content`**. Confirm behavior on your deployed service if it differs.
 
 ---
 
@@ -1196,6 +1228,8 @@ The JWT payload contains a `permissions` array. Check that the required permissi
 
 **Providers (sellers):** full wire shapes, filters, and dashboard mapping — **§5b** above and root **`CLAUDE.md`** (Providers).
 
+**Categories (taxonomy):** list pagination, search, envelopes, sub-category nesting — **§3** above and root **`CLAUDE.md`** (Categories).
+
 ---
 
 ## 9 — Notes
@@ -1203,7 +1237,7 @@ The JWT payload contains a `permissions` array. Check that the required permissi
 - All UUIDs follow **UUID v4** format — validate before sending to avoid unnecessary 400s.
 - All timestamps are **ISO 8601 UTC** strings (`2026-04-23T10:00:00.000Z`).
 - Admin token from login is stored in Zustand with localStorage persistence. User/permissions are decoded from the JWT payload at login (JWT contains `sub`, `role`, `role_id`, `is_super_admin`, `permissions[]`, `deviceId`).
-- The `DELETE /admin/categories/:id` and `DELETE /admin/sub-categories/:id` are **soft-deletes** (sets `is_active = false`) — the record still exists in the DB.
+- The **`DELETE /admin/categories/:id`** contract in production may be a **204** hard delete with **409** when sub-categories remain — see **§3 — Admin: Categories** above and root **`CLAUDE.md`** (Categories). **`DELETE /admin/sub-categories/:id`** may still be implemented as **`is_active = false`** (soft-delete) per OpenAPI; confirm against the deployed API.
 - The `DELETE /admin/countries/:id` and `DELETE /admin/users/:userId` are also soft-deletes from the user's perspective but behave differently: countries are permanently deleted, users get a `deletedAt` timestamp.
 - **Roles RBAC:** OpenAPI excerpt `Admin_API_integration_S1.json` includes `Admin — Roles` paths (`GET/POST /admin/roles`, `GET /admin/roles/permissions`, `GET/PATCH/DELETE /admin/roles/{roleId}`) and schemas (`RoleDetailDto`, `CreateRoleDto`, permission module DTOs).
 - **Admins (operators):** Same file adds tag **`Admin — Admins`** with paths `/api/v1/admin/admins`, `/api/v1/admin/admins/{adminId}`, `/api/v1/admin/admins/{adminId}/block`, `/api/v1/admin/admins/{adminId}/unblock` and DTOs **`AdministratorAccountDto`**, **`PaginatedAdministratorsDto`**, **`CreateAdministratorDto`**, **`UpdateAdministratorDto`**, **`AdministratorMutationResponseDto`**, **`AdministratorRoleSummaryDto`**.

@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 import type { SubCategory } from '@/types/api'
 import { PageHeader } from '@/components/shared/page-header'
+import { TableFiltersShell } from '@/components/shared/table-filters-shell'
 import { DataTable, type RowActionItem } from '@/components/data-table/data-table'
 import { ConfirmDialog } from '@/components/shared/confirm-dialog'
 import { FormDialog } from '@/components/shared/form-dialog'
@@ -11,10 +12,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ImageUploadField } from '@/components/shared/image-upload-field'
+import { ImagePreview } from '@/components/shared/image-preview'
 import { Can } from '@/components/permissions/can'
 import { PERMISSIONS, usePermission } from '@/lib/permissions'
+import { format } from '@/lib/format'
+import { cn } from '@/lib/utils'
 import { useSubCategoryColumns } from '@/features/categories/sub-categories.columns'
 import {
   useCategoryDetailQuery,
@@ -24,6 +29,25 @@ import {
   useDeleteSubCategoryMutation,
 } from '@/features/categories/categories.queries'
 
+function FormSection({
+  title,
+  children,
+  className,
+}: {
+  title: string
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <div className={cn('space-y-3', className)}>
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </h3>
+      {children}
+    </div>
+  )
+}
+
 interface SubCategoriesListPageProps {
   categoryId: string
 }
@@ -32,7 +56,6 @@ export function SubCategoriesListPage({ categoryId }: SubCategoriesListPageProps
   const { t } = useTranslation()
   const navigate = useNavigate()
 
-  const canCreate = usePermission(PERMISSIONS.subCategories.create)
   const canUpdate = usePermission(PERMISSIONS.subCategories.update)
   const canDelete = usePermission(PERMISSIONS.subCategories.delete)
 
@@ -147,18 +170,49 @@ export function SubCategoriesListPage({ categoryId }: SubCategoriesListPageProps
     }
   }
 
+  const headerDescription: ReactNode =
+    isLoadingParent ? (
+      <Skeleton className="h-16 w-full max-w-lg rounded-lg" />
+    ) : parentCategory ? (
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
+        <div className="flex min-w-0 items-center gap-3">
+          <ImagePreview
+            src={parentCategory.image_url}
+            alt={parentCategory.name_en}
+            size="md"
+            className="ring-1 ring-border/80"
+          />
+          <div className="min-w-0 space-y-0.5">
+            <p className="truncate font-medium text-foreground">{parentCategory.name_en}</p>
+            <p className="truncate text-sm text-muted-foreground" dir="rtl">
+              {parentCategory.name_ar}
+            </p>
+          </div>
+        </div>
+        <p className="text-sm leading-snug text-muted-foreground sm:max-w-md sm:border-s sm:border-border sm:ps-5">
+          {t('categories:sub.page_description', { category: parentCategory.name_en })}
+        </p>
+      </div>
+    ) : undefined
+
+  const toolbar = (
+    <TableFiltersShell
+      meta={
+        !isLoadingSubs
+          ? t('categories:sub.meta.total', { count: format.number(subCategories.length) })
+          : undefined
+      }
+    >
+      <p className="max-w-xl text-sm text-muted-foreground">{t('categories:sub.list_hint')}</p>
+    </TableFiltersShell>
+  )
+
   /* ---------- render ---------- */
   return (
     <div className="space-y-6">
       <PageHeader
         title={t('categories:sub.page_title')}
-        description={
-          isLoadingParent
-            ? undefined
-            : parentCategory
-              ? t('categories:sub.page_description', { category: parentCategory.name_en })
-              : undefined
-        }
+        description={headerDescription}
         onBack={() => navigate({ to: '/categories' })}
         actions={
           <Can permission={PERMISSIONS.subCategories.create}>
@@ -170,19 +224,15 @@ export function SubCategoriesListPage({ categoryId }: SubCategoriesListPageProps
         }
       />
 
-      {isLoadingParent ? (
-        <Skeleton className="h-6 w-48" />
-      ) : null}
-
       <DataTable
         columns={columns}
         data={subCategories}
         isLoading={isLoadingSubs}
+        toolbar={toolbar}
         actions={canUpdate || canDelete ? getRowActions : undefined}
         getRowId={(row) => row.id}
       />
 
-      {/* Create / Edit dialog */}
       <FormDialog
         open={formOpen}
         onOpenChange={(open) => {
@@ -195,61 +245,86 @@ export function SubCategoriesListPage({ categoryId }: SubCategoriesListPageProps
         isEdit={!!editTarget}
         isLoading={isSubmitting}
         onSubmit={handleSubmit}
-        contentClassName="sm:max-w-lg"
+        contentClassName="sm:max-w-xl"
+        suppressInitialFocus
       >
-        <div className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="sub-name-en">{t('categories:sub.form.name_en')}</Label>
-            <Input
-              id="sub-name-en"
-              value={nameEn}
-              onChange={(e) => setNameEn(e.target.value)}
-              placeholder={t('categories:sub.form.name_en_placeholder')}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="sub-name-ar">{t('categories:sub.form.name_ar')}</Label>
-            <Input
-              id="sub-name-ar"
-              value={nameAr}
-              onChange={(e) => setNameAr(e.target.value)}
-              placeholder={t('categories:sub.form.name_ar_placeholder')}
-              dir="rtl"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label>{t('categories:sub.form.image_url')}</Label>
-            <ImageUploadField
-              value={imageUrl}
-              onChange={setImageUrl}
-              uploadCase="sub_category_image"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="sub-order">{t('categories:sub.form.display_order')}</Label>
-            <Input
-              id="sub-order"
-              type="number"
-              value={displayOrder}
-              onChange={(e) => setDisplayOrder(Number(e.target.value))}
-              min={0}
-              className="font-mono tabular-nums"
-            />
-          </div>
-          {editTarget && (
-            <div className="flex items-center gap-3">
-              <Switch
-                id="sub-active"
-                checked={isActive}
-                onCheckedChange={setIsActive}
-              />
-              <Label htmlFor="sub-active">{t('categories:sub.form.is_active')}</Label>
+        <div className="max-h-[min(65vh,480px)] overflow-y-auto pe-1">
+          <FormSection title={t('categories:sub.form.section_names')}>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="sub-name-en">{t('categories:sub.form.name_en')}</Label>
+                <Input
+                  id="sub-name-en"
+                  value={nameEn}
+                  onChange={(e) => setNameEn(e.target.value)}
+                  placeholder={t('categories:sub.form.name_en_placeholder')}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="sub-name-ar">{t('categories:sub.form.name_ar')}</Label>
+                <Input
+                  id="sub-name-ar"
+                  value={nameAr}
+                  onChange={(e) => setNameAr(e.target.value)}
+                  placeholder={t('categories:sub.form.name_ar_placeholder')}
+                  dir="rtl"
+                />
+              </div>
             </div>
-          )}
+          </FormSection>
+
+          <Separator className="my-5" />
+
+          <FormSection title={t('categories:sub.form.section_media')}>
+            <div className="rounded-lg border border-border bg-muted/20 p-4">
+              <Label className="text-foreground">{t('categories:sub.form.image_url')}</Label>
+              <div className="mt-2">
+                <ImageUploadField
+                  value={imageUrl}
+                  onChange={setImageUrl}
+                  uploadCase="sub_category_image"
+                />
+              </div>
+            </div>
+          </FormSection>
+
+          <Separator className="my-5" />
+
+          <FormSection title={t('categories:sub.form.section_publishing')}>
+            <div className="grid gap-4 md:grid-cols-2 md:items-start">
+              <div className="grid gap-2">
+                <Label htmlFor="sub-order">{t('categories:sub.form.display_order')}</Label>
+                <Input
+                  id="sub-order"
+                  type="number"
+                  value={displayOrder}
+                  onChange={(e) => setDisplayOrder(Number(e.target.value))}
+                  min={0}
+                  className="max-w-48 font-mono tabular-nums"
+                />
+              </div>
+              {editTarget ? (
+                <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/20 px-4 py-3 md:justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="sub-active" className="text-foreground">
+                      {t('categories:sub.form.is_active')}
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      {t('categories:sub.form.is_active_hint')}
+                    </p>
+                  </div>
+                  <Switch id="sub-active" checked={isActive} onCheckedChange={setIsActive} />
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground md:pt-8">
+                  {t('categories:sub.form.create_active_hint')}
+                </p>
+              )}
+            </div>
+          </FormSection>
         </div>
       </FormDialog>
 
-      {/* Delete dialog */}
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}

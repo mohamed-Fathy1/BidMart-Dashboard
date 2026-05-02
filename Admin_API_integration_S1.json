@@ -510,18 +510,47 @@
     "/api/v1/admin/categories": {
       "get": {
         "operationId": "CategoryAdminController_listCategories",
-        "summary": "List all categories ordered by display_order, capped at 500",
-        "parameters": [],
+        "summary": "List categories (paginated, newest first, sub-category count per row)",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search by category name (English or Arabic)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number (1-based)",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size (default 10)",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 10
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Category list (sub_categories not populated)",
+            "description": "Paginated category list with sub-category counts",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/CategoryDto"
-                  }
+                  "$ref": "#/components/schemas/AdminCategoriesListResponseDto"
                 }
               }
             }
@@ -560,7 +589,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CategoryDto"
+                  "$ref": "#/components/schemas/AdminCategoryDetailResponseDto"
                 }
               }
             }
@@ -573,6 +602,9 @@
           },
           "403": {
             "description": "Insufficient permissions"
+          },
+          "409": {
+            "description": "A category with this name already exists"
           }
         },
         "tags": ["Admin — Categories"],
@@ -604,7 +636,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CategoryDto"
+                  "$ref": "#/components/schemas/AdminCategoryDetailResponseDto"
                 }
               }
             }
@@ -659,7 +691,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CategoryDto"
+                  "$ref": "#/components/schemas/AdminCategoryDetailResponseDto"
                 }
               }
             }
@@ -675,6 +707,9 @@
           },
           "404": {
             "description": "Category not found"
+          },
+          "409": {
+            "description": "A category with this name already exists"
           }
         },
         "tags": ["Admin — Categories"],
@@ -686,7 +721,7 @@
       },
       "delete": {
         "operationId": "CategoryAdminController_deleteCategory",
-        "summary": "Soft-delete a category — sets is_active = false",
+        "summary": "Delete a category (blocked while sub-categories exist)",
         "parameters": [
           {
             "name": "id",
@@ -700,7 +735,7 @@
         ],
         "responses": {
           "204": {
-            "description": "Category deactivated"
+            "description": "Category deleted"
           },
           "400": {
             "description": "Invalid UUID"
@@ -713,6 +748,9 @@
           },
           "404": {
             "description": "Category not found"
+          },
+          "409": {
+            "description": "Cannot delete — has related sub-categories"
           }
         },
         "tags": ["Admin — Categories"],
@@ -3286,9 +3324,9 @@
             "example": "هواتف وتابلت"
           },
           "image_url": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
-            "example": null
+            "example": "https://cdn.bidmart.com/sub-categories/phones.png"
           },
           "display_order": {
             "type": "number",
@@ -3313,8 +3351,103 @@
           "created_at"
         ]
       },
+      "CategoryListItemDto": {
+        "type": "object",
+        "description": "Admin paginated list row for GET /admin/categories (sub_categories not included; use subCategoriesCount).",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name_en": {
+            "type": "string",
+            "example": "Electronics"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "إلكترونيات"
+          },
+          "image_url": {
+            "type": "string"
+          },
+          "icon_url": {
+            "type": "string"
+          },
+          "display_order": {
+            "type": "number",
+            "example": 1
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": true
+          },
+          "subCategoriesCount": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 2
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "name_en",
+          "name_ar",
+          "image_url",
+          "icon_url",
+          "display_order",
+          "is_active",
+          "subCategoriesCount",
+          "created_at"
+        ]
+      },
+      "AdminCategoriesListResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryListItemDto"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMetaDto"
+          }
+        },
+        "required": ["success", "data", "meta"]
+      },
+      "AdminCategoryDetailResponseDto": {
+        "type": "object",
+        "description": "Standard admin envelope for category create, update, and detail (unwrap `data` on clients).",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/CategoryDto"
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string",
+                "example": "1.0.0"
+              }
+            }
+          }
+        },
+        "required": ["success", "data"]
+      },
       "CategoryDto": {
         "type": "object",
+        "description": "Full category record including nested sub_categories (detail, create, and update responses).",
         "properties": {
           "id": {
             "type": "string",
@@ -3331,6 +3464,24 @@
           "image_url": {
             "type": "string",
             "example": "https://placehold.co/400x400.png"
+          },
+          "icon_url": {
+            "type": "string",
+            "example": "https://placehold.co/64x64.png"
+          },
+          "sub_category_image_url": {
+            "type": "string",
+            "example": "https://placehold.co/400x300.png"
+          },
+          "description_en": {
+            "type": "string",
+            "nullable": true,
+            "example": "All electronic devices and accessories"
+          },
+          "description_ar": {
+            "type": "string",
+            "nullable": true,
+            "example": "جميع الأجهزة والإكسسوارات الإلكترونية"
           },
           "display_order": {
             "type": "number",
@@ -3349,6 +3500,10 @@
           "created_at": {
             "format": "date-time",
             "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
           }
         },
         "required": [
@@ -3356,9 +3511,13 @@
           "name_en",
           "name_ar",
           "image_url",
+          "icon_url",
+          "sub_category_image_url",
           "display_order",
           "is_active",
-          "created_at"
+          "sub_categories",
+          "created_at",
+          "updated_at"
         ]
       },
       "CreateCategoryDto": {
@@ -3376,13 +3535,37 @@
             "type": "string",
             "example": "https://cdn.bidmart.com/categories/electronics.png"
           },
+          "icon_url": {
+            "type": "string",
+            "example": "https://cdn.bidmart.com/categories/electronics-icon.png"
+          },
+          "sub_category_image_url": {
+            "type": "string",
+            "example": "https://cdn.bidmart.com/categories/electronics-sub.png"
+          },
+          "description_en": {
+            "type": "string",
+            "nullable": true,
+            "example": "All electronic devices and accessories"
+          },
+          "description_ar": {
+            "type": "string",
+            "nullable": true,
+            "example": "جميع الأجهزة والإكسسوارات الإلكترونية"
+          },
           "display_order": {
             "type": "number",
             "default": 0,
             "minimum": 0
           }
         },
-        "required": ["name_en", "name_ar", "image_url"]
+        "required": [
+          "name_en",
+          "name_ar",
+          "image_url",
+          "icon_url",
+          "sub_category_image_url"
+        ]
       },
       "UpdateCategoryDto": {
         "type": "object",
@@ -3398,6 +3581,22 @@
           "image_url": {
             "type": "string",
             "example": "https://cdn.bidmart.com/categories/electronics.png"
+          },
+          "icon_url": {
+            "type": "string",
+            "example": "https://cdn.bidmart.com/categories/electronics-icon.png"
+          },
+          "sub_category_image_url": {
+            "type": "string",
+            "example": "https://cdn.bidmart.com/categories/electronics-sub.png"
+          },
+          "description_en": {
+            "type": "string",
+            "nullable": true
+          },
+          "description_ar": {
+            "type": "string",
+            "nullable": true
           },
           "display_order": {
             "type": "number",

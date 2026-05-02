@@ -13,7 +13,12 @@ export function useSubCategoryColumns(): ColumnDef<SubCategory>[] {
       accessorKey: 'image_url',
       header: t('categories:sub.columns.image'),
       cell: ({ row }) => (
-        <ImagePreview src={row.original.image_url} alt={row.original.name_en} size="sm" />
+        <ImagePreview
+          src={row.original.image_url}
+          alt={row.original.name_en}
+          size="sm"
+          className="ring-1 ring-border/80"
+        />
       ),
       size: 60,
       enableSorting: false,
@@ -21,18 +26,26 @@ export function useSubCategoryColumns(): ColumnDef<SubCategory>[] {
     {
       accessorKey: 'name_en',
       header: t('categories:sub.columns.name_en'),
+      cell: ({ getValue }) => (
+        <span className="font-medium text-foreground">{getValue<string>()}</span>
+      ),
       size: 200,
     },
     {
       accessorKey: 'name_ar',
       header: t('categories:sub.columns.name_ar'),
+      cell: ({ getValue }) => (
+        <span className="font-medium text-foreground" dir="rtl">
+          {getValue<string>()}
+        </span>
+      ),
       size: 200,
     },
     {
       accessorKey: 'display_order',
       header: t('categories:sub.columns.display_order'),
       cell: ({ getValue }) => (
-        <span className="font-mono tabular-nums">{getValue<number>()}</span>
+        <span className="font-mono tabular-nums text-muted-foreground">{getValue<number>()}</span>
       ),
       size: 120,
     },
@@ -48,7 +61,9 @@ export function useSubCategoryColumns(): ColumnDef<SubCategory>[] {
       accessorKey: 'created_at',
       header: t('categories:sub.columns.created_at'),
       cell: ({ getValue }) => (
-        <span className="font-mono tabular-nums">{format.date(getValue<string>())}</span>
+        <span className="font-mono tabular-nums text-sm text-muted-foreground">
+          {format.date(getValue<string>())}
+        </span>
       ),
       size: 140,
     },

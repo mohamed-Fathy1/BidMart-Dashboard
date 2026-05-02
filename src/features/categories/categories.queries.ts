@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
@@ -11,11 +12,24 @@ import {
   createSubCategory,
   updateSubCategory,
   deleteSubCategory,
+  type ListCategoriesParams,
   type CreateCategoryPayload,
   type UpdateCategoryPayload,
   type CreateSubCategoryPayload,
   type UpdateSubCategoryPayload,
 } from '@/features/categories/categories.api'
+
+function extractMutationError(error: unknown): string | undefined {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { message?: string } | undefined
+    return typeof data?.message === 'string' ? data.message : undefined
+  }
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    const m = (error as { message: unknown }).message
+    return typeof m === 'string' ? m : undefined
+  }
+  return undefined
+}
 
 /* ------------------------------------------------------------------ */
 /*  Query keys                                                         */
@@ -24,7 +38,7 @@ import {
 export const categoryKeys = {
   all: ['categories'] as const,
   lists: () => [...categoryKeys.all, 'list'] as const,
-  list: () => [...categoryKeys.lists()] as const,
+  list: (params: ListCategoriesParams) => [...categoryKeys.lists(), params] as const,
   details: () => [...categoryKeys.all, 'detail'] as const,
   detail: (id: string) => [...categoryKeys.details(), id] as const,
 }
@@ -39,10 +53,10 @@ export const subCategoryKeys = {
 /*  Category queries                                                   */
 /* ------------------------------------------------------------------ */
 
-export function useCategoriesQuery() {
+export function useCategoriesQuery(params: ListCategoriesParams) {
   return useQuery({
-    queryKey: categoryKeys.list(),
-    queryFn: listCategories,
+    queryKey: categoryKeys.list(params),
+    queryFn: () => listCategories(params),
   })
 }
 
@@ -68,6 +82,9 @@ export function useCreateCategoryMutation() {
       queryClient.invalidateQueries({ queryKey: categoryKeys.all })
       toast.success(t('categories:actions.create_success'))
     },
+    onError: (error: unknown) => {
+      toast.error(extractMutationError(error) ?? t('categories:errors.create_failed'))
+    },
   })
 }
 
@@ -78,9 +95,13 @@ export function useUpdateCategoryMutation() {
   return useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: UpdateCategoryPayload }) =>
       updateCategory(id, payload),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: categoryKeys.all })
+      queryClient.invalidateQueries({ queryKey: categoryKeys.detail(variables.id) })
       toast.success(t('categories:actions.update_success'))
+    },
+    onError: (error: unknown) => {
+      toast.error(extractMutationError(error) ?? t('categories:errors.update_failed'))
     },
   })
 }
@@ -94,6 +115,9 @@ export function useDeleteCategoryMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: categoryKeys.all })
       toast.success(t('categories:actions.delete_success'))
+    },
+    onError: (error: unknown) => {
+      toast.error(extractMutationError(error) ?? t('categories:errors.delete_failed'))
     },
   })
 }
@@ -120,10 +144,14 @@ export function useCreateSubCategoryMutation() {
 
   return useMutation({
     mutationFn: (payload: CreateSubCategoryPayload) => createSubCategory(payload),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: subCategoryKeys.all })
       queryClient.invalidateQueries({ queryKey: categoryKeys.all })
+      queryClient.invalidateQueries({ queryKey: categoryKeys.detail(variables.category_id) })
       toast.success(t('categories:sub.actions.create_success'))
+    },
+    onError: (error: unknown) => {
+      toast.error(extractMutationError(error) ?? t('categories:sub.errors.create_failed'))
     },
   })
 }
@@ -138,7 +166,11 @@ export function useUpdateSubCategoryMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: subCategoryKeys.all })
       queryClient.invalidateQueries({ queryKey: categoryKeys.all })
+      queryClient.invalidateQueries({ queryKey: categoryKeys.details() })
       toast.success(t('categories:sub.actions.update_success'))
+    },
+    onError: (error: unknown) => {
+      toast.error(extractMutationError(error) ?? t('categories:sub.errors.update_failed'))
     },
   })
 }
@@ -152,7 +184,11 @@ export function useDeleteSubCategoryMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: subCategoryKeys.all })
       queryClient.invalidateQueries({ queryKey: categoryKeys.all })
+      queryClient.invalidateQueries({ queryKey: categoryKeys.details() })
       toast.success(t('categories:sub.actions.delete_success'))
+    },
+    onError: (error: unknown) => {
+      toast.error(extractMutationError(error) ?? t('categories:sub.errors.delete_failed'))
     },
   })
 }
