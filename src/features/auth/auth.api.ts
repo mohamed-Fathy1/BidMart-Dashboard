@@ -25,6 +25,7 @@ interface MeResponse {
 /** Shape of the admin JWT payload */
 interface AdminJwtPayload {
   sub: string
+  email?: string
   role: string
   role_id: string
   is_super_admin: boolean
@@ -50,9 +51,11 @@ function buildSessionFromToken(token: string): { user: User; permissions: string
 
   const user: User = {
     id: payload.sub,
-    name: payload.role,
-    email: '',
+    name: payload.email ?? '',
+    email: payload.email ?? '',
     role: payload.role,
+    roleId: payload.role_id,
+    isSuperAdmin: payload.is_super_admin,
   }
 
   // The backend already embeds the full permission list for super_admins,
@@ -104,4 +107,58 @@ export async function getMeRequest(): Promise<MeResponse> {
 
 export async function logoutRequest(): Promise<void> {
   await api.post('/admin/auth/logout')
+}
+
+/* ------------------------------------------------------------------ */
+/*  Forgot / Reset password                                            */
+/* ------------------------------------------------------------------ */
+
+export interface ForgotPasswordRequest {
+  email: string
+}
+
+export interface ForgotPasswordResponse {
+  message: string
+  otp?: string
+}
+
+export interface ResetPasswordRequest {
+  email: string
+  otp: string
+  newPassword: string
+  confirmPassword: string
+}
+
+export interface ResetPasswordResponse {
+  message: string
+}
+
+export async function forgotPasswordRequest(
+  data: ForgotPasswordRequest,
+): Promise<ForgotPasswordResponse> {
+  const res = await api.post<ForgotPasswordResponse>(
+    '/admin/auth/forgot-password',
+    data,
+  )
+  return res.data
+}
+
+export async function resendForgotPasswordOtp(
+  data: ForgotPasswordRequest,
+): Promise<ForgotPasswordResponse> {
+  const res = await api.post<ForgotPasswordResponse>(
+    '/admin/auth/forgot-password/resend',
+    data,
+  )
+  return res.data
+}
+
+export async function resetPasswordRequest(
+  data: ResetPasswordRequest,
+): Promise<ResetPasswordResponse> {
+  const res = await api.post<ResetPasswordResponse>(
+    '/admin/auth/reset-password',
+    data,
+  )
+  return res.data
 }

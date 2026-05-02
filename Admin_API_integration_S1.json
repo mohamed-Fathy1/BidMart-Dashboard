@@ -1424,6 +1424,721 @@
           }
         ]
       }
+    },
+    "/api/v1/admin/roles": {
+      "get": {
+        "operationId": "RoleAdminController_listRoles",
+        "summary": "List all roles",
+        "description": "Paginated roles sorted alphabetically. Includes admin count per role. Search applies to English or Arabic name. Default limit 10.",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated role list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedRolesDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          }
+        },
+        "tags": ["Admin — Roles"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "RoleAdminController_createRole",
+        "summary": "Create a new role",
+        "description": "Bilingual names required and must be unique. Permissions array contains string keys.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Role created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CreateRoleSuccessResponseDto"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "version": {
+                          "type": "string",
+                          "example": "1.0.0"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "409": {
+            "description": "Duplicate role name"
+          }
+        },
+        "tags": ["Admin — Roles"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/roles/permissions": {
+      "get": {
+        "operationId": "RoleAdminController_getPermissionTree",
+        "summary": "Get all permissions grouped by module",
+        "description": "Used to drive the permission matrix when creating or editing roles.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Permission groups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/RolePermissionModuleDto"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "version": {
+                          "type": "string",
+                          "example": "1.0.0"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          }
+        },
+        "tags": ["Admin — Roles"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/roles/{roleId}": {
+      "get": {
+        "operationId": "RoleAdminController_getRole",
+        "summary": "Get role detail with permissions",
+        "parameters": [
+          {
+            "name": "roleId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/RoleDetailDto"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "version": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "Role not found"
+          }
+        },
+        "tags": ["Admin — Roles"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "RoleAdminController_updateRole",
+        "summary": "Update an existing role",
+        "description": "Partial update. Protected roles cannot be edited.",
+        "parameters": [
+          {
+            "name": "roleId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Role updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UpdateRoleSuccessResponseDto"
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Cannot edit a protected role"
+          },
+          "404": {
+            "description": "Role not found"
+          },
+          "409": {
+            "description": "Duplicate role name"
+          }
+        },
+        "tags": ["Admin — Roles"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "RoleAdminController_deleteRole",
+        "summary": "Delete a role",
+        "description": "Cannot delete protected roles, the logged-in admin's role, or roles that still have admins assigned.",
+        "parameters": [
+          {
+            "name": "roleId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Role deleted"
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Cannot delete a protected role"
+          },
+          "404": {
+            "description": "Role not found"
+          },
+          "409": {
+            "description": "Role still has admins assigned or is the current admin's role"
+          }
+        },
+        "tags": ["Admin — Roles"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/admins": {
+      "get": {
+        "operationId": "AdministratorAdminController_listAdministrators",
+        "summary": "List all administrators",
+        "description": "Paginated list sorted by last login (most recent first). Searchable by name or email. Filterable by active status. Default page size is 10.",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search by name or email",
+            "schema": {
+              "type": "string",
+              "example": "ahmed"
+            }
+          },
+          {
+            "name": "isActive",
+            "required": false,
+            "in": "query",
+            "description": "Filter by active status (true = active, false = blocked)",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated administrator list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedAdministratorsDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          }
+        },
+        "tags": ["Admin — Admins"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "AdministratorAdminController_createAdministrator",
+        "summary": "Add a new administrator",
+        "description": "Creates an admin with a system-generated secure password. A welcome email with login credentials is sent to the new admin.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAdministratorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Admin created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdministratorMutationResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "Role not found"
+          },
+          "409": {
+            "description": "Duplicate email or phone number"
+          }
+        },
+        "tags": ["Admin — Admins"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/admins/{adminId}": {
+      "get": {
+        "operationId": "AdministratorAdminController_getAdministrator",
+        "summary": "Get administrator detail",
+        "parameters": [
+          {
+            "name": "adminId",
+            "required": true,
+            "in": "path",
+            "description": "Administrator UUID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Administrator detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdministratorAccountDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "Administrator not found"
+          }
+        },
+        "tags": ["Admin — Admins"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "AdministratorAdminController_updateAdministrator",
+        "summary": "Update an administrator",
+        "description": "Partial update — only provided fields are changed. Cannot edit Super Admin accounts except by the Super Admin themselves. Changing email forces the admin to re-login.",
+        "parameters": [
+          {
+            "name": "adminId",
+            "required": true,
+            "in": "path",
+            "description": "Administrator UUID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAdministratorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Administrator updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdministratorMutationResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Cannot edit a Super Admin account"
+          },
+          "404": {
+            "description": "Administrator or role not found"
+          },
+          "409": {
+            "description": "Duplicate email or phone number"
+          }
+        },
+        "tags": ["Admin — Admins"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "AdministratorAdminController_deleteAdministrator",
+        "summary": "Delete an administrator",
+        "description": "Hard-deletes the admin. Cannot delete Super Admin or yourself. Active sessions are terminated immediately.",
+        "parameters": [
+          {
+            "name": "adminId",
+            "required": true,
+            "in": "path",
+            "description": "Administrator UUID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Administrator deleted"
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Cannot delete a Super Admin"
+          },
+          "404": {
+            "description": "Administrator not found"
+          },
+          "409": {
+            "description": "Cannot delete your own account"
+          }
+        },
+        "tags": ["Admin — Admins"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/admins/{adminId}/block": {
+      "patch": {
+        "operationId": "AdministratorAdminController_blockAdministrator",
+        "summary": "Block an administrator",
+        "description": "Sets the admin to inactive and immediately terminates all active sessions. The admin cannot log in until unblocked.",
+        "parameters": [
+          {
+            "name": "adminId",
+            "required": true,
+            "in": "path",
+            "description": "Administrator UUID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Administrator blocked"
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Cannot block a Super Admin"
+          },
+          "404": {
+            "description": "Administrator not found"
+          },
+          "409": {
+            "description": "Administrator already blocked or cannot block yourself"
+          }
+        },
+        "tags": ["Admin — Admins"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/admins/{adminId}/unblock": {
+      "patch": {
+        "operationId": "AdministratorAdminController_unblockAdministrator",
+        "summary": "Unblock an administrator",
+        "description": "Restores the admin to active status so they can log in again.",
+        "parameters": [
+          {
+            "name": "adminId",
+            "required": true,
+            "in": "path",
+            "description": "Administrator UUID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Administrator unblocked"
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "Administrator not found"
+          },
+          "409": {
+            "description": "Administrator already active"
+          }
+        },
+        "tags": ["Admin — Admins"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
     }
   },
   "info": {
@@ -1456,6 +2171,14 @@
     {
       "name": "Admin — Providers",
       "description": "Seller / provider management"
+    },
+    {
+      "name": "Admin — Roles",
+      "description": "Admin RBAC — bilingual role names, permission matrix, protected system roles, delete rules when admins assigned"
+    },
+    {
+      "name": "Admin — Admins",
+      "description": "Administrator accounts — list, create, update, delete, block/unblock; role assignment; welcome email with generated password on create"
     }
   ],
   "servers": [
@@ -2194,6 +2917,11 @@
       "PaginationMetaDto": {
         "type": "object",
         "properties": {
+          "version": {
+            "type": "string",
+            "example": "1.0.0",
+            "description": "Optional — echoed by some admin list endpoints"
+          },
           "page": {
             "type": "number",
             "example": 1
@@ -3154,6 +3882,358 @@
         },
         "required": ["isVerified"]
       },
+      "AdminRoleListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "12a08f81-07b9-4400-9ea8-749520065534"
+          },
+          "name_en": {
+            "type": "string",
+            "example": "Moderator"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "مشرف"
+          },
+          "adminCount": {
+            "type": "integer",
+            "example": 0
+          },
+          "isProtected": {
+            "type": "boolean",
+            "example": false,
+            "description": "System roles (e.g. Super Admin) cannot be edited or deleted"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-04-25T12:32:33.456Z"
+          }
+        },
+        "required": ["id", "name_en", "name_ar", "adminCount", "isProtected", "createdAt"]
+      },
+      "RoleDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "e69df1f0-165e-41d7-9c76-99d337b90415"
+          },
+          "name_en": {
+            "type": "string",
+            "example": "Moderator"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "مشرف"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "admin:users:view"
+            }
+          },
+          "adminCount": {
+            "type": "integer",
+            "example": 0
+          },
+          "isProtected": {
+            "type": "boolean",
+            "example": false
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["id", "name_en", "name_ar", "permissions", "adminCount", "isProtected", "createdAt", "updatedAt"]
+      },
+      "CreateRoleDto": {
+        "type": "object",
+        "properties": {
+          "name_en": {
+            "type": "string",
+            "example": "Moderator"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "مشرف"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "admin:users:view"
+            },
+            "description": "Granted permission keys (`admin:<resource>:<action>`)"
+          }
+        },
+        "required": ["name_en", "name_ar", "permissions"]
+      },
+      "UpdateRoleDto": {
+        "type": "object",
+        "properties": {
+          "name_en": {
+            "type": "string"
+          },
+          "name_ar": {
+            "type": "string"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "description": "Partial update — omit fields that do not change"
+      },
+      "RolePermissionDefinitionDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "admin:users:view"
+          },
+          "label_en": {
+            "type": "string",
+            "example": "View"
+          },
+          "label_ar": {
+            "type": "string",
+            "example": "عرض"
+          }
+        },
+        "required": ["key", "label_en", "label_ar"]
+      },
+      "RolePermissionModuleDto": {
+        "type": "object",
+        "properties": {
+          "module_en": {
+            "type": "string",
+            "example": "User Management"
+          },
+          "module_ar": {
+            "type": "string",
+            "example": "إدارة المستخدمين"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RolePermissionDefinitionDto"
+            }
+          }
+        },
+        "required": ["module_en", "module_ar", "permissions"]
+      },
+      "PaginatedRolesDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminRoleListItemDto"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMetaDto"
+          }
+        },
+        "required": ["data", "meta"]
+      },
+      "CreateRoleSuccessResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Role created successfully"
+          },
+          "role": {
+            "$ref": "#/components/schemas/RoleDetailDto"
+          }
+        },
+        "required": ["message", "role"]
+      },
+      "UpdateRoleSuccessResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Role updated successfully"
+          },
+          "role": {
+            "$ref": "#/components/schemas/RoleDetailDto"
+          }
+        },
+        "required": ["message", "role"]
+      },
+      "AdministratorRoleSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3de76c2e-47dd-46bc-86cc-2456898aa695"
+          },
+          "name_en": {
+            "type": "string",
+            "example": "Super Admin"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "مدير عام"
+          }
+        },
+        "required": ["id", "name_en", "name_ar"]
+      },
+      "AdministratorAccountDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "298a276c-9416-4db5-a445-8303969da16b"
+          },
+          "fullName": {
+            "type": "string",
+            "example": "Super Admin"
+          },
+          "phone": {
+            "nullable": true,
+            "type": "string",
+            "example": "+966500000000"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "admin@bidmart.com"
+          },
+          "role": {
+            "$ref": "#/components/schemas/AdministratorRoleSummaryDto"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "isSuperAdmin": {
+            "type": "boolean",
+            "example": true
+          },
+          "lastLoginAt": {
+            "nullable": true,
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-05-02T05:44:54.794Z"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-04-20T04:32:52.814Z"
+          }
+        },
+        "required": [
+          "id",
+          "fullName",
+          "phone",
+          "email",
+          "role",
+          "isActive",
+          "isSuperAdmin",
+          "lastLoginAt",
+          "createdAt"
+        ]
+      },
+      "PaginatedAdministratorsDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true,
+            "description": "Present when gateway wraps list responses"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdministratorAccountDto"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMetaDto"
+          }
+        },
+        "required": ["data", "meta"]
+      },
+      "CreateAdministratorDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "example": "Ahmed Ali"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+966500000000",
+            "description": "Optional — omit or null if not used"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "admin@bidmart.com"
+          },
+          "roleId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "12a08f81-07b9-4400-9ea8-749520065534",
+            "description": "Existing role UUID from GET /admin/roles"
+          }
+        },
+        "required": ["fullName", "email", "roleId"]
+      },
+      "UpdateAdministratorDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "example": "Ahmed Ali"
+          },
+          "phone": {
+            "nullable": true,
+            "type": "string",
+            "example": "+966500000000"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "admin@bidmart.com"
+          },
+          "roleId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "12a08f81-07b9-4400-9ea8-749520065534"
+          }
+        },
+        "description": "Partial update — omit unchanged fields"
+      },
+      "AdministratorMutationResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Admin updated successfully"
+          },
+          "admin": {
+            "$ref": "#/components/schemas/AdministratorAccountDto"
+          }
+        },
+        "required": ["message", "admin"]
+      },
       "CategoryItemDto": {
         "type": "object",
         "properties": {
@@ -3360,7 +4440,9 @@
         "Admin — Categories",
         "Admin — Sub-categories",
         "Admin — Users",
-        "Admin — Providers"
+        "Admin — Providers",
+        "Admin — Roles",
+        "Admin — Admins"
       ]
     },
     {

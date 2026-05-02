@@ -1,0 +1,90 @@
+{
+  "page_title": "المديرون",
+  "page_description": "إدارة حسابات المشرفين والأدوار والصلاحيات",
+  "meta": {
+    "total_accounts": "{{count}} مسؤول"
+  },
+  "search_placeholder": "بحث بالاسم أو البريد",
+  "status": {
+    "active": "نشط",
+    "blocked": "محظور"
+  },
+  "columns": {
+    "full_name": "الاسم",
+    "email": "البريد",
+    "phone": "الهاتف",
+    "role": "الدور",
+    "status": "الحالة",
+    "account_type": "نوع الحساب",
+    "last_login": "آخر تسجيل دخول",
+    "created_at": "تاريخ الإنشاء"
+  },
+  "badges": {
+    "super_admin": "مدير عام",
+    "standard": "مسؤول"
+  },
+  "filters": {
+    "status": "الحالة",
+    "active_only": "نشط",
+    "blocked_only": "محظور"
+  },
+  "actions": {
+    "create": "إضافة مسؤول",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "block": "حظر",
+    "unblock": "إلغاء الحظر",
+    "create_success": "تمت إضافة المسؤول",
+    "update_success": "تم تحديث المسؤول",
+    "delete_success": "تم حذف المسؤول",
+    "block_success": "تم حظر المسؤول",
+    "unblock_success": "تم إلغاء حظر المسؤول"
+  },
+  "form": {
+    "create_title": "إضافة مسؤول",
+    "edit_title": "تعديل مسؤول",
+    "create_description": "يُنشئ حسابًا بكلمة مرور مُولَّدة ويُرسل بريدًا ترحيبيًا.",
+    "edit_description": "تغيير البريد يفرض على المسؤول تسجيل الدخول مجددًا.",
+    "section_profile": "الملف التعريفي",
+    "section_profile_hint": "الاسم وبيانات التواصل تظهر في السجل والبريد.",
+    "section_access": "الوصول",
+    "section_access_hint": "الدور يحدد أجزاء لوحة التحكم التي يمكن لهذا المسؤول استخدامها.",
+    "footer_create": "يتلقى المسؤول الجديد تعليمات الدخول بالبريد. لا تُحدَّد كلمة المرور هنا.",
+    "empty_roles": "لا توجد أدوار. أنشئ دورًا أولًا ثم أضِف المسؤولين.",
+    "full_name": "الاسم الكامل",
+    "full_name_placeholder": "مثال: أحمد علي",
+    "email": "البريد الإلكتروني",
+    "email_placeholder": "admin@bidmart.com",
+    "phone": "الهاتف",
+    "phone_placeholder": "+966500000000",
+    "role": "الدور",
+    "role_placeholder": "اختر دورًا",
+    "role_hint": "اختر الدور الأنسب؛ يمكن تعديل الصلاحيات من صفحة الأدوار."
+  },
+  "delete_dialog": {
+    "title": "حذف مسؤول",
+    "description": "يحذف الحساب نهائيًا وينهي الجلسات. لا يمكن التراجع.",
+    "description_named": "حذف {{name}} نهائيًا وإنهاء جلساته. لا يمكن التراجع."
+  },
+  "block_dialog": {
+    "title": "حظر مسؤول",
+    "description": "يمنع تسجيل الدخول وينهي الجلسات فورًا حتى إلغاء الحظر.",
+    "description_named": "سيتم تسجيل خروج {{name}} من كل الأجهزة ولن يتمكن من الدخول حتى إلغاء الحظر.",
+    "confirm": "حظر"
+  },
+  "unblock_dialog": {
+    "title": "إلغاء حظر مسؤول",
+    "description": "يعيد الحالة النشطة ليتمكن من تسجيل الدخول.",
+    "description_named": "استعادة وصول {{name}} ليتمكن من تسجيل الدخول مجددًا.",
+    "confirm": "إلغاء الحظر"
+  },
+  "errors": {
+    "generic": "تعذر حفظ المسؤول.",
+    "delete_failed": "تعذر حذف المسؤول.",
+    "block_failed": "تعذر حظر المسؤول.",
+    "unblock_failed": "تعذر إلغاء حظر المسؤول.",
+    "validation_name": "أدخل الاسم الكامل.",
+    "validation_email": "أدخل عنوان البريد.",
+    "validation_role": "اختر دورًا."
+  }
+}

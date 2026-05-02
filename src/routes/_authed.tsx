@@ -7,8 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ShieldAlert } from 'lucide-react'
 
 export const Route = createFileRoute('/_authed')({
-  beforeLoad: ({ context }) => {
-    if (!context.auth.token) {
+  beforeLoad: () => {
+    if (!useAuthStore.getState().token) {
       throw redirect({ to: '/login' })
     }
   },

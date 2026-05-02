@@ -35,7 +35,7 @@ async function getPresignedUrls(
   files: FileItem[],
 ): Promise<UploadResult[]> {
   const res = await api.post<UploadResponse>('/files/upload', {
-    case: uploadCase,
+    folder: uploadCase,
     files,
   })
   return res.data.data

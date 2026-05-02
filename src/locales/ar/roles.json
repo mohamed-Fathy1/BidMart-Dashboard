@@ -1,0 +1,51 @@
+{
+  "page_title": "الأدوار",
+  "page_description": "إدارة أدوار المشرفين والصلاحيات",
+  "search_placeholder": "بحث بالاسم بالإنجليزية أو العربية",
+  "columns": {
+    "name": "الاسم",
+    "admin_count": "المشرفون",
+    "type": "النوع",
+    "created_at": "تاريخ الإنشاء"
+  },
+  "badges": {
+    "system": "نظام",
+    "custom": "مخصص"
+  },
+  "actions": {
+    "create": "إضافة دور",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "create_success": "تم إنشاء الدور",
+    "update_success": "تم تحديث الدور",
+    "delete_success": "تم حذف الدور"
+  },
+  "form": {
+    "create_title": "إضافة دور",
+    "edit_title": "تعديل دور",
+    "create_description": "حدد الاسم باللغتين وحدد الصلاحيات.",
+    "edit_description": "حدّث الاسم وتعيين الصلاحيات لهذا الدور.",
+    "name_en": "الاسم (إنجليزي)",
+    "name_en_placeholder": "مثل Moderator",
+    "name_ar": "الاسم (عربي)",
+    "name_ar_placeholder": "اسم الدور بالعربية",
+    "permissions": "الصلاحيات",
+    "section_identity": "الأسماء",
+    "section_identity_hint": "يظهر الاسم بالعربية والإنجليزية في الواجهة. الخادم يفرض التفرد.",
+    "permissions_hint": "عنوان الوحدة يحدد كل صلاحياتها. الأسطر تعرض معرف الخادم.",
+    "selected_of_total": "{{selected}} / {{total}} محددة",
+    "footer_note": "أدوار النظام للقراءة فقط. الحذف متوقف إن وُجد مشرفون أو كان الدور الحالي دورك.",
+    "loading_permissions": "جارٍ تحميل قائمة الصلاحيات…",
+    "loading_detail": "جارٍ تحميل تفاصيل الدور…",
+    "no_permission_modules": "قائمة الصلاحيات غير متاحة."
+  },
+  "delete_dialog": {
+    "title": "حذف الدور",
+    "description": "يزيل هذا الدور نهائيًا. الأدوار المحمية والأدوار المرتبطة بمشرفين تُمنع بواسطة الخادم."
+  },
+  "errors": {
+    "generic": "تعذر حفظ الدور.",
+    "delete_failed": "تعذر حذف الدور.",
+    "validation": "أدخل الاسم بالإنجليزية والعربية."
+  }
+}

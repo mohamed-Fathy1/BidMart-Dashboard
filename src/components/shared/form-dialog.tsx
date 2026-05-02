@@ -20,8 +20,15 @@ interface FormDialogProps {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
   submitLabel?: string
   isLoading?: boolean
+  /** Keeps Cancel enabled; disables only the submit action (e.g. waiting for prerequisite data). */
+  submitDisabled?: boolean
   isEdit?: boolean
   contentClassName?: string
+  /**
+   * When true, the dialog does not move focus to the first focusable control on open,
+   * so the primary focus ring does not appear on one field only before the user interacts.
+   */
+  suppressInitialFocus?: boolean
 }
 
 export function FormDialog({
@@ -33,8 +40,10 @@ export function FormDialog({
   onSubmit,
   submitLabel,
   isLoading = false,
+  submitDisabled = false,
   isEdit = false,
   contentClassName,
+  suppressInitialFocus = false,
 }: FormDialogProps) {
   const { t } = useTranslation()
 
@@ -47,7 +56,19 @@ export function FormDialog({
       if (!next && isLoading) return
       onOpenChange(next)
     }}>
-      <DialogContent className={contentClassName}>
+      <DialogContent
+        className={contentClassName}
+        onOpenAutoFocus={(e) => {
+          if (!suppressInitialFocus) return
+          e.preventDefault()
+          const root = e.currentTarget
+          const title = root.querySelector('[data-slot="dialog-title"]')
+          if (title instanceof HTMLElement) {
+            title.tabIndex = -1
+            title.focus()
+          }
+        }}
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
@@ -71,7 +92,7 @@ export function FormDialog({
             </Button>
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || submitDisabled}
             >
               {isLoading && <LoaderIcon className="size-4 animate-spin" />}
               {isLoading

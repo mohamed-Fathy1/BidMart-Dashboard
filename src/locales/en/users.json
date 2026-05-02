@@ -17,9 +17,13 @@
   "actions": {
     "view": "View Details",
     "ban": "Ban User",
+    "ban_success": "User has been banned",
     "suspend": "Suspend User",
+    "suspend_success": "User has been suspended",
     "activate": "Activate User",
-    "delete": "Delete User"
+    "activate_success": "User has been activated",
+    "delete": "Delete User",
+    "delete_success": "User has been deleted"
   },
   "ban_dialog": {
     "title": "Ban User",

@@ -122,6 +122,7 @@ export function useCreateSubCategoryMutation() {
     mutationFn: (payload: CreateSubCategoryPayload) => createSubCategory(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: subCategoryKeys.all })
+      queryClient.invalidateQueries({ queryKey: categoryKeys.all })
       toast.success(t('categories:sub.actions.create_success'))
     },
   })
@@ -136,6 +137,7 @@ export function useUpdateSubCategoryMutation() {
       updateSubCategory(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: subCategoryKeys.all })
+      queryClient.invalidateQueries({ queryKey: categoryKeys.all })
       toast.success(t('categories:sub.actions.update_success'))
     },
   })
@@ -149,6 +151,7 @@ export function useDeleteSubCategoryMutation() {
     mutationFn: (id: string) => deleteSubCategory(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: subCategoryKeys.all })
+      queryClient.invalidateQueries({ queryKey: categoryKeys.all })
       toast.success(t('categories:sub.actions.delete_success'))
     },
   })

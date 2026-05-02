@@ -3,59 +3,73 @@
 /* ------------------------------------------------------------------ */
 
 export interface ApiResponse<T> {
-  success: true
-  data: T
-  timestamp: string
+  success: true;
+  data: T;
+  timestamp: string;
 }
 
 export interface PaginationMeta {
-  page: number
-  limit: number
-  total: number
-  totalPages: number
-  hasNextPage: boolean
-  hasPrevPage: boolean
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
 }
 
 export interface PaginatedResponse<T> {
-  data: T[]
-  meta: PaginationMeta
+  data: T[];
+  meta: PaginationMeta;
 }
 
 /* ------------------------------------------------------------------ */
 /*  Enums                                                              */
 /* ------------------------------------------------------------------ */
 
-export type AccountStatus = 'active' | 'suspended' | 'banned' | 'pending_verification' | 'deleted'
-export type UserRole = 'USER' | 'SELLER' | 'ADMIN'
-export type SellerStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED'
-export type ApplicationStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
-export type VerificationStatus = 'pending' | 'approved' | 'rejected'
-export type AccountType = 'user_only' | 'upgraded_to_seller'
-export type AuthProvider = 'phone' | 'google' | 'apple'
-export type AdminRole = 'super_admin' | 'admin' | 'finance' | 'support' | 'content'
+export type AccountStatus =
+  | "active"
+  | "suspended"
+  | "banned"
+  | "pending_verification"
+  | "deleted";
+export type UserRole = "guest" | "user" | "seller" | "admin";
+export type SellerStatus = "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED";
+export type ApplicationStatus = "PENDING" | "APPROVED" | "REJECTED";
+export type VerificationStatus = "pending" | "approved" | "rejected";
+export type AccountType = "user_only" | "upgraded_to_seller";
+export type AuthProvider = "phone" | "google" | "apple";
+export type AdminRole =
+  | "super_admin"
+  | "admin"
+  | "finance"
+  | "support"
+  | "content";
 
 /* ------------------------------------------------------------------ */
 /*  Admin (logged-in user)                                             */
 /* ------------------------------------------------------------------ */
 
 export interface Admin {
-  id: string
-  email: string
-  full_name: string | null
-  role: AdminRole
-  permissions: string[]
-  is_super_admin: boolean
-  is_active: boolean
+  id: string;
+  email: string;
+  full_name: string | null;
+  role: AdminRole;
+  permissions: string[];
+  is_super_admin: boolean;
+  is_active: boolean;
 }
 
 /** Alias kept for auth store compatibility */
 export interface User {
-  id: string
-  name: string
-  email: string
-  avatar?: string
-  role: string
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  role: string;
+  /** Admin role UUID from JWT; used for client-side guards (e.g. role delete rules). */
+  roleId?: string;
+  /** From JWT `is_super_admin`; used for UI guards only. */
+  isSuperAdmin?: boolean;
 }
 
 /* ------------------------------------------------------------------ */
@@ -63,32 +77,32 @@ export interface User {
 /* ------------------------------------------------------------------ */
 
 export interface AdminUserListItem {
-  id: string
-  accountName: string
-  phoneNumber: string
-  email: string | null
-  status: AccountStatus
-  accountType: AccountType
-  registrationDate: string
+  id: string;
+  accountName: string | null;
+  phoneNumber: string | null;
+  email: string | null;
+  status: AccountStatus;
+  accountType: AccountType;
+  registrationDate: string;
 }
 
 export interface AdminUserDetail {
-  id: string
-  fullName: string
-  email: string | null
-  phone: string
-  role: UserRole
-  isActive: boolean
-  isVerified: boolean
-  avatarUrl: string | null
-  language: string | null
+  id: string;
+  fullName: string;
+  email: string | null;
+  phone: string;
+  role: UserRole;
+  isActive: boolean;
+  isVerified: boolean;
+  avatarUrl: string | null;
+  language: string | null;
   store: {
-    id: string
-    nameEn: string
-    status: SellerStatus
-  } | null
-  createdAt: string
-  updatedAt: string
+    id: string;
+    nameEn: string;
+    status: SellerStatus;
+  } | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -96,15 +110,15 @@ export interface AdminUserDetail {
 /* ------------------------------------------------------------------ */
 
 export interface Country {
-  id: string
-  name_en: string
-  name_ar: string
-  iso_code: string
-  image_url: string
-  is_enabled: boolean
-  sort_order: number
-  created_at: string
-  updated_at: string
+  id: string;
+  name_en: string;
+  name_ar: string;
+  iso_code: string;
+  image_url: string;
+  is_enabled: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -112,19 +126,17 @@ export interface Country {
 /* ------------------------------------------------------------------ */
 
 export interface Category {
-  id: string
-  name_en: string
-  name_ar: string
-  image_url: string
-  icon_url: string
-  sub_category_image_url: string
-  display_order: number
-  is_active: boolean
-  created_at: string
+  id: string;
+  name_en: string;
+  name_ar: string;
+  image_url: string;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
 }
 
 export interface CategoryDetail extends Category {
-  sub_categories: SubCategory[]
+  sub_categories: SubCategory[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -132,14 +144,14 @@ export interface CategoryDetail extends Category {
 /* ------------------------------------------------------------------ */
 
 export interface SubCategory {
-  id: string
-  category_id: string
-  name_en: string
-  name_ar: string
-  image_url: string | null
-  display_order: number
-  is_active: boolean
-  created_at: string
+  id: string;
+  category_id: string;
+  name_en: string;
+  name_ar: string;
+  image_url: string | null;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -147,22 +159,77 @@ export interface SubCategory {
 /* ------------------------------------------------------------------ */
 
 export interface ProviderUser {
-  id: string
-  fullName: string
-  email: string
+  id: string;
+  fullName: string;
+  email: string;
 }
 
 export interface ProviderSummary {
-  id: string
-  nameEn: string
-  nameAr: string
-  status: SellerStatus
-  isVerified: boolean
-  user: ProviderUser
-  createdAt: string
+  id: string;
+  nameEn: string;
+  nameAr: string;
+  status: SellerStatus;
+  isVerified: boolean;
+  user: ProviderUser;
+  createdAt: string;
 }
 
 export interface ProviderDetail extends ProviderSummary {
-  averageRating: number
-  totalSold: number
+  averageRating: number;
+  totalSold: number;
 }
+
+/* ------------------------------------------------------------------ */
+/*  Roles (admin RBAC)                                                 */
+/* ------------------------------------------------------------------ */
+
+export interface RoleListItem {
+  id: string;
+  name_en: string;
+  name_ar: string;
+  adminCount: number;
+  isProtected: boolean;
+  createdAt: string;
+}
+
+export interface RoleDetail extends RoleListItem {
+  permissions: string[];
+  updatedAt: string;
+}
+
+export interface RolePermissionDefinition {
+  key: string;
+  label_en: string;
+  label_ar: string;
+}
+
+export interface RolePermissionModule {
+  module_en: string;
+  module_ar: string;
+  permissions: RolePermissionDefinition[];
+}
+
+/* ------------------------------------------------------------------ */
+/*  Admins (operator accounts)                                         */
+/* ------------------------------------------------------------------ */
+
+export interface AdminAccountRole {
+  id: string;
+  name_en: string;
+  name_ar: string;
+}
+
+export interface AdminAccountListItem {
+  id: string;
+  fullName: string;
+  phone: string | null;
+  email: string;
+  role: AdminAccountRole;
+  isActive: boolean;
+  isSuperAdmin: boolean;
+  lastLoginAt: string | null;
+  createdAt: string;
+}
+
+/** Detail payload matches list rows from this API */
+export type AdminAccountDetail = AdminAccountListItem;

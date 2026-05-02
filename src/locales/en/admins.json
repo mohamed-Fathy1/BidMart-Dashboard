@@ -1,0 +1,90 @@
+{
+  "page_title": "Admins",
+  "page_description": "Manage administrator accounts, roles, and access",
+  "meta": {
+    "total_accounts": "{{count}} administrators"
+  },
+  "search_placeholder": "Search by name or email",
+  "status": {
+    "active": "Active",
+    "blocked": "Blocked"
+  },
+  "columns": {
+    "full_name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "role": "Role",
+    "status": "Status",
+    "account_type": "Account type",
+    "last_login": "Last login",
+    "created_at": "Created"
+  },
+  "badges": {
+    "super_admin": "Super Admin",
+    "standard": "Administrator"
+  },
+  "filters": {
+    "status": "Status",
+    "active_only": "Active",
+    "blocked_only": "Blocked"
+  },
+  "actions": {
+    "create": "Add administrator",
+    "edit": "Edit",
+    "delete": "Delete",
+    "block": "Block",
+    "unblock": "Unblock",
+    "create_success": "Administrator added",
+    "update_success": "Administrator updated",
+    "delete_success": "Administrator deleted",
+    "block_success": "Administrator blocked",
+    "unblock_success": "Administrator unblocked"
+  },
+  "form": {
+    "create_title": "Add administrator",
+    "edit_title": "Edit administrator",
+    "create_description": "Creates an account with a generated password and sends a welcome email.",
+    "edit_description": "Changing email forces that administrator to sign in again.",
+    "section_profile": "Profile",
+    "section_profile_hint": "Name and contact details shown in audit and email.",
+    "section_access": "Access",
+    "section_access_hint": "Role defines which areas of the dashboard this administrator can use.",
+    "footer_create": "The new administrator receives login instructions by email. You do not set a password here.",
+    "empty_roles": "No roles are available. Create a role first, then add administrators.",
+    "full_name": "Full name",
+    "full_name_placeholder": "e.g. Ahmed Ali",
+    "email": "Email",
+    "email_placeholder": "admin@bidmart.com",
+    "phone": "Phone",
+    "phone_placeholder": "+966500000000",
+    "role": "Role",
+    "role_placeholder": "Select a role",
+    "role_hint": "Choose the closest operational role; you can edit permissions under Roles."
+  },
+  "delete_dialog": {
+    "title": "Delete administrator",
+    "description": "Permanently removes this account and ends their sessions. You cannot undo this.",
+    "description_named": "Remove {{name}} permanently and end their sessions. You cannot undo this."
+  },
+  "block_dialog": {
+    "title": "Block administrator",
+    "description": "Blocks sign-in and ends active sessions immediately until unblocked.",
+    "description_named": "{{name}} will be signed out everywhere and cannot sign in until unblocked.",
+    "confirm": "Block"
+  },
+  "unblock_dialog": {
+    "title": "Unblock administrator",
+    "description": "Restores active status so they can sign in again.",
+    "description_named": "Restore access for {{name}} so they can sign in again.",
+    "confirm": "Unblock"
+  },
+  "errors": {
+    "generic": "Could not save the administrator.",
+    "delete_failed": "Could not delete the administrator.",
+    "block_failed": "Could not block the administrator.",
+    "unblock_failed": "Could not unblock the administrator.",
+    "validation_name": "Enter a full name.",
+    "validation_email": "Enter an email address.",
+    "validation_role": "Select a role."
+  }
+}

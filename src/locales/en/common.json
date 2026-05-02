@@ -20,6 +20,18 @@
     "no_data": "No data to display",
     "no_results": "No results found"
   },
+  "auth": {
+    "sign_in": "Sign in",
+    "sign_in_subtitle": "Sign in to manage the BidMart marketplace.",
+    "remember_me": "Keep me signed in",
+    "forgot_password": "Forgot password?",
+    "login_failed": "Email or password is incorrect.",
+    "invalid_email": "Enter a valid email address",
+    "password_min": "Password must be at least 6 characters",
+    "otp_sent": "OTP has been sent to your email",
+    "otp_resent": "OTP has been resent to your email",
+    "password_reset_success": "Password has been reset successfully"
+  },
   "errors": {
     "permission_denied": "You do not have permission to perform this action",
     "unexpected": "An unexpected error occurred",
@@ -31,6 +43,7 @@
     "date": "Date",
     "name": "Name",
     "email": "Email",
+    "password": "Password",
     "phone": "Phone",
     "total": "Total",
     "page": "Page",

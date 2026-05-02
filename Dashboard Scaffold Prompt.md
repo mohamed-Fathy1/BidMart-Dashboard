@@ -86,7 +86,7 @@ src/
     _authed.tsx           # protected layout + permission enforcement
     _authed.overview.tsx  # proof-of-shell landing
   features/
-    auth/ users/ moderators/ roles/ providers/ withdrawals/
+    auth/ users/ moderators/ roles/ admins/ providers/ withdrawals/
     orders/ complaints/ ratings/ live-streams/ content/
     categories/ settings/ notifications/ profile/
   components/
@@ -177,7 +177,7 @@ Namespaces:
 - `common.json` — buttons (save, cancel, confirm), states (loading, empty, error), common labels
 - `components.json` — shared component strings (image upload, data table, etc.)
 - `shell.json` — sidebar nav labels, topbar labels, user menu
-- Feature namespaces: `users.json`, `countries.json`, `categories.json`, `providers.json`
+- Feature namespaces: `users.json`, `countries.json`, `categories.json`, `providers.json`, `roles.json`, `admins.json`
 
 Each feature owns its own namespace. **No hardcoded strings in components, ever.**
 
@@ -264,6 +264,8 @@ At repo root, in this order:
 13. **Commit style** — conventional commits, imperative, no co-author footers
 
 Tight bullets. No prose essays.
+
+The authoritative root `CLAUDE.md` may add short **feature anchors** when useful (currently includes **Roles** and **Admins**: API paths relative to Axios `baseURL`, `User.roleId` / `User.isSuperAdmin`, guards, and optional `suppressInitialFocus` on `FormDialog` where relevant).
 
 ---
 

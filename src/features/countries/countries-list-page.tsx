@@ -1,133 +1,141 @@
-import { useState, useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
-import type { PaginationState } from '@tanstack/react-table'
-import type { Country } from '@/types/api'
-import { PageHeader } from '@/components/shared/page-header'
-import { FilterSelect } from '@/components/shared/filter-select'
-import { DataTable, type RowActionItem } from '@/components/data-table/data-table'
-import { ConfirmDialog } from '@/components/shared/confirm-dialog'
-import { FormDialog } from '@/components/shared/form-dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { ImageUploadField } from '@/components/shared/image-upload-field'
-import { Can } from '@/components/permissions/can'
-import { PERMISSIONS, usePermission } from '@/lib/permissions'
-import { useCountryColumns } from '@/features/countries/countries.columns'
+import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { Plus, Pencil, Trash2 } from "lucide-react";
+import type { PaginationState } from "@tanstack/react-table";
+import type { Country } from "@/types/api";
+import { PageHeader } from "@/components/shared/page-header";
+import { FilterSelect } from "@/components/shared/filter-select";
+import {
+  DataTable,
+  type RowActionItem,
+} from "@/components/data-table/data-table";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { FormDialog } from "@/components/shared/form-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { ImageUploadField } from "@/components/shared/image-upload-field";
+import { Can } from "@/components/permissions/can";
+import { PERMISSIONS, usePermission } from "@/lib/permissions";
+import { useCountryColumns } from "@/features/countries/countries.columns";
 import {
   useCountriesQuery,
   useCreateCountryMutation,
   useUpdateCountryMutation,
   useDeleteCountryMutation,
-} from '@/features/countries/countries.queries'
+} from "@/features/countries/countries.queries";
 
 export function CountriesListPage() {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
-  const canCreate = usePermission(PERMISSIONS.countries.create)
-  const canUpdate = usePermission(PERMISSIONS.countries.update)
-  const canDelete = usePermission(PERMISSIONS.countries.delete)
+  const canCreate = usePermission(PERMISSIONS.countries.create);
+  const canUpdate = usePermission(PERMISSIONS.countries.update);
+  const canDelete = usePermission(PERMISSIONS.countries.delete);
 
   /* ---------- filters ---------- */
-  const [enabledFilter, setEnabledFilter] = useState('')
+  const [enabledFilter, setEnabledFilter] = useState("");
 
   /* ---------- pagination ---------- */
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
-  })
+  });
 
   /* ---------- dialogs ---------- */
-  const [formOpen, setFormOpen] = useState(false)
-  const [editTarget, setEditTarget] = useState<Country | null>(null)
-  const [deleteTarget, setDeleteTarget] = useState<Country | null>(null)
+  const [formOpen, setFormOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<Country | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Country | null>(null);
 
   /* ---------- form state ---------- */
-  const [nameEn, setNameEn] = useState('')
-  const [nameAr, setNameAr] = useState('')
-  const [isoCode, setIsoCode] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
-  const [isEnabled, setIsEnabled] = useState(true)
-  const [sortOrder, setSortOrder] = useState(0)
+  const [nameEn, setNameEn] = useState("");
+  const [nameAr, setNameAr] = useState("");
+  const [isoCode, setIsoCode] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [isEnabled, setIsEnabled] = useState(true);
+  const [sortOrder, setSortOrder] = useState(0);
 
   function resetForm() {
-    setNameEn('')
-    setNameAr('')
-    setIsoCode('')
-    setImageUrl('')
-    setIsEnabled(true)
-    setSortOrder(0)
+    setNameEn("");
+    setNameAr("");
+    setIsoCode("");
+    setImageUrl("");
+    setIsEnabled(true);
+    setSortOrder(0);
   }
 
   function openCreate() {
-    resetForm()
-    setEditTarget(null)
-    setFormOpen(true)
+    resetForm();
+    setEditTarget(null);
+    setFormOpen(true);
   }
 
   function openEdit(country: Country) {
-    setNameEn(country.name_en)
-    setNameAr(country.name_ar)
-    setIsoCode(country.iso_code)
-    setImageUrl(country.image_url)
-    setIsEnabled(country.is_enabled)
-    setSortOrder(country.sort_order)
-    setEditTarget(country)
-    setFormOpen(true)
+    setNameEn(country.name_en);
+    setNameAr(country.name_ar);
+    setIsoCode(country.iso_code);
+    setImageUrl(country.image_url);
+    setIsEnabled(country.is_enabled);
+    setSortOrder(country.sort_order);
+    setEditTarget(country);
+    setFormOpen(true);
   }
 
   /* ---------- data ---------- */
   const { data: response, isLoading } = useCountriesQuery({
-    isEnabled: enabledFilter || undefined,
+    isEnabled:
+      enabledFilter === "true"
+        ? true
+        : enabledFilter === "false"
+          ? false
+          : undefined,
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
-  })
+  });
 
-  const data = response?.data ?? []
-  const meta = response?.meta
+  const data = response?.data ?? [];
+  const meta = response?.meta;
 
-  const columns = useCountryColumns()
+  const columns = useCountryColumns();
 
   /* ---------- mutations ---------- */
-  const createMutation = useCreateCountryMutation()
-  const updateMutation = useUpdateCountryMutation()
-  const deleteMutation = useDeleteCountryMutation()
+  const createMutation = useCreateCountryMutation();
+  const updateMutation = useUpdateCountryMutation();
+  const deleteMutation = useDeleteCountryMutation();
 
-  const isSubmitting = createMutation.isPending || updateMutation.isPending
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   /* ---------- filter options ---------- */
   const enabledOptions = useMemo(
     () => [
-      { value: 'true', label: t('countries:enabled_options.enabled') },
-      { value: 'false', label: t('countries:enabled_options.disabled') },
+      { value: "true", label: t("countries:enabled_options.enabled") },
+      { value: "false", label: t("countries:enabled_options.disabled") },
     ],
     [t],
-  )
+  );
 
   /* ---------- row actions ---------- */
   function getRowActions(_row: Country): RowActionItem<Country>[] {
-    const items: RowActionItem<Country>[] = []
+    const items: RowActionItem<Country>[] = [];
 
     if (canUpdate) {
       items.push({
-        label: t('countries:actions.edit'),
+        label: t("countries:actions.edit"),
         icon: Pencil,
         onClick: (r) => openEdit(r),
-      })
+      });
     }
 
     if (canDelete) {
       items.push({
-        label: t('countries:actions.delete'),
+        label: t("countries:actions.delete"),
         icon: Trash2,
         onClick: (r) => setDeleteTarget(r),
-        variant: 'destructive',
-      })
+        variant: "destructive",
+      });
     }
 
-    return items
+    return items;
   }
 
   /* ---------- handlers ---------- */
@@ -146,11 +154,11 @@ export function CountriesListPage() {
         },
         {
           onSuccess: () => {
-            setFormOpen(false)
-            setEditTarget(null)
+            setFormOpen(false);
+            setEditTarget(null);
           },
         },
-      )
+      );
     } else {
       createMutation.mutate(
         {
@@ -163,10 +171,10 @@ export function CountriesListPage() {
         },
         {
           onSuccess: () => {
-            setFormOpen(false)
+            setFormOpen(false);
           },
         },
-      )
+      );
     }
   }
 
@@ -176,26 +184,26 @@ export function CountriesListPage() {
       <FilterSelect
         value={enabledFilter}
         onChange={(v) => {
-          setEnabledFilter(v)
-          setPagination((p) => ({ ...p, pageIndex: 0 }))
+          setEnabledFilter(v);
+          setPagination((p) => ({ ...p, pageIndex: 0 }));
         }}
         options={enabledOptions}
-        placeholder={t('countries:filters.enabled')}
+        placeholder={t("countries:filters.enabled")}
       />
     </div>
-  )
+  );
 
   /* ---------- render ---------- */
   return (
     <div className="space-y-6">
       <PageHeader
-        title={t('countries:page_title')}
-        description={t('countries:page_description')}
+        title={t("countries:page_title")}
+        description={t("countries:page_description")}
         actions={
           <Can permission={PERMISSIONS.countries.create}>
             <Button size="sm" onClick={openCreate}>
               <Plus className="size-4" />
-              {t('countries:actions.create')}
+              {t("countries:actions.create")}
             </Button>
           </Can>
         }
@@ -219,11 +227,15 @@ export function CountriesListPage() {
         open={formOpen}
         onOpenChange={(open) => {
           if (!open) {
-            setFormOpen(false)
-            setEditTarget(null)
+            setFormOpen(false);
+            setEditTarget(null);
           }
         }}
-        title={editTarget ? t('countries:form.edit_title') : t('countries:form.create_title')}
+        title={
+          editTarget
+            ? t("countries:form.edit_title")
+            : t("countries:form.create_title")
+        }
         isEdit={!!editTarget}
         isLoading={isSubmitting}
         onSubmit={handleSubmit}
@@ -231,39 +243,47 @@ export function CountriesListPage() {
       >
         <div className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="country-name-en">{t('countries:form.name_en')}</Label>
+            <Label htmlFor="country-name-en">
+              {t("countries:form.name_en")}
+            </Label>
             <Input
               id="country-name-en"
               value={nameEn}
               onChange={(e) => setNameEn(e.target.value)}
-              placeholder={t('countries:form.name_en_placeholder')}
+              placeholder={t("countries:form.name_en_placeholder")}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="country-name-ar">{t('countries:form.name_ar')}</Label>
+            <Label htmlFor="country-name-ar">
+              {t("countries:form.name_ar")}
+            </Label>
             <Input
               id="country-name-ar"
               value={nameAr}
               onChange={(e) => setNameAr(e.target.value)}
-              placeholder={t('countries:form.name_ar_placeholder')}
+              placeholder={t("countries:form.name_ar_placeholder")}
               dir="rtl"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="country-iso">{t('countries:form.iso_code')}</Label>
+              <Label htmlFor="country-iso">
+                {t("countries:form.iso_code")}
+              </Label>
               <Input
                 id="country-iso"
                 value={isoCode}
                 onChange={(e) => setIsoCode(e.target.value.toUpperCase())}
-                placeholder={t('countries:form.iso_code_placeholder')}
+                placeholder={t("countries:form.iso_code_placeholder")}
                 maxLength={3}
                 className="font-mono uppercase"
                 disabled={!!editTarget}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="country-sort">{t('countries:form.sort_order')}</Label>
+              <Label htmlFor="country-sort">
+                {t("countries:form.sort_order")}
+              </Label>
               <Input
                 id="country-sort"
                 type="number"
@@ -275,7 +295,7 @@ export function CountriesListPage() {
             </div>
           </div>
           <div className="grid gap-2">
-            <Label>{t('countries:form.image_url')}</Label>
+            <Label>{t("countries:form.image_url")}</Label>
             <ImageUploadField
               value={imageUrl}
               onChange={setImageUrl}
@@ -288,7 +308,9 @@ export function CountriesListPage() {
               checked={isEnabled}
               onCheckedChange={setIsEnabled}
             />
-            <Label htmlFor="country-enabled">{t('countries:form.is_enabled')}</Label>
+            <Label htmlFor="country-enabled">
+              {t("countries:form.is_enabled")}
+            </Label>
           </div>
         </div>
       </FormDialog>
@@ -297,17 +319,17 @@ export function CountriesListPage() {
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title={t('countries:delete_dialog.title')}
-        description={t('countries:delete_dialog.description')}
+        title={t("countries:delete_dialog.title")}
+        description={t("countries:delete_dialog.description")}
         onConfirm={() => {
-          if (!deleteTarget) return
+          if (!deleteTarget) return;
           deleteMutation.mutate(deleteTarget.id, {
             onSettled: () => setDeleteTarget(null),
-          })
+          });
         }}
         isLoading={deleteMutation.isPending}
         variant="destructive"
       />
     </div>
-  )
+  );
 }

@@ -784,7 +784,221 @@ Errors:
 
 ---
 
-## 6 — HTTP Status Code Reference
+## 6 — Admin: Roles
+
+> Token required + permissions `admin:roles:*`.
+> Dashboard: route `/roles` (`routes/_authed.roles.tsx`), feature folder `src/features/roles/` (`roles.api.ts`, `roles.queries.ts`, `roles.columns.tsx`, `roles-list-page.tsx`). i18n namespace `roles` (registered in `lib/i18n.ts`). Axios paths are relative to `VITE_API_URL` — typically `/admin/roles`, not the full `/api/v1` prefix repeated in handlers.
+> JWT may include `role_id`; session maps it to `User.roleId` for UI guards (disable delete when it matches the row, or when `adminCount > 0`, or `isProtected`). API still returns `403`/`409` on violation.
+
+### `GET /admin/roles`
+Query params (all optional):
+
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| `search` | string | — | Filter by English or Arabic role name |
+| `page` | number | 1 | Page number |
+| `limit` | number | 10 | Page size |
+
+Response `200` — paginated list (sorted alphabetically by name):
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "name_en": "Admin",
+      "name_ar": "مدير",
+      "adminCount": 0,
+      "isProtected": false,
+      "createdAt": "2026-04-25T12:32:33.456Z"
+    }
+  ],
+  "meta": { "page": 1, "limit": 10, "total": 2, "totalPages": 1, "hasNextPage": false, "hasPrevPage": false }
+}
+```
+
+---
+
+### `GET /admin/roles/permissions`
+Returns the permission tree grouped by module (bilingual module titles and permission labels). Used only to render the checklist in create/edit role.
+
+Response `200` (may include `success` / `meta` wrapper depending on gateway):
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "module_en": "User Management",
+      "module_ar": "إدارة المستخدمين",
+      "permissions": [
+        { "key": "admin:users:view", "label_en": "View", "label_ar": "عرض" }
+      ]
+    }
+  ],
+  "meta": { "version": "1.0.0" }
+}
+```
+
+---
+
+### `GET /admin/roles/:roleId`
+Response `200` — full role including permission keys:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "name_en": "Moderator",
+    "name_ar": "مشرف",
+    "permissions": ["admin:users:view"],
+    "adminCount": 0,
+    "isProtected": false,
+    "createdAt": "...",
+    "updatedAt": "..."
+  }
+}
+```
+
+Errors: `400` invalid UUID, `404` not found.
+
+---
+
+### `POST /admin/roles`
+Request:
+```json
+{
+  "name_en": "Moderator",
+  "name_ar": "مشرف",
+  "permissions": ["admin:users:view", "admin:orders:view"]
+}
+```
+
+Response `201` — envelope with message + nested `role` object (same fields as GET detail).
+
+Errors: `409` duplicate name (EN or AR uniqueness per backend rules).
+
+---
+
+### `PATCH /admin/roles/:roleId`
+Partial body — send only changing fields (`name_en`, `name_ar`, `permissions`).
+
+Errors: `403` cannot edit protected role, `404`, `409` duplicate name.
+
+---
+
+### `DELETE /admin/roles/:roleId`
+Response `204 No Content`.
+
+Errors:
+| Status | Meaning |
+|--------|---------|
+| 403 | Protected / system role |
+| 409 | Role still has admins assigned, or is the logged-in admin's role |
+
+---
+
+## 6b — Admin: Admins (operators)
+
+> Token required + permissions `admin:admins:*` (see §8). Block/unblock use **`admin:admins:update`** in the dashboard until the API exposes dedicated JWT keys.
+> Dashboard: route `/admins` (`routes/_authed.admins.tsx`), feature folder `src/features/admins/` (`admins.api.ts`, `admins.queries.ts`, `admins.columns.tsx`, `admins-list-page.tsx`). i18n namespace `admins` (registered in `lib/i18n.ts`).
+> **Paths:** Handlers in OpenAPI use the full prefix `/api/v1/admin/admins`. The dashboard Axios client uses paths **relative to `VITE_API_URL`** (usually `/admin/admins` when `baseURL` already ends with `/api/v1`).
+> **Canonical shapes:** Repo root `Admin_API_integration_S1.json` — tag **`Admin — Admins`**, schemas `AdministratorAccountDto`, `AdministratorRoleSummaryDto`, `PaginatedAdministratorsDto`, `CreateAdministratorDto`, `UpdateAdministratorDto`, `AdministratorMutationResponseDto`.
+> JWT includes `is_super_admin`; session maps to `User.isSuperAdmin` for UI guards (super-admin rows: edit only where self applies; never delete/block self or another super admin). Create uses a generated password and triggers a welcome email (no password field in UI).
+
+### `GET /admin/admins`
+
+Query params:
+
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| `search` | string | — | Name or email |
+| `isActive` | boolean | — | Active (`true`) vs blocked (`false`) |
+| `page` | number | `1` | Page |
+| `limit` | number | `10` | Page size |
+
+Response `200` — paginated list sorted by **last login** (most recent first). Gateway may include optional `success: true`:
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "298a276c-9416-4db5-a445-8303969da16b",
+      "fullName": "Super Admin",
+      "phone": null,
+      "email": "admin@bidmart.com",
+      "role": {
+        "id": "3de76c2e-47dd-46bc-86cc-2456898aa695",
+        "name_en": "Super Admin",
+        "name_ar": "مدير عام"
+      },
+      "isActive": true,
+      "isSuperAdmin": true,
+      "lastLoginAt": "2026-05-02T05:44:54.794Z",
+      "createdAt": "2026-04-20T04:32:52.814Z"
+    }
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "page": 1,
+    "limit": 10,
+    "total": 1,
+    "totalPages": 1,
+    "hasNextPage": false,
+    "hasPrevPage": false
+  }
+}
+```
+
+### `POST /admin/admins`
+
+Request:
+
+```json
+{
+  "fullName": "Ahmed Ali",
+  "phone": "+966500000000",
+  "email": "admin@bidmart.com",
+  "roleId": "12a08f81-07b9-4400-9ea8-749520065534"
+}
+```
+
+Response `201` — `{ "message": "...", "admin": { ...AdministratorAccountDto } }`.
+
+Errors: `400` validation, `404` role not found, `409` duplicate email or phone.
+
+### `GET /admin/admins/:adminId`
+
+Response `200` — administrator object (same shape as list rows). Implemented client-side as `getAdmin()` for detail routes or edit prefetch.
+
+Errors: `400` invalid UUID, `404` not found.
+
+### `PATCH /admin/admins/:adminId`
+
+Partial body: `fullName`, `phone`, `email`, `roleId`. Response `200` — `{ "message": "...", "admin": { ... } }`.
+
+Errors: `403` cannot edit another Super Admin (except self where allowed), `404` admin or role not found, `409` duplicate email or phone.
+
+### `DELETE /admin/admins/:adminId`
+
+Response `204`. Hard delete; sessions terminated.
+
+Errors: `403` cannot delete Super Admin, `409` cannot delete own account.
+
+### `PATCH /admin/admins/:adminId/block`
+
+Response `204`. Sets inactive and terminates sessions.
+
+Errors: `403` cannot block Super Admin, `409` already blocked or cannot block yourself.
+
+### `PATCH /admin/admins/:adminId/unblock`
+
+Response `204`.
+
+Errors: `409` already active.
+
+---
+
+## 7 — HTTP Status Code Reference
 
 | Code | Meaning |
 |------|---------|
@@ -801,7 +1015,7 @@ Errors:
 
 ---
 
-## 7 — Required Admin Permissions per Action
+## 8 — Required Admin Permissions per Action
 
 | Action | Permission value in JWT |
 |--------|------------------------|
@@ -837,15 +1051,19 @@ Errors:
 | Create admin | `admin:admins:create` |
 | Update admin | `admin:admins:update` |
 | Delete admin | `admin:admins:delete` |
+| Block administrator | `admin:admins:update` |
+| Unblock administrator | `admin:admins:update` |
 
 The JWT payload contains a `permissions` array. Check that the required permission is present before showing action buttons in the UI.
 
 ---
 
-## 8 — Notes
+## 9 — Notes
 
 - All UUIDs follow **UUID v4** format — validate before sending to avoid unnecessary 400s.
 - All timestamps are **ISO 8601 UTC** strings (`2026-04-23T10:00:00.000Z`).
 - Admin token from login is stored in Zustand with localStorage persistence. User/permissions are decoded from the JWT payload at login (JWT contains `sub`, `role`, `role_id`, `is_super_admin`, `permissions[]`, `deviceId`).
 - The `DELETE /admin/categories/:id` and `DELETE /admin/sub-categories/:id` are **soft-deletes** (sets `is_active = false`) — the record still exists in the DB.
 - The `DELETE /admin/countries/:id` and `DELETE /admin/users/:userId` are also soft-deletes from the user's perspective but behave differently: countries are permanently deleted, users get a `deletedAt` timestamp.
+- **Roles RBAC:** OpenAPI excerpt `Admin_API_integration_S1.json` includes `Admin — Roles` paths (`GET/POST /admin/roles`, `GET /admin/roles/permissions`, `GET/PATCH/DELETE /admin/roles/{roleId}`) and schemas (`RoleDetailDto`, `CreateRoleDto`, permission module DTOs).
+- **Admins (operators):** Same file adds tag **`Admin — Admins`** with paths `/api/v1/admin/admins`, `/api/v1/admin/admins/{adminId}`, `/api/v1/admin/admins/{adminId}/block`, `/api/v1/admin/admins/{adminId}/unblock` and DTOs **`AdministratorAccountDto`**, **`PaginatedAdministratorsDto`**, **`CreateAdministratorDto`**, **`UpdateAdministratorDto`**, **`AdministratorMutationResponseDto`**, **`AdministratorRoleSummaryDto`**.

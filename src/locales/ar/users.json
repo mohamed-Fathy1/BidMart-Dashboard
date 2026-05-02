@@ -17,9 +17,13 @@
   "actions": {
     "view": "عرض التفاصيل",
     "ban": "حظر المستخدم",
+    "ban_success": "تم حظر المستخدم",
     "suspend": "إيقاف المستخدم",
+    "suspend_success": "تم إيقاف المستخدم",
     "activate": "تفعيل المستخدم",
-    "delete": "حذف المستخدم"
+    "activate_success": "تم تفعيل المستخدم",
+    "delete": "حذف المستخدم",
+    "delete_success": "تم حذف المستخدم"
   },
   "ban_dialog": {
     "title": "حظر المستخدم",

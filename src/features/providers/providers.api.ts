@@ -7,7 +7,7 @@ import type { ProviderSummary, ProviderDetail, PaginationMeta } from '@/types/ap
 
 export interface ListProvidersParams {
   search?: string
-  status?: string
+  status?: 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED'
   page?: number
   limit?: number
 }

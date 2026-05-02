@@ -55,7 +55,7 @@ export function useBanUserMutation() {
       banUser(userId, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.all })
-      toast.success(t('users:actions.ban') + ' — ' + t('common:states.loading').replace('...', ''))
+      toast.success(t('users:actions.ban_success'))
     },
   })
 }
@@ -69,7 +69,7 @@ export function useSuspendUserMutation() {
       suspendUser(userId, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.all })
-      toast.success(t('users:actions.suspend'))
+      toast.success(t('users:actions.suspend_success'))
     },
   })
 }
@@ -82,7 +82,7 @@ export function useActivateUserMutation() {
     mutationFn: (userId: string) => activateUser(userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.all })
-      toast.success(t('users:actions.activate'))
+      toast.success(t('users:actions.activate_success'))
     },
   })
 }
@@ -95,7 +95,7 @@ export function useDeleteUserMutation() {
     mutationFn: (userId: string) => deleteUser(userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.all })
-      toast.success(t('users:actions.delete'))
+      toast.success(t('users:actions.delete_success'))
     },
   })
 }

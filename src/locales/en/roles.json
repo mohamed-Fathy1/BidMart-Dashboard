@@ -1,0 +1,51 @@
+{
+  "page_title": "Roles",
+  "page_description": "Manage admin roles and permissions",
+  "search_placeholder": "Search by English or Arabic name",
+  "columns": {
+    "name": "Name",
+    "admin_count": "Admins",
+    "type": "Type",
+    "created_at": "Created At"
+  },
+  "badges": {
+    "system": "System",
+    "custom": "Custom"
+  },
+  "actions": {
+    "create": "Add Role",
+    "edit": "Edit",
+    "delete": "Delete",
+    "create_success": "Role created",
+    "update_success": "Role updated",
+    "delete_success": "Role deleted"
+  },
+  "form": {
+    "create_title": "Add Role",
+    "edit_title": "Edit Role",
+    "create_description": "Set bilingual labels and attach permissions.",
+    "edit_description": "Update labels and permission set for this role.",
+    "name_en": "Name (English)",
+    "name_en_placeholder": "e.g. Moderator",
+    "name_ar": "Name (Arabic)",
+    "name_ar_placeholder": "Arabic role name",
+    "permissions": "Permissions",
+    "section_identity": "Labels",
+    "section_identity_hint": "Names appear in Arabic and English in the shell. Backend rules require unique names.",
+    "permissions_hint": "Use a module heading to toggle all permissions in that group. Rows list the canonical API key.",
+    "selected_of_total": "{{selected}} / {{total}} selected",
+    "footer_note": "System roles are read-only. Delete stays disabled while admins use a role or it is yours.",
+    "loading_permissions": "Loading permission list…",
+    "loading_detail": "Loading role details…",
+    "no_permission_modules": "Permission list is unavailable."
+  },
+  "delete_dialog": {
+    "title": "Delete Role",
+    "description": "This removes the role. You cannot undo this. Protected roles and roles assigned to admins stay blocked by the API."
+  },
+  "errors": {
+    "generic": "Could not save the role.",
+    "delete_failed": "Could not delete the role.",
+    "validation": "Enter both English and Arabic names."
+  }
+}

@@ -11,8 +11,8 @@ import type {
 
 export interface ListUsersParams {
   search?: string
-  status?: string
-  accountType?: string
+  status?: 'active' | 'banned' | 'suspended'
+  accountType?: 'user_only' | 'upgraded_to_seller'
   page?: number
   limit?: number
 }

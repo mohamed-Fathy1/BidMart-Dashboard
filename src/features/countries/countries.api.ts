@@ -6,7 +6,7 @@ import type { Country, PaginationMeta } from '@/types/api'
 /* ------------------------------------------------------------------ */
 
 export interface ListCountriesParams {
-  isEnabled?: string
+  isEnabled?: boolean
   page?: number
   limit?: number
 }

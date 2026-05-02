@@ -22,6 +22,23 @@
 - No nested `components/`/`hooks/`/`utils/` inside features
 - No barrel files unless they remove real friction
 - Named exports only; default exports only where TanStack Router file-route convention requires
+- **Roles example:** `roles.api.ts`, `roles.queries.ts`, `roles.columns.tsx`, `roles-list-page.tsx` (mounted from `routes/_authed.roles.tsx`)
+- **Admins example:** `admins.api.ts`, `admins.queries.ts`, `admins.columns.tsx`, `admins-list-page.tsx` (mounted from `routes/_authed.admins.tsx`)
+
+## Roles (admin RBAC)
+
+- UI: `/roles`, file route `routes/_authed.roles.tsx`; list + create/edit modal in `features/roles/roles-list-page.tsx` with `DataTable` + granular permission matrix from API.
+- HTTP (paths are relative to the Axios `baseURL` in env): list `GET /admin/roles` (search, pagination); modules `GET /admin/roles/permissions`; detail `GET /admin/roles/{id}`; `POST /admin/roles`; `PATCH` / `DELETE /admin/roles/{id}`.
+- Auth: JWT may include `role_id`; session `User.roleId` in `features/auth/auth.api.ts` mirrors it for UI-only guards (blocked delete for current role, protected rows, nonzero `adminCount`). Server remains authoritative (`403`/`409`).
+- Guards: route uses `PERMISSIONS.roles.view`; mutations use `roles.create` | `update` | `delete` with `<Can>`.
+
+## Admins (operator accounts)
+
+- UI: `/admins`, file route `routes/_authed.admins.tsx`; list + create/edit modal in `features/admins/admins-list-page.tsx` with `DataTable`; role assignments use `GET /admin/roles` (picklist while the modal is open).
+- HTTP (paths are relative to the Axios `baseURL` in env): list `GET /admin/admins` (`search`, `isActive`, pagination); detail `GET /admin/admins/{id}` (`getAdmin` in `admins.api.ts`, optional for detail routes or edit prefetch); `POST /admin/admins`; `PATCH /admin/admins/{id}`; `DELETE /admin/admins/{id}`; `PATCH /admin/admins/{id}/block`; `PATCH /admin/admins/{id}/unblock`.
+- Auth: JWT includes `is_super_admin`; session `User.isSuperAdmin` in `features/auth/auth.api.ts` mirrors it for UI-only guards (no edit/delete/block/unblock for another super admin except where self-edit applies; no delete/block self). Server remains authoritative (`403`/`409`).
+- Guards: route uses `PERMISSIONS.admins.view`; header create uses `<Can permission={PERMISSIONS.admins.create}>`. Row actions gate on `admins.update` (edit, block, unblock) and `admins.delete` (delete)—there are no separate JWT strings for block/unblock today.
+- Forms: this modal passes `suppressInitialFocus` on `FormDialog` (`components/shared/form-dialog.tsx`) so opening does not auto-focus the first input (avoids one field showing an isolated focus ring); programmatic focus lands on the dialog title instead.
 
 ## Context vs Zustand
 
@@ -32,7 +49,7 @@
 ## Styling Rules
 
 - All tokens as CSS variables in `src/styles/tokens.css`, mapped via `@theme` in `src/styles/index.css`
-- No arbitrary hex values — always reference token variables or Tailwind utilities
+- No arbitrary hex values — always reference token variables or Tailwind utilities (motion tokens exposed to Tailwind often use parentheses form, e.g. `duration-(--duration-hover)` / `ease-(--ease-default)`)
 - No inline styles
 - `cn()` from `lib/utils` for conditional classes
 - Tailwind classes only — no custom CSS unless unavoidable
@@ -124,7 +141,7 @@ Duration/easing pairings:
 
 - No hardcoded strings in components, ever
 - One namespace per feature (e.g., `users.json`), plus `common.json`, `components.json`, and `shell.json`
-- Current namespaces: `common`, `components`, `shell`, `users`, `countries`, `categories`, `providers`
+- Current namespaces: `common`, `components`, `shell`, `users`, `countries`, `categories`, `providers`, `roles`, `admins`
 - Use `t('namespace:key')` pattern
 - Pluralization via i18next
 - Locale persisted to localStorage (`bidmart-lang` key), applied to `<html dir>` and `<html lang>` on change
