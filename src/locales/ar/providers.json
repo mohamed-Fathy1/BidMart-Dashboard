@@ -1,56 +1,97 @@
 {
-  "page_title": "مقدمو الخدمات",
-  "page_description": "إدارة متاجر البائعين والطلبات",
+  "page_title": "مقدمو الخدمة",
+  "page_description": "متاجر البائعين والتحقق والإشراف",
+  "meta": {
+    "total_stores": "{{count}} متجرًا"
+  },
+  "errors": {
+    "approve_failed": "تعذر قبول هذا المقدّم.",
+    "reject_failed": "تعذر رفض هذا المقدّم.",
+    "verify_failed": "تعذر تحديث شارة التوثيق.",
+    "block_failed": "تعذر حظر هذا المقدّم.",
+    "unblock_failed": "تعذر إلغاء حظر هذا المقدّم."
+  },
   "columns": {
-    "name_en": "اسم المتجر (EN)",
-    "name_ar": "اسم المتجر (AR)",
-    "owner": "المالك",
-    "email": "البريد الإلكتروني",
-    "status": "الحالة",
-    "verified": "موثّق",
+    "account_name": "الحساب",
+    "phone": "الهاتف",
+    "country": "البلد",
+    "commercial_registration": "السجل التجاري",
+    "documents": "المستندات",
+    "account_status": "حالة المتجر",
     "created_at": "تاريخ الإنشاء"
   },
   "filters": {
-    "search_placeholder": "بحث باسم المتجر...",
-    "status": "الحالة"
+    "search_placeholder": "بحث بالاسم أو الهاتف أو اسم المتجر",
+    "status": "الحالة",
+    "status_blocked": "محظور"
   },
   "actions": {
     "view": "عرض التفاصيل",
     "approve": "قبول",
     "reject": "رفض",
-    "verify": "توثيق",
-    "unverify": "إزالة التوثيق",
+    "toggle_badge": "تبديل شارة التوثيق",
+    "toggle_verify_on": "تفعيل شارة التوثيق",
+    "toggle_verify_off": "إزالة شارة التوثيق",
+    "block": "حظر",
+    "unblock": "إلغاء الحظر",
     "approve_success": "تم قبول مقدم الخدمة",
     "reject_success": "تم رفض مقدم الخدمة",
-    "verified_success": "تم توثيق مقدم الخدمة",
-    "unverified_success": "تم إزالة التوثيق"
+    "verified_success": "تم تفعيل شارة التوثيق",
+    "unverified_success": "تم إلغاء شارة التوثيق",
+    "block_success": "تم حظر مقدم الخدمة",
+    "unblock_success": "تم إلغاء الحظر"
   },
   "approve_dialog": {
     "title": "قبول مقدم الخدمة",
-    "description": "سيتم تغيير حالة المتجر إلى مقبول ومنح المستخدم صلاحية بائع. هل تريد المتابعة؟"
+    "description": "سيتم اعتماد المتجر وتفعيل دور البائع. هل تريد المتابعة؟"
   },
   "reject_dialog": {
     "title": "رفض مقدم الخدمة",
-    "description": "اذكر سبب الرفض. سيرى البائع هذه الرسالة."
+    "description": "اذكر سبب الرفض. يمكن للبائع إعادة التقديم لاحقاً."
   },
   "verify_dialog": {
-    "verify_title": "توثيق مقدم الخدمة",
-    "verify_description": "سيتم إضافة شارة التوثيق للمتجر. هل تريد المتابعة؟",
-    "unverify_title": "إزالة التوثيق",
-    "unverify_description": "سيتم إزالة شارة التوثيق من المتجر. هل تريد المتابعة؟"
+    "verify_title": "تفعيل شارة التوثيق",
+    "verify_description": "سيتم إظهار شارة التوثيق على المتجر الذي تم اعتماده. هل تريد المتابعة؟",
+    "unverify_title": "إزالة شارة التوثيق",
+    "unverify_description": "سيتم إخفاء شارة التوثيق من المتجر. هل تريد المتابعة؟",
+    "list_title": "تبديل شارة التوثيق",
+    "list_description": "تفعيل أو إلغاء شارة التوثيق لهذا المتجر المعتمد."
+  },
+  "block_dialog": {
+    "title": "حظر مقدم الخدمة",
+    "description": "لن يستطيع البائع إضافة منتجات أو البث الحي حتى يُرفع الحظر."
+  },
+  "unblock_dialog": {
+    "title": "إلغاء حظر مقدم الخدمة",
+    "description": "معالجة إعادة اعتماد المتجر وظهور المنتجات من جديد."
   },
   "detail": {
     "page_title": "تفاصيل مقدم الخدمة",
-    "store_info": "معلومات المتجر",
-    "name_en": "اسم المتجر (EN)",
-    "name_ar": "اسم المتجر (AR)",
-    "status": "الحالة",
-    "verified": "موثّق",
-    "avg_rating": "متوسط التقييم",
-    "total_sold": "إجمالي المبيعات",
+    "store_info": "المتجر",
+    "store_logo": "الشعار",
+    "status": "حالة المتجر",
+    "platform_verified": "شارة التوثيق",
+    "country": "البلد",
+    "address": "العنوان",
     "created_at": "تاريخ الإنشاء",
-    "owner_info": "معلومات المالك",
+    "return_policy": "سياسة الإرجاع",
+    "return_policy_en": "سياسة الإرجاع (إنجليزي)",
+    "return_policy_ar": "سياسة الإرجاع (عربي)",
+    "owner_info": "المالك",
     "owner_name": "الاسم الكامل",
-    "owner_email": "البريد الإلكتروني"
+    "owner_email": "البريد الإلكتروني",
+    "owner_phone": "الهاتف",
+    "owner_account_status": "حالة حساب البائع",
+    "owner_registered_at": "تاريخ التسجيل",
+    "documents": "المستندات",
+    "cr_number": "رقم السجل التجاري",
+    "documents_verification": "التحقق من السجل التجاري",
+    "cr_document": "نسخة السجل التجاري",
+    "open_document": "فتح الملف",
+    "load_failed": "تعذر تحميل بيانات مقدم الخدمة.",
+    "load_failed_hint": "قد يكون السجل غير موجوداً أو أن الرابط قديماً. ارجع إلى القائمة وجرّب متجراً آخر.",
+    "back_to_list": "العودة إلى المقدّمين",
+    "summary_since": "متجر منذ",
+    "address_empty": "لم يتم تقديم عنوان."
   }
 }

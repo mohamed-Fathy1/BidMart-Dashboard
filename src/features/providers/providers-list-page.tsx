@@ -1,160 +1,173 @@
-import { useState, useMemo } from "react";
-import { useNavigate } from "@tanstack/react-router";
-import { useTranslation } from "react-i18next";
-import { Eye, CheckCircle, XCircle, ShieldCheck } from "lucide-react";
-import type { PaginationState } from "@tanstack/react-table";
-import type { ProviderSummary } from "@/types/api";
-import { PageHeader } from "@/components/shared/page-header";
-import { SearchInput } from "@/components/shared/search-input";
-import { FilterSelect } from "@/components/shared/filter-select";
+import { useMemo, useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
+import { Eye, CheckCircle, XCircle, ShieldCheck, Ban, Unlock } from 'lucide-react'
+import type { PaginationState } from '@tanstack/react-table'
+import type { ProviderSummary, ProviderAccountStatus } from '@/types/api'
+import { PageHeader } from '@/components/shared/page-header'
+import { SearchInput } from '@/components/shared/search-input'
+import { FilterSelect } from '@/components/shared/filter-select'
+import { TableFiltersShell } from '@/components/shared/table-filters-shell'
 import {
   DataTable,
   type RowActionItem,
-} from "@/components/data-table/data-table";
-import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import { ReasonDialog } from "@/components/shared/reason-dialog";
-import { useProviderColumns } from "@/features/providers/providers.columns";
+} from '@/components/data-table/data-table'
+import { ConfirmDialog } from '@/components/shared/confirm-dialog'
+import { ReasonDialog } from '@/components/shared/reason-dialog'
+import { useProviderColumns } from '@/features/providers/providers.columns'
 import {
   useProvidersQuery,
   useApproveProviderMutation,
   useRejectProviderMutation,
   useToggleVerificationMutation,
-} from "@/features/providers/providers.queries";
-import type { ListProvidersParams } from "@/features/providers/providers.api";
-import { PERMISSIONS, usePermission } from "@/lib/permissions";
+  useBlockProviderMutation,
+  useUnblockProviderMutation,
+} from '@/features/providers/providers.queries'
+import { PERMISSIONS, usePermission } from '@/lib/permissions'
+import { format } from '@/lib/format'
 
 export function ProvidersListPage() {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
+  const { t } = useTranslation()
+  const navigate = useNavigate()
 
-  /* ---------- permissions ---------- */
-  const canApprove = usePermission(PERMISSIONS.providers.approve);
-  const canReject = usePermission(PERMISSIONS.providers.reject);
-  const canVerify = usePermission(PERMISSIONS.providers.verify);
+  const canApprove = usePermission(PERMISSIONS.providers.approve)
+  const canReject = usePermission(PERMISSIONS.providers.reject)
+  const canVerify = usePermission(PERMISSIONS.providers.verify)
+  const canBlock = usePermission(PERMISSIONS.providers.block)
+  const canUnblock = usePermission(PERMISSIONS.providers.unblock)
 
-  /* ---------- filters ---------- */
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
 
-  /* ---------- pagination ---------- */
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
-  });
+    pageSize: 20,
+  })
 
-  /* ---------- dialogs ---------- */
-  const [approveTarget, setApproveTarget] = useState<ProviderSummary | null>(
-    null,
-  );
-  const [rejectTarget, setRejectTarget] = useState<ProviderSummary | null>(
-    null,
-  );
-  const [verifyTarget, setVerifyTarget] = useState<ProviderSummary | null>(
-    null,
-  );
+  const [approveTarget, setApproveTarget] = useState<ProviderSummary | null>(null)
+  const [rejectTarget, setRejectTarget] = useState<ProviderSummary | null>(null)
+  const [verifyTarget, setVerifyTarget] = useState<ProviderSummary | null>(null)
+  const [blockTarget, setBlockTarget] = useState<ProviderSummary | null>(null)
+  const [unblockTarget, setUnblockTarget] = useState<ProviderSummary | null>(null)
 
-  /* ---------- data ---------- */
   const { data: response, isLoading } = useProvidersQuery({
     search: search || undefined,
-    status: (statusFilter as ListProvidersParams["status"]) || undefined,
+    status: statusFilter ? (statusFilter as ProviderAccountStatus) : undefined,
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
-  });
+  })
 
-  const data = response?.data ?? [];
-  const meta = response?.meta;
+  const data = response?.data ?? []
+  const meta = response?.meta
 
-  const columns = useProviderColumns();
+  const columns = useProviderColumns()
 
-  /* ---------- mutations ---------- */
-  const approveMutation = useApproveProviderMutation();
-  const rejectMutation = useRejectProviderMutation();
-  const verifyMutation = useToggleVerificationMutation();
+  const approveMutation = useApproveProviderMutation()
+  const rejectMutation = useRejectProviderMutation()
+  const verifyMutation = useToggleVerificationMutation()
+  const blockMutation = useBlockProviderMutation()
+  const unblockMutation = useUnblockProviderMutation()
 
-  /* ---------- filter options ---------- */
   const statusOptions = useMemo(
     () => [
-      { value: "PENDING", label: t("components:status.PENDING") },
-      { value: "APPROVED", label: t("components:status.APPROVED") },
-      { value: "REJECTED", label: t("components:status.REJECTED") },
-      { value: "SUSPENDED", label: t("components:status.SUSPENDED") },
+      { value: 'pending', label: t('components:status.pending') },
+      { value: 'approved', label: t('components:status.approved') },
+      { value: 'rejected', label: t('components:status.rejected') },
+      { value: 'blocked', label: t('providers:filters.status_blocked') },
     ],
     [t],
-  );
+  )
 
-  /* ---------- row actions ---------- */
-  function getRowActions(
-    row: ProviderSummary,
-  ): RowActionItem<ProviderSummary>[] {
+  function getRowActions(row: ProviderSummary): RowActionItem<ProviderSummary>[] {
     const items: RowActionItem<ProviderSummary>[] = [
       {
-        label: t("providers:actions.view"),
+        label: t('providers:actions.view'),
         icon: Eye,
         onClick: (r) =>
-          navigate({ to: "/providers/$storeId", params: { storeId: r.id } }),
+          navigate({ to: '/providers/$storeId', params: { storeId: r.id } }),
       },
-    ];
+    ]
 
-    if (canApprove && row.status === "PENDING") {
+    if (canApprove && row.accountStatus === 'pending') {
       items.push({
-        label: t("providers:actions.approve"),
+        label: t('providers:actions.approve'),
         icon: CheckCircle,
         onClick: (r) => setApproveTarget(r),
-      });
+      })
     }
 
-    if (canReject && row.status === "PENDING") {
+    if (canReject && row.accountStatus === 'pending') {
       items.push({
-        label: t("providers:actions.reject"),
+        label: t('providers:actions.reject'),
         icon: XCircle,
         onClick: (r) => setRejectTarget(r),
-        variant: "destructive",
-      });
+        variant: 'destructive',
+      })
     }
 
-    if (canVerify && row.status === "APPROVED") {
+    if (canVerify && row.accountStatus === 'approved') {
       items.push({
-        label: row.isVerified
-          ? t("providers:actions.unverify")
-          : t("providers:actions.verify"),
+        label: t('providers:actions.toggle_badge'),
         icon: ShieldCheck,
         onClick: (r) => setVerifyTarget(r),
-      });
+      })
     }
 
-    return items;
+    if (canBlock && row.accountStatus === 'approved') {
+      items.push({
+        label: t('providers:actions.block'),
+        icon: Ban,
+        onClick: (r) => setBlockTarget(r),
+        variant: 'destructive',
+      })
+    }
+
+    if (canUnblock && row.accountStatus === 'blocked') {
+      items.push({
+        label: t('providers:actions.unblock'),
+        icon: Unlock,
+        onClick: (r) => setUnblockTarget(r),
+      })
+    }
+
+    return items
   }
 
-  /* ---------- toolbar ---------- */
   const toolbar = (
-    <div className="flex flex-wrap items-center gap-3">
+    <TableFiltersShell
+      meta={
+        meta != null
+          ? t('providers:meta.total_stores', { count: format.number(meta.total) })
+          : undefined
+      }
+    >
       <SearchInput
         value={search}
         onChange={(v) => {
-          setSearch(v);
-          setPagination((p) => ({ ...p, pageIndex: 0 }));
+          setSearch(v)
+          setPagination((p) => ({ ...p, pageIndex: 0 }))
         }}
-        placeholder={t("providers:filters.search_placeholder")}
-        className="w-64"
+        placeholder={t('providers:filters.search_placeholder')}
+        className="w-full min-w-[min(100%,220px)] sm:w-72"
       />
       <FilterSelect
         value={statusFilter}
         onChange={(v) => {
-          setStatusFilter(v);
-          setPagination((p) => ({ ...p, pageIndex: 0 }));
+          setStatusFilter(v)
+          setPagination((p) => ({ ...p, pageIndex: 0 }))
         }}
         options={statusOptions}
-        placeholder={t("providers:filters.status")}
+        placeholder={t('providers:filters.status')}
+        className="min-w-[148px]"
       />
-    </div>
-  );
+    </TableFiltersShell>
+  )
 
-  /* ---------- render ---------- */
   return (
     <div className="space-y-6">
       <PageHeader
-        title={t("providers:page_title")}
-        description={t("providers:page_description")}
+        title={t('providers:page_title')}
+        description={t('providers:page_description')}
       />
 
       <DataTable
@@ -169,64 +182,84 @@ export function ProvidersListPage() {
         actions={getRowActions}
         getRowId={(row) => row.id}
         onRowClick={(row) =>
-          navigate({ to: "/providers/$storeId", params: { storeId: row.id } })
+          navigate({ to: '/providers/$storeId', params: { storeId: row.id } })
         }
       />
 
-      {/* Approve dialog */}
       <ConfirmDialog
         open={!!approveTarget}
         onOpenChange={(open) => !open && setApproveTarget(null)}
-        title={t("providers:approve_dialog.title")}
-        description={t("providers:approve_dialog.description")}
+        title={t('providers:approve_dialog.title')}
+        description={t('providers:approve_dialog.description')}
         onConfirm={() => {
-          if (!approveTarget) return;
+          if (!approveTarget) return
           approveMutation.mutate(approveTarget.id, {
             onSettled: () => setApproveTarget(null),
-          });
+          })
         }}
         isLoading={approveMutation.isPending}
       />
 
-      {/* Reject dialog */}
       <ReasonDialog
         open={!!rejectTarget}
         onOpenChange={(open) => !open && setRejectTarget(null)}
-        title={t("providers:reject_dialog.title")}
-        description={t("providers:reject_dialog.description")}
+        title={t('providers:reject_dialog.title')}
+        description={t('providers:reject_dialog.description')}
         onConfirm={(reason) => {
-          if (!rejectTarget) return;
+          if (!rejectTarget) return
           rejectMutation.mutate(
             { storeId: rejectTarget.id, reason },
             { onSettled: () => setRejectTarget(null) },
-          );
+          )
         }}
         isLoading={rejectMutation.isPending}
         variant="destructive"
       />
 
-      {/* Verify toggle dialog */}
       <ConfirmDialog
         open={!!verifyTarget}
         onOpenChange={(open) => !open && setVerifyTarget(null)}
-        title={
-          verifyTarget?.isVerified
-            ? t("providers:verify_dialog.unverify_title")
-            : t("providers:verify_dialog.verify_title")
-        }
-        description={
-          verifyTarget?.isVerified
-            ? t("providers:verify_dialog.unverify_description")
-            : t("providers:verify_dialog.verify_description")
-        }
+        title={t('providers:verify_dialog.list_title')}
+        description={t('providers:verify_dialog.list_description')}
         onConfirm={() => {
-          if (!verifyTarget) return;
+          if (!verifyTarget) return
           verifyMutation.mutate(verifyTarget.id, {
             onSettled: () => setVerifyTarget(null),
-          });
+          })
         }}
         isLoading={verifyMutation.isPending}
       />
+
+      <ConfirmDialog
+        open={!!blockTarget}
+        onOpenChange={(open) => !open && setBlockTarget(null)}
+        title={t('providers:block_dialog.title')}
+        description={t('providers:block_dialog.description')}
+        confirmLabel={t('providers:actions.block')}
+        onConfirm={() => {
+          if (!blockTarget) return
+          blockMutation.mutate(blockTarget.id, {
+            onSettled: () => setBlockTarget(null),
+          })
+        }}
+        isLoading={blockMutation.isPending}
+        variant="destructive"
+      />
+
+      <ConfirmDialog
+        open={!!unblockTarget}
+        onOpenChange={(open) => !open && setUnblockTarget(null)}
+        title={t('providers:unblock_dialog.title')}
+        description={t('providers:unblock_dialog.description')}
+        confirmLabel={t('providers:actions.unblock')}
+        onConfirm={() => {
+          if (!unblockTarget) return
+          unblockMutation.mutate(unblockTarget.id, {
+            onSettled: () => setUnblockTarget(null),
+          })
+        }}
+        isLoading={unblockMutation.isPending}
+      />
     </div>
-  );
+  )
 }

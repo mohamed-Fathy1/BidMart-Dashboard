@@ -24,6 +24,7 @@
 - Named exports only; default exports only where TanStack Router file-route convention requires
 - **Roles example:** `roles.api.ts`, `roles.queries.ts`, `roles.columns.tsx`, `roles-list-page.tsx` (mounted from `routes/_authed.roles.tsx`)
 - **Admins example:** `admins.api.ts`, `admins.queries.ts`, `admins.columns.tsx`, `admins-list-page.tsx` (mounted from `routes/_authed.admins.tsx`)
+- **Providers example:** `providers.api.ts`, `providers.queries.ts`, `providers.columns.tsx`, `providers-list-page.tsx`, `provider-detail-page.tsx` (list `routes/_authed.providers.tsx`, detail `routes/_authed.providers.$storeId.tsx`)
 
 ## Roles (admin RBAC)
 
@@ -39,6 +40,17 @@
 - Auth: JWT includes `is_super_admin`; session `User.isSuperAdmin` in `features/auth/auth.api.ts` mirrors it for UI-only guards (no edit/delete/block/unblock for another super admin except where self-edit applies; no delete/block self). Server remains authoritative (`403`/`409`).
 - Guards: route uses `PERMISSIONS.admins.view`; header create uses `<Can permission={PERMISSIONS.admins.create}>`. Row actions gate on `admins.update` (edit, block, unblock) and `admins.delete` (delete)—there are no separate JWT strings for block/unblock today.
 - Forms: this modal passes `suppressInitialFocus` on `FormDialog` (`components/shared/form-dialog.tsx`) so opening does not auto-focus the first input (avoids one field showing an isolated focus ring); programmatic focus lands on the dialog title instead.
+
+## Providers (sellers / stores)
+
+- OpenAPI: repo **`Admin_API_integration_S1.json`** — tag **Admin — Providers** (`ProviderSummaryDto`, **`AdminProvidersListResponseDto`** `{ success, data, meta }`, **`AdminProviderDetailResponseDto`**, `PATCH …/block` & `…/unblock`, **`ToggleVerificationMutationResponseDto`**).
+- UI: `/providers` list and `/providers/:storeId` detail; `PageHeader` `description` may be **`ReactNode`** (e.g. provider detail subtitle with phone, country icon, timestamps). **Detail moderation actions** use `PageHeader` **`actions`** as plain **`Button`** / `<Can>` siblings (no extra bordered `bg-muted` strip around the group).
+- HTTP (paths relative to Axios `baseURL`): list `GET /admin/providers` with `search`, `status`, `page`, `limit`; detail `GET /admin/providers/{storeId}`; `PATCH …/approve` (204); `PATCH …/reject` with `{ reason }` (204); `PATCH …/verify` toggles **`isVerified`** badge on approved stores (200 — body may be `{ isVerified }` or nested `{ data: { isVerified } }`, unwrapped in `providers.api.ts`); `PATCH …/block` and `PATCH …/unblock` (204).
+- Responses: backend wraps payloads in **`{ success, data, meta? }`**; `listProviders` / `getProviderDetail` unwrap in `providers.api.ts` (follow the same pattern as `listAdmins` / `getAdmin`).
+- Payload shapes (`types/api.ts`): list rows are **`ProviderSummary`** (`accountName`, `phoneNumber`, `verificationStatus` for docs/KYC, `commercialRegistrationNumber`, `country` ref or null, **`accountStatus`** as lowercase `pending` | `approved` | `rejected` | `blocked`, `createdAt`). Detail is **`ProviderDetail`** (`storeLogo`, `isVerified`, `status`, `country`, `detailedAddress`, `returnPolicy`, **`owner`** object, **`documents`** object including `verificationStatus`, `commercialRegistrationDoc`, `createdAt`). Do not assume legacy list fields (`nameEn` / `user` nesting) — they are not returned by this API.
+- Status filter & badges: query **`status`** uses the same lowercase values as **`accountStatus`**. For **`StatusBadge`** `type="seller"`, map **`blocked` → `SUSPENDED`** via **`providerAccountStatusForSellerBadge()`** in `providers.api.ts`. Documents column uses **`StatusBadge`** `type="providerVerification"` (`pending_verification` \| `unverified` \| `verified`); locale keys live under **`components:provider_verification.*`**. Platform verified badge on detail uses **`type="sellerVerified"`** (`components:status.verified` / `unverified`).
+- Guards: routes use **`PERMISSIONS.providers.view`**; mutations use **`providers.approve`** \| **`reject`** \| **`verify`** \| **`block`** \| **`unblock`** with `<Can>` and row/menu actions. **`PATCH /verify`** is not the same field as list **`verificationStatus`** (documents vs storefront badge — list confirms toggle via neutral copy since **`isVerified`** is absent on list rows).
+- Errors: mutations use **`onError`** toasts with **`providers:errors.*`** (see **`extractMutationError`** pattern in **`providers.queries.ts`**, same idea as admins/roles).
 
 ## Context vs Zustand
 
@@ -65,6 +77,7 @@
 ## Shadow Rules
 
 - 3-tier elevation: `--shadow-rest` (cards at rest), `--shadow-raised` (content shell, dialogs), `--shadow-floating` (popovers, dropdowns, toasts)
+- **`Card`** (`components/ui/card.tsx`): default drop shadow is **`shadow-rest`** (maps to `--shadow-rest`), not Tailwind `shadow-sm`. Do not override with generic shadows unless the surface is a different tier.
 - Hover NEVER adds shadow — use background change instead
 - Shadow = depth tier = state, not feedback
 - Sidebar has no shadow — separates from canvas by background color only
@@ -154,6 +167,13 @@ Duration/easing pairings:
 - Column defs colocated as `<feature>.columns.tsx`
 - 48px row height, sticky header, hairline borders
 - Empty state: one line of copy, one action, no illustration
+- **Filter bar:** Wrap search/filters above the table in **`TableFiltersShell`** (`components/shared/table-filters-shell.tsx`): `rounded-xl border border-border bg-card p-4 shadow-rest`, optional trailing **`meta`** (localized total using `format.number(meta.total)`). Avoid one-off `bg-muted/*` shells for primary list filters.
+- **List page layout:** `space-y-6` between `PageHeader` and the table block (aligned with admins, roles, users, countries, providers).
+
+## TanStack Router — list + detail under one path
+
+- If a URL has nested children (e.g. `/providers` + `/providers/$storeId`), the parent layout must render **`<Outlet />`** when the child route is active. Rendering only the list component hides detail pages.
+- **Preferred:** layout route with **`<Outlet />`** and an **index** file for the table (e.g. `_authed.providers.index.tsx` with `createFileRoute('/_authed/providers/')`); avoid ad-hoc `useMatchRoute` branching when an index route keeps the tree obvious.
 
 ## Permission Rules
 

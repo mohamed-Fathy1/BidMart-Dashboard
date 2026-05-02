@@ -43,6 +43,21 @@ interface AccountTypeBadgeProps {
   className?: string
 }
 
+/** List/detail commercial registration verification (distinct from generic verification type) */
+type ProviderVerificationStatus = 'pending_verification' | 'unverified' | 'verified'
+
+interface ProviderVerificationBadgeProps {
+  type: 'providerVerification'
+  status: ProviderVerificationStatus
+  className?: string
+}
+
+interface SellerVerifiedBadgeProps {
+  type: 'sellerVerified'
+  status: 'true' | 'false'
+  className?: string
+}
+
 type StatusBadgeProps =
   | AccountBadgeProps
   | SellerBadgeProps
@@ -50,6 +65,8 @@ type StatusBadgeProps =
   | VerificationBadgeProps
   | BooleanBadgeProps
   | AccountTypeBadgeProps
+  | ProviderVerificationBadgeProps
+  | SellerVerifiedBadgeProps
 
 interface StatusStyle {
   badge: string
@@ -103,6 +120,17 @@ const accountTypeStyles: Record<AccountType, StatusStyle> = {
   upgraded_to_seller: positive,
 }
 
+const providerVerificationStyles: Record<ProviderVerificationStatus, StatusStyle> = {
+  pending_verification: warning,
+  unverified:           neutral,
+  verified:             positive,
+}
+
+const sellerVerifiedStyles: Record<'true' | 'false', StatusStyle> = {
+  true:  positive,
+  false: neutral,
+}
+
 const fallbackStyle: StatusStyle = neutral
 
 function getStyle(status: string, type: StatusBadgeProps['type']): StatusStyle {
@@ -117,6 +145,10 @@ function getStyle(status: string, type: StatusBadgeProps['type']): StatusStyle {
       return booleanStyles[status as 'true' | 'false'] ?? fallbackStyle
     case 'accountType':
       return accountTypeStyles[status as AccountType] ?? fallbackStyle
+    case 'providerVerification':
+      return providerVerificationStyles[status as ProviderVerificationStatus] ?? fallbackStyle
+    case 'sellerVerified':
+      return sellerVerifiedStyles[status as 'true' | 'false'] ?? fallbackStyle
     case 'account':
     default:
       return accountStyles[status as AccountStatus] ?? fallbackStyle
@@ -126,6 +158,14 @@ function getStyle(status: string, type: StatusBadgeProps['type']): StatusStyle {
 function getI18nKey(status: string, type: StatusBadgeProps['type']): string {
   if (type === 'boolean') {
     return status === 'true' ? 'components:status.enabled' : 'components:status.disabled'
+  }
+  if (type === 'providerVerification') {
+    return `components:provider_verification.${status}`
+  }
+  if (type === 'sellerVerified') {
+    return status === 'true'
+      ? 'components:status.verified'
+      : 'components:status.unverified'
   }
   return `components:status.${status}`
 }

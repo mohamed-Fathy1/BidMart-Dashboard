@@ -5,6 +5,7 @@ import type { PaginationState } from "@tanstack/react-table";
 import type { Country } from "@/types/api";
 import { PageHeader } from "@/components/shared/page-header";
 import { FilterSelect } from "@/components/shared/filter-select";
+import { TableFiltersShell } from "@/components/shared/table-filters-shell";
 import {
   DataTable,
   type RowActionItem,
@@ -25,6 +26,7 @@ import {
   useUpdateCountryMutation,
   useDeleteCountryMutation,
 } from "@/features/countries/countries.queries";
+import { format } from "@/lib/format";
 
 export function CountriesListPage() {
   const { t } = useTranslation();
@@ -180,7 +182,15 @@ export function CountriesListPage() {
 
   /* ---------- toolbar ---------- */
   const toolbar = (
-    <div className="flex flex-wrap items-center gap-3">
+    <TableFiltersShell
+      meta={
+        meta != null
+          ? t("countries:meta.total_countries", {
+              count: format.number(meta.total),
+            })
+          : undefined
+      }
+    >
       <FilterSelect
         value={enabledFilter}
         onChange={(v) => {
@@ -189,8 +199,9 @@ export function CountriesListPage() {
         }}
         options={enabledOptions}
         placeholder={t("countries:filters.enabled")}
+        className="min-w-[148px]"
       />
-    </div>
+    </TableFiltersShell>
   );
 
   /* ---------- render ---------- */

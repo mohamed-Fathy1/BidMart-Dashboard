@@ -1163,14 +1163,16 @@
     "/api/v1/admin/providers": {
       "get": {
         "operationId": "SellerAdminController_listProviders",
-        "summary": "List providers (sellers) with optional status and search filter",
+        "summary": "List sellers with store summary fields",
+        "description": "Paginated seller accounts: account name, phone, commercial registration, country, document verification status, and **store** `accountStatus`. Sort default: newest first. Search matches name, phone, or store name.",
         "parameters": [
           {
             "name": "status",
             "required": false,
             "in": "query",
+            "description": "Filter by store account lifecycle. **Lowercase** strings as returned in list rows (`accountStatus`). `blocked` means the seller is suspended from operating; UI may map it to a “suspended” style badge.",
             "schema": {
-              "enum": ["PENDING", "APPROVED", "REJECTED", "SUSPENDED"],
+              "enum": ["pending", "approved", "rejected", "blocked"],
               "type": "string"
             }
           },
@@ -1211,7 +1213,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedProvidersDto"
+                  "$ref": "#/components/schemas/AdminProvidersListResponseDto"
                 }
               }
             }
@@ -1248,11 +1250,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider detail with ratings and sales",
+            "description": "Full seller profile: store identity, address, return policy snippets, owner, commercial registration / documents, and verification badge (`isVerified`). Response is wrapped with `success` and optional `meta`.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProviderDetailDto"
+                  "$ref": "#/components/schemas/AdminProviderDetailResponseDto"
                 }
               }
             }
@@ -1282,7 +1284,7 @@
       "patch": {
         "operationId": "SellerAdminController_approveProvider",
         "summary": "Approve a pending provider application",
-        "description": "Sets store status → APPROVED and user role → SELLER. Creates a wallet if none exists.",
+        "description": "Sets store status to **approved** and user role to **SELLER**. Creates a wallet if none exists. Fails if the store owner’s user account is **banned**.",
         "parameters": [
           {
             "name": "storeId",
@@ -1311,7 +1313,7 @@
             "description": "Provider not found"
           },
           "409": {
-            "description": "Provider is already approved"
+            "description": "Store is not pending, already approved/rejected, or store owner is banned"
           }
         },
         "tags": ["Admin — Providers"],
@@ -1326,6 +1328,7 @@
       "patch": {
         "operationId": "SellerAdminController_rejectProvider",
         "summary": "Reject a pending provider application with a reason",
+        "description": "Rejection reason is required; seller is notified and may resubmit after rejection.",
         "parameters": [
           {
             "name": "storeId",
@@ -1378,7 +1381,8 @@
     "/api/v1/admin/providers/{storeId}/verify": {
       "patch": {
         "operationId": "SellerAdminController_toggleVerification",
-        "summary": "Toggle verified badge on an approved provider",
+        "summary": "Toggle verified badge on an approved store",
+        "description": "Flips `isVerified` (storefront badge). Only **approved** stores. Not the same as commercial-registration **document** verification on list rows.",
         "parameters": [
           {
             "name": "storeId",
@@ -1396,7 +1400,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ToggleVerificationResponseDto"
+                  "$ref": "#/components/schemas/ToggleVerificationMutationResponseDto"
                 }
               }
             }
@@ -1414,7 +1418,95 @@
             "description": "Provider not found"
           },
           "409": {
-            "description": "Provider must be APPROVED to toggle verification"
+            "description": "Store must be **approved** (`accountStatus`/`status` approved) to toggle the verified badge"
+          }
+        },
+        "tags": ["Admin — Providers"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/providers/{storeId}/block": {
+      "patch": {
+        "operationId": "SellerAdminController_blockProvider",
+        "summary": "Block a seller (suspend store)",
+        "description": "Suspends the seller: cannot add products or go live; existing catalog/streams hidden; user force-logged out.",
+        "parameters": [
+          {
+            "name": "storeId",
+            "required": true,
+            "in": "path",
+            "description": "Store UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Store blocked"
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "Provider not found"
+          },
+          "409": {
+            "description": "Store is already blocked or not in **approved** status"
+          }
+        },
+        "tags": ["Admin — Providers"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/providers/{storeId}/unblock": {
+      "patch": {
+        "operationId": "SellerAdminController_unblockProvider",
+        "summary": "Unblock a seller (restore approved store)",
+        "description": "Restores store to **approved**; listings and streams visible again; seller may log in.",
+        "parameters": [
+          {
+            "name": "storeId",
+            "required": true,
+            "in": "path",
+            "description": "Store UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Store unblocked"
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "Provider not found"
+          },
+          "409": {
+            "description": "Store is not blocked"
           }
         },
         "tags": ["Admin — Providers"],
@@ -2170,7 +2262,7 @@
     },
     {
       "name": "Admin — Providers",
-      "description": "Seller / provider management"
+      "description": "Seller / store moderation — paginated summary list, detail, approve/reject, verified-badge toggle, block/unblock (`accountStatus` / `status` wire values are lowercase; list uses `verificationStatus` for CR/KYC)"
     },
     {
       "name": "Admin — Roles",
@@ -3735,69 +3827,80 @@
           }
         }
       },
-      "ProviderUserDto": {
+      "ProviderCountryRefDto": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
-            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+            "format": "uuid",
+            "example": "24656e30-7460-47d0-b0a6-caf0ba8ee876"
           },
-          "fullName": {
+          "name_en": {
             "type": "string",
-            "example": "Ahmed Ali"
+            "example": "Saudi Arabia"
           },
-          "email": {
+          "name_ar": {
             "type": "string",
-            "example": "ahmed@example.com"
+            "example": "السعودية"
           }
         },
-        "required": ["id", "fullName", "email"]
+        "required": ["id", "name_en", "name_ar"]
       },
       "ProviderSummaryDto": {
         "type": "object",
+        "description": "Seller list row. Store lifecycle is **`accountStatus`** (lowercase). Document pipeline is **`verificationStatus`** — distinct from detail `isVerified` storefront badge.",
         "properties": {
           "id": {
             "type": "string",
-            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+            "format": "uuid"
           },
-          "nameEn": {
+          "accountName": {
             "type": "string",
-            "example": "Ahmed Store"
+            "example": "Ahmed Mohamed ali"
           },
-          "nameAr": {
+          "phoneNumber": {
             "type": "string",
-            "example": "متجر أحمد"
+            "example": "+966501234567"
           },
-          "status": {
+          "verificationStatus": {
             "type": "string",
-            "enum": ["PENDING", "APPROVED", "REJECTED", "SUSPENDED"],
-            "example": "PENDING"
+            "enum": ["pending_verification", "unverified", "verified"]
           },
-          "isVerified": {
-            "type": "boolean",
-            "example": false
+          "commercialRegistrationNumber": {
+            "type": "string",
+            "example": "1234567890"
           },
-          "user": {
-            "$ref": "#/components/schemas/ProviderUserDto"
+          "country": {
+            "nullable": true,
+            "allOf": [{ "$ref": "#/components/schemas/ProviderCountryRefDto" }]
+          },
+          "accountStatus": {
+            "type": "string",
+            "enum": ["pending", "approved", "rejected", "blocked"],
+            "description": "`blocked` = admin-blocked seller (operational suspension). DB may store as `SUSPENDED` — wire format uses `blocked` for this endpoint."
           },
           "createdAt": {
-            "format": "date-time",
-            "type": "string"
+            "type": "string",
+            "format": "date-time"
           }
         },
         "required": [
           "id",
-          "nameEn",
-          "nameAr",
-          "status",
-          "isVerified",
-          "user",
+          "accountName",
+          "phoneNumber",
+          "verificationStatus",
+          "commercialRegistrationNumber",
+          "accountStatus",
           "createdAt"
         ]
       },
-      "PaginatedProvidersDto": {
+      "AdminProvidersListResponseDto": {
         "type": "object",
         "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
           "data": {
             "type": "array",
             "items": {
@@ -3808,59 +3911,148 @@
             "$ref": "#/components/schemas/PaginationMetaDto"
           }
         },
-        "required": ["data", "meta"]
+        "required": ["success", "data", "meta"]
       },
-      "ProviderDetailDto": {
+      "ProviderOwnerDto": {
         "type": "object",
+        "description": "Store owner account (authenticated user backing the seller).",
         "properties": {
           "id": {
             "type": "string",
-            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+            "format": "uuid"
           },
-          "nameEn": {
+          "fullName": {
             "type": "string",
-            "example": "Ahmed Store"
+            "example": "Ahmed Ali"
           },
-          "nameAr": {
+          "email": {
             "type": "string",
-            "example": "متجر أحمد"
+            "format": "email",
+            "example": "seller@example.com"
           },
-          "status": {
+          "phoneNumber": {
             "type": "string",
-            "enum": ["PENDING", "APPROVED", "REJECTED", "SUSPENDED"],
-            "example": "PENDING"
+            "example": "+966503929330"
+          },
+          "accountStatus": {
+            "type": "string",
+            "description": "`AccountStatus`-style lifecycle for the owner user (`active`, `banned`, etc.) — lowercase wire values.",
+            "example": "active"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "fullName", "email", "phoneNumber", "accountStatus", "registeredAt"]
+      },
+      "ProviderReturnPolicyDto": {
+        "type": "object",
+        "properties": {
+          "ar": {
+            "type": "string",
+            "nullable": true,
+            "description": "Return policy copy (Arabic)"
+          },
+          "en": {
+            "type": "string",
+            "nullable": true,
+            "description": "Return policy copy (English)"
+          }
+        }
+      },
+      "ProviderDocumentsDto": {
+        "type": "object",
+        "properties": {
+          "commercialRegistrationNumber": {
+            "type": "string"
+          },
+          "commercialRegistrationDoc": {
+            "type": "string",
+            "nullable": true,
+            "description": "HTTPS URL to uploaded registration file (e.g. PDF)"
+          },
+          "verificationStatus": {
+            "type": "string",
+            "enum": ["pending_verification", "unverified", "verified"]
+          }
+        },
+        "required": ["commercialRegistrationNumber", "verificationStatus"]
+      },
+      "ProviderDetailDto": {
+        "type": "object",
+        "description": "Payload inside `GET /admin/providers/{storeId}` `data` field. Store lifecycle is **`status`** (lowercase). **`isVerified`** is the admin-toggled storefront badge.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "storeLogo": {
+            "type": "string",
+            "nullable": true,
+            "description": "Public URL to store logo image"
           },
           "isVerified": {
             "type": "boolean",
-            "example": false
+            "description": "Verified badge (toggle via `PATCH .../verify` when store is approved)"
           },
-          "user": {
-            "$ref": "#/components/schemas/ProviderUserDto"
+          "status": {
+            "type": "string",
+            "enum": ["pending", "approved", "rejected", "blocked"]
+          },
+          "country": {
+            "nullable": true,
+            "allOf": [{ "$ref": "#/components/schemas/ProviderCountryRefDto" }]
+          },
+          "detailedAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "returnPolicy": {
+            "$ref": "#/components/schemas/ProviderReturnPolicyDto"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/ProviderOwnerDto"
+          },
+          "documents": {
+            "$ref": "#/components/schemas/ProviderDocumentsDto"
           },
           "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "averageRating": {
-            "type": "number",
-            "example": 4.8
-          },
-          "totalSold": {
-            "type": "number",
-            "example": 142
+            "type": "string",
+            "format": "date-time"
           }
         },
         "required": [
           "id",
-          "nameEn",
-          "nameAr",
-          "status",
           "isVerified",
-          "user",
-          "createdAt",
-          "averageRating",
-          "totalSold"
+          "status",
+          "returnPolicy",
+          "owner",
+          "documents",
+          "createdAt"
         ]
+      },
+      "AdminProviderDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProviderDetailDto"
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string",
+                "example": "1.0.0"
+              }
+            }
+          }
+        },
+        "required": ["success", "data"]
       },
       "RejectProviderDto": {
         "type": "object",
@@ -3881,6 +4073,27 @@
           }
         },
         "required": ["isVerified"]
+      },
+      "ToggleVerificationMutationResponseDto": {
+        "description": "Some gateways return `{ isVerified }` only; others wrap `{ success, data: { isVerified } }`. Clients should accept either shape.",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ToggleVerificationResponseDto"
+          },
+          {
+            "type": "object",
+            "required": ["success", "data"],
+            "properties": {
+              "success": {
+                "type": "boolean",
+                "example": true
+              },
+              "data": {
+                "$ref": "#/components/schemas/ToggleVerificationResponseDto"
+              }
+            }
+          }
+        ]
       },
       "AdminRoleListItemDto": {
         "type": "object",

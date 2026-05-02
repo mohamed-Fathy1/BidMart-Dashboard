@@ -1,56 +1,97 @@
 {
   "page_title": "Providers",
-  "page_description": "Manage seller stores and applications",
+  "page_description": "Seller stores, verification, and moderation",
+  "meta": {
+    "total_stores": "{{count}} stores"
+  },
+  "errors": {
+    "approve_failed": "Could not approve this provider.",
+    "reject_failed": "Could not reject this provider.",
+    "verify_failed": "Could not update the verified badge.",
+    "block_failed": "Could not block this provider.",
+    "unblock_failed": "Could not unblock this provider."
+  },
   "columns": {
-    "name_en": "Store Name (EN)",
-    "name_ar": "Store Name (AR)",
-    "owner": "Owner",
-    "email": "Email",
-    "status": "Status",
-    "verified": "Verified",
+    "account_name": "Account",
+    "phone": "Phone",
+    "country": "Country",
+    "commercial_registration": "Commercial registration",
+    "documents": "Documents",
+    "account_status": "Store status",
     "created_at": "Created At"
   },
   "filters": {
-    "search_placeholder": "Search by store name...",
-    "status": "Status"
+    "search_placeholder": "Search by name, phone, or store name",
+    "status": "Status",
+    "status_blocked": "Blocked"
   },
   "actions": {
     "view": "View Details",
     "approve": "Approve",
     "reject": "Reject",
-    "verify": "Verify",
-    "unverify": "Remove Verification",
+    "toggle_badge": "Toggle Verified Badge",
+    "toggle_verify_on": "Verify Store Badge",
+    "toggle_verify_off": "Remove Verified Badge",
+    "block": "Block",
+    "unblock": "Unblock",
     "approve_success": "Provider approved",
     "reject_success": "Provider rejected",
-    "verified_success": "Provider verified",
-    "unverified_success": "Verification removed"
+    "verified_success": "Verified badge turned on",
+    "unverified_success": "Verified badge turned off",
+    "block_success": "Provider blocked",
+    "unblock_success": "Provider unblocked"
   },
   "approve_dialog": {
     "title": "Approve Provider",
-    "description": "This will set the store status to APPROVED and grant the user SELLER role. Continue?"
+    "description": "This sets the store to approved and grants the seller role. Continue?"
   },
   "reject_dialog": {
     "title": "Reject Provider",
-    "description": "Provide a reason for rejection. The seller will see this message."
+    "description": "Provide a reason. The seller can resubmit after rejection."
   },
   "verify_dialog": {
-    "verify_title": "Verify Provider",
-    "verify_description": "This will add the verified badge to the store. Continue?",
-    "unverify_title": "Remove Verification",
-    "unverify_description": "This will remove the verified badge from the store. Continue?"
+    "verify_title": "Add Verified Badge",
+    "verify_description": "Adds the verified badge to this approved store. Continue?",
+    "unverify_title": "Remove Verified Badge",
+    "unverify_description": "Removes the verified badge from this store. Continue?",
+    "list_title": "Toggle Verified Badge",
+    "list_description": "Adds or removes the verified badge on this approved store."
+  },
+  "block_dialog": {
+    "title": "Block Provider",
+    "description": "The seller cannot list products or go live until unblocked."
+  },
+  "unblock_dialog": {
+    "title": "Unblock Provider",
+    "description": "Restores the store to approved. Listings become visible again."
   },
   "detail": {
     "page_title": "Provider Details",
-    "store_info": "Store Information",
-    "name_en": "Store Name (EN)",
-    "name_ar": "Store Name (AR)",
-    "status": "Status",
-    "verified": "Verified",
-    "avg_rating": "Average Rating",
-    "total_sold": "Total Sold",
+    "store_info": "Store",
+    "store_logo": "Logo",
+    "status": "Store status",
+    "platform_verified": "Verified badge",
+    "country": "Country",
+    "address": "Address",
     "created_at": "Created At",
-    "owner_info": "Owner Information",
+    "return_policy": "Return Policy",
+    "return_policy_en": "Return Policy (English)",
+    "return_policy_ar": "Return Policy (Arabic)",
+    "owner_info": "Owner",
     "owner_name": "Full Name",
-    "owner_email": "Email"
+    "owner_email": "Email",
+    "owner_phone": "Phone",
+    "owner_account_status": "Account Status",
+    "owner_registered_at": "Registered At",
+    "documents": "Documents",
+    "cr_number": "Commercial Registration No.",
+    "documents_verification": "Commercial registration Verification",
+    "cr_document": "Commercial Registration Copy",
+    "open_document": "Open File",
+    "load_failed": "Could not load this provider.",
+    "load_failed_hint": "The record may have been removed or the link is outdated. Return to the list and try another store.",
+    "back_to_list": "Back to providers",
+    "summary_since": "Store since",
+    "address_empty": "No address provided."
   }
 }

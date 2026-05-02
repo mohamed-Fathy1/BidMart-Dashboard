@@ -7,6 +7,7 @@ import type { AdminUserListItem } from "@/types/api";
 import { PageHeader } from "@/components/shared/page-header";
 import { SearchInput } from "@/components/shared/search-input";
 import { FilterSelect } from "@/components/shared/filter-select";
+import { TableFiltersShell } from "@/components/shared/table-filters-shell";
 import {
   DataTable,
   type RowActionItem,
@@ -23,6 +24,7 @@ import {
 } from "@/features/users/users.queries";
 import type { ListUsersParams } from "@/features/users/users.api";
 import { PERMISSIONS, usePermission } from "@/lib/permissions";
+import { format } from "@/lib/format";
 
 export function UsersListPage() {
   const { t } = useTranslation();
@@ -157,7 +159,15 @@ export function UsersListPage() {
 
   /* ---------- toolbar ---------- */
   const toolbar = (
-    <div className="flex flex-wrap items-center gap-3">
+    <TableFiltersShell
+      meta={
+        meta != null
+          ? t("users:meta.total_accounts", {
+              count: format.number(meta.total),
+            })
+          : undefined
+      }
+    >
       <SearchInput
         value={search}
         onChange={(v) => {
@@ -165,7 +175,7 @@ export function UsersListPage() {
           setPagination((p) => ({ ...p, pageIndex: 0 }));
         }}
         placeholder={t("users:filters.search_placeholder")}
-        className="w-64"
+        className="w-full min-w-[min(100%,220px)] sm:w-72"
       />
       <FilterSelect
         value={statusFilter}
@@ -175,6 +185,7 @@ export function UsersListPage() {
         }}
         options={statusOptions}
         placeholder={t("users:filters.status")}
+        className="min-w-[148px]"
       />
       <FilterSelect
         value={accountTypeFilter}
@@ -184,8 +195,9 @@ export function UsersListPage() {
         }}
         options={accountTypeOptions}
         placeholder={t("users:filters.account_type")}
+        className="min-w-[180px]"
       />
-    </div>
+    </TableFiltersShell>
   );
 
   /* ---------- render ---------- */

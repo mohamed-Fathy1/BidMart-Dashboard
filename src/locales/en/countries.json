@@ -1,6 +1,9 @@
 {
   "page_title": "Countries",
   "page_description": "Manage supported countries",
+  "meta": {
+    "total_countries": "{{count}} countries"
+  },
   "columns": {
     "flag": "Flag",
     "name_en": "Name (EN)",

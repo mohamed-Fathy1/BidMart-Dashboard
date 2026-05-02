@@ -6,6 +6,7 @@ import type { PaginationState } from '@tanstack/react-table'
 import type { RoleListItem, RolePermissionModule } from '@/types/api'
 import { PageHeader } from '@/components/shared/page-header'
 import { SearchInput } from '@/components/shared/search-input'
+import { TableFiltersShell } from '@/components/shared/table-filters-shell'
 import {
   DataTable,
   type RowActionItem,
@@ -31,6 +32,7 @@ import {
   useDeleteRoleMutation,
 } from '@/features/roles/roles.queries'
 import { cn } from '@/lib/utils'
+import { format } from '@/lib/format'
 
 function ModuleHeaderCheckbox({
   module,
@@ -276,7 +278,13 @@ export function RolesListPage() {
 
   const toolbar = useMemo(
     () => (
-      <div className="rounded-xl border border-border bg-card p-3 shadow-rest">
+      <TableFiltersShell
+        meta={
+          meta != null
+            ? t('roles:meta.total_roles', { count: format.number(meta.total) })
+            : undefined
+        }
+      >
         <SearchInput
           value={search}
           onChange={(v) => {
@@ -284,11 +292,11 @@ export function RolesListPage() {
             setPagination((p) => ({ ...p, pageIndex: 0 }))
           }}
           placeholder={t('roles:search_placeholder')}
-          className="w-full min-w-48 sm:max-w-md"
+          className="w-full min-w-[min(100%,220px)] sm:max-w-md"
         />
-      </div>
+      </TableFiltersShell>
     ),
-    [search, t],
+    [search, t, meta],
   )
 
   const hasRowMenu = canUpdate || canDelete

@@ -1,48 +1,89 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ColumnDef } from '@tanstack/react-table'
-import type { ProviderSummary } from '@/types/api'
+import type { ProviderSummary, ProviderVerificationStatus } from '@/types/api'
 import { StatusBadge } from '@/components/shared/status-badge'
 import { format } from '@/lib/format'
+import { providerAccountStatusForSellerBadge } from '@/features/providers/providers.api'
 
 export function useProviderColumns(): ColumnDef<ProviderSummary>[] {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   return useMemo(
     () => [
       {
-        accessorKey: 'nameEn',
-        header: t('providers:columns.name_en'),
+        accessorKey: 'accountName',
+        header: t('providers:columns.account_name'),
+        cell: ({ getValue }) => {
+          const name = getValue<string>()
+          return (
+            <span className="max-w-52 truncate font-medium text-foreground" title={name}>
+              {name}
+            </span>
+          )
+        },
       },
       {
-        accessorKey: 'nameAr',
-        header: t('providers:columns.name_ar'),
+        accessorKey: 'phoneNumber',
+        header: t('providers:columns.phone'),
+        cell: ({ getValue }) => {
+          const phone = getValue<string>()
+          return (
+            <span className="font-mono text-xs tabular-nums text-muted-foreground" title={phone}>
+              {phone}
+            </span>
+          )
+        },
       },
       {
-        accessorKey: 'user.fullName',
-        header: t('providers:columns.owner'),
+        id: 'country',
+        header: t('providers:columns.country'),
+        cell: ({ row }) => {
+          const c = row.original.country
+          if (!c) {
+            return (
+              <span className="text-sm text-muted-foreground">
+                {t('components:detail.not_available')}
+              </span>
+            )
+          }
+          const label = i18n.language === 'ar' ? c.name_ar : c.name_en
+          return (
+            <span className="max-w-36 truncate text-sm text-muted-foreground" title={label}>
+              {label}
+            </span>
+          )
+        },
       },
       {
-        accessorKey: 'user.email',
-        header: t('providers:columns.email'),
-        cell: ({ getValue }) => (
-          <span className="font-mono text-xs">{getValue<string>()}</span>
-        ),
+        accessorKey: 'commercialRegistrationNumber',
+        header: t('providers:columns.commercial_registration'),
+        cell: ({ getValue }) => {
+          const cr = getValue<string>()
+          return (
+            <span className="max-w-28 truncate font-mono text-xs tabular-nums text-muted-foreground" title={cr}>
+              {cr}
+            </span>
+          )
+        },
       },
       {
-        accessorKey: 'status',
-        header: t('providers:columns.status'),
-        cell: ({ getValue }) => (
-          <StatusBadge type="seller" status={getValue<string>()} />
-        ),
-      },
-      {
-        accessorKey: 'isVerified',
-        header: t('providers:columns.verified'),
+        accessorKey: 'verificationStatus',
+        header: t('providers:columns.documents'),
         cell: ({ getValue }) => (
           <StatusBadge
-            type="boolean"
-            status={getValue<boolean>() ? 'true' : 'false'}
+            type="providerVerification"
+            status={getValue<ProviderVerificationStatus>()}
+          />
+        ),
+      },
+      {
+        accessorKey: 'accountStatus',
+        header: t('providers:columns.account_status'),
+        cell: ({ getValue }) => (
+          <StatusBadge
+            type="seller"
+            status={providerAccountStatusForSellerBadge(getValue<string>())}
           />
         ),
       },
@@ -56,6 +97,6 @@ export function useProviderColumns(): ColumnDef<ProviderSummary>[] {
         ),
       },
     ],
-    [t],
+    [t, i18n.language],
   )
 }

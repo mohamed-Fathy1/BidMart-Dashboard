@@ -19,6 +19,11 @@
     "user_only": "User",
     "upgraded_to_seller": "Seller"
   },
+  "provider_verification": {
+    "pending_verification": "Pending verification",
+    "unverified": "Not verified",
+    "verified": "Documents verified"
+  },
   "search": {
     "placeholder": "Search...",
     "clear": "Clear search"

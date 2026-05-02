@@ -265,7 +265,7 @@ At repo root, in this order:
 
 Tight bullets. No prose essays.
 
-The authoritative root `CLAUDE.md` may add short **feature anchors** when useful (currently includes **Roles** and **Admins**: API paths relative to Axios `baseURL`, `User.roleId` / `User.isSuperAdmin`, guards, and optional `suppressInitialFocus` on `FormDialog` where relevant).
+The authoritative root `CLAUDE.md` may add short **feature anchors** when useful (currently includes **Roles**, **Admins**, and **Providers**: API paths relative to Axios `baseURL`, response unwrapping, permission guards, and—where relevant—JWT mirrors such as `User.roleId` / `User.isSuperAdmin` plus `suppressInitialFocus` on `FormDialog` for admins modals).
 
 ---
 

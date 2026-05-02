@@ -6,6 +6,7 @@ import { Ban, Plus, Pencil, Shield, Trash2, Unlock, User } from 'lucide-react'
 import type { PaginationState } from '@tanstack/react-table'
 import type { AdminAccountListItem } from '@/types/api'
 import { PageHeader } from '@/components/shared/page-header'
+import { TableFiltersShell } from '@/components/shared/table-filters-shell'
 import { SearchInput } from '@/components/shared/search-input'
 import { FilterSelect } from '@/components/shared/filter-select'
 import {
@@ -247,43 +248,35 @@ export function AdminsListPage() {
   }
 
   const toolbar = (
-    <div
-      className={cn(
-        'rounded-xl border border-border bg-card p-4 shadow-rest',
-        'transition-[background-color] duration-(--duration-hover) ease-(--ease-default)',
-      )}
-    >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-wrap items-center gap-3">
-          <SearchInput
-            value={search}
-            onChange={(v) => {
-              setSearch(v)
-              setPagination((p) => ({ ...p, pageIndex: 0 }))
-            }}
-            placeholder={t('admins:search_placeholder')}
-            className="w-full min-w-[min(100%,220px)] sm:w-72"
-          />
-          <FilterSelect
-            value={activeFilter}
-            onChange={(v) => {
-              setActiveFilter(v)
-              setPagination((p) => ({ ...p, pageIndex: 0 }))
-            }}
-            options={activeFilterOptions}
-            placeholder={t('admins:filters.status')}
-            className="min-w-[148px]"
-          />
-        </div>
-        {meta != null && (
-          <p className="text-sm text-muted-foreground lg:text-end">
-            {t('admins:meta.total_accounts', {
+    <TableFiltersShell
+      meta={
+        meta != null
+          ? t('admins:meta.total_accounts', {
               count: format.number(meta.total),
-            })}
-          </p>
-        )}
-      </div>
-    </div>
+            })
+          : undefined
+      }
+    >
+      <SearchInput
+        value={search}
+        onChange={(v) => {
+          setSearch(v)
+          setPagination((p) => ({ ...p, pageIndex: 0 }))
+        }}
+        placeholder={t('admins:search_placeholder')}
+        className="w-full min-w-[min(100%,220px)] sm:w-72"
+      />
+      <FilterSelect
+        value={activeFilter}
+        onChange={(v) => {
+          setActiveFilter(v)
+          setPagination((p) => ({ ...p, pageIndex: 0 }))
+        }}
+        options={activeFilterOptions}
+        placeholder={t('admins:filters.status')}
+        className="min-w-[148px]"
+      />
+    </TableFiltersShell>
   )
 
   const showRowActions = canUpdate || canDelete

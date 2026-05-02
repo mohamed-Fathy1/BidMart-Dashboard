@@ -19,6 +19,11 @@
     "user_only": "مستخدم",
     "upgraded_to_seller": "بائع"
   },
+  "provider_verification": {
+    "pending_verification": "قيد التحقق من المستندات",
+    "unverified": "غير موثّق",
+    "verified": "تم التحقق من المستندات"
+  },
   "search": {
     "placeholder": "بحث...",
     "clear": "مسح البحث"

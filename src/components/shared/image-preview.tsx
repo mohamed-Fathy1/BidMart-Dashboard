@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 interface ImagePreviewProps {
   src: string | null | undefined
   alt: string
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg' | 'xl'
   className?: string
 }
 
@@ -13,6 +13,7 @@ const sizeClasses = {
   sm: 'size-8 rounded-md',
   md: 'size-12 rounded-lg',
   lg: 'size-20 rounded-lg',
+  xl: 'size-24 rounded-xl',
 } as const
 
 export function ImagePreview({ src, alt, size = 'md', className }: ImagePreviewProps) {
@@ -31,7 +32,13 @@ export function ImagePreview({ src, alt, size = 'md', className }: ImagePreviewP
     >
       {showFallback ? (
         <div className="flex size-full items-center justify-center text-muted-foreground">
-          <ImageOffIcon className={cn(size === 'sm' ? 'size-3.5' : 'size-5')} />
+          <ImageOffIcon
+            className={cn(
+              size === 'sm' && 'size-3.5',
+              (size === 'md' || size === 'lg') && 'size-5',
+              size === 'xl' && 'size-6',
+            )}
+          />
         </div>
       ) : (
         <img

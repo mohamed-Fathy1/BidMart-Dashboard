@@ -1,6 +1,9 @@
 {
   "page_title": "الأدوار",
   "page_description": "إدارة أدوار المشرفين والصلاحيات",
+  "meta": {
+    "total_roles": "{{count}} دورًا"
+  },
   "search_placeholder": "بحث بالاسم بالإنجليزية أو العربية",
   "columns": {
     "name": "الاسم",

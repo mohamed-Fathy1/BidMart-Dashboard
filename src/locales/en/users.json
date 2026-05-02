@@ -1,6 +1,9 @@
 {
   "page_title": "Users",
   "page_description": "Manage registered users and sellers",
+  "meta": {
+    "total_accounts": "{{count}} accounts"
+  },
   "columns": {
     "account_name": "Account Name",
     "phone": "Phone",

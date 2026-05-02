@@ -49,6 +49,24 @@ REJECTED
 SUSPENDED
 ```
 
+### Admin provider API — store lifecycle (HTTP wire format)
+List rows expose **`accountStatus`**; detail exposes **`status`**. Both use the same **lowercase** literals (aligned with the dashboard + `Admin_API_integration_S1.json`):
+```
+pending
+approved
+rejected
+blocked
+```
+- **`blocked`** — admin-blocked seller (cannot trade / forced logout). Often maps to **`SUSPENDED`** in the `stores.status` column; clients should not assume uppercase enums on these JSON fields.
+- **`PATCH /admin/providers/:id/verify`** toggles **`isVerified`** (storefront badge) on **approved** stores only. That flag is **not** the same as **`verificationStatus`** on list rows (commercial-registration / KYC pipeline).
+
+### Admin provider API — `verificationStatus` (documents / CR pipeline)
+```
+pending_verification
+unverified
+verified
+```
+
 ### `AdminUserAccountType`
 ```
 user_only          ← regular user, no store
@@ -235,8 +253,9 @@ content
 **Business rules:**
 - `status = PENDING` → seller cannot edit store settings yet
 - `status = APPROVED` → seller has full access to their store panel
-- `is_verified = true` → blue verified badge shown to buyers
+- `is_verified = true` → verified badge shown to buyers (admin-toggled; see `PATCH /admin/providers/:storeId/verify`)
 - `commercial_registration_number` and `commercial_registration_doc` cannot be changed after store creation
+- **Admin JSON** may surface a blocked seller as `accountStatus`/`status` **`blocked`** while the DB column remains `SellerStatus` — treat as an implementation detail; see **§5b**.
 
 ---
 
@@ -784,6 +803,125 @@ Errors:
 
 ---
 
+## 5b — Admin: Providers (sellers / stores)
+
+> Token required + permissions `admin:providers:*` (see §8).  
+> **OpenAPI:** `Admin_API_integration_S1.json` — tag **Admin — Providers** (paths under `/api/v1/admin/providers`).  
+> **Dashboard:** `CLAUDE.md` § **Providers (sellers / stores)**; routes `/providers`, `/providers/:storeId`; feature folder `src/features/providers/` (`providers.api.ts`, `providers.queries.ts`, `providers.columns.tsx`, `providers-list-page.tsx`, `provider-detail-page.tsx`). Axios calls use paths **relative to `VITE_API_URL`** (typically `/admin/providers/...` when base includes `/api/v1`).
+
+### `GET /admin/providers`
+Query params (all optional):
+
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| `search` | string | — | Matches account name, phone, or store name |
+| `status` | string | — | Filter: `pending` · `approved` · `rejected` · `blocked` (lowercase, same as list `accountStatus`) |
+| `page` | number | 1 | Page index |
+| `limit` | number | 20 | Page size (max per gateway) |
+
+Response **`200`** — envelope:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "store-uuid",
+      "accountName": "Ahmed Store",
+      "phoneNumber": "+966501234567",
+      "verificationStatus": "unverified",
+      "commercialRegistrationNumber": "1234567890",
+      "country": { "id": "country-uuid", "name_en": "Saudi Arabia", "name_ar": "السعودية" },
+      "accountStatus": "pending",
+      "createdAt": "2026-05-02T18:51:14.627Z"
+    }
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "page": 1,
+    "limit": 20,
+    "total": 44,
+    "totalPages": 3,
+    "hasNextPage": true,
+    "hasPrevPage": false
+  }
+}
+```
+- `country` may be **`null`**.  
+- **`verificationStatus`** — commercial registration / KYC (not the storefront **`isVerified`** badge).  
+- Sorted **newest first** (default).
+
+---
+
+### `GET /admin/providers/:storeId`
+Response **`200`** — envelope with full store + owner + documents:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "store-uuid",
+    "storeLogo": "https://...",
+    "isVerified": false,
+    "status": "pending",
+    "country": { "id": "...", "name_en": "Saudi Arabia", "name_ar": "السعودية" },
+    "detailedAddress": "…",
+    "returnPolicy": { "ar": null, "en": null },
+    "owner": {
+      "id": "user-uuid",
+      "fullName": "Ahmed Ali",
+      "email": "seller@example.com",
+      "phoneNumber": "+966501234567",
+      "accountStatus": "active",
+      "registeredAt": "2026-05-02T18:42:51.844Z"
+    },
+    "documents": {
+      "commercialRegistrationNumber": "…",
+      "commercialRegistrationDoc": "https://...pdf",
+      "verificationStatus": "unverified"
+    },
+    "createdAt": "2026-05-02T18:44:27.644Z"
+  },
+  "meta": { "version": "1.0.0" }
+}
+```
+
+Errors: `400` invalid UUID, `404` not found.
+
+---
+
+### `PATCH /admin/providers/:storeId/approve`
+No body. Response **`204`**. Sets store to approved and user to seller; creates wallet if missing.  
+**`409`** — not pending, already resolved, or **owner user is banned**.
+
+---
+
+### `PATCH /admin/providers/:storeId/reject`
+Request:
+```json
+{ "reason": "Commercial registration document is invalid or expired" }
+```
+Response **`204`**. Seller notified; may re-apply.  
+**`409`** — store is not **`pending`**.
+
+---
+
+### `PATCH /admin/providers/:storeId/verify`
+No body. Response **`200`** — toggles **`isVerified`** badge. Body is either `{ "isVerified": true }` or wrapped `{ "success": true, "data": { "isVerified": true } }` depending on gateway.  
+**`409`** — store is not **approved**.
+
+---
+
+### `PATCH /admin/providers/:storeId/block`
+No body. Response **`204`**. Blocks seller (hide catalog, force logout).  
+**`409`** — already blocked or store not **approved**.
+
+---
+
+### `PATCH /admin/providers/:storeId/unblock`
+No body. Response **`204`**. Restores **approved** store.  
+**`409`** — store is not blocked.
+
+---
+
 ## 6 — Admin: Roles
 
 > Token required + permissions `admin:roles:*`.
@@ -1055,6 +1193,8 @@ Errors: `409` already active.
 | Unblock administrator | `admin:admins:update` |
 
 The JWT payload contains a `permissions` array. Check that the required permission is present before showing action buttons in the UI.
+
+**Providers (sellers):** full wire shapes, filters, and dashboard mapping — **§5b** above and root **`CLAUDE.md`** (Providers).
 
 ---
 

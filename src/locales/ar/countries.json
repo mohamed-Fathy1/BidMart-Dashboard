@@ -1,6 +1,9 @@
 {
   "page_title": "الدول",
   "page_description": "إدارة الدول المدعومة",
+  "meta": {
+    "total_countries": "{{count}} دولة"
+  },
   "columns": {
     "flag": "العلم",
     "name_en": "الاسم (EN)",

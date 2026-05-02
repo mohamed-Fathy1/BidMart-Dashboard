@@ -155,28 +155,70 @@ export interface SubCategory {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Providers                                                          */
+/*  Providers (admin seller / store management)                          */
 /* ------------------------------------------------------------------ */
 
-export interface ProviderUser {
+export interface ProviderCountryRef {
   id: string;
-  fullName: string;
-  email: string;
+  name_en: string;
+  name_ar: string;
 }
+
+/** KYC / docs verification column on list rows and detail.documents */
+export type ProviderVerificationStatus =
+  | "pending_verification"
+  | "unverified"
+  | "verified";
+
+/** Store account lifecycle from GET /admin/providers and detail.status */
+export type ProviderAccountStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "blocked";
 
 export interface ProviderSummary {
   id: string;
-  nameEn: string;
-  nameAr: string;
-  status: SellerStatus;
-  isVerified: boolean;
-  user: ProviderUser;
+  accountName: string;
+  phoneNumber: string;
+  verificationStatus: ProviderVerificationStatus;
+  commercialRegistrationNumber: string;
+  country: ProviderCountryRef | null;
+  accountStatus: ProviderAccountStatus;
   createdAt: string;
 }
 
-export interface ProviderDetail extends ProviderSummary {
-  averageRating: number;
-  totalSold: number;
+export interface ProviderOwner {
+  id: string;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  accountStatus: string;
+  registeredAt: string;
+}
+
+export interface ProviderDocuments {
+  commercialRegistrationNumber: string;
+  commercialRegistrationDoc: string | null;
+  verificationStatus: ProviderVerificationStatus;
+}
+
+export interface ProviderReturnPolicy {
+  ar: string | null;
+  en: string | null;
+}
+
+export interface ProviderDetail {
+  id: string;
+  storeLogo: string | null;
+  isVerified: boolean;
+  status: ProviderAccountStatus;
+  country: ProviderCountryRef | null;
+  detailedAddress: string | null;
+  returnPolicy: ProviderReturnPolicy;
+  owner: ProviderOwner;
+  documents: ProviderDocuments;
+  createdAt: string;
 }
 
 /* ------------------------------------------------------------------ */
