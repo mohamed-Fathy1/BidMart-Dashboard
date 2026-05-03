@@ -4,17 +4,16 @@ import { Sidebar } from '@/components/layout/sidebar'
 import { Topbar } from '@/components/layout/topbar'
 
 interface ShellProps {
-  title?: string
   children: ReactNode
 }
 
-export function Shell({ title, children }: ShellProps) {
+export function Shell({ children }: ShellProps) {
   const collapsed = useUIStore((s) => s.sidebarCollapsed)
 
   return (
 
     <div className="flex h-screen flex-col bg-sidebar-background">
-      <Topbar title={title} />
+      <Topbar />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         <div

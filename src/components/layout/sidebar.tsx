@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useMatchRoute, useRouterState } from '@tanstack/react-router'
+import { Link, useMatchRoute, useNavigate, useRouterState } from '@tanstack/react-router'
 import { ChevronsLeft, ChevronsRight, ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
@@ -167,6 +167,7 @@ function NavGroupItem({
 }) {
   const { t } = useTranslation()
   const matchRoute = useMatchRoute()
+  const navigate = useNavigate()
   const Icon = group.icon
   const hasActiveChild = !!matchRoute({ to: group.matchPath, fuzzy: true })
   const [open, setOpen] = useState(hasActiveChild)
@@ -180,46 +181,63 @@ function NavGroupItem({
     setTooltipOpen(false)
   }, [collapsed])
 
-  // Collapsed sidebar: show only the parent icon, navigate to defaultTo on click.
-  // Children are not shown here (no flyout) — sidebar expansion reveals them.
-  if (collapsed) {
-    return (
+  function handleClick() {
+    if (collapsed) {
+      navigate({ to: group.defaultTo })
+    } else {
+      setOpen((v) => !v)
+    }
+  }
+
+  return (
+    <div>
       <Tooltip
         delayDuration={0}
-        open={tooltipOpen}
-        onOpenChange={setTooltipOpen}
+        open={collapsed ? tooltipOpen : false}
+        onOpenChange={(next) => {
+          if (collapsed) setTooltipOpen(next)
+        }}
       >
         <TooltipTrigger asChild>
           <div
             className="overflow-visible"
             style={{
-              width: 'calc(var(--sidebar-collapsed-width) - 24px)',
+              width: collapsed
+                ? 'calc(var(--sidebar-collapsed-width) - 24px)'
+                : '100%',
               transition: 'width var(--duration-layout) var(--ease-sidebar)',
             }}
           >
-            <Link
-              to={group.defaultTo}
+            <button
+              type="button"
+              onClick={handleClick}
+              aria-expanded={collapsed ? undefined : open}
+              aria-controls={collapsed ? undefined : `navgroup-${group.matchPath}`}
               className={cn(
-                'group/link relative flex h-10 items-center gap-3 rounded-[var(--radius-md)] ps-3 pe-3 text-sm font-medium',
+                'group/group relative flex h-10 w-full items-center gap-3 rounded-[var(--radius-md)] ps-3 pe-3 text-sm font-medium text-start',
                 'transition-colors duration-[var(--duration-hover)] ease-[var(--ease-default)]',
                 hasActiveChild
-                  ? 'text-primary bg-primary/10'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted',
+                  ? 'text-primary'
+                  : 'text-muted-foreground hover:text-foreground',
               )}
             >
+              {/* animated bg span — inlineSize transitions with sidebar width */}
               <span
                 className={cn(
                   'pointer-events-none absolute inset-block-0 inset-inline-start-0 rounded-[var(--radius-md)]',
                   hasActiveChild
                     ? 'bg-primary/10'
-                    : 'bg-transparent group-hover/link:bg-muted-foreground/10',
+                    : 'bg-transparent group-hover/group:bg-muted-foreground/10',
                 )}
                 style={{
-                  inlineSize: 'calc(var(--sidebar-collapsed-width) - 24px)',
+                  inlineSize: collapsed
+                    ? 'calc(var(--sidebar-collapsed-width) - 24px)'
+                    : '100%',
                   transition:
                     'inline-size var(--duration-layout) var(--ease-sidebar), background-color var(--duration-hover) var(--ease-default)',
                 }}
               />
+              {/* active edge bar */}
               <span
                 className={cn(
                   'absolute -start-3 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-e-full bg-primary',
@@ -228,7 +246,25 @@ function NavGroupItem({
                 )}
               />
               <Icon className="relative z-[1] h-[18px] w-[18px] shrink-0" />
-            </Link>
+              <span
+                className={cn(
+                  'relative z-[1] flex-1 whitespace-nowrap',
+                  'transition-opacity duration-[var(--duration-layout)] ease-[var(--ease-sidebar)]',
+                  collapsed ? 'opacity-0' : 'opacity-100',
+                )}
+              >
+                {t(group.labelKey)}
+              </span>
+              <ChevronRight
+                className={cn(
+                  'relative z-[1] h-4 w-4 shrink-0 text-muted-foreground/70',
+                  'transition-[transform,opacity] duration-[var(--duration-layout)] ease-[var(--ease-sidebar)]',
+                  'rtl:rotate-180',
+                  open && !collapsed && 'rotate-90 rtl:rotate-90',
+                  collapsed ? 'opacity-0' : 'opacity-100',
+                )}
+              />
+            </button>
           </div>
         </TooltipTrigger>
         <TooltipContent
@@ -239,54 +275,16 @@ function NavGroupItem({
           {t(group.labelKey)}
         </TooltipContent>
       </Tooltip>
-    )
-  }
 
-  return (
-    <div>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        aria-controls={`navgroup-${group.matchPath}`}
-        className={cn(
-          'group/group relative flex h-10 w-full items-center gap-3 rounded-[var(--radius-md)] ps-3 pe-3 text-sm font-medium text-start',
-          'transition-colors duration-[var(--duration-hover)] ease-[var(--ease-default)]',
-          hasActiveChild
-            ? 'text-foreground'
-            : 'text-muted-foreground hover:text-foreground',
-        )}
-      >
-        <span
-          className={cn(
-            'pointer-events-none absolute inset-0 rounded-[var(--radius-md)]',
-            'transition-colors duration-[var(--duration-hover)] ease-[var(--ease-default)]',
-            'bg-transparent group-hover/group:bg-muted-foreground/10',
-          )}
-        />
-        <Icon className="relative z-[1] h-[18px] w-[18px] shrink-0" />
-        <span className="relative z-[1] flex-1 whitespace-nowrap">
-          {t(group.labelKey)}
-        </span>
-        <ChevronRight
-          className={cn(
-            'relative z-[1] h-4 w-4 shrink-0 text-muted-foreground/70',
-            'transition-transform duration-[var(--duration-layout)] ease-[var(--ease-sidebar)]',
-            'rtl:rotate-180',
-            open && 'rotate-90 rtl:rotate-90',
-          )}
-        />
-      </button>
-
+      {/* Children — always mounted; animated by grid-template-rows + opacity */}
       <div
         id={`navgroup-${group.matchPath}`}
-        className={cn(
-          'grid overflow-hidden',
-          'transition-[grid-template-rows,opacity] duration-[var(--duration-layout)] ease-[var(--ease-sidebar)]',
-        )}
+        className="grid overflow-hidden"
         style={{
-          gridTemplateRows: open ? '1fr' : '0fr',
-          opacity: open ? 1 : 0,
+          gridTemplateRows: !collapsed && open ? '1fr' : '0fr',
+          opacity: !collapsed && open ? 1 : 0,
+          transition:
+            'grid-template-rows var(--duration-layout) var(--ease-sidebar), opacity var(--duration-layout) var(--ease-sidebar)',
         }}
       >
         <div className="min-h-0">

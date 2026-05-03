@@ -21,10 +21,18 @@
   },
   "topbar": {
     "notifications": "الإشعارات",
+    "notifications_empty": "لا توجد إشعارات حالياً.",
+    "notifications_empty_hint": "سنعرض هنا أي شيء يستدعي انتباهك.",
     "profile": "الملف الشخصي",
     "my_profile": "ملفي الشخصي",
     "logout": "تسجيل الخروج",
-    "language": "اللغة"
+    "language": "اللغة",
+    "search": "بحث",
+    "search_placeholder": "انتقل إلى صفحة…",
+    "search_empty": "لا توجد نتائج.",
+    "navigate": "الانتقال",
+    "account": "الحساب",
+    "detail": "التفاصيل"
   },
   "sidebar": {
     "collapse": "طي القائمة",

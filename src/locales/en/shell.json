@@ -21,10 +21,18 @@
   },
   "topbar": {
     "notifications": "Notifications",
+    "notifications_empty": "You're all caught up.",
+    "notifications_empty_hint": "We'll surface anything that needs your attention here.",
     "profile": "Profile",
     "my_profile": "My profile",
     "logout": "Logout",
-    "language": "Language"
+    "language": "Language",
+    "search": "Search",
+    "search_placeholder": "Jump to a page…",
+    "search_empty": "No matches.",
+    "navigate": "Navigate",
+    "account": "Account",
+    "detail": "Detail"
   },
   "sidebar": {
     "collapse": "Collapse sidebar",
