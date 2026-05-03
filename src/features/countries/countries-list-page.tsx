@@ -1,5 +1,6 @@
 import { useState, useMemo, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { Plus, Pencil, Trash2, ToggleLeft } from "lucide-react";
 import type { PaginationState } from "@tanstack/react-table";
 import type { Country } from "@/types/api";
@@ -132,6 +133,17 @@ export function CountriesListPage() {
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
+  const canSave = useMemo(() => {
+    const nameEnOk = nameEn.trim().length > 0;
+    const nameArOk = nameAr.trim().length > 0;
+    const imageOk = imageUrl.trim().length > 0;
+    const orderOk = Number.isFinite(sortOrder) && sortOrder >= 0;
+    const iso = isoCode.trim().toUpperCase();
+    const isoOk =
+      !!editTarget || (iso.length === 3 && /^[A-Z]{3}$/.test(iso));
+    return nameEnOk && nameArOk && imageOk && orderOk && isoOk;
+  }, [nameEn, nameAr, isoCode, imageUrl, sortOrder, editTarget]);
+
   /* ---------- filter options ---------- */
   const enabledOptions = useMemo(
     () => [
@@ -157,10 +169,14 @@ export function CountriesListPage() {
           : t("countries:actions.enable"),
         icon: ToggleLeft,
         onClick: (r) => toggleMutation.mutate(r.id),
+        disabled: toggleMutation.isPending,
       });
     }
 
     if (canDelete) {
+      if (canUpdate) {
+        items.push({ type: "separator" });
+      }
       items.push({
         label: t("countries:actions.delete"),
         icon: Trash2,
@@ -174,14 +190,40 @@ export function CountriesListPage() {
 
   /* ---------- handlers ---------- */
   function handleSubmit() {
+    const name_en = nameEn.trim();
+    const name_ar = nameAr.trim();
+    const iso_code = isoCode.trim().toUpperCase();
+    const image_url = imageUrl.trim();
+
+    if (!name_en) {
+      toast.error(t("countries:errors.name_en_required"));
+      return;
+    }
+    if (!name_ar) {
+      toast.error(t("countries:errors.name_ar_required"));
+      return;
+    }
+    if (!editTarget && (iso_code.length !== 3 || !/^[A-Z]{3}$/.test(iso_code))) {
+      toast.error(t("countries:errors.iso_invalid"));
+      return;
+    }
+    if (!image_url) {
+      toast.error(t("countries:errors.image_required"));
+      return;
+    }
+    if (!Number.isFinite(sortOrder) || sortOrder < 0) {
+      toast.error(t("countries:errors.sort_order_invalid"));
+      return;
+    }
+
     if (editTarget) {
       updateMutation.mutate(
         {
           id: editTarget.id,
           payload: {
-            name_en: nameEn,
-            name_ar: nameAr,
-            image_url: imageUrl,
+            name_en,
+            name_ar,
+            image_url,
             is_enabled: isEnabled,
             sort_order: sortOrder,
           },
@@ -196,10 +238,10 @@ export function CountriesListPage() {
     } else {
       createMutation.mutate(
         {
-          name_en: nameEn,
-          name_ar: nameAr,
-          iso_code: isoCode,
-          image_url: imageUrl,
+          name_en,
+          name_ar,
+          iso_code,
+          image_url,
           is_enabled: isEnabled,
           sort_order: sortOrder,
         },
@@ -218,8 +260,8 @@ export function CountriesListPage() {
       meta={
         meta != null
           ? t("countries:meta.total_countries", {
-              count: format.number(meta.total),
-            })
+            count: format.number(meta.total),
+          })
           : undefined
       }
     >
@@ -272,6 +314,7 @@ export function CountriesListPage() {
         toolbar={toolbar}
         actions={canUpdate || canDelete ? getRowActions : undefined}
         getRowId={(row) => row.id}
+        onRowClick={canUpdate ? (row) => openEdit(row) : undefined}
       />
 
       {/* Create / Edit dialog */}
@@ -291,6 +334,7 @@ export function CountriesListPage() {
         description={t("countries:form.dialog_description")}
         isEdit={!!editTarget}
         isLoading={isSubmitting}
+        submitDisabled={!canSave}
         onSubmit={handleSubmit}
         contentClassName="sm:max-w-2xl"
         suppressInitialFocus
@@ -327,7 +371,7 @@ export function CountriesListPage() {
           <Separator className="my-6" />
 
           <FormSection title={t("countries:form.section_codes")}>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 items-start">
               <div className="grid gap-2">
                 <Label htmlFor="country-iso">
                   {t("countries:form.iso_code")}

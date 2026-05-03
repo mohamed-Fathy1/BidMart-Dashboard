@@ -181,7 +181,7 @@ content
 
 **Business rules:**
 - Only countries where `is_enabled = true` appear in `GET /countries` (public endpoint for registration dropdowns)
-- Admin can toggle `is_enabled` via `PATCH /admin/countries/:id`
+- Admin can toggle `is_enabled` via **`PATCH /admin/countries/:id/toggle`** (dashboard) or partial **`PATCH /admin/countries/:id`** with `is_enabled`
 
 ---
 
@@ -599,19 +599,25 @@ Response **`204`**. **`deleteFile`** / **`extractS3Key`** in **`lib/upload.ts`**
 
 ## 2 — Admin: Countries
 
-> Token required + permission `admin:countries:*`. Country flag / image URLs are usually set via presigned upload — see **§1b — Admin: Files (S3 presign)**.
+> Token required + permission `admin:countries:*`. Country flag / image URLs are set via presigned upload — see **§1b — Admin: Files (S3 presign)**.  
+> **Dashboard:** root **`CLAUDE.md`** — **Countries (admin reference data)**; implementation in **`features/countries/`**.
 
 ### `GET /admin/countries`
-Query params (all optional):
+
+Paginated list, sorted alphabetically by English name (per API). Query params (all optional):
+
 | Param | Type | Default | Description |
 |-------|------|---------|-------------|
+| `search` | string | — | Search by name (EN or AR) |
+| `isEnabled` | boolean | — | Filter enabled / disabled |
 | `page` | number | 1 | Page number |
-| `limit` | number | 10 | Max 100 |
-| `isEnabled` | boolean | — | Filter by enabled/disabled |
+| `limit` | number | 10 | Page size (max 100) |
 
-Response `200`:
+Response **`200`** (typical envelope):
+
 ```json
 {
+  "success": true,
   "data": [
     {
       "id": "uuid",
@@ -621,18 +627,22 @@ Response `200`:
       "image_url": "https://flagcdn.com/w320/sa.png",
       "is_enabled": true,
       "sort_order": 1,
-      "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2024-01-01T00:00:00.000Z"
+      "created_at": "2026-04-15T21:51:42.149Z",
+      "updated_at": "2026-04-15T21:51:42.149Z"
     }
   ],
-  "meta": { "page": 1, "limit": 10, "total": 5, "totalPages": 1, "hasNextPage": false, "hasPrevPage": false }
+  "meta": { "page": 1, "limit": 10, "total": 20, "totalPages": 2, "hasNextPage": true, "hasPrevPage": false }
 }
 ```
+
+List rows may omit **`updated_at`** depending on deployment. **`listCountries`** unwraps **`data`** and **`meta`**.
 
 ---
 
 ### `POST /admin/countries`
+
 Request:
+
 ```json
 {
   "name_en": "Saudi Arabia",
@@ -640,39 +650,57 @@ Request:
   "iso_code": "SAU",
   "image_url": "https://flagcdn.com/w320/sa.png",
   "is_enabled": true,
-  "sort_order": 1
+  "sort_order": 0
 }
 ```
-- `iso_code`: 2–3 letters only (auto-uppercased)
-- `is_enabled` and `sort_order` are optional (defaults: `true`, `0`)
 
-Response `201`: same shape as a single country object above.
+- **`iso_code`**: three uppercase letters (ISO 3166-1 alpha-3 style; dashboard enforces **3** chars on create).
+- **`is_enabled`** and **`sort_order`** optional (defaults: `true`, `0`).
+
+Response **`201`**: wrapped payload `{ success, data: { …country }, meta? }`; **`createCountry`** unwraps **`data`**.
 
 Errors:
+
 | Status | Meaning |
 |--------|---------|
-| 409 | `iso_code` already exists |
+| 400 | Validation |
+| 409 | Duplicate name or **`iso_code`** |
 
 ---
 
 ### `PATCH /admin/countries/:id`
-All fields optional — send only what changed:
+
+Partial update — **no `iso_code`** in body (immutable after create).
+
 ```json
 {
   "name_en": "Saudi Arabia",
   "name_ar": "السعودية",
-  "iso_code": "SAU",
   "image_url": "https://...",
   "is_enabled": false,
   "sort_order": 2
 }
 ```
-Response `200`: updated country object.
+
+Response **`200`**: `{ success, data: { …country }, meta? }`; **`updateCountry`** unwraps **`data`**.
+
+Errors: **404** not found; **409** duplicate name.
+
+---
+
+### `PATCH /admin/countries/:id/toggle`
+
+Toggles **`is_enabled`** (registration dropdown visibility). No body.
+
+Response **`200`**: `{ isEnabled: boolean }` (or wrapped / `is_enabled` — dashboard normalizes in **`toggleCountryEnabled`**).
 
 ---
 
 ### `DELETE /admin/countries/:id`
-Response `204 No Content`. Permanent delete.
+
+Response **`204 No Content`**. Permanent delete.
+
+**409** if registered users are linked to the country.
 
 ---
 

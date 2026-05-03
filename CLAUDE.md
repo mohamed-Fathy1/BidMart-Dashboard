@@ -28,6 +28,7 @@
 - **Providers example:** `providers.api.ts`, `providers.queries.ts`, `providers.columns.tsx`, `providers-list-page.tsx`, `provider-detail-page.tsx` (list `routes/_authed.providers.tsx`, detail `routes/_authed.providers.$storeId.tsx`)
 - **Categories example:** `categories.api.ts`, `categories.queries.ts`, `categories.columns.tsx`, `categories-section-tabs.tsx`, `categories-list-page.tsx`, `sub-categories.columns.tsx`, `sub-categories-list-page.tsx` (layout `routes/_authed.categories.tsx` + index `routes/_authed.categories.index.tsx`, hub `routes/_authed.categories.sub-categories.tsx`, nested `routes/_authed.categories.$categoryId.sub-categories.tsx`)
 - **Profile (authenticated admin):** `profile-page.tsx` in `features/profile/` (`routes/_authed.profile.tsx` → **`/profile`**); profile HTTP colocated in **`auth.api.ts`**
+- **Countries example:** `countries.api.ts`, `countries.queries.ts`, `countries.columns.tsx`, `countries-list-page.tsx` (`routes/_authed.countries.tsx` → **`/countries`**)
 
 ## Admin — Auth
 
@@ -61,6 +62,17 @@
 - Auth: JWT includes `is_super_admin`; session **`User.isSuperAdmin`** is taken from **`GET /admin/profile`** after hydration (login still seeds from JWT). UI-only guards (no edit/delete/block/unblock for another super admin except where self-edit applies; no delete/block self). Server remains authoritative (`403`/`409`).
 - Guards: route uses `PERMISSIONS.admins.view`; header create uses `<Can permission={PERMISSIONS.admins.create}>`. Row actions gate on `admins.update` (edit, block, unblock) and `admins.delete` (delete)—there are no separate JWT strings for block/unblock today.
 - Forms: this modal passes `suppressInitialFocus` on `FormDialog` (`components/shared/form-dialog.tsx`) so opening does not auto-focus the first input (avoids one field showing an isolated focus ring); programmatic focus lands on the dialog title instead.
+
+## Countries (admin reference data)
+
+- OpenAPI: repo **`Admin_API_integration_S1.json`** — tag **Admin — Countries** (`CountryDto`, **`CreateCountryDto`**, **`UpdateCountryDto`**, list **`{ success, data, meta }`**, **`PATCH …/{id}/toggle`**).
+- UI: **`/countries`**, **`routes/_authed.countries.tsx`** → **`features/countries/countries-list-page.tsx`** with **`DataTable`**; locale namespace **`countries`**.
+- Colocated files (flat **`features/countries/`**): **`countries.api.ts`**, **`countries.queries.ts`**, **`countries.columns.tsx`**, **`countries-list-page.tsx`**, **`countries.mock.ts`** (optional).
+- HTTP (paths relative to Axios **`baseURL`**): list **`GET /admin/countries`** — **`search`** (name EN or AR), **`isEnabled`** (boolean), **`page`**, **`limit`** (default **10**). Response **`{ success, data, meta }`**; **`listCountries`** returns **`{ data, meta }`**. **`POST /admin/countries`** body **`name_en`**, **`name_ar`**, **`iso_code`**, **`image_url`**, optional **`is_enabled`**, **`sort_order`** — unwrap created country from **`data`**. **`PATCH /admin/countries/{id}`** partial update (**no `iso_code`** in body; UI keeps ISO read-only after create). **`PATCH /admin/countries/{id}/toggle`** toggles **`is_enabled`**; response **`{ isEnabled }`** or nested / snake_case — unwrapped in **`toggleCountryEnabled`**. **`DELETE /admin/countries/{id}`** — **204**; **409** if users are linked.
+- Types (`types/api.ts`): **`Country`** — list rows may omit **`updated_at`**; **`iso_code`** is three-letter; snake_case fields match API.
+- List UX: **`TableFiltersShell`** + **`SearchInput`** + **`FilterSelect`** (enabled/disabled); combined **country** column (flag + bilingual names); **`onRowClick`** opens edit when **`countries.update`**; row actions: edit, enable/disable via **toggle** endpoint ( **`countries.update`**), delete (**`countries.delete`**) with menu separator before delete; **`FormDialog`** **`sm:max-w-2xl`**, **`suppressInitialFocus`**, sectioned form, client validation + **`submitDisabled`**, **`ImageUploadField`** **`country_image`**.
+- Errors: **`extractMutationError`** in **`countries.queries.ts`** → **`toast.error`** with **`countries:errors.*`** (mutations + validation toasts).
+- Guards: route **`PERMISSIONS.countries.view`**; create/edit/toggle/delete gated with **`<Can>`** and **`PERMISSIONS.countries.create` \| `update` \| `delete`**.
 
 ## Users (buyers — buyer management)
 

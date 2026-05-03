@@ -1208,8 +1208,17 @@
     "/api/v1/admin/countries": {
       "get": {
         "operationId": "CountryAdminController_listCountries",
-        "summary": "List countries with optional pagination and isEnabled filter",
+        "summary": "List countries (search, enabled filter, pagination; sorted by English name)",
         "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search by country name (English or Arabic)",
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "isEnabled",
             "required": false,
@@ -1286,7 +1295,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CountryDto"
+                  "$ref": "#/components/schemas/AdminCountryWriteResponseDto"
                 }
               }
             }
@@ -1301,7 +1310,7 @@
             "description": "Insufficient permissions"
           },
           "409": {
-            "description": "Country iso_code already exists"
+            "description": "Duplicate country name or iso_code"
           }
         },
         "tags": ["Admin — Countries"],
@@ -1315,7 +1324,7 @@
     "/api/v1/admin/countries/{id}": {
       "patch": {
         "operationId": "CountryAdminController_updateCountry",
-        "summary": "Update country details or toggle is_enabled",
+        "summary": "Update country details (partial; no iso_code)",
         "parameters": [
           {
             "name": "id",
@@ -1343,7 +1352,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CountryDto"
+                  "$ref": "#/components/schemas/AdminCountryWriteResponseDto"
                 }
               }
             }
@@ -1359,6 +1368,9 @@
           },
           "404": {
             "description": "Country not found"
+          },
+          "409": {
+            "description": "Duplicate country name"
           }
         },
         "tags": ["Admin — Countries"],
@@ -1385,6 +1397,58 @@
         "responses": {
           "204": {
             "description": "Country deleted"
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "Country not found"
+          },
+          "409": {
+            "description": "Country is linked to registered users"
+          }
+        },
+        "tags": ["Admin — Countries"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/countries/{id}/toggle": {
+      "patch": {
+        "operationId": "CountryAdminController_toggleCountry",
+        "summary": "Toggle country enabled/disabled",
+        "description": "Toggles is_enabled. Enabled countries appear in the registration country list.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Country UUID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Toggle result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CountryToggleResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid UUID"
@@ -4386,13 +4450,16 @@
           "image_url",
           "is_enabled",
           "sort_order",
-          "created_at",
-          "updated_at"
+          "created_at"
         ]
       },
       "PaginatedCountriesDto": {
         "type": "object",
         "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
           "data": {
             "type": "array",
             "items": {
@@ -4403,7 +4470,7 @@
             "$ref": "#/components/schemas/PaginationMetaDto"
           }
         },
-        "required": ["data", "meta"]
+        "required": ["success", "data", "meta"]
       },
       "CreateCountryDto": {
         "type": "object",
@@ -4461,6 +4528,35 @@
             "minimum": 0
           }
         }
+      },
+      "CountryToggleResponseDto": {
+        "type": "object",
+        "description": "New is_enabled value after toggle (flat or nested `data` on some gateways)",
+        "properties": {
+          "isEnabled": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": ["isEnabled"]
+      },
+      "AdminCountryWriteResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/CountryDto"
+          },
+          "meta": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Optional envelope (e.g. API version)"
+          }
+        },
+        "required": ["success", "data"]
       },
       "UpgradeToSellerDto": {
         "type": "object",

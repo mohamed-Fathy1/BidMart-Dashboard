@@ -34,7 +34,12 @@
     "create_failed": "تعذر إنشاء الدولة",
     "update_failed": "تعذر تحديث الدولة",
     "delete_failed": "تعذر حذف الدولة",
-    "toggle_failed": "تعذر تحديث التفعيل"
+    "toggle_failed": "تعذر تحديث التفعيل",
+    "name_en_required": "أدخل الاسم بالإنجليزية.",
+    "name_ar_required": "أدخل الاسم بالعربية.",
+    "iso_invalid": "أدخل رمز ISO من ثلاثة أحرف (مثل SAU).",
+    "image_required": "أضف صورة للعلم.",
+    "sort_order_invalid": "ترتيب العرض يجب أن يكون صفراً أو أكبر."
   },
   "form": {
     "dialog_description": "الأسماء وصورة العلم والرمز يحددان ظهور الدولة في قائمة التسجيل.",

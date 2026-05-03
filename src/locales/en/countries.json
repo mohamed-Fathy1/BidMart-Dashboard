@@ -34,7 +34,12 @@
     "create_failed": "Could not create country",
     "update_failed": "Could not update country",
     "delete_failed": "Could not delete country",
-    "toggle_failed": "Could not update availability"
+    "toggle_failed": "Could not update availability",
+    "name_en_required": "Enter the English name.",
+    "name_ar_required": "Enter the Arabic name.",
+    "iso_invalid": "Enter a 3-letter ISO code (e.g. SAU).",
+    "image_required": "Add a flag image.",
+    "sort_order_invalid": "Sort order must be zero or greater."
   },
   "form": {
     "dialog_description": "Names, flag image, and ISO code determine how the country appears in the registration list.",
