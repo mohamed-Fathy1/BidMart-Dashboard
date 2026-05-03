@@ -48,10 +48,10 @@ function NavLink({ item, collapsed }: { item: NavLeaf; collapsed: boolean }) {
             to={item.to}
             className={cn(
               'group/link relative flex h-10 items-center gap-3 rounded-[var(--radius-md)] ps-3 pe-3 text-sm font-medium',
-              'transition-colors duration-[var(--duration-hover)] ease-[var(--ease-default)]',
+              'transition-colors duration-[var(--duration-hover)] ease-[var(--ease-default)] border border-transparent',
               isActive
                 ? 'text-primary bg-primary/10'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted',
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted-foreground/5 hover:border-border',
             )}
           >
             <span
@@ -215,10 +215,10 @@ function NavGroupItem({
               aria-controls={collapsed ? undefined : `navgroup-${group.matchPath}`}
               className={cn(
                 'group/group relative flex h-10 w-full items-center gap-3 rounded-[var(--radius-md)] ps-3 pe-3 text-sm font-medium text-start',
-                'transition-colors duration-[var(--duration-hover)] ease-[var(--ease-default)]',
+                'transition-colors duration-[var(--duration-hover)] ease-[var(--ease-default)] border border-transparent',
                 hasActiveChild
                   ? 'text-primary'
-                  : 'text-muted-foreground hover:text-foreground',
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted-foreground/5 hover:border-border',
               )}
             >
               {/* animated bg span — inlineSize transitions with sidebar width */}

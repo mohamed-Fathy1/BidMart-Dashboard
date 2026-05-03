@@ -100,7 +100,8 @@
   --table-row-height: 48px;
 
   /* Sidebar */
-  --sidebar-background: #FAFAF8;
+  /* Slightly deeper than card so white hover pills (bg-card) read clearly */
+  --sidebar-background: #F5F3F0;
   --sidebar-foreground: #1C1917;
   --sidebar-border: #E7E5E4;
   --sidebar-accent: #F5F5F4;

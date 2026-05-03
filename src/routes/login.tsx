@@ -92,6 +92,7 @@ function LoginPage() {
           <PasswordInput
             id="password"
             autoComplete="current-password"
+            placeholder={t("common:auth.password_placeholder")}
             aria-invalid={!!errors.password}
             {...register("password")}
           />

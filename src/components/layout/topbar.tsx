@@ -77,7 +77,7 @@ export function Topbar() {
           onClick={() => setPaletteOpen(true)}
           aria-label={t('shell:topbar.search')}
           className={cn(
-            'hidden h-9 w-full max-w-sm shrink items-center gap-2 rounded-[var(--radius-md)] bg-muted/60 px-3 text-sm text-muted-foreground md:flex',
+            'hidden h-9 w-full max-w-sm shrink items-center gap-2 rounded-[var(--radius-md)] border border-border bg-card px-3 text-sm text-muted-foreground shadow-rest md:flex',
             'transition-colors duration-(--duration-hover) ease-(--ease-default) hover:bg-muted hover:text-foreground',
             'focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
           )}
