@@ -78,10 +78,10 @@ interface StatusStyle {
 /*  positive = emerald, warning = amber, danger = red, neutral = stone */
 /* ------------------------------------------------------------------ */
 
-const positive: StatusStyle = { badge: 'bg-emerald-50 text-emerald-700 border-emerald-200', dot: 'bg-emerald-500' }
-const warning: StatusStyle  = { badge: 'bg-amber-50 text-amber-700 border-amber-200',       dot: 'bg-amber-500' }
-const danger: StatusStyle   = { badge: 'bg-red-50 text-red-700 border-red-200',             dot: 'bg-red-500' }
-const neutral: StatusStyle  = { badge: 'bg-stone-100 text-stone-500 border-stone-200',       dot: 'bg-stone-400' }
+const positive: StatusStyle = { badge: 'bg-emerald-50 text-emerald-700 border-emerald-200/70', dot: 'bg-emerald-500' }
+const warning: StatusStyle  = { badge: 'bg-amber-50 text-amber-700 border-amber-200/70',       dot: 'bg-amber-500' }
+const danger: StatusStyle   = { badge: 'bg-red-50 text-red-700 border-red-200/70',             dot: 'bg-red-500' }
+const neutral: StatusStyle  = { badge: 'bg-stone-100 text-stone-600 border-stone-200/70',       dot: 'bg-stone-400' }
 
 const accountStyles: Record<AccountStatus, StatusStyle> = {
   active:               positive,
@@ -178,12 +178,12 @@ export function StatusBadge({ status, type = 'account', className }: StatusBadge
     <span
       data-slot="status-badge"
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap',
+        'inline-flex items-center gap-1.5 rounded-full border ps-2 pe-2.5 py-0.5 text-xs font-medium whitespace-nowrap leading-5',
         style.badge,
         className,
       )}
     >
-      <span className={cn('size-1.5 rounded-full', style.dot)} />
+      <span aria-hidden className={cn('size-1.5 rounded-full shrink-0', style.dot)} />
       {t(getI18nKey(status, type))}
     </span>
   )

@@ -11,7 +11,7 @@ import {
   type Row,
 } from '@tanstack/react-table'
 import { useTranslation } from 'react-i18next'
-import { EllipsisVertical } from 'lucide-react'
+import { EllipsisVertical, Inbox } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -303,9 +303,22 @@ export function DataTable<TData, TValue>({
       {toolbar && <div>{toolbar}</div>}
 
       {selectedCount > 0 && (
-        <p className="text-sm text-muted-foreground">
-          {t('components:data_table.selected', { count: selectedCount })}
-        </p>
+        <div className="flex items-center justify-between gap-3 rounded-[var(--radius-md)] border border-primary/20 bg-primary/5 px-3 py-2">
+          <span className="text-sm font-medium text-foreground">
+            {t('components:data_table.selected', { count: selectedCount })}
+          </span>
+          {hasSelect && onRowSelectionChange && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs"
+              onClick={() => onRowSelectionChange({})}
+            >
+              {t('common:buttons.reset')}
+            </Button>
+          )}
+        </div>
       )}
 
       <div className="overflow-hidden rounded-lg border border-border">
@@ -355,7 +368,10 @@ export function DataTable<TData, TValue>({
                         {colId === 'select' || colId === 'actions' ? (
                           <Skeleton className="size-4 rounded" />
                         ) : (
-                          <Skeleton className="h-4 w-3/4" />
+                          <Skeleton
+                            className="h-4"
+                            style={{ width: `${50 + ((i * 7 + j * 11) % 35)}%` }}
+                          />
                         )}
                       </TableCell>
                     )
@@ -394,12 +410,22 @@ export function DataTable<TData, TValue>({
                 )
               })
             ) : (
-              <TableRow>
+              <TableRow className={hasStickyColumns ? 'border-b-0' : undefined}>
                 <TableCell
                   colSpan={allColumns.length}
-                  className="h-24 text-center text-muted-foreground"
+                  className="h-64 p-0"
                 >
-                  {t('common:states.no_data')}
+                  <div className="flex h-full flex-col items-center justify-center gap-2 px-6 py-10 text-center">
+                    <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground/70">
+                      <Inbox className="size-5" />
+                    </div>
+                    <p className="text-sm font-medium text-foreground">
+                      {t('common:states.no_results')}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t('components:data_table.empty_hint')}
+                    </p>
+                  </div>
                 </TableCell>
               </TableRow>
             )}

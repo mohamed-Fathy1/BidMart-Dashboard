@@ -79,10 +79,10 @@ export function FormDialog({
             e.preventDefault()
             onSubmit(e)
           }}
-          className="grid gap-4"
+          className="grid gap-5"
         >
           {children}
-          <DialogFooter>
+          <DialogFooter className="-mx-6 -mb-6 mt-2 border-t border-border/60 bg-muted/30 px-6 py-4">
             <Button
               type="button"
               variant="outline"

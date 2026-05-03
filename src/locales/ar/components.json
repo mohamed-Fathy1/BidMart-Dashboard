@@ -82,6 +82,7 @@
     "select_all": "تحديد الكل",
     "select_row": "تحديد الصف",
     "row_actions": "إجراءات الصف",
-    "selected": "{{count}} محدد"
+    "selected": "{{count}} محدد",
+    "empty_hint": "جرّب تعديل المرشحات أو البحث."
   }
 }
