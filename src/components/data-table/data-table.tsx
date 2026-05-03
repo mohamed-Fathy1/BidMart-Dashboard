@@ -285,7 +285,7 @@ export function DataTable<TData, TValue>({
       'sticky z-[1]',
       edge,
       isSelected ? 'bg-muted' : 'bg-card',
-      'group-hover/row:bg-muted/50',
+      'group-hover/row:bg-[#F8F8F8]',
     )
   }
 

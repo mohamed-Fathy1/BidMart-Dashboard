@@ -441,7 +441,7 @@ export function RolesListPage() {
                 </p>
               </div>
             ) : (
-              <ScrollArea className="h-88 rounded-xl border border-border bg-muted/20 shadow-rest">
+              <ScrollArea className="max-h-88 overflow-y-auto rounded-xl border border-border bg-muted/20 shadow-rest">
                 <div className="flex flex-col gap-2 p-2">
                   {permissionModules.map((module) => (
                     <article
@@ -506,7 +506,7 @@ export function RolesListPage() {
           </section>
         </div>
 
-        <p className="text-[11px] leading-relaxed text-muted-foreground">
+        <p className="text-[11px] leading-relaxed text-muted-foreground mt-1">
           {t('roles:form.footer_note')}
         </p>
       </FormDialog>
