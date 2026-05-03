@@ -35,10 +35,10 @@ export function Topbar({ title }: TopbarProps) {
   const logout = useLogoutMutation();
 
   return (
-    <header className="z-40 flex h-[var(--topbar-height)] shrink-0 items-center border-b border-border/60 bg-sidebar-background">
+    <header className="z-40 flex h-[var(--topbar-height)] shrink-0 items-center bg-sidebar-background">
       {/* Brand — width syncs with sidebar below */}
       <div
-        className="flex h-full shrink-0 items-center overflow-hidden px-4"
+        className="flex h-full shrink-0 items-center gap-2 overflow-hidden px-4"
         style={{
           width: collapsed
             ? "var(--sidebar-collapsed-width)"
@@ -46,28 +46,18 @@ export function Topbar({ title }: TopbarProps) {
           transition: "width var(--duration-layout) var(--ease-sidebar)",
         }}
       >
-        <Link
-          to="/overview"
-          aria-label={t("shell:nav.overview")}
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-primary text-xs font-bold text-primary-foreground">
+          B
+        </span>
+        <span
           className={cn(
-            "group/brand flex h-9 items-center gap-2 rounded-[var(--radius-md)] pe-2 ps-1 -ms-1",
-            "transition-colors duration-[var(--duration-hover)] ease-[var(--ease-default)]",
-            "hover:bg-muted-foreground/10 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/50",
+            "text-base font-semibold tracking-tight text-foreground whitespace-nowrap",
+            "transition-opacity duration-[var(--duration-layout)] ease-[var(--ease-sidebar)]",
+            collapsed ? "opacity-0" : "opacity-100",
           )}
         >
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-primary text-xs font-bold text-primary-foreground">
-            B
-          </span>
-          <span
-            className={cn(
-              "text-sm font-semibold tracking-tight text-foreground whitespace-nowrap",
-              "transition-opacity duration-[var(--duration-layout)] ease-[var(--ease-sidebar)]",
-              collapsed ? "opacity-0" : "opacity-100",
-            )}
-          >
-            BidMart
-          </span>
-        </Link>
+          BidMart
+        </span>
       </div>
 
       {/* Page info + actions */}
