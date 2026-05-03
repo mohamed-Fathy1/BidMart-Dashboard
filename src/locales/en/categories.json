@@ -1,11 +1,6 @@
 {
   "page_title": "Categories",
   "page_description": "Manage product categories and sub-categories",
-  "tabs": {
-    "aria": "Categories workspace",
-    "categories": "Categories",
-    "sub_categories": "Sub-categories"
-  },
   "meta": {
     "total": "{{count}} categories"
   },

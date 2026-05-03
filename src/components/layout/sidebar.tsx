@@ -1,14 +1,21 @@
-import { useEffect, useState } from 'react'
-import { Link, useMatchRoute } from '@tanstack/react-router'
-import { ChevronsLeft, ChevronsRight } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useMatchRoute, useRouterState } from '@tanstack/react-router'
+import { ChevronsLeft, ChevronsRight, ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import { usePermission, type Permission } from '@/lib/permissions'
+import { can, usePermission, type Permission } from '@/lib/permissions'
+import { useAuthStore } from '@/features/auth/auth.store'
 import { useUIStore } from '@/features/ui/ui.store'
-import { navItems, type NavItem } from '@/components/layout/nav-items'
+import {
+  navSections,
+  type NavLeaf,
+  type NavGroup,
+  type NavEntry,
+  type NavSection,
+} from '@/components/layout/nav-items'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
-function NavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
+function NavLink({ item, collapsed }: { item: NavLeaf; collapsed: boolean }) {
   const { t } = useTranslation()
   const matchRoute = useMatchRoute()
   const isActive = !!matchRoute({ to: item.to, fuzzy: true })
@@ -47,7 +54,6 @@ function NavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted',
             )}
           >
-            {/* Animated background — separate span so it shrinks independently of content */}
             <span
               className={cn(
                 'pointer-events-none absolute inset-block-0 inset-inline-start-0 rounded-[var(--radius-md)]',
@@ -63,7 +69,6 @@ function NavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
                   'inline-size var(--duration-layout) var(--ease-sidebar), background-color var(--duration-hover) var(--ease-default)',
               }}
             />
-            {/* Active indicator at sidebar edge */}
             <span
               className={cn(
                 'absolute -start-3 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-e-full bg-primary',
@@ -95,16 +100,264 @@ function NavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
   )
 }
 
-function FilteredNavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
-  // Items without a permission prop are visible to all authenticated admins
-  if (!item.permission) return <NavLink item={item} collapsed={collapsed} />
-  return <PermissionNavLink item={item} permission={item.permission} collapsed={collapsed} />
+function NavChildLink({ item }: { item: NavLeaf }) {
+  const { t } = useTranslation()
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
+  const isActive = isChildActive(item.to, pathname)
+
+  return (
+    <Link
+      to={item.to}
+      className={cn(
+        'group/child relative flex h-9 items-center gap-3 rounded-[var(--radius-md)] ps-9 pe-3 text-sm',
+        'transition-colors duration-[var(--duration-hover)] ease-[var(--ease-default)]',
+        isActive
+          ? 'text-primary font-medium'
+          : 'text-muted-foreground hover:text-foreground',
+      )}
+    >
+      <span
+        className={cn(
+          'pointer-events-none absolute inset-block-0 inset-inline-start-0 inset-inline-end-0 rounded-[var(--radius-md)]',
+          'transition-colors duration-[var(--duration-hover)] ease-[var(--ease-default)]',
+          isActive
+            ? 'bg-primary/10'
+            : 'bg-transparent group-hover/child:bg-muted-foreground/10',
+        )}
+      />
+      <span
+        aria-hidden
+        className={cn(
+          'relative z-[1] inline-block size-1.5 rounded-full shrink-0',
+          'transition-colors duration-[var(--duration-hover)] ease-[var(--ease-default)]',
+          isActive ? 'bg-primary' : 'bg-muted-foreground/40',
+        )}
+        style={{ marginInlineStart: '-12px' }}
+      />
+      <span className="relative z-[1] whitespace-nowrap">{t(item.labelKey)}</span>
+    </Link>
+  )
 }
 
-function PermissionNavLink({ item, permission, collapsed }: { item: NavItem; permission: Permission; collapsed: boolean }) {
-  const hasPermission = usePermission(permission)
-  if (!hasPermission) return null
+// Sub-categories live at two paths: the hub `/categories/sub-categories` and the
+// nested drill-down `/categories/<id>/sub-categories`. Both should light the same
+// child row. Categories child must NOT light when the URL is one of those.
+function isChildActive(to: string, pathname: string): boolean {
+  const normalized = pathname.replace(/\/$/, '') || '/'
+  if (to === '/categories/sub-categories') {
+    return (
+      normalized === '/categories/sub-categories' ||
+      /^\/categories\/[^/]+\/sub-categories$/.test(normalized)
+    )
+  }
+  if (to === '/categories') {
+    return normalized === '/categories'
+  }
+  return normalized === to
+}
+
+function NavGroupItem({
+  group,
+  visibleChildren,
+  collapsed,
+}: {
+  group: NavGroup
+  visibleChildren: NavLeaf[]
+  collapsed: boolean
+}) {
+  const { t } = useTranslation()
+  const matchRoute = useMatchRoute()
+  const Icon = group.icon
+  const hasActiveChild = !!matchRoute({ to: group.matchPath, fuzzy: true })
+  const [open, setOpen] = useState(hasActiveChild)
+  const [tooltipOpen, setTooltipOpen] = useState(false)
+
+  useEffect(() => {
+    if (hasActiveChild) setOpen(true)
+  }, [hasActiveChild])
+
+  useEffect(() => {
+    setTooltipOpen(false)
+  }, [collapsed])
+
+  // Collapsed sidebar: show only the parent icon, navigate to defaultTo on click.
+  // Children are not shown here (no flyout) — sidebar expansion reveals them.
+  if (collapsed) {
+    return (
+      <Tooltip
+        delayDuration={0}
+        open={tooltipOpen}
+        onOpenChange={setTooltipOpen}
+      >
+        <TooltipTrigger asChild>
+          <div
+            className="overflow-visible"
+            style={{
+              width: 'calc(var(--sidebar-collapsed-width) - 24px)',
+              transition: 'width var(--duration-layout) var(--ease-sidebar)',
+            }}
+          >
+            <Link
+              to={group.defaultTo}
+              className={cn(
+                'group/link relative flex h-10 items-center gap-3 rounded-[var(--radius-md)] ps-3 pe-3 text-sm font-medium',
+                'transition-colors duration-[var(--duration-hover)] ease-[var(--ease-default)]',
+                hasActiveChild
+                  ? 'text-primary bg-primary/10'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted',
+              )}
+            >
+              <span
+                className={cn(
+                  'pointer-events-none absolute inset-block-0 inset-inline-start-0 rounded-[var(--radius-md)]',
+                  hasActiveChild
+                    ? 'bg-primary/10'
+                    : 'bg-transparent group-hover/link:bg-muted-foreground/10',
+                )}
+                style={{
+                  inlineSize: 'calc(var(--sidebar-collapsed-width) - 24px)',
+                  transition:
+                    'inline-size var(--duration-layout) var(--ease-sidebar), background-color var(--duration-hover) var(--ease-default)',
+                }}
+              />
+              <span
+                className={cn(
+                  'absolute -start-3 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-e-full bg-primary',
+                  'transition-all duration-[var(--duration-layout)] ease-[var(--ease-sidebar)]',
+                  hasActiveChild ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0',
+                )}
+              />
+              <Icon className="relative z-[1] h-[18px] w-[18px] shrink-0" />
+            </Link>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent
+          side="right"
+          sideOffset={12}
+          className="data-[state=delayed-open]:animate-tooltip-in data-[state=instant-open]:animate-tooltip-in data-[state=closed]:animate-tooltip-out"
+        >
+          {t(group.labelKey)}
+        </TooltipContent>
+      </Tooltip>
+    )
+  }
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-controls={`navgroup-${group.matchPath}`}
+        className={cn(
+          'group/group relative flex h-10 w-full items-center gap-3 rounded-[var(--radius-md)] ps-3 pe-3 text-sm font-medium text-start',
+          'transition-colors duration-[var(--duration-hover)] ease-[var(--ease-default)]',
+          hasActiveChild
+            ? 'text-foreground'
+            : 'text-muted-foreground hover:text-foreground',
+        )}
+      >
+        <span
+          className={cn(
+            'pointer-events-none absolute inset-0 rounded-[var(--radius-md)]',
+            'transition-colors duration-[var(--duration-hover)] ease-[var(--ease-default)]',
+            'bg-transparent group-hover/group:bg-muted-foreground/10',
+          )}
+        />
+        <Icon className="relative z-[1] h-[18px] w-[18px] shrink-0" />
+        <span className="relative z-[1] flex-1 whitespace-nowrap">
+          {t(group.labelKey)}
+        </span>
+        <ChevronRight
+          className={cn(
+            'relative z-[1] h-4 w-4 shrink-0 text-muted-foreground/70',
+            'transition-transform duration-[var(--duration-layout)] ease-[var(--ease-sidebar)]',
+            'rtl:rotate-180',
+            open && 'rotate-90 rtl:rotate-90',
+          )}
+        />
+      </button>
+
+      <div
+        id={`navgroup-${group.matchPath}`}
+        className={cn(
+          'grid overflow-hidden',
+          'transition-[grid-template-rows,opacity] duration-[var(--duration-layout)] ease-[var(--ease-sidebar)]',
+        )}
+        style={{
+          gridTemplateRows: open ? '1fr' : '0fr',
+          opacity: open ? 1 : 0,
+        }}
+      >
+        <div className="min-h-0">
+          <div className="space-y-1 pt-1">
+            {visibleChildren.map((child) => (
+              <NavChildLink key={child.to} item={child} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FilteredEntry({ entry, collapsed }: { entry: NavEntry; collapsed: boolean }) {
+  if (entry.kind === 'leaf') {
+    return entry.permission ? (
+      <PermissionLeaf item={entry} permission={entry.permission} collapsed={collapsed} />
+    ) : (
+      <NavLink item={entry} collapsed={collapsed} />
+    )
+  }
+  return <FilteredGroup group={entry} collapsed={collapsed} />
+}
+
+function PermissionLeaf({
+  item,
+  permission,
+  collapsed,
+}: {
+  item: NavLeaf
+  permission: Permission
+  collapsed: boolean
+}) {
+  const ok = usePermission(permission)
+  if (!ok) return null
   return <NavLink item={item} collapsed={collapsed} />
+}
+
+function FilteredGroup({ group, collapsed }: { group: NavGroup; collapsed: boolean }) {
+  const visibleChildren = useVisibleChildren(group.children)
+  if (visibleChildren.length === 0) return null
+  if (visibleChildren.length === 1) {
+    const only = visibleChildren[0]!
+    return <NavLink item={only} collapsed={collapsed} />
+  }
+  return <NavGroupItem group={group} visibleChildren={visibleChildren} collapsed={collapsed} />
+}
+
+function useVisibleChildren(children: NavLeaf[]): NavLeaf[] {
+  const permissions = useAuthStore((s) => s.permissions)
+  return useMemo(
+    () => children.filter((c) => !c.permission || can(permissions, c.permission)),
+    [children, permissions],
+  )
+}
+
+function Section({ section, collapsed, isFirst }: { section: NavSection; collapsed: boolean; isFirst: boolean }) {
+  return (
+    <div
+      className={cn(
+        'space-y-1',
+        !isFirst && 'pt-3 border-t border-border/50',
+        section.pinBottom ? 'mt-auto' : !isFirst && 'mt-3',
+      )}
+    >
+      {section.entries.map((entry, i) => (
+        <FilteredEntry key={`${section.id}-${i}`} entry={entry} collapsed={collapsed} />
+      ))}
+    </div>
+  )
 }
 
 export function Sidebar() {
@@ -122,21 +375,21 @@ export function Sidebar() {
         transition: 'width var(--duration-layout) var(--ease-sidebar)',
       }}
     >
-      {/* Inner wrapper at full width — prevents text reflow during transition */}
       <div
         className="flex h-full flex-col"
         style={{ width: 'var(--sidebar-width)' }}
       >
-
-
-        {/* Navigation */}
-        <nav className="flex-1 space-y-1 overflow-y-auto overflow-x-hidden p-3">
-          {navItems.map((item) => (
-            <FilteredNavLink key={item.to} item={item} collapsed={collapsed} />
+        <nav className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden p-3">
+          {navSections.map((section, i) => (
+            <Section
+              key={section.id}
+              section={section}
+              collapsed={collapsed}
+              isFirst={i === 0}
+            />
           ))}
         </nav>
 
-        {/* Collapse toggle */}
         <div className="border-t border-border/50 p-3">
           <button
             onClick={toggleSidebar}
