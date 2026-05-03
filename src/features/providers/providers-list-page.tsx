@@ -93,6 +93,7 @@ export function ProvidersListPage() {
         label: t('providers:actions.approve'),
         icon: CheckCircle,
         onClick: (r) => setApproveTarget(r),
+        variant: 'success',
       })
     }
 

@@ -26,7 +26,7 @@ export function StatCard({ label, value, delta, className }: StatCardProps) {
             <span
               className={cn(
                 'inline-flex items-center gap-0.5 text-xs font-medium',
-                delta.positive ? 'text-primary' : 'text-destructive',
+                delta.positive ? 'text-emerald-600' : 'text-destructive',
               )}
             >
               {delta.positive ? (

@@ -174,7 +174,7 @@ export function ProviderDetailPage({ storeId }: ProviderDetailPageProps) {
       {provider.status === 'pending' && (
         <>
           <Can permission={PERMISSIONS.providers.approve}>
-            <Button variant="default" size="sm" onClick={() => setApproveOpen(true)}>
+            <Button className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-600/90 text-white" size="sm" onClick={() => setApproveOpen(true)}>
               <CheckCircle className="size-4" aria-hidden />
               {t('providers:actions.approve')}
             </Button>

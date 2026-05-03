@@ -54,7 +54,7 @@ interface RowAction<TData> {
   label: string
   icon?: ElementType
   onClick: (row: TData) => void
-  variant?: 'default' | 'destructive'
+  variant?: 'default' | 'destructive' | 'success'
   disabled?: boolean
 }
 
@@ -104,7 +104,13 @@ function RowActionsCell<TData>({
               <DropdownMenuItem
                 key={i}
                 onClick={() => item.onClick(row.original)}
-                variant={item.variant === 'destructive' ? 'destructive' : 'default'}
+                variant={
+                  item.variant === 'destructive'
+                    ? 'destructive'
+                    : item.variant === 'success'
+                      ? 'success'
+                      : 'default'
+                }
                 disabled={item.disabled}
               >
                 {item.icon && <item.icon className="size-4" />}

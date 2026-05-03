@@ -5,7 +5,7 @@
   --color-card-foreground: #1C1917;
   --color-border: #E7E5E4;
   --color-input: #E7E5E4;
-  --color-ring: #059669;
+  --color-ring: #3660B5;
 
   /* Background & foreground */
   --color-background: #F5F3F0;
@@ -14,8 +14,11 @@
   --color-muted-foreground: #78716C;
 
   /* Accent */
-  --color-primary: #059669;
+  --color-primary: #3660B5;
   --color-primary-foreground: #FFFFFF;
+  --color-primary-hover: #6993E8;
+  --color-brand-secondary: #551CCA;
+  --color-brand-secondary-hover: #884FFD;
   --color-secondary: #F5F5F4;
   --color-secondary-foreground: #1C1917;
   --color-accent: #F5F5F4;
@@ -102,9 +105,9 @@
   --sidebar-border: #E7E5E4;
   --sidebar-accent: #F5F5F4;
   --sidebar-accent-foreground: #1C1917;
-  --sidebar-primary: #059669;
+  --sidebar-primary: #3660B5;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-ring: #059669;
+  --sidebar-ring: #3660B5;
 
   /* ---------- Semantic type tokens (rem — scales with user font-size) ---------- */
 

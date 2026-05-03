@@ -144,10 +144,14 @@
 
 ## Color Rules
 
-- Single emerald accent `#059669` — used sparingly: primary button, active nav, focus ring, positive deltas
+- Primary brand `#3660B5` (Primary500) — primary button, active nav, focus ring; exposed as `--color-primary` / `--color-ring`
+- Primary hover `#6993E8` (Primary400) — primary button hover, soft accent surfaces; exposed as `--color-primary-hover` (`bg-primary-hover`)
+- Secondary brand `#551CCA` (Secondary500) — purple accent for charts, dual-tone highlights; opt-in via `--color-brand-secondary` (`bg-brand-secondary`). Lighter variant `#884FFD` (Secondary400) via `--color-brand-secondary-hover`
+- Do NOT remap `--color-secondary` (neutral `#F5F5F4`) — backs the shadcn `variant="secondary"` button as a grey surface
+- Semantic success — emerald (`bg-emerald-50/500/700`, `text-emerald-600/700`) reserved for active/approved/verified/enabled states and positive deltas. Never tinted with primary
 - Warm stone neutrals for everything else — canvas `#F5F3F0`, card `#FFFFFF`, sidebar `#FAFAF8`
-- Destructive is `#DC2626` — reserved for block/reject/delete only
-- No blues, no purples, no secondary accents, no gradients
+- Destructive `#DC2626` — block/reject/delete only
+- No gradients. No tertiary brand accents beyond the blue/purple pair above
 - Borders do structure, not shadows — universally `1px solid var(--color-border)`
 
 ## Shadow Rules
