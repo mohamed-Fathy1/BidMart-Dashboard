@@ -125,3 +125,10 @@
     min-height: 100dvh;
   }
 }
+
+/* Inputs sit inset against the white dialog surface, not transparent.
+   Specificity (0,2,1) beats `bg-transparent` (0,1,0) without !important. */
+[role="dialog"] input[data-slot="input"]:not(:disabled),
+[role="dialog"] textarea[data-slot="textarea"]:not(:disabled) {
+  background-color: color-mix(in oklch, var(--color-muted) 55%, transparent);
+}

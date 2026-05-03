@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -16,13 +16,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
-import { Separator } from '@/components/ui/separator'
+import { FormSection } from '@/components/shared/form-section'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ImageUploadField } from '@/components/shared/image-upload-field'
 import { Can } from '@/components/permissions/can'
 import { PERMISSIONS, usePermission } from '@/lib/permissions'
 import { format } from '@/lib/format'
-import { cn } from '@/lib/utils'
 import { useCategoryColumns } from '@/features/categories/categories.columns'
 import {
   categoryKeys,
@@ -32,25 +31,6 @@ import {
   useDeleteCategoryMutation,
 } from '@/features/categories/categories.queries'
 import { getCategoryDetail } from '@/features/categories/categories.api'
-
-function FormSection({
-  title,
-  children,
-  className,
-}: {
-  title: string
-  children: ReactNode
-  className?: string
-}) {
-  return (
-    <div className={cn('space-y-3', className)}>
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        {title}
-      </h3>
-      {children}
-    </div>
-  )
-}
 
 export function CategoriesListPage() {
   const { t } = useTranslation()
@@ -323,10 +303,9 @@ export function CategoriesListPage() {
         isLoading={isSubmitting}
         submitDisabled={formPrefilling}
         onSubmit={handleSubmit}
-        contentClassName="sm:max-w-2xl"
         suppressInitialFocus
       >
-        <div className="max-h-[min(72vh,600px)] overflow-y-auto pe-1">
+        <>
           {formPrefilling ? (
             <div className="space-y-4">
               <div className="space-y-2">
@@ -378,8 +357,6 @@ export function CategoriesListPage() {
                 </div>
               </FormSection>
 
-              <Separator className="my-6" />
-
               <FormSection title={t('categories:form.section_media')}>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   <div className="grid gap-2 rounded-lg border border-border bg-muted/20 p-4">
@@ -411,8 +388,6 @@ export function CategoriesListPage() {
                 </div>
               </FormSection>
 
-              <Separator className="my-6" />
-
               <FormSection title={t('categories:form.section_descriptions')}>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="grid gap-2">
@@ -440,8 +415,6 @@ export function CategoriesListPage() {
                   </div>
                 </div>
               </FormSection>
-
-              <Separator className="my-6" />
 
               <FormSection title={t('categories:form.section_publishing')}>
                 <div className="grid gap-4 md:grid-cols-2 md:items-start">
@@ -481,7 +454,7 @@ export function CategoriesListPage() {
               </FormSection>
             </div>
           )}
-        </div>
+        </>
       </FormDialog>
 
       <ConfirmDialog

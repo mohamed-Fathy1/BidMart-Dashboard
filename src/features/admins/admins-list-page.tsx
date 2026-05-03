@@ -326,7 +326,7 @@ export function AdminsListPage() {
         isLoading={isSubmitting}
         submitDisabled={!editTarget && (rolesLoading || roles.length === 0)}
         onSubmit={() => handleSubmit()}
-        contentClassName="sm:max-w-xl"
+        size="md"
         suppressInitialFocus
       >
         <div className="flex flex-col gap-8">

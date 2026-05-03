@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
-import { Separator } from '@/components/ui/separator'
+import { FormSection } from '@/components/shared/form-section'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Select,
@@ -29,7 +29,6 @@ import { ImagePreview } from '@/components/shared/image-preview'
 import { Can } from '@/components/permissions/can'
 import { PERMISSIONS, usePermission } from '@/lib/permissions'
 import { format } from '@/lib/format'
-import { cn } from '@/lib/utils'
 import { useSubCategoryColumns } from '@/features/categories/sub-categories.columns'
 import {
   subCategoryKeys,
@@ -44,25 +43,6 @@ import {
   getSubCategoryDetail,
   type UpdateSubCategoryPayload,
 } from '@/features/categories/categories.api'
-
-function FormSection({
-  title,
-  children,
-  className,
-}: {
-  title: string
-  children: ReactNode
-  className?: string
-}) {
-  return (
-    <div className={cn('space-y-3', className)}>
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        {title}
-      </h3>
-      {children}
-    </div>
-  )
-}
 
 const PARENT_SELECT_NONE = '__none'
 
@@ -417,10 +397,9 @@ export function SubCategoriesListPage({
         isLoading={isSubmitting}
         submitDisabled={formPrefilling}
         onSubmit={handleSubmit}
-        contentClassName="sm:max-w-2xl"
         suppressInitialFocus
       >
-        <div className="max-h-[min(65vh,520px)] overflow-y-auto pe-1">
+        <>
           {formPrefilling ? (
             <div className="space-y-4">
               <Skeleton className="h-10 w-full" />
@@ -453,7 +432,6 @@ export function SubCategoriesListPage({
                       </p>
                     </div>
                   </FormSection>
-                  <Separator className="my-5" />
                 </>
               ) : null}
 
@@ -481,8 +459,6 @@ export function SubCategoriesListPage({
                 </div>
               </FormSection>
 
-              <Separator className="my-5" />
-
               <FormSection title={t('categories:sub.form.section_media')}>
                 <div className="rounded-lg border border-border bg-muted/20 p-4">
                   <Label className="text-foreground">{t('categories:sub.form.image_url')}</Label>
@@ -495,8 +471,6 @@ export function SubCategoriesListPage({
                   </div>
                 </div>
               </FormSection>
-
-              <Separator className="my-5" />
 
               <FormSection title={t('categories:sub.form.section_descriptions')}>
                 <div className="grid gap-4 md:grid-cols-2">
@@ -525,8 +499,6 @@ export function SubCategoriesListPage({
                   </div>
                 </div>
               </FormSection>
-
-              <Separator className="my-5" />
 
               <FormSection title={t('categories:sub.form.section_publishing')}>
                 <div className="grid gap-4 md:grid-cols-2 md:items-start">
@@ -562,7 +534,7 @@ export function SubCategoriesListPage({
               </FormSection>
             </>
           )}
-        </div>
+        </>
       </FormDialog>
 
       <ConfirmDialog

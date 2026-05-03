@@ -1,4 +1,4 @@
-import { useState, useMemo, type ReactNode } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, ToggleLeft } from "lucide-react";
@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ImageUploadField } from "@/components/shared/image-upload-field";
-import { Separator } from "@/components/ui/separator";
+import { FormSection } from "@/components/shared/form-section";
 import { Can } from "@/components/permissions/can";
 import { PERMISSIONS, usePermission } from "@/lib/permissions";
 import { useCountryColumns } from "@/features/countries/countries.columns";
@@ -31,26 +31,6 @@ import {
   useDeleteCountryMutation,
 } from "@/features/countries/countries.queries";
 import { format } from "@/lib/format";
-import { cn } from "@/lib/utils";
-
-function FormSection({
-  title,
-  children,
-  className,
-}: {
-  title: string;
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={cn("space-y-3", className)}>
-      <h3 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-        {title}
-      </h3>
-      {children}
-    </div>
-  );
-}
 
 export function CountriesListPage() {
   const { t } = useTranslation();
@@ -336,10 +316,9 @@ export function CountriesListPage() {
         isLoading={isSubmitting}
         submitDisabled={!canSave}
         onSubmit={handleSubmit}
-        contentClassName="sm:max-w-2xl"
         suppressInitialFocus
       >
-        <div className="max-h-[min(72vh,600px)] space-y-0 overflow-y-auto pe-1">
+        <div className="space-y-0">
           <FormSection title={t("countries:form.section_names")}>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="grid gap-2">
@@ -367,8 +346,6 @@ export function CountriesListPage() {
               </div>
             </div>
           </FormSection>
-
-          <Separator className="my-6" />
 
           <FormSection title={t("countries:form.section_codes")}>
             <div className="grid gap-4 sm:grid-cols-2 items-start">
@@ -407,8 +384,6 @@ export function CountriesListPage() {
             </div>
           </FormSection>
 
-          <Separator className="my-6" />
-
           <FormSection title={t("countries:form.section_flag")}>
             <div className="grid gap-2">
               <Label>{t("countries:form.image_url")}</Label>
@@ -420,10 +395,8 @@ export function CountriesListPage() {
             </div>
           </FormSection>
 
-          <Separator className="my-6" />
-
           <FormSection title={t("countries:form.section_visibility")}>
-            <div className="rounded-lg border border-border bg-card p-4 shadow-rest">
+            <div className="rounded-lg border border-border bg-muted/40 p-4">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0 space-y-1">
                   <Label htmlFor="country-enabled" className="text-foreground">

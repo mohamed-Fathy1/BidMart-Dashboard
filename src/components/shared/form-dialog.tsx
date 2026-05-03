@@ -10,6 +10,16 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+
+const SIZE_CLASSES = {
+  sm: 'sm:max-w-md',
+  md: 'sm:max-w-xl',
+  lg: 'sm:max-w-2xl',
+  xl: 'sm:max-w-3xl',
+} as const
+
+type FormDialogSize = keyof typeof SIZE_CLASSES
 
 interface FormDialogProps {
   open: boolean
@@ -23,7 +33,11 @@ interface FormDialogProps {
   /** Keeps Cancel enabled; disables only the submit action (e.g. waiting for prerequisite data). */
   submitDisabled?: boolean
   isEdit?: boolean
+  /** Width preset. Defaults to `lg` (max-w-2xl) — the typical create/edit form. */
+  size?: FormDialogSize
   contentClassName?: string
+  /** Override styling on the scrollable body wrapper (padding, max-height). */
+  bodyClassName?: string
   /**
    * When true, the dialog does not move focus to the first focusable control on open,
    * so the primary focus ring does not appear on one field only before the user interacts.
@@ -42,7 +56,9 @@ export function FormDialog({
   isLoading = false,
   submitDisabled = false,
   isEdit = false,
+  size = 'lg',
   contentClassName,
+  bodyClassName,
   suppressInitialFocus = false,
 }: FormDialogProps) {
   const { t } = useTranslation()
@@ -57,7 +73,7 @@ export function FormDialog({
       onOpenChange(next)
     }}>
       <DialogContent
-        className={contentClassName}
+        className={cn('gap-0 p-0', SIZE_CLASSES[size], contentClassName)}
         onOpenAutoFocus={(e) => {
           if (!suppressInitialFocus) return
           e.preventDefault()
@@ -70,19 +86,30 @@ export function FormDialog({
           }
         }}
       >
-        <DialogHeader>
+        <DialogHeader className="border-b border-border/60 px-6 py-5 pe-12">
           <DialogTitle>{title}</DialogTitle>
-          {description && <DialogDescription>{description}</DialogDescription>}
+          {description && (
+            <DialogDescription className="leading-relaxed">
+              {description}
+            </DialogDescription>
+          )}
         </DialogHeader>
         <form
           onSubmit={(e) => {
             e.preventDefault()
             onSubmit(e)
           }}
-          className="grid gap-5"
+          className="grid min-h-0"
         >
-          {children}
-          <DialogFooter className="-mx-6 -mb-6 mt-2 border-t border-border/60 bg-muted/30 px-6 py-4">
+          <div
+            className={cn(
+              'max-h-[min(70vh,580px)] overflow-y-auto px-6 py-5 [scrollbar-gutter:stable]',
+              bodyClassName,
+            )}
+          >
+            {children}
+          </div>
+          <DialogFooter className="border-t border-border bg-muted/60 px-6 py-4">
             <Button
               type="button"
               variant="outline"

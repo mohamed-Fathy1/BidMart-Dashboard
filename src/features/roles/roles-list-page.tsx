@@ -362,7 +362,7 @@ export function RolesListPage() {
         submitLabel={
           editTarget ? t('components:form_dialog.save') : t('roles:actions.create')
         }
-        contentClassName="sm:max-w-3xl"
+        size="xl"
       >
         <div className="grid gap-6">
           {editBlocked && (
