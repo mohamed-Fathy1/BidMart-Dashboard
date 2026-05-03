@@ -5,16 +5,15 @@
     "total_countries": "{{count}} دولة"
   },
   "columns": {
-    "flag": "العلم",
-    "name_en": "الاسم (EN)",
-    "name_ar": "الاسم (AR)",
+    "country": "الدولة",
     "iso_code": "رمز ISO",
     "enabled": "مفعّل",
     "sort_order": "ترتيب العرض",
     "created_at": "تاريخ الإنشاء"
   },
   "filters": {
-    "enabled": "الحالة"
+    "enabled": "الحالة",
+    "search_placeholder": "البحث بالاسم (إنجليزي أو عربي)"
   },
   "enabled_options": {
     "enabled": "مفعّل",
@@ -24,11 +23,21 @@
     "create": "إضافة دولة",
     "edit": "تعديل",
     "delete": "حذف",
+    "enable": "تفعيل",
+    "disable": "تعطيل",
     "create_success": "تم إنشاء الدولة",
     "update_success": "تم تحديث الدولة",
-    "delete_success": "تم حذف الدولة"
+    "delete_success": "تم حذف الدولة",
+    "toggle_success": "تم تحديث ظهور الدولة في التسجيل"
+  },
+  "errors": {
+    "create_failed": "تعذر إنشاء الدولة",
+    "update_failed": "تعذر تحديث الدولة",
+    "delete_failed": "تعذر حذف الدولة",
+    "toggle_failed": "تعذر تحديث التفعيل"
   },
   "form": {
+    "dialog_description": "الأسماء وصورة العلم والرمز يحددان ظهور الدولة في قائمة التسجيل.",
     "create_title": "إضافة دولة",
     "edit_title": "تعديل دولة",
     "name_en": "الاسم (إنجليزي)",
@@ -40,7 +49,13 @@
     "image_url": "رابط صورة العلم",
     "image_url_placeholder": "https://flagcdn.com/w320/sa.png",
     "is_enabled": "مفعّل",
-    "sort_order": "ترتيب العرض"
+    "sort_order": "ترتيب العرض",
+    "section_names": "الأسماء",
+    "section_codes": "الرمز والترتيب",
+    "section_flag": "صورة العلم",
+    "section_visibility": "التسجيل",
+    "enabled_hint": "الدول المفعّلة تظهر في قائمة اختيار الدولة عند التسجيل.",
+    "iso_locked_hint": "لا يمكن تغيير رمز ISO بعد إنشاء الدولة."
   },
   "delete_dialog": {
     "title": "حذف الدولة",

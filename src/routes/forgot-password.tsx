@@ -30,9 +30,11 @@ export const Route = createFileRoute("/forgot-password")({
 /* ------------------------------------------------------------------ */
 
 const emailSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email({ message: "common:auth.invalid_email" }),
 });
 type EmailForm = z.infer<typeof emailSchema>;
+
+const RESET_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/
 
 /* ------------------------------------------------------------------ */
 /*  Step 2 — OTP + new password                                        */
@@ -40,12 +42,21 @@ type EmailForm = z.infer<typeof emailSchema>;
 
 const resetSchema = z
   .object({
-    otp: z.string().length(6, "OTP must be 6 digits"),
-    newPassword: z.string().min(8).max(20),
+    otp: z
+      .string()
+      .length(6, { message: "common:auth.otp_length" })
+      .regex(/^\d{6}$/, { message: "common:auth.otp_digits" }),
+    newPassword: z
+      .string()
+      .min(8, { message: "common:auth.password_length" })
+      .max(20, { message: "common:auth.password_length" })
+      .regex(RESET_PASSWORD_REGEX, {
+        message: "common:auth.password_strength",
+      }),
     confirmPassword: z.string(),
   })
   .refine((d) => d.newPassword === d.confirmPassword, {
-    message: "Passwords do not match",
+    message: "common:auth.passwords_mismatch",
     path: ["confirmPassword"],
   });
 type ResetForm = z.infer<typeof resetSchema>;
@@ -120,9 +131,9 @@ function ForgotPasswordPage() {
                     autoComplete="email"
                     {...emailForm.register("email")}
                   />
-                  {emailForm.formState.errors.email && (
+                  {emailForm.formState.errors.email?.message && (
                     <p className="text-xs text-destructive">
-                      {emailForm.formState.errors.email.message}
+                      {t(emailForm.formState.errors.email.message)}
                     </p>
                   )}
                 </div>
@@ -181,9 +192,9 @@ function ForgotPasswordPage() {
                     className="font-mono tracking-widest text-center"
                     {...resetForm.register("otp")}
                   />
-                  {resetForm.formState.errors.otp && (
+                  {resetForm.formState.errors.otp?.message && (
                     <p className="text-xs text-destructive">
-                      {resetForm.formState.errors.otp.message}
+                      {t(resetForm.formState.errors.otp.message)}
                     </p>
                   )}
                 </div>
@@ -197,9 +208,9 @@ function ForgotPasswordPage() {
                     autoComplete="new-password"
                     {...resetForm.register("newPassword")}
                   />
-                  {resetForm.formState.errors.newPassword && (
+                  {resetForm.formState.errors.newPassword?.message && (
                     <p className="text-xs text-destructive">
-                      {resetForm.formState.errors.newPassword.message}
+                      {t(resetForm.formState.errors.newPassword.message)}
                     </p>
                   )}
                 </div>
@@ -213,9 +224,9 @@ function ForgotPasswordPage() {
                     autoComplete="new-password"
                     {...resetForm.register("confirmPassword")}
                   />
-                  {resetForm.formState.errors.confirmPassword && (
+                  {resetForm.formState.errors.confirmPassword?.message && (
                     <p className="text-xs text-destructive">
-                      {resetForm.formState.errors.confirmPassword.message}
+                      {t(resetForm.formState.errors.confirmPassword.message)}
                     </p>
                   )}
                 </div>

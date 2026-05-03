@@ -11,6 +11,10 @@ export function useUserColumns(): ColumnDef<AdminUserListItem>[] {
     {
       accessorKey: 'accountName',
       header: t('users:columns.account_name'),
+      cell: ({ getValue }) =>
+        getValue<string | null>() ?? (
+          <span className="text-muted-foreground">-</span>
+        ),
       size: 200,
     },
     {

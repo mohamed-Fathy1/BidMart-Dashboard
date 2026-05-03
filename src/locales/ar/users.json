@@ -44,22 +44,32 @@
     "title": "تفعيل المستخدم",
     "description": "سيتم إعادة تفعيل حساب المستخدم، مما يسمح له بتسجيل الدخول مجدداً."
   },
+  "errors": {
+    "ban_failed": "تعذّر حظر المستخدم",
+    "suspend_failed": "تعذّر إيقاف المستخدم",
+    "activate_failed": "تعذّر تفعيل المستخدم",
+    "delete_failed": "تعذّر حذف المستخدم"
+  },
+  "roles": {
+    "user": "مشتري",
+    "seller": "بائع"
+  },
   "detail": {
     "page_title": "تفاصيل المستخدم",
     "user_info": "معلومات المستخدم",
-    "store_info": "معلومات المتجر",
     "full_name": "الاسم الكامل",
     "email": "البريد الإلكتروني",
     "phone": "الهاتف",
     "role": "الدور",
-    "active": "نشط",
-    "verified": "موثّق",
-    "language": "اللغة",
+    "account_status": "حالة الحساب",
     "created_at": "تاريخ الإنشاء",
     "updated_at": "تاريخ التحديث",
-    "store_name": "اسم المتجر",
+    "store_card_title": "المتجر {{index}}",
+    "commercial_registration": "السجل التجاري",
+    "commercial_registration_doc": "مستند السجل التجاري",
     "store_status": "حالة المتجر",
-    "yes": "نعم",
-    "no": "لا"
+    "platform_verified": "موثّق على المنصة",
+    "store_created_at": "تاريخ إنشاء المتجر",
+    "verification_requests_count": "طلبات التحقق"
   }
 }

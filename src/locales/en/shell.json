@@ -21,6 +21,7 @@
   "topbar": {
     "notifications": "Notifications",
     "profile": "Profile",
+    "my_profile": "My profile",
     "logout": "Logout",
     "language": "Language"
   },

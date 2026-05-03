@@ -44,22 +44,32 @@
     "title": "Activate User",
     "description": "This will reactivate the user's account, allowing them to log in again."
   },
+  "errors": {
+    "ban_failed": "Could not ban user",
+    "suspend_failed": "Could not suspend user",
+    "activate_failed": "Could not activate user",
+    "delete_failed": "Could not delete user"
+  },
+  "roles": {
+    "user": "Buyer",
+    "seller": "Seller"
+  },
   "detail": {
     "page_title": "User Details",
     "user_info": "User Information",
-    "store_info": "Store Information",
     "full_name": "Full Name",
     "email": "Email",
     "phone": "Phone",
     "role": "Role",
-    "active": "Active",
-    "verified": "Verified",
-    "language": "Language",
+    "account_status": "Account Status",
     "created_at": "Created At",
     "updated_at": "Updated At",
-    "store_name": "Store Name",
-    "store_status": "Store Status",
-    "yes": "Yes",
-    "no": "No"
+    "store_card_title": "Store {{index}}",
+    "commercial_registration": "Commercial registration",
+    "commercial_registration_doc": "Registration document",
+    "store_status": "Store status",
+    "platform_verified": "Platform verified",
+    "store_created_at": "Store created",
+    "verification_requests_count": "Verification requests"
   }
 }

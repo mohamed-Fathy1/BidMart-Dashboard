@@ -27,7 +27,11 @@
     "forgot_password": "Forgot password?",
     "login_failed": "Email or password is incorrect.",
     "invalid_email": "Enter a valid email address",
-    "password_min": "Password must be at least 6 characters",
+    "password_length": "Password must be 8–20 characters",
+    "otp_length": "OTP must be 6 digits",
+    "otp_digits": "OTP must be numeric",
+    "password_strength": "Use 8–20 characters with uppercase, lowercase, number, and symbol",
+    "passwords_mismatch": "Passwords do not match",
     "otp_sent": "OTP has been sent to your email",
     "otp_resent": "OTP has been resent to your email",
     "password_reset_success": "Password has been reset successfully"

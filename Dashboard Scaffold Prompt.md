@@ -26,7 +26,7 @@ Read silently, then proceed.
 - **Forms**: react-hook-form + zod
 - **i18n**: i18next + react-i18next, Arabic + English, RTL-aware
 - **Rich text**: tiptap (for Terms, Privacy, About Us)
-- **File upload**: react-dropzone
+- **File upload**: Admin S3 presign via **`src/lib/upload.ts`** (**`POST /admin/files/upload`** → browser **PUT** → **`mediaUrl`**) and **`src/components/shared/image-upload-field.tsx`**. Optional **react-dropzone** only if you add a richer dropzone wrapper later.
 - **Date picker**: react-day-picker via shadcn
 - **Export**: `xlsx` + `jspdf` + `jspdf-autotable`
 - **Icons**: lucide-react
@@ -82,7 +82,7 @@ src/
     __root.tsx            # shell: sidebar + topbar
     index.tsx             # redirects to /overview or /login
     login.tsx
-    forgot-password.tsx   # account recovery stub (4 steps laid out)
+    forgot-password.tsx   # email → OTP + reset password (wired to Admin Auth API)
     _authed.tsx           # protected layout + permission enforcement
     _authed.overview.tsx  # proof-of-shell landing
   features/
@@ -95,7 +95,7 @@ src/
     data-table/           # shared TanStack Table + shadcn wrapper
     permissions/          # <Can />
     rich-text/            # tiptap wrapper (stub)
-    uploader/             # dropzone wrapper (stub)
+    shared/               # cross-feature widgets (e.g. image-upload-field → lib/upload.ts)
   lib/
     axios.ts query-client.ts cn.ts env.ts
     format.ts             # currency (SAR), date, number — locale-aware
@@ -127,10 +127,10 @@ Rules (baked into `CLAUDE.md`):
 
 `src/lib/axios.ts`:
 
-- Single `api` instance, `baseURL` from `env.VITE_API_URL`
-- Request interceptor: attach bearer from `useAuthStore.getState()`; attach `Accept-Language` from `i18n.language`
-- Response interceptor: 401 → `clearSession()` + redirect `/login`; 403 → toast "permission denied" + reject; others normalized to `{ message, status, code }`
-- Export `apiRequest<T>(config): Promise<T>` that unwraps `.data`
+- Single `api` instance, `baseURL` from `env.VITE_API_URL` (must match deployment, e.g. include `/api/v1` segment if your gateway serves that prefix once)
+- Request interceptor: attach bearer from persisted Zustand token in **`localStorage`** (**`bidmart-auth`** persistence shape); attach `Accept-Language` from `i18n.language`
+- Response interceptor: **`401`** → remove **`bidmart-auth`** + redirect **`/login`**, **except** for **`POST`** **`/admin/auth/login`**, **`/admin/auth/forgot-password`**, **`/admin/auth/forgot-password/resend`**, and **`/admin/auth/reset-password`** (so wrong credentials / validation errors stay on-page). **`403`** → generic permission toast + reject, **except** those same URLs (disabled-admin auth flows use API body messaging). Errors reject with **`{ message, status }`** (nested **`response.data.message`** / **`response.data.data.message`** extracted when present via **`extractApiErrorMessage`**)
+- Export `apiRequest<T>(config): Promise<T>` that returns `axios` **`response.data`**
 
 `src/lib/query-client.ts`:
 
@@ -143,7 +143,7 @@ Rules (baked into `CLAUDE.md`):
 ## 5. Auth + permissions
 
 `features/auth/auth.store.ts` (Zustand + persist):
-`{ user, token, permissions: string[], status, setSession, clearSession }`. Token persisted to localStorage; user + permissions rehydrated from `/me` on mount.
+`{ user, token, permissions: string[], status, setSession, clearSession }`. Persist **token** only (**`bidmart-auth`** key). **`loginRequest`** decodes the JWT once for an initial **`user`**. **`useMeQuery`** / **`getMeRequest`** validate JWT **`exp`**, call **`GET /admin/profile`**, and merge: **`permissions[]`** and JWT **`role`** (slug) from the token; **`fullName`**, **`email`**, **`phone`**, **`role.id`**, role labels, **`isSuperAdmin`** from the API. **`PATCH /admin/profile`** updates editable fields (**`useUpdateAdminProfileMutation`**). See root **`CLAUDE.md`** — Admin — Auth.
 
 `_authed.tsx` layout:
 - No token → redirect `/login`
@@ -166,8 +166,8 @@ export const PERMISSIONS = {
 
 Export `usePermission(p: Permission)` hook and `<Can permission="..." fallback={null}>` component, both reading from `auth.store`.
 
-`login.tsx`: real form (email + password), wired to `useLoginMutation` → `POST /auth/login`. No mocking.
-`forgot-password.tsx`: stub with 4 steps (email → code → new password → confirm) laid out, no logic.
+`login.tsx`: real form (**email**, **password**, **remember-me** via **`react-hook-form` `Controller` + `Checkbox`**), **`useLoginMutation`** → **`POST /admin/auth/login`** with **`deviceId: "admin-panel"`**. Validates password length **8–20** client-side before submit.
+`forgot-password.tsx`: request OTP (**`POST /admin/auth/forgot-password`**), optional resend, reset (**`POST /admin/auth/reset-password`**); client validation mirrors API OTP + password rules (see **`CLAUDE.md` — Admin — Auth**).
 
 ---
 
@@ -179,7 +179,7 @@ Namespaces:
 - `common.json` — buttons (save, cancel, confirm), states (loading, empty, error), common labels
 - `components.json` — shared component strings (image upload, data table, etc.)
 - `shell.json` — sidebar nav labels, topbar labels, user menu
-- Feature namespaces: `users.json`, `countries.json`, `categories.json`, `providers.json`, `roles.json`, `admins.json`
+- Feature namespaces: `users.json`, `countries.json`, `categories.json`, `providers.json`, `roles.json`, `admins.json`, `profile.json` (authenticated `/profile` screen)
 
 Each feature owns its own namespace. **No hardcoded strings in components, ever.**
 
@@ -192,7 +192,7 @@ Each feature owns its own namespace. **No hardcoded strings in components, ever.
 `components/layout/shell.tsx` composes `<Sidebar />` + `<Topbar />` + `<main>`.
 
 - **Sidebar**: fixed inline-start (respects RTL), 260px expanded / 64px collapsed, collapse state in `ui.store.ts` (Zustand, persisted). Nav items data-driven from `nav-items.ts`, each `{ label, icon, to, permission }`. Items hidden if permission fails. Active state via `useMatchRoute`.
-- **Topbar**: 56px, hairline bottom border. Breadcrumb slot (start), then language switcher, notifications bell (stub — real feature folder, empty popover), user menu (stub). Stubs have correct shape and spacing, no fake data.
+- **Topbar**: 56px, hairline bottom border. Breadcrumb slot (start), then language switcher, notifications bell (stub — real feature folder, empty popover), user menu with **My profile** → **`/profile`** and sign-out (initials derived from **`lib/utils`** **`accountInitials`** when session is hydrated).
 - **Main**: max-width container with token-based padding. Scroll lives on `<main>`.
 
 ---
@@ -267,7 +267,7 @@ At repo root, in this order:
 
 Tight bullets. No prose essays.
 
-The authoritative root `CLAUDE.md` may add short **feature anchors** when useful (currently includes **Roles**, **Admins**, and **Providers**: API paths relative to Axios `baseURL`, response unwrapping, permission guards, and—where relevant—JWT mirrors such as `User.roleId` / `User.isSuperAdmin` plus `suppressInitialFocus` on `FormDialog` for admins modals).
+The authoritative root `CLAUDE.md` may add short **feature anchors** when useful (currently includes **Auth / profile**, **Roles**, **Admins**, **Users**, **Providers**, and **Categories**: API paths relative to Axios `baseURL`, response unwrapping, permission guards, and—where relevant—session fields such as `User.roleId` / `User.isSuperAdmin` plus `suppressInitialFocus` on `FormDialog` for admins modals).
 
 ---
 
@@ -276,7 +276,7 @@ The authoritative root `CLAUDE.md` may add short **feature anchors** when useful
 `/overview` (under `_authed`) renders:
 - Topbar with breadcrumb "Overview", working language switcher, bell stub, user menu stub
 - Sidebar with 3 placeholder nav items (Overview, Users, Settings) — real nav comes feature-by-feature
-- Main area: one `<h1>`, one muted sentence, one empty `DataTable` (headers only, "No data" state), one `<Can permission="users.read">` gate wrapping a dummy button, and a debug strip showing `format.currency(1234.5)` + `format.dateTime(new Date())` in both locales
+- Main area: one `<h1>`, one muted sentence, one empty `DataTable` (headers only, "No data" state), one `<Can permission="admin:users:view">` gate wrapping a dummy button, and a debug strip showing `format.currency(1234.5)` + `format.dateTime(new Date())` in both locales
 
 Toggling the language switcher must flip direction, font family, and formatter output live.
 

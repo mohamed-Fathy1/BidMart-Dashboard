@@ -70,6 +70,11 @@ export interface User {
   roleId?: string;
   /** From JWT `is_super_admin`; used for UI guards only. */
   isSuperAdmin?: boolean;
+  /** From `GET /admin/profile`; omitted until session is hydrated from the API. */
+  phone?: string | null;
+  /** Role labels from `GET /admin/profile` (read-only). */
+  roleNameEn?: string;
+  roleNameAr?: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -86,23 +91,45 @@ export interface AdminUserListItem {
   registrationDate: string;
 }
 
+/** Verification row nested under GET /admin/users/{id} → stores[].verification_requests */
+export interface AdminUserStoreVerificationRequest {
+  id: string;
+  commercial_registration_number: string;
+  commercial_registration_doc: string | null;
+  status: string;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  rejection_reason: string | null;
+  created_at: string;
+}
+
+/** Store row from GET /admin/users/{id} */
+export interface AdminUserStore {
+  id: string;
+  store_logo: string | null;
+  commercial_registration_number: string | null;
+  commercial_registration_doc: string | null;
+  /** Lowercase lifecycle — map with `providerAccountStatusForSellerBadge` for badges */
+  status: string;
+  is_verified: boolean;
+  return_policy_ar: string | null;
+  return_policy_en: string | null;
+  created_at: string;
+  verification_requests: AdminUserStoreVerificationRequest[];
+}
+
+/** GET /admin/users/{userId} — buyers only (`user` | `seller`), snake_case matches API */
 export interface AdminUserDetail {
   id: string;
-  fullName: string;
   email: string | null;
-  phone: string;
-  role: UserRole;
-  isActive: boolean;
-  isVerified: boolean;
-  avatarUrl: string | null;
-  language: string | null;
-  store: {
-    id: string;
-    nameEn: string;
-    status: SellerStatus;
-  } | null;
-  createdAt: string;
-  updatedAt: string;
+  phone_number: string;
+  full_name: string | null;
+  profile_picture: string | null;
+  role: Extract<UserRole, "user" | "seller">;
+  account_status: AccountStatus;
+  created_at: string;
+  updated_at: string;
+  stores: AdminUserStore[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -118,7 +145,8 @@ export interface Country {
   is_enabled: boolean;
   sort_order: number;
   created_at: string;
-  updated_at: string;
+  /** Present on create/update/detail; list rows may omit. */
+  updated_at?: string;
 }
 
 /* ------------------------------------------------------------------ */

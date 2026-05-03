@@ -5,16 +5,15 @@
     "total_countries": "{{count}} countries"
   },
   "columns": {
-    "flag": "Flag",
-    "name_en": "Name (EN)",
-    "name_ar": "Name (AR)",
+    "country": "Country",
     "iso_code": "ISO Code",
     "enabled": "Enabled",
     "sort_order": "Sort Order",
     "created_at": "Created At"
   },
   "filters": {
-    "enabled": "Status"
+    "enabled": "Status",
+    "search_placeholder": "Search by name (EN or AR)"
   },
   "enabled_options": {
     "enabled": "Enabled",
@@ -24,11 +23,21 @@
     "create": "Add Country",
     "edit": "Edit",
     "delete": "Delete",
+    "enable": "Enable",
+    "disable": "Disable",
     "create_success": "Country created",
     "update_success": "Country updated",
-    "delete_success": "Country deleted"
+    "delete_success": "Country deleted",
+    "toggle_success": "Country availability updated"
+  },
+  "errors": {
+    "create_failed": "Could not create country",
+    "update_failed": "Could not update country",
+    "delete_failed": "Could not delete country",
+    "toggle_failed": "Could not update availability"
   },
   "form": {
+    "dialog_description": "Names, flag image, and ISO code determine how the country appears in the registration list.",
     "create_title": "Add Country",
     "edit_title": "Edit Country",
     "name_en": "Name (English)",
@@ -40,7 +49,13 @@
     "image_url": "Flag Image URL",
     "image_url_placeholder": "https://flagcdn.com/w320/sa.png",
     "is_enabled": "Enabled",
-    "sort_order": "Sort Order"
+    "sort_order": "Sort Order",
+    "section_names": "Names",
+    "section_codes": "Codes and order",
+    "section_flag": "Flag image",
+    "section_visibility": "Registration",
+    "enabled_hint": "Enabled countries appear in the registration country list.",
+    "iso_locked_hint": "ISO code cannot be changed after the country is created."
   },
   "delete_dialog": {
     "title": "Delete Country",

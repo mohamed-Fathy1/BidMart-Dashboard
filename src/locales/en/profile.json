@@ -1,0 +1,27 @@
+{
+  "title": "My profile",
+  "description": "Your account in the admin panel: how you appear to other operators and how we reach you.",
+  "sections": {
+    "editable": "Contact & display",
+    "editable_hint": "These fields are visible in operator tools and notifications. Your role is assigned separately and cannot be changed here.",
+    "role_managed_hint": "Role changes are made by a super admin under Admins."
+  },
+  "badges": {
+    "super_admin": "Super admin"
+  },
+  "fields": {
+    "full_name": "Full name",
+    "phone": "Phone",
+    "phone_placeholder": "+9665…",
+    "phone_helper": "Optional. Include country code."
+  },
+  "actions": {
+    "save": "Save changes"
+  },
+  "messages": {
+    "saved": "Profile saved"
+  },
+  "errors": {
+    "full_name_required": "Enter your full name"
+  }
+}

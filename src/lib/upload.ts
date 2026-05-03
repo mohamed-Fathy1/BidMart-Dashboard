@@ -6,7 +6,7 @@ import { api } from '@/lib/axios'
 
 interface FileItem {
   contentType: string
-  fileName?: string
+  fileName: string
 }
 
 interface UploadResult {
@@ -14,10 +14,12 @@ interface UploadResult {
   mediaUrl: string
 }
 
+/** Admin upload endpoint wraps results; accepts `meta` (admin) or `timestamp` (legacy client). */
 interface UploadResponse {
   success: true
   data: UploadResult[]
-  timestamp: string
+  meta?: { version?: string }
+  timestamp?: string
 }
 
 export type UploadCase =
@@ -25,6 +27,18 @@ export type UploadCase =
   | 'country_image'
   | 'sub_category_image'
   | 'product_image'
+
+function fileExtensionForContentType(contentType: string): string {
+  if (contentType === 'image/jpeg' || contentType === 'image/jpg') return 'jpg'
+  if (contentType === 'image/png') return 'png'
+  if (contentType === 'image/webp') return 'webp'
+  return 'bin'
+}
+
+function buildObjectFileName(uploadCase: UploadCase, contentType: string): string {
+  const ext = fileExtensionForContentType(contentType)
+  return `${uploadCase}/${crypto.randomUUID()}-${Date.now()}.${ext}`
+}
 
 /* ------------------------------------------------------------------ */
 /*  Get presigned URL                                                  */
@@ -34,8 +48,8 @@ async function getPresignedUrls(
   uploadCase: UploadCase,
   files: FileItem[],
 ): Promise<UploadResult[]> {
-  const res = await api.post<UploadResponse>('/files/upload', {
-    folder: uploadCase,
+  const res = await api.post<UploadResponse>('/admin/files/upload', {
+    case: uploadCase,
     files,
   })
   return res.data.data
@@ -57,9 +71,16 @@ export async function uploadFile(
   onProgress?: (progress: UploadProgress) => void,
 ): Promise<string> {
   // 1. Get presigned URL
-  const [result] = await getPresignedUrls(uploadCase, [
-    { contentType: file.type },
+  const results = await getPresignedUrls(uploadCase, [
+    {
+      contentType: file.type,
+      fileName: buildObjectFileName(uploadCase, file.type),
+    },
   ])
+  const result = results[0]
+  if (!result) {
+    throw new Error('No presigned URL returned')
+  }
 
   // 2. PUT file directly to S3
   await fetch(result.preSignedURL, {
@@ -81,7 +102,7 @@ export async function uploadFile(
 /* ------------------------------------------------------------------ */
 
 export async function deleteFile(key: string): Promise<void> {
-  await api.delete('/files', { data: { key } })
+  await api.delete('/admin/files', { data: { key } })
 }
 
 /* ------------------------------------------------------------------ */

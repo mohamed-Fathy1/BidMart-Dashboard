@@ -1,4 +1,5 @@
 import { Bell, LogOut, User } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -18,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LangSwitcher } from "@/components/layout/lang-switcher";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
+import { accountInitials, cn } from "@/lib/utils";
 import { useUIStore } from "@/features/ui/ui.store";
 import { useAuthStore } from "@/features/auth/auth.store";
 import { useLogoutMutation } from "@/features/auth/auth.queries";
@@ -89,8 +90,12 @@ export function Topbar({ title }: TopbarProps) {
                 aria-label={t("shell:topbar.profile")}
               >
                 <Avatar className="h-7 w-7">
-                  <AvatarFallback>
-                    <User className="h-4 w-4" />
+                  <AvatarFallback className="text-[10px] font-semibold">
+                    {user ? (
+                      accountInitials(user.name, user.email)
+                    ) : (
+                      <User className="h-4 w-4" />
+                    )}
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -104,13 +109,23 @@ export function Topbar({ title }: TopbarProps) {
                   <DropdownMenuSeparator />
                 </>
               )}
+              <DropdownMenuItem asChild>
+                <Link
+                  to="/profile"
+                  className="flex w-full cursor-pointer items-center gap-2"
+                >
+                  <User className="size-4" />
+                  {t("shell:topbar.my_profile")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem
                 variant="destructive"
                 onClick={() => logout.mutate()}
                 disabled={logout.isPending}
               >
                 <LogOut className="size-4" />
-                {t("shell:topbar.sign_out")}
+                {t("shell:topbar.logout")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

@@ -21,6 +21,7 @@
   "topbar": {
     "notifications": "الإشعارات",
     "profile": "الملف الشخصي",
+    "my_profile": "ملفي الشخصي",
     "logout": "تسجيل الخروج",
     "language": "اللغة"
   },

@@ -1,11 +1,12 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, ToggleLeft } from "lucide-react";
 import type { PaginationState } from "@tanstack/react-table";
 import type { Country } from "@/types/api";
 import { PageHeader } from "@/components/shared/page-header";
 import { FilterSelect } from "@/components/shared/filter-select";
 import { TableFiltersShell } from "@/components/shared/table-filters-shell";
+import { SearchInput } from "@/components/shared/search-input";
 import {
   DataTable,
   type RowActionItem,
@@ -17,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ImageUploadField } from "@/components/shared/image-upload-field";
+import { Separator } from "@/components/ui/separator";
 import { Can } from "@/components/permissions/can";
 import { PERMISSIONS, usePermission } from "@/lib/permissions";
 import { useCountryColumns } from "@/features/countries/countries.columns";
@@ -24,18 +26,39 @@ import {
   useCountriesQuery,
   useCreateCountryMutation,
   useUpdateCountryMutation,
+  useToggleCountryMutation,
   useDeleteCountryMutation,
 } from "@/features/countries/countries.queries";
 import { format } from "@/lib/format";
+import { cn } from "@/lib/utils";
+
+function FormSection({
+  title,
+  children,
+  className,
+}: {
+  title: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("space-y-3", className)}>
+      <h3 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+        {title}
+      </h3>
+      {children}
+    </div>
+  );
+}
 
 export function CountriesListPage() {
   const { t } = useTranslation();
 
-  const canCreate = usePermission(PERMISSIONS.countries.create);
   const canUpdate = usePermission(PERMISSIONS.countries.update);
   const canDelete = usePermission(PERMISSIONS.countries.delete);
 
   /* ---------- filters ---------- */
+  const [search, setSearch] = useState("");
   const [enabledFilter, setEnabledFilter] = useState("");
 
   /* ---------- pagination ---------- */
@@ -85,6 +108,7 @@ export function CountriesListPage() {
 
   /* ---------- data ---------- */
   const { data: response, isLoading } = useCountriesQuery({
+    search: search.trim() || undefined,
     isEnabled:
       enabledFilter === "true"
         ? true
@@ -103,6 +127,7 @@ export function CountriesListPage() {
   /* ---------- mutations ---------- */
   const createMutation = useCreateCountryMutation();
   const updateMutation = useUpdateCountryMutation();
+  const toggleMutation = useToggleCountryMutation();
   const deleteMutation = useDeleteCountryMutation();
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
@@ -117,7 +142,7 @@ export function CountriesListPage() {
   );
 
   /* ---------- row actions ---------- */
-  function getRowActions(_row: Country): RowActionItem<Country>[] {
+  function getRowActions(row: Country): RowActionItem<Country>[] {
     const items: RowActionItem<Country>[] = [];
 
     if (canUpdate) {
@@ -125,6 +150,13 @@ export function CountriesListPage() {
         label: t("countries:actions.edit"),
         icon: Pencil,
         onClick: (r) => openEdit(r),
+      });
+      items.push({
+        label: row.is_enabled
+          ? t("countries:actions.disable")
+          : t("countries:actions.enable"),
+        icon: ToggleLeft,
+        onClick: (r) => toggleMutation.mutate(r.id),
       });
     }
 
@@ -191,6 +223,15 @@ export function CountriesListPage() {
           : undefined
       }
     >
+      <SearchInput
+        value={search}
+        onChange={(v) => {
+          setSearch(v);
+          setPagination((p) => ({ ...p, pageIndex: 0 }));
+        }}
+        placeholder={t("countries:filters.search_placeholder")}
+        className="w-full min-w-[min(100%,220px)] sm:max-w-xs md:w-80"
+      />
       <FilterSelect
         value={enabledFilter}
         onChange={(v) => {
@@ -199,7 +240,7 @@ export function CountriesListPage() {
         }}
         options={enabledOptions}
         placeholder={t("countries:filters.enabled")}
-        className="min-w-[148px]"
+        className="min-w-[160px]"
       />
     </TableFiltersShell>
   );
@@ -247,82 +288,117 @@ export function CountriesListPage() {
             ? t("countries:form.edit_title")
             : t("countries:form.create_title")
         }
+        description={t("countries:form.dialog_description")}
         isEdit={!!editTarget}
         isLoading={isSubmitting}
         onSubmit={handleSubmit}
-        contentClassName="sm:max-w-lg"
+        contentClassName="sm:max-w-2xl"
+        suppressInitialFocus
       >
-        <div className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="country-name-en">
-              {t("countries:form.name_en")}
-            </Label>
-            <Input
-              id="country-name-en"
-              value={nameEn}
-              onChange={(e) => setNameEn(e.target.value)}
-              placeholder={t("countries:form.name_en_placeholder")}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="country-name-ar">
-              {t("countries:form.name_ar")}
-            </Label>
-            <Input
-              id="country-name-ar"
-              value={nameAr}
-              onChange={(e) => setNameAr(e.target.value)}
-              placeholder={t("countries:form.name_ar_placeholder")}
-              dir="rtl"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
+        <div className="max-h-[min(72vh,600px)] space-y-0 overflow-y-auto pe-1">
+          <FormSection title={t("countries:form.section_names")}>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="country-name-en">
+                  {t("countries:form.name_en")}
+                </Label>
+                <Input
+                  id="country-name-en"
+                  value={nameEn}
+                  onChange={(e) => setNameEn(e.target.value)}
+                  placeholder={t("countries:form.name_en_placeholder")}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="country-name-ar">
+                  {t("countries:form.name_ar")}
+                </Label>
+                <Input
+                  id="country-name-ar"
+                  value={nameAr}
+                  onChange={(e) => setNameAr(e.target.value)}
+                  placeholder={t("countries:form.name_ar_placeholder")}
+                  dir="rtl"
+                />
+              </div>
+            </div>
+          </FormSection>
+
+          <Separator className="my-6" />
+
+          <FormSection title={t("countries:form.section_codes")}>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="country-iso">
+                  {t("countries:form.iso_code")}
+                </Label>
+                <Input
+                  id="country-iso"
+                  value={isoCode}
+                  onChange={(e) => setIsoCode(e.target.value.toUpperCase())}
+                  placeholder={t("countries:form.iso_code_placeholder")}
+                  maxLength={3}
+                  className="font-mono uppercase"
+                  disabled={!!editTarget}
+                />
+                {editTarget ? (
+                  <p className="text-xs text-muted-foreground">
+                    {t("countries:form.iso_locked_hint")}
+                  </p>
+                ) : null}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="country-sort">
+                  {t("countries:form.sort_order")}
+                </Label>
+                <Input
+                  id="country-sort"
+                  type="number"
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(Number(e.target.value))}
+                  min={0}
+                  className="font-mono tabular-nums"
+                />
+              </div>
+            </div>
+          </FormSection>
+
+          <Separator className="my-6" />
+
+          <FormSection title={t("countries:form.section_flag")}>
             <div className="grid gap-2">
-              <Label htmlFor="country-iso">
-                {t("countries:form.iso_code")}
-              </Label>
-              <Input
-                id="country-iso"
-                value={isoCode}
-                onChange={(e) => setIsoCode(e.target.value.toUpperCase())}
-                placeholder={t("countries:form.iso_code_placeholder")}
-                maxLength={3}
-                className="font-mono uppercase"
-                disabled={!!editTarget}
+              <Label>{t("countries:form.image_url")}</Label>
+              <ImageUploadField
+                value={imageUrl}
+                onChange={setImageUrl}
+                uploadCase="country_image"
               />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="country-sort">
-                {t("countries:form.sort_order")}
-              </Label>
-              <Input
-                id="country-sort"
-                type="number"
-                value={sortOrder}
-                onChange={(e) => setSortOrder(Number(e.target.value))}
-                min={0}
-                className="font-mono tabular-nums"
-              />
+          </FormSection>
+
+          <Separator className="my-6" />
+
+          <FormSection title={t("countries:form.section_visibility")}>
+            <div className="rounded-lg border border-border bg-card p-4 shadow-rest">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0 space-y-1">
+                  <Label htmlFor="country-enabled" className="text-foreground">
+                    {t("countries:form.is_enabled")}
+                  </Label>
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    {t("countries:form.enabled_hint")}
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center sm:ps-4">
+                  <Switch
+                    id="country-enabled"
+                    checked={isEnabled}
+                    onCheckedChange={setIsEnabled}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="grid gap-2">
-            <Label>{t("countries:form.image_url")}</Label>
-            <ImageUploadField
-              value={imageUrl}
-              onChange={setImageUrl}
-              uploadCase="country_image"
-            />
-          </div>
-          <div className="flex items-center gap-3">
-            <Switch
-              id="country-enabled"
-              checked={isEnabled}
-              onCheckedChange={setIsEnabled}
-            />
-            <Label htmlFor="country-enabled">
-              {t("countries:form.is_enabled")}
-            </Label>
-          </div>
+          </FormSection>
         </div>
       </FormDialog>
 

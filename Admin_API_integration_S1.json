@@ -65,7 +65,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedAdminUsersDto"
+                  "$ref": "#/components/schemas/AdminUsersListResponseDto"
                 }
               }
             }
@@ -106,7 +106,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserDetailDto"
+                  "$ref": "#/components/schemas/AdminUserDetailResponseDto"
                 }
               }
             }
@@ -344,11 +344,23 @@
         },
         "responses": {
           "200": {
-            "description": "Access token issued",
+            "description": "Access token issued (HTTP body wraps token in `{ success, data, meta }` — see `AdminLoginApiResponseDto`).",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminTokenResponseDto"
+                  "$ref": "#/components/schemas/AdminLoginApiResponseDto"
+                },
+                "examples": {
+                  "wrapped": {
+                    "summary": "Gateway envelope",
+                    "value": {
+                      "success": true,
+                      "data": {
+                        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      },
+                      "meta": { "version": "1.0.0" }
+                    }
+                  }
                 }
               }
             }
@@ -384,11 +396,11 @@
         },
         "responses": {
           "200": {
-            "description": "OTP dispatched",
+            "description": "OTP dispatched (`data.message`; `data.otp` only when NODE_ENV=development).",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminForgotPasswordResponseDto"
+                  "$ref": "#/components/schemas/AdminForgotPasswordApiResponseDto"
                 }
               }
             }
@@ -424,11 +436,11 @@
         },
         "responses": {
           "200": {
-            "description": "OTP re-sent",
+            "description": "OTP re-sent (same envelope as `POST …/forgot-password`; sliding-window rate limit shared with that endpoint).",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminForgotPasswordResponseDto"
+                  "$ref": "#/components/schemas/AdminForgotPasswordApiResponseDto"
                 }
               }
             }
@@ -464,11 +476,11 @@
         },
         "responses": {
           "200": {
-            "description": "Password updated",
+            "description": "Password updated (`data.message`; client should redirect to login).",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminResetPasswordResponseDto"
+                  "$ref": "#/components/schemas/AdminResetPasswordApiResponseDto"
                 }
               }
             }
@@ -500,6 +512,168 @@
           }
         },
         "tags": ["Admin — Auth"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/profile": {
+      "get": {
+        "operationId": "AdminProfileController_getProfile",
+        "summary": "Get authenticated admin profile",
+        "description": "Returns admin name, email, phone, and assigned role (read-only). Dashboard: `getAdminProfileRequest` / merged in `getMeRequest` (`features/auth/auth.api.ts`).",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminProfileApiResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "404": {
+            "description": "Admin not found"
+          }
+        },
+        "tags": ["Admin — Profile"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "AdminProfileController_updateProfile",
+        "summary": "Update authenticated admin profile",
+        "description": "Editable fields: `fullName`, `email`, `phone`. Role cannot be changed through this endpoint. Dashboard: `updateAdminProfileRequest`.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAdminProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminProfileUpdateApiResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "404": {
+            "description": "Admin not found"
+          },
+          "409": {
+            "description": "Email already in use by another admin"
+          }
+        },
+        "tags": ["Admin — Profile"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/files/upload": {
+      "post": {
+        "operationId": "AdminFilesController_presignUpload",
+        "summary": "Generate pre-signed S3 upload URLs (admin)",
+        "description": "Admin version of the upload URL generator. Same behaviour as the client endpoint — returns a pre-signed PUT URL per file (1–10 files per request). Client uploads with HTTP PUT to `preSignedURL` using the same `Content-Type` as requested, then stores `mediaUrl` on entities.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminPresignUploadRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pre-signed URLs generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPresignUploadResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          }
+        },
+        "tags": ["Admin — Files"],
+        "security": [
+          {
+            "adminAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/files": {
+      "delete": {
+        "operationId": "AdminFilesController_deleteFile",
+        "summary": "Delete a file from S3 (admin)",
+        "description": "Deletes object by S3 key.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteFileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "File deleted successfully"
+          },
+          "400": {
+            "description": "Invalid request body or key"
+          },
+          "401": {
+            "description": "Missing or expired admin token"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "Object not found"
+          }
+        },
+        "tags": ["Admin — Files"],
         "security": [
           {
             "adminAuth": []
@@ -2318,6 +2492,10 @@
       "description": "Admin panel authentication — login (with optional rememberMe), logout, forgot password & OTP resend, and password reset"
     },
     {
+      "name": "Admin — Files",
+      "description": "S3 presigned PUT URLs for dashboard uploads and DELETE by object key (`case` + `files[]` on upload; shared DTOs `AdminPresignUploadRequestDto`, `UploadResultDto`, `DeleteFileDto`)"
+    },
+    {
       "name": "Admin — Countries",
       "description": "Country management"
     },
@@ -3025,48 +3203,46 @@
       },
       "AdminUserRowDto": {
         "type": "object",
+        "description": "Buyer row from GET /admin/users (USER and SELLER roles; admins excluded). Ordered by registration date, newest first.",
         "properties": {
           "id": {
             "type": "string",
-            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+            "format": "uuid",
+            "example": "9a680ff9-e584-4864-96ee-9768b9693441"
           },
           "accountName": {
-            "type": "object",
-            "example": "Ahmed Ali",
-            "nullable": true
+            "type": "string",
+            "nullable": true,
+            "example": "Ahmed Ali"
           },
           "phoneNumber": {
-            "type": "object",
-            "example": "+966500000000",
-            "nullable": true
+            "type": "string",
+            "nullable": true,
+            "example": "+966588228822"
           },
           "email": {
-            "type": "object",
-            "example": "ahmed@example.com",
-            "nullable": true
+            "type": "string",
+            "nullable": true,
+            "format": "email",
+            "example": "buyer@example.com"
           },
           "status": {
             "type": "string",
-            "enum": [
-              "pending_verification",
-              "active",
-              "suspended",
-              "banned",
-              "deleted"
-            ],
+            "enum": ["active", "banned", "suspended"],
             "example": "active",
-            "description": "Active / Banned / Suspended"
+            "description": "Account status filter values match query param `status`"
           },
           "accountType": {
             "type": "string",
             "enum": ["user_only", "upgraded_to_seller"],
             "example": "user_only",
-            "description": "user_only if the user has no store, upgraded_to_seller if they own one"
+            "description": "`user_only` = USER with no store; `upgraded_to_seller` = has a store"
           },
           "registrationDate": {
-            "format": "date-time",
             "type": "string",
-            "example": "2025-11-03T14:23:00.000Z"
+            "format": "date-time",
+            "example": "2026-05-02T20:23:23.940Z",
+            "description": "Registration timestamp (ISO 8601)"
           }
         },
         "required": [
@@ -3121,9 +3297,14 @@
           "hasPrevPage"
         ]
       },
-      "PaginatedAdminUsersDto": {
+      "AdminUsersListResponseDto": {
         "type": "object",
+        "description": "Standard admin envelope for buyer list — clients unwrap `data` and `meta` (see `users.api.ts` `listUsers`).",
         "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
           "data": {
             "type": "array",
             "items": {
@@ -3134,103 +3315,215 @@
             "$ref": "#/components/schemas/PaginationMetaDto"
           }
         },
-        "required": ["data", "meta"]
+        "required": ["success", "data", "meta"]
       },
-      "UserStoreDto": {
+      "AdminUserVerificationRequestDto": {
         "type": "object",
+        "description": "Document verification request row nested under a store on buyer detail.",
         "properties": {
           "id": {
             "type": "string",
-            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+            "format": "uuid"
           },
-          "nameEn": {
+          "commercial_registration_number": {
+            "type": "string"
+          },
+          "commercial_registration_doc": {
             "type": "string",
-            "example": "Ahmed Store"
+            "nullable": true
           },
           "status": {
             "type": "string",
-            "enum": ["PENDING", "APPROVED", "REJECTED", "SUSPENDED"]
-          }
-        },
-        "required": ["id", "nameEn", "status"]
-      },
-      "UserDetailDto": {
-        "type": "object",
-        "properties": {
-          "id": {
+            "example": "pending",
+            "description": "Workflow status for this verification request"
+          },
+          "reviewed_by": {
             "type": "string",
-            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-          },
-          "fullName": {
-            "type": "string",
-            "example": "Ahmed Ali"
-          },
-          "email": {
-            "type": "string",
-            "example": "ahmed@example.com"
-          },
-          "phone": {
-            "type": "string",
-            "example": "+966500000000"
-          },
-          "role": {
-            "type": "string",
-            "enum": ["guest", "user", "seller", "admin"]
-          },
-          "isActive": {
-            "type": "boolean",
-            "example": true
-          },
-          "isVerified": {
-            "type": "boolean",
-            "example": true
-          },
-          "store": {
             "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/UserStoreDto"
-              }
-            ]
+            "format": "uuid"
           },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "avatarUrl": {
-            "type": "object",
-            "nullable": true,
-            "example": "https://cdn.bidmart.com/avatars/abc.jpg"
-          },
-          "language": {
+          "reviewed_at": {
             "type": "string",
-            "example": "ar"
+            "nullable": true,
+            "format": "date-time"
           },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
+          "rejection_reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "required": [
           "id",
-          "fullName",
-          "email",
-          "phone",
-          "role",
-          "isActive",
-          "isVerified",
-          "createdAt",
-          "language",
-          "updatedAt"
+          "commercial_registration_number",
+          "commercial_registration_doc",
+          "status",
+          "reviewed_by",
+          "reviewed_at",
+          "rejection_reason",
+          "created_at"
         ]
+      },
+      "AdminUserStoreDto": {
+        "type": "object",
+        "description": "Store snapshot on buyer detail (`GET /admin/users/{userId}` → `stores[]`).",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "store_logo": {
+            "type": "string",
+            "nullable": true
+          },
+          "commercial_registration_number": {
+            "type": "string",
+            "nullable": true
+          },
+          "commercial_registration_doc": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "example": "approved",
+            "description": "Lowercase store lifecycle (`pending`, `approved`, `rejected`, `blocked`, …) — map for UI badges same as providers list"
+          },
+          "is_verified": {
+            "type": "boolean",
+            "description": "Platform storefront verified badge (not the same as document verification status)"
+          },
+          "return_policy_ar": {
+            "type": "string",
+            "nullable": true
+          },
+          "return_policy_en": {
+            "type": "string",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "verification_requests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminUserVerificationRequestDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "store_logo",
+          "commercial_registration_number",
+          "commercial_registration_doc",
+          "status",
+          "is_verified",
+          "return_policy_ar",
+          "return_policy_en",
+          "created_at",
+          "verification_requests"
+        ]
+      },
+      "AdminUserDetailDto": {
+        "type": "object",
+        "description": "Buyer detail payload inside `AdminUserDetailResponseDto.data` — snake_case wire fields.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "format": "email"
+          },
+          "phone_number": {
+            "type": "string",
+            "example": "+966588228822"
+          },
+          "full_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "profile_picture": {
+            "type": "string",
+            "nullable": true,
+            "description": "Absolute URL when set"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["user", "seller"],
+            "description": "This endpoint returns buyers only (`guest` / `admin` do not appear)"
+          },
+          "account_status": {
+            "type": "string",
+            "enum": ["active", "banned", "suspended"],
+            "example": "active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stores": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminUserStoreDto"
+            },
+            "description": "Empty array for `user_only` buyers with no store"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "phone_number",
+          "full_name",
+          "profile_picture",
+          "role",
+          "account_status",
+          "created_at",
+          "updated_at",
+          "stores"
+        ]
+      },
+      "AdminUserDetailResponseDto": {
+        "type": "object",
+        "description": "Standard admin envelope for buyer detail — unwrap `data` on clients (`users.api.ts` `getUserDetail`). Optional `meta.version` may be present.",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminUserDetailDto"
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string",
+                "example": "1.0.0"
+              }
+            }
+          }
+        },
+        "required": ["success", "data"]
       },
       "ModerateUserDto": {
         "type": "object",
         "properties": {
           "reason": {
             "type": "string",
+            "maxLength": 500,
             "example": "Violation of terms of service",
-            "description": "Reason for the moderation action (ban or suspend). Used for audit purposes."
+            "description": "Reason for the moderation action (ban or suspend). Required for audit."
           }
         },
         "required": ["reason"]
@@ -3259,12 +3552,18 @@
             "type": "string",
             "example": "admin-panel",
             "description": "Device identifier recorded in the JWT payload (defaults to \"admin-panel\")"
+          },
+          "fcmToken": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optional FCM registration token when the admin client supports push notifications. Omitted by the web dashboard."
           }
         },
         "required": ["email", "password"]
       },
       "AdminTokenResponseDto": {
         "type": "object",
+        "description": "Login payload nested under HTTP 200 `data` (full response is `AdminLoginApiResponseDto`).",
         "properties": {
           "accessToken": {
             "type": "string",
@@ -3273,6 +3572,29 @@
           }
         },
         "required": ["accessToken"]
+      },
+      "AdminLoginApiResponseDto": {
+        "type": "object",
+        "description": "Gateway envelope for `POST /admin/auth/login`. Clients unwrap `data.accessToken` (dashboard: `features/auth/auth.api.ts` `loginRequest`).",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminTokenResponseDto"
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string",
+                "example": "1.0.0"
+              }
+            }
+          }
+        },
+        "required": ["success", "data"]
       },
       "AdminForgotPasswordDto": {
         "type": "object",
@@ -3287,6 +3609,7 @@
       },
       "AdminForgotPasswordResponseDto": {
         "type": "object",
+        "description": "Payload nested under HTTP 200 `data` for forgot-password and resend (full envelope: `AdminForgotPasswordApiResponseDto`).",
         "properties": {
           "message": {
             "type": "string",
@@ -3299,6 +3622,29 @@
           }
         },
         "required": ["message"]
+      },
+      "AdminForgotPasswordApiResponseDto": {
+        "type": "object",
+        "description": "Gateway envelope for forgot-password OTP request and resend. Clients unwrap `data` (dashboard: `forgotPasswordRequest` / `resendForgotPasswordOtp`).",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminForgotPasswordResponseDto"
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string",
+                "example": "1.0.0"
+              }
+            }
+          }
+        },
+        "required": ["success", "data"]
       },
       "AdminResetPasswordDto": {
         "type": "object",
@@ -3331,6 +3677,7 @@
       },
       "AdminResetPasswordResponseDto": {
         "type": "object",
+        "description": "Payload nested under HTTP 200 `data` after reset-password (full envelope: `AdminResetPasswordApiResponseDto`).",
         "properties": {
           "message": {
             "type": "string",
@@ -3338,6 +3685,159 @@
           }
         },
         "required": ["message"]
+      },
+      "AdminResetPasswordApiResponseDto": {
+        "type": "object",
+        "description": "Gateway envelope for reset-password success. Clients unwrap `data.message` (dashboard: `resetPasswordRequest`).",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminResetPasswordResponseDto"
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string",
+                "example": "1.0.0"
+              }
+            }
+          }
+        },
+        "required": ["success", "data"]
+      },
+      "AdminProfileRoleDto": {
+        "type": "object",
+        "description": "Assigned role on the authenticated admin profile (read-only via PATCH).",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name_en": {
+            "type": "string",
+            "example": "Super Admin"
+          },
+          "name_ar": {
+            "type": "string",
+            "example": "مدير عام"
+          }
+        },
+        "required": ["id", "name_en", "name_ar"]
+      },
+      "AdminProfileDto": {
+        "type": "object",
+        "description": "Authenticated admin profile. Dashboard maps to session `User` via `userFromAdminProfile` (JWT still supplies `permissions[]` and `role` slug).",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string",
+            "example": "Ahmed Ali"
+          },
+          "email": {
+            "type": "string",
+            "example": "admin@bidmart.com"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true,
+            "example": "+966500000000"
+          },
+          "role": {
+            "$ref": "#/components/schemas/AdminProfileRoleDto"
+          },
+          "isSuperAdmin": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": ["id", "fullName", "email", "role", "isSuperAdmin"]
+      },
+      "AdminProfileApiResponseDto": {
+        "type": "object",
+        "description": "Gateway envelope for `GET /admin/profile`. Clients unwrap `data` (`getAdminProfileRequest`).",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminProfileDto"
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string",
+                "example": "1.0.0"
+              }
+            }
+          }
+        },
+        "required": ["success", "data"]
+      },
+      "UpdateAdminProfileDto": {
+        "type": "object",
+        "description": "PATCH body for `/admin/profile`. Role cannot be changed. Send `phone: null` to clear.",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "example": "Ahmed Ali"
+          },
+          "email": {
+            "type": "string",
+            "example": "admin@bidmart.com"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true,
+            "example": "+966500000000"
+          }
+        },
+        "required": ["fullName", "email"]
+      },
+      "AdminProfileUpdateDataDto": {
+        "type": "object",
+        "description": "Payload nested under HTTP 200 `data` after PATCH profile (full envelope: `AdminProfileUpdateApiResponseDto`).",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Profile updated successfully"
+          },
+          "admin": {
+            "$ref": "#/components/schemas/AdminProfileDto"
+          }
+        },
+        "required": ["message", "admin"]
+      },
+      "AdminProfileUpdateApiResponseDto": {
+        "type": "object",
+        "description": "Gateway envelope for `PATCH /admin/profile`. Clients unwrap `data.message` and `data.admin` (`updateAdminProfileRequest`).",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminProfileUpdateDataDto"
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string",
+                "example": "1.0.0"
+              }
+            }
+          }
+        },
+        "required": ["success", "data"]
       },
       "SubCategoryParentRefDto": {
         "type": "object",
@@ -4912,6 +5412,73 @@
         },
         "required": ["message"]
       },
+      "AdminPresignFileItemDto": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "example": "image/jpeg",
+            "description": "MIME type of the file to upload"
+          },
+          "fileName": {
+            "type": "string",
+            "example": "product_image/3fa85f64-5717-4562-b3fc-2c963f66afa6-1700000000000.jpg",
+            "description": "Target S3 object key for the upload"
+          }
+        },
+        "required": ["contentType", "fileName"]
+      },
+      "AdminPresignUploadRequestDto": {
+        "type": "object",
+        "properties": {
+          "case": {
+            "type": "string",
+            "description": "Upload kind / prefix — aligns with dashboard `UploadCase` in `lib/upload.ts`",
+            "enum": [
+              "category_image",
+              "country_image",
+              "sub_category_image",
+              "product_image"
+            ],
+            "example": "product_image"
+          },
+          "files": {
+            "description": "1–10 files per request",
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": {
+              "$ref": "#/components/schemas/AdminPresignFileItemDto"
+            }
+          }
+        },
+        "required": ["case", "files"]
+      },
+      "AdminPresignUploadResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UploadResultDto"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string",
+                "example": "1.0.0"
+              }
+            }
+          }
+        },
+        "required": ["success", "data"]
+      },
       "FileItemDto": {
         "type": "object",
         "properties": {
@@ -5027,6 +5594,8 @@
       "name": "Dashboard (Admin)",
       "tags": [
         "Admin — Auth",
+        "Admin — Profile",
+        "Admin — Files",
         "Admin — Countries",
         "Admin — Categories",
         "Admin — Sub-categories",

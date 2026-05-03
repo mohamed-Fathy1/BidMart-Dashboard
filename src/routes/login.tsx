@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
-import { useLoginMutation } from "@/features/auth/auth.queries";
+import { useLoginMutation, rejectionMessage } from "@/features/auth/auth.queries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +18,10 @@ export const Route = createFileRoute("/login")({
 
 const loginSchema = z.object({
   email: z.string().email({ message: "common:auth.invalid_email" }),
-  password: z.string().min(6, { message: "common:auth.password_min" }),
+  password: z
+    .string()
+    .min(8, { message: "common:auth.password_length" })
+    .max(20, { message: "common:auth.password_length" }),
   rememberMe: z.boolean().optional(),
 });
 
@@ -30,6 +33,7 @@ function LoginPage() {
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginForm>({
@@ -116,7 +120,17 @@ function LoginPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <Checkbox id="remember-me" {...register("rememberMe")} />
+                <Controller
+                  name="rememberMe"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="remember-me"
+                      checked={field.value ?? false}
+                      onCheckedChange={field.onChange}
+                    />
+                  )}
+                />
                 <label
                   htmlFor="remember-me"
                   className="cursor-pointer select-none text-sm text-muted-foreground"
@@ -130,7 +144,10 @@ function LoginPage() {
                   role="alert"
                   className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive"
                 >
-                  {t("common:auth.login_failed")}
+                  {rejectionMessage(
+                    login.error,
+                    t("common:auth.login_failed"),
+                  )}
                 </div>
               )}
 

@@ -1,18 +1,21 @@
 # BidMart — Sprint 1 Frontend Guide
 
 > **Base URL:** `https://<host>/api/v1`
+> **OpenAPI artifact (repo):** `Admin_API_integration_S1.json` — authoritative path + schema refs (e.g. auth **`AdminLoginApiResponseDto`**, **`AdminForgotPasswordApiResponseDto`**, **`AdminResetPasswordApiResponseDto`**; profile **`AdminProfileApiResponseDto`**, **`AdminProfileUpdateApiResponseDto`**, **`AdminProfileDto`**, **`UpdateAdminProfileDto`**; admin files / S3 **`AdminPresignUploadRequestDto`**, **`AdminPresignUploadResponseDto`**, **`UploadResultDto`**, **`DeleteFileDto`** — tag **Admin — Files**).
 > **Swagger UI:** `https://<host>/api/docs` (Basic-Auth protected — ask backend for credentials)
 
 ---
 
 ## Authentication
 
+Admin paths below are rooted at **`/api/v1`** (e.g. full URL `…/api/v1/admin/auth/login`). The dashboard Axios **`baseURL`** should be set so requests use **`/admin/...`** without duplicating **`/api/v1`**.
+
 ### Admin routes
 All `/admin/*` endpoints require:
 ```
 Authorization: Bearer <adminToken>
 ```
-Token is obtained from `POST /admin/auth/login`.
+Token is obtained from `POST /admin/auth/login`. The dashboard also calls **`GET /admin/profile`** after sign-in (see **§1 — Admin Auth**).
 
 ### User/Seller routes
 All protected user endpoints require:
@@ -329,14 +332,20 @@ categories                                               │
 
 ## Common Response Shape
 
-### Success
+Many admin success bodies use **`{ success: true, data, meta }`**:
+
+- **`data`** holds the payload (object, array, or nested `data` + `meta` for paginated lists depending on endpoint).
+- **`meta`** varies by route: **`PaginationMetaDto`** (`page`, `limit`, `total`, …) on list endpoints; single-action JSON often includes **`meta.version`** (**`\"1.0.0\"`**) alongside **`data`**. Omit **`meta`** in clients when absent.
+
+### Success (typical mutations / detail)
 ```json
 {
   "success": true,
-  "data": { ... },
-  "timestamp": "2026-04-23T10:00:00.000Z"
+  "data": { },
+  "meta": { "version": "1.0.0" }
 }
 ```
+Some older docs used **`timestamp`** on the envelope; deployments may expose **`meta.version`** instead — always prefer **`Admin_API_integration_S1.json`** for the operation you integrate.
 
 ### Error
 ```json
@@ -366,6 +375,8 @@ categories                                               │
 
 ## 1 — Admin Auth
 
+OpenAPI (**`Admin_API_integration_S1.json`**): tag **Admin — Auth** — request DTOs **`AdminLoginDto`**, **`AdminForgotPasswordDto`**, **`AdminResetPasswordDto`**; HTTP **`200`** bodies use wrappers **`AdminLoginApiResponseDto`**, **`AdminForgotPasswordApiResponseDto`**, **`AdminResetPasswordApiResponseDto`** (inner payloads **`AdminTokenResponseDto`**, **`AdminForgotPasswordResponseDto`**, **`AdminResetPasswordResponseDto`** in **`data`**). Tag **Admin — Profile** — **`GET`/`PATCH /api/v1/admin/profile`**: schemas **`AdminProfileApiResponseDto`** (`data` → **`AdminProfileDto`** with nested **`AdminProfileRoleDto`**), **`UpdateAdminProfileDto`**, **`AdminProfileUpdateApiResponseDto`** (`data` → **`AdminProfileUpdateDataDto`**: **`message`**, **`admin`**).
+
 ### `POST /admin/auth/login`
 **Public — no token needed**
 
@@ -374,22 +385,95 @@ Request:
 {
   "email": "admin@bidmart.com",
   "password": "Admin@123",
-  "rememberMe": false
+  "rememberMe": false,
+  "deviceId": "admin-panel"
 }
 ```
-- `rememberMe: true` → token expires in 30 days instead of 8 hours
-- `deviceId` — optional string (defaults to `"admin-panel"`)
+- `rememberMe: true` → JWT uses extended TTL (default **30 days** vs standard **~8 hours**).
+- **`fcmToken`** — optional (**`AdminLoginDto`** in **`Admin_API_integration_S1.json`**); omit on the web dashboard unless push is wired.
 
-Response `200`:
+Response **`200`** (gateway envelope — unwrap **`data`** in clients):
 ```json
-{ "accessToken": "eyJ..." }
+{
+  "success": true,
+  "data": { "accessToken": "eyJ..." },
+  "meta": { "version": "1.0.0" }
+}
 ```
 
 Errors:
 | Status | Meaning |
 |--------|---------|
+| 400 | Invalid email or password length (must be **8–20**) |
 | 401 | Wrong email or password |
 | 403 | Admin account disabled |
+
+> **Dashboard (`auth.api.ts`):** Parses **`accessToken`** from **`data`** (or legacy flat/`data` nests), decodes JWT (base64url-safe) for the **initial** session **`user`** + **`permissions`** on login. After **`_authed`** loads, **`useMeQuery`** calls **`GET /admin/profile`** and merges API fields into **`user`** (JWT still supplies **`permissions[]`** and **`role`** slug); **`PATCH /admin/profile`** updates **`fullName`**, **`email`**, **`phone`**. Axios **does not** redirect on **`401`** for **`POST /admin/auth/login`** only — failed login stays on **`/login`**.
+
+---
+
+### `GET /admin/profile` / `PATCH /admin/profile`
+**Full path:** `GET|PATCH /api/v1/admin/profile` · **Requires `adminAuth`** · Dashboard Axios: **`/admin/profile`** when **`baseURL`** ends with **`/api/v1`**.
+
+OpenAPI: tag **Admin — Profile** — **`AdminProfileApiResponseDto`**, **`AdminProfileUpdateApiResponseDto`**, **`AdminProfileDto`**, **`AdminProfileRoleDto`**, **`UpdateAdminProfileDto`**, **`AdminProfileUpdateDataDto`**.
+
+#### `GET`
+**`200`** — unwrap **`data`**:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "298a276c-9416-4db5-a445-8303969da16b",
+    "fullName": "Super Admin",
+    "email": "admin@bidmart.com",
+    "phone": null,
+    "role": {
+      "id": "3de76c2e-47dd-46bc-86cc-2456898aa695",
+      "name_en": "Super Admin",
+      "name_ar": "مدير عام"
+    },
+    "isSuperAdmin": true
+  },
+  "meta": { "version": "1.0.0" }
+}
+```
+Errors: **`401`**, **`404`**. Used by **`getMeRequest`** after JWT **`exp`** check.
+
+#### `PATCH`
+Request body (**`UpdateAdminProfileDto`** — **`fullName`**, **`email`** required; **`phone`** optional / nullable to clear):
+```json
+{
+  "fullName": "Ahmed Ali",
+  "email": "admin@bidmart.com",
+  "phone": "+966500000000"
+}
+```
+
+**`200`** — unwrap **`data`**:
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Profile updated successfully",
+    "admin": {
+      "id": "298a276c-9416-4db5-a445-8303969da16b",
+      "fullName": "Ahmed Ali",
+      "email": "admin@bidmart.com",
+      "phone": "+966500000000",
+      "role": {
+        "id": "3de76c2e-47dd-46bc-86cc-2456898aa695",
+        "name_en": "Super Admin",
+        "name_ar": "مدير عام"
+      },
+      "isSuperAdmin": true
+    }
+  },
+  "meta": { "version": "1.0.0" }
+}
+```
+Errors: **`400`**, **`401`**, **`404`**, **`409`** (email in use).
+
+> **Dashboard:** **`features/profile/profile-page.tsx`** (route **`/profile`**), **`useUpdateAdminProfileMutation`** in **`auth.queries.ts`**, **`getAdminProfileRequest`**, **`updateAdminProfileRequest`**, **`userFromAdminProfile`** in **`auth.api.ts`**.
 
 ---
 
@@ -400,19 +484,26 @@ Request:
 ```json
 { "email": "admin@bidmart.com" }
 ```
-Response `200`:
+Response **`200`** (envelope — message lives under **`data`**):
 ```json
 {
-  "message": "OTP sent to admin@bidmart.com",
-  "otp": "123456"   // only present in development
+  "success": true,
+  "data": {
+    "message": "OTP sent to your email address. It expires in 10 minutes.",
+    "otp": "123456"
+  },
+  "meta": { "version": "1.0.0" }
 }
 ```
-OTP is **6 digits**, expires in **10 minutes**.
+- **`otp`** is only returned when **`NODE_ENV=development`** on the server.
+- OTP is **6 digits**, expires in **10 minutes**.
+
+Errors: **`400`** invalid email; **`403`** disabled admin; **`404`** unknown email.
 
 ---
 
 ### `POST /admin/auth/forgot-password/resend`
-Same body and response as `forgot-password`.
+Same body, envelope, and errors as **`forgot-password`** (rate-limited the same).
 
 ---
 
@@ -430,23 +521,85 @@ Request:
 ```
 Password rules: 8–20 chars, uppercase, lowercase, digit, symbol.
 
-Response `200`:
+Response **`200`** (envelope):
 ```json
-{ "message": "Password has been reset successfully." }
+{
+  "success": true,
+  "data": { "message": "Password reset successfully, please login" },
+  "meta": { "version": "1.0.0" }
+}
 ```
+
+Errors: **`400`** (OTP invalid/expired, weak password, mismatch); **`403`** disabled; **`404`** unknown email.
 
 ---
 
 ### `POST /admin/auth/logout`
 **Requires `adminAuth` token**
 
-No body. Response `204 No Content`.
+No body. Response **`204 No Content`** (JWT **`jti`** blocklisted server-side).
+
+> **Dashboard:** Still clears local session **`onSettled`** so the UI Signs out even if the network fails.
+
+---
+
+## 1b — Admin: Files (S3 presign)
+
+> Token required (same as other **`/admin/*`**). Full paths: **`POST|DELETE /api/v1/admin/files/...`**. Dashboard Axios: **`/admin/files/upload`**, **`/admin/files`** when **`baseURL`** ends with **`/api/v1`**.  
+> **OpenAPI:** repo **`Admin_API_integration_S1.json`** — tag **`Admin — Files`**; request **`AdminPresignUploadRequestDto`** (**`AdminPresignFileItemDto`** items); **`200`** body **`AdminPresignUploadResponseDto`** (**`data`** → **`UploadResultDto[]`** with **`preSignedURL`**, **`mediaUrl`**); delete body **`DeleteFileDto`**; operations **`AdminFilesController_presignUpload`**, **`AdminFilesController_deleteFile`**.
+
+Admin upload URL generator: returns a presigned **PUT** URL per file; the browser uploads bytes directly to S3, then the app stores the permanent **`mediaUrl`** on entities (e.g. country **`image_url`**, category **`image_url`**).
+
+### `POST /admin/files/upload`
+
+Request:
+```json
+{
+  "case": "product_image",
+  "files": [
+    {
+      "contentType": "image/jpeg",
+      "fileName": "product_image/3fa85f64-5717-4562-b3fc-2c963f66afa6-1700000000000.jpg"
+    }
+  ]
+}
+```
+- **`case`** — upload kind; dashboard **`UploadCase`**: **`category_image`**, **`country_image`**, **`sub_category_image`**, **`product_image`** (**`lib/upload.ts`** generates **`fileName`** under that prefix).
+- **`files`** — **1–10** items; **`contentType`** required; **`fileName`** required for deterministic S3 keys (server may treat it as target key).
+
+Response **`200`**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "preSignedURL": "https://bucket.s3.region.amazonaws.com/folder/uuid-ts.jpg?X-Amz-...",
+      "mediaUrl": "https://bucket.s3.region.amazonaws.com/folder/uuid-ts.jpg"
+    }
+  ],
+  "meta": { "version": "1.0.0" }
+}
+```
+
+Client flow: **`PUT preSignedURL`** with **`Content-Type`** = file MIME and body = file → then persist **`mediaUrl`** in **`PATCH`** / create payloads.
+
+> **Dashboard:** **`uploadFile`** in **`src/lib/upload.ts`**; **`ImageUploadField`** in **`src/components/shared/image-upload-field.tsx`** (categories, sub-categories, countries).
+
+### `DELETE /admin/files`
+
+Request:
+```json
+{
+  "key": "category_image/3fa85f64-5717-4562-b3fc-2c963f66afa6-1700000000000.jpg"
+}
+```
+Response **`204`**. **`deleteFile`** / **`extractS3Key`** in **`lib/upload.ts`** support this; UI does not call delete when clearing an image field unless product asks for S3 cleanup.
 
 ---
 
 ## 2 — Admin: Countries
 
-> Token required + permission `admin:countries:*`
+> Token required + permission `admin:countries:*`. Country flag / image URLs are usually set via presigned upload — see **§1b — Admin: Files (S3 presign)**.
 
 ### `GET /admin/countries`
 Query params (all optional):
@@ -527,7 +680,7 @@ Response `204 No Content`. Permanent delete.
 
 > Token required + permission `admin:categories:*`  
 > **OpenAPI:** repo **`Admin_API_integration_S1.json`** — tag **`Admin — Categories`** (`CategoryListItemDto`, **`AdminCategoriesListResponseDto`**, **`AdminCategoryDetailResponseDto`**, **`CategoryDto`**, **`CreateCategoryDto`**, **`UpdateCategoryDto`**).  
-> **Dashboard UI:** layout + section tabs, category index, sub hub (`/categories/sub-categories?parent=`), nested drill-down — root **`CLAUDE.md`** (Categories).
+> **Dashboard UI:** layout + section tabs, category index, sub hub (`/categories/sub-categories?parent=`), nested drill-down — root **`CLAUDE.md`** (Categories). Hero / icon / sub-category images: presigned upload — **§1b**.
 
 ### `GET /admin/categories`
 Paginated list, **newest first** (per deployed API). Includes **`subCategoriesCount`** per row. Search matches **English or Arabic** name.
@@ -650,7 +803,7 @@ Response **`200`**: updated category (unwrap **`data`** if wrapped). **`404`**, 
 ## 4 — Admin: Sub-Categories
 
 > Token required + permission `admin:sub-categories:*`  
-> **OpenAPI:** same file — tag **`Admin — Sub-categories`** (`SubCategoryListItemDto`, **`SubCategoryParentRefDto`**, **`AdminSubCategoriesListResponseDto`**, **`AdminSubCategoryDetailResponseDto`**, **`SubCategoryDto`**, **`CreateSubCategoryDto`**, **`UpdateSubCategoryDto`**).
+> **OpenAPI:** same file — tag **`Admin — Sub-categories`** (`SubCategoryListItemDto`, **`SubCategoryParentRefDto`**, **`AdminSubCategoriesListResponseDto`**, **`AdminSubCategoryDetailResponseDto`**, **`SubCategoryDto`**, **`CreateSubCategoryDto`**, **`UpdateSubCategoryDto`**). Optional **`image_url`**: **§1b** (dashboard **`sub_category_image`**).
 
 ### `GET /admin/sub-categories`
 Query params:
@@ -747,9 +900,13 @@ Response **`200`**: updated sub-category object. **`404`**: sub-category or pare
 
 ## 5 — Admin: Users (Buyer Management)
 
-> Token required + permission `admin:users:*`
+> Token required + permission `admin:users:*`  
+> **OpenAPI:** `Admin_API_integration_S1.json` — `/api/v1/admin/users`; response envelopes **`AdminUsersListResponseDto`** (`success` + `data` + `meta`) and **`AdminUserDetailResponseDto`** (`success` + `data` + optional `meta.version`). Row **`AdminUserRowDto`**; nested detail **`AdminUserDetailDto`** with **`stores[]`** (**`AdminUserStoreDto`**) and **`verification_requests`** (**`AdminUserVerificationRequestDto`**). Moderation body **`ModerateUserDto`** (`reason`, max **500** chars).  
+> **Dashboard:** `CLAUDE.md` § **Users (buyers — buyer management)**; routes `/users`, `/users/:userId`; feature folder `src/features/users/` (`users.api.ts`, `users.queries.ts`, `users.columns.tsx`, `users-list-page.tsx`, `user-detail-page.tsx`). Axios paths are relative to **`VITE_API_URL`** (typically `/admin/users/...` when base includes `/api/v1`). **`users.api.ts`** unwraps **`{ success, data, meta }`** (list) and **`{ success, data }`** (detail).
 
 ### `GET /admin/users`
+Returns registered **buyers** (USER and SELLER roles), **newest registration first**. Admins are excluded.
+
 Query params (all optional):
 | Param | Type | Values | Description |
 |-------|------|--------|-------------|
@@ -759,9 +916,10 @@ Query params (all optional):
 | `page` | number | default 1 | — |
 | `limit` | number | default 10, max 100 | — |
 
-Response `200`:
+Response **`200`** — envelope:
 ```json
 {
+  "success": true,
   "data": [
     {
       "id": "uuid",
@@ -773,35 +931,83 @@ Response `200`:
       "registrationDate": "2025-11-03T14:23:00.000Z"
     }
   ],
-  "meta": { "page": 1, "limit": 10, "total": 50, "totalPages": 5, "hasNextPage": true, "hasPrevPage": false }
+  "meta": {
+    "version": "1.0.0",
+    "page": 1,
+    "limit": 10,
+    "total": 50,
+    "totalPages": 5,
+    "hasNextPage": true,
+    "hasPrevPage": false
+  }
 }
 ```
+
+Errors:
+
+| Status | Meaning |
+|--------|---------|
+| `401` | Missing or expired admin token |
+| `403` | Insufficient permissions |
 
 ---
 
 ### `GET /admin/users/:userId`
-Response `200` — full user detail:
+Response **`200`** — envelope **`{ success, data }`**. **`data`** matches **`AdminUserDetail`** in `types/api.ts` (snake_case fields from the API). Example (**seller** with one store):
+
 ```json
 {
-  "id": "uuid",
-  "fullName": "Ahmed Ali",
-  "email": "ahmed@example.com",
-  "phone": "+966500000000",
-  "role": "USER",
-  "isActive": true,
-  "isVerified": true,
-  "avatarUrl": "https://cdn.bidmart.com/avatars/abc.jpg",
-  "language": "ar",
-  "store": {
-    "id": "store-uuid",
-    "nameEn": "Ahmed Store",
-    "status": "APPROVED"
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "email": "ahmed@example.com",
+    "phone_number": "+966500000000",
+    "full_name": "Ahmed Ali",
+    "profile_picture": "https://…",
+    "role": "seller",
+    "account_status": "active",
+    "created_at": "2025-11-03T14:23:00.000Z",
+    "updated_at": "2025-11-03T15:00:00.000Z",
+    "stores": [
+      {
+        "id": "store-uuid",
+        "store_logo": null,
+        "commercial_registration_number": "CR-123",
+        "commercial_registration_doc": "seller-docs/….pdf",
+        "status": "approved",
+        "is_verified": true,
+        "return_policy_ar": null,
+        "return_policy_en": null,
+        "created_at": "2025-11-03T14:25:00.000Z",
+        "verification_requests": [
+          {
+            "id": "5bc3d5dd-1367-4681-85ca-85a59b4cd0a8",
+            "commercial_registration_number": "CR-123",
+            "commercial_registration_doc": "seller-docs/uuid.pdf",
+            "status": "pending",
+            "reviewed_by": null,
+            "reviewed_at": null,
+            "rejection_reason": null,
+            "created_at": "2025-11-03T14:26:00.000Z"
+          }
+        ]
+      }
+    ]
   },
-  "createdAt": "...",
-  "updatedAt": "..."
+  "meta": { "version": "1.0.0" }
 }
 ```
-- `store` is `null` if the user has no store
+
+- **`role`** is **`user`** or **`seller`** (lowercase). **`stores`** is **`[]`** for buyers who have not upgraded.
+
+Errors:
+
+| Status | Meaning |
+|--------|---------|
+| `400` | Invalid UUID |
+| `401` | Missing or expired admin token |
+| `403` | Insufficient permissions |
+| `404` | User not found |
 
 ---
 
@@ -819,8 +1025,11 @@ Side effects: revokes all refresh tokens + force-logs-out active access tokens w
 Errors:
 | Status | Meaning |
 |--------|---------|
-| 404 | User not found |
-| 409 | User is already banned |
+| `400` | Invalid UUID or missing reason |
+| `401` | Missing or expired admin token |
+| `403` | Insufficient permissions |
+| `404` | User not found |
+| `409` | User is already banned |
 
 ---
 
@@ -836,7 +1045,11 @@ Side effects: same force-logout as ban.
 Errors:
 | Status | Meaning |
 |--------|---------|
-| 409 | User already suspended or deleted |
+| `400` | Invalid UUID or missing reason |
+| `401` | Missing or expired admin token |
+| `403` | Insufficient permissions |
+| `404` | User not found |
+| `409` | User already suspended or deleted |
 
 ---
 
@@ -849,7 +1062,11 @@ Clears the force-logout flag so the user can log in again.
 Errors:
 | Status | Meaning |
 |--------|---------|
-| 409 | User already active, or deleted, or still unverified |
+| `400` | Invalid UUID |
+| `401` | Missing or expired admin token |
+| `403` | Insufficient permissions |
+| `404` | User not found |
+| `409` | User already active, deleted, or unverified |
 
 ---
 
@@ -859,7 +1076,11 @@ Soft-delete (GDPR). Response `204 No Content`.
 Errors:
 | Status | Meaning |
 |--------|---------|
-| 409 | Cannot delete an admin account |
+| `400` | Invalid UUID |
+| `401` | Missing or expired admin token |
+| `403` | Insufficient permissions |
+| `404` | User not found |
+| `409` | Cannot delete an admin account |
 
 ---
 
@@ -1264,7 +1485,7 @@ The JWT payload contains a `permissions` array. Check that the required permissi
 
 - All UUIDs follow **UUID v4** format — validate before sending to avoid unnecessary 400s.
 - All timestamps are **ISO 8601 UTC** strings (`2026-04-23T10:00:00.000Z`).
-- Admin token from login is stored in Zustand with localStorage persistence. User/permissions are decoded from the JWT payload at login (JWT contains `sub`, `role`, `role_id`, `is_super_admin`, `permissions[]`, `deviceId`).
+- Admin **`accessToken`** is stored persistently (**`bidmart-auth`**, token only). **`loginRequest`** decodes the JWT (**`features/auth/auth.api.ts`**) for an initial **`user`** + **`permissions[]`**. On **`_authed`**, **`useMeQuery`** calls **`GET /admin/profile`** and merges **`fullName`**, **`email`**, **`phone`**, **`role`**, **`isSuperAdmin`** into **`user`**; **`permissions[]`** and the JWT **`role`** string (slug) remain from the token. Claims include **`sub`**, **`email`**, **`role`**, **`role_id`**, **`is_super_admin`**, **`permissions`**, **`deviceId`**, **`jti`**, **`exp`**. **`PATCH /admin/profile`** updates the authenticated admin; success toast uses **`profile:messages.saved`**. If **`GET /admin/profile`** fails, the session is cleared (same as invalid/expired token for this flow).
 - The **`DELETE /admin/categories/:id`** contract in production may be a **204** hard delete with **409** when sub-categories remain — see **§3 — Admin: Categories** above and root **`CLAUDE.md`** (Categories). **`DELETE /admin/sub-categories/:id`** is **204** permanent delete in **`Admin_API_integration_S1.json`**; confirm against your deployed API if an older stack differed.
 - The `DELETE /admin/countries/:id` and `DELETE /admin/users/:userId` are also soft-deletes from the user's perspective but behave differently: countries are permanently deleted, users get a `deletedAt` timestamp.
 - **Roles RBAC:** OpenAPI excerpt `Admin_API_integration_S1.json` includes `Admin — Roles` paths (`GET/POST /admin/roles`, `GET /admin/roles/permissions`, `GET/PATCH/DELETE /admin/roles/{roleId}`) and schemas (`RoleDetailDto`, `CreateRoleDto`, permission module DTOs).
