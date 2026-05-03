@@ -40,7 +40,6 @@ import {
   useBlockAdminMutation,
   useUnblockAdminMutation,
 } from '@/features/admins/admins.queries'
-import { cn } from '@/lib/utils'
 import { format } from '@/lib/format'
 
 export function AdminsListPage() {

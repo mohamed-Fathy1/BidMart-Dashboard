@@ -14,8 +14,8 @@ export function accountInitials(
   if (n) {
     const parts = n.split(/\s+/).filter(Boolean)
     if (parts.length >= 2) {
-      const a = parts[0][0]
-      const b = parts[parts.length - 1][0]
+      const a = parts[0]?.[0]
+      const b = parts[parts.length - 1]?.[0]
       if (a && b) return (a + b).toUpperCase()
     }
     return n.slice(0, 2).toUpperCase()

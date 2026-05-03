@@ -62,10 +62,11 @@ export function FormDialog({
           if (!suppressInitialFocus) return
           e.preventDefault()
           const root = e.currentTarget
-          const title = root.querySelector('[data-slot="dialog-title"]')
-          if (title instanceof HTMLElement) {
-            title.tabIndex = -1
-            title.focus()
+          if (!(root instanceof HTMLElement)) return
+          const heading = root.querySelector('[data-slot="dialog-title"]')
+          if (heading instanceof HTMLElement) {
+            heading.tabIndex = -1
+            heading.focus()
           }
         }}
       >

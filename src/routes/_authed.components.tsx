@@ -639,8 +639,7 @@ function ComponentsShowcasePage() {
         onOpenChange={setReasonOpen}
         title="Ban User"
         description="Banning this user will revoke all tokens and prevent them from logging in."
-        onConfirm={(reason) => {
-          console.log('Ban reason:', reason)
+        onConfirm={() => {
           setReasonOpen(false)
         }}
       />

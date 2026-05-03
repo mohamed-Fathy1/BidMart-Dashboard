@@ -40,6 +40,7 @@ export function SearchInput({
   }
 
   function handleClear() {
+    if (timerRef.current) clearTimeout(timerRef.current)
     setInternal('')
     onChange('')
   }

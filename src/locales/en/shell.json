@@ -28,5 +28,9 @@
   "sidebar": {
     "collapse": "Collapse sidebar",
     "expand": "Expand sidebar"
+  },
+  "overview": {
+    "subtitle": "Welcome back. Pick a section from the sidebar to manage the marketplace.",
+    "coming_soon": "Dashboard widgets are coming soon."
   }
 }

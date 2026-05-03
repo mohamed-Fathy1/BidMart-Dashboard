@@ -10,7 +10,6 @@ interface ImageUploadFieldProps {
   value: string
   onChange: (url: string) => void
   uploadCase: UploadCase
-  label?: string
   className?: string
 }
 
