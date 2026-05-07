@@ -75,6 +75,7 @@
     "remove": "Remove",
     "change": "Change",
     "invalid_type": "Only PNG, JPG, and WebP images are allowed",
+    "gif_only": "Only GIF images are allowed",
     "too_large": "File must be under 5 MB",
     "upload_failed": "Upload failed. Try again."
   },

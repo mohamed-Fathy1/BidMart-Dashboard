@@ -75,6 +75,7 @@
     "remove": "إزالة",
     "change": "تغيير",
     "invalid_type": "يُسمح فقط بصور PNG و JPG و WebP",
+    "gif_only": "يُسمح فقط بصور GIF",
     "too_large": "يجب أن يكون حجم الملف أقل من 5 ميغابايت",
     "upload_failed": "فشل الرفع. حاول مرة أخرى."
   },

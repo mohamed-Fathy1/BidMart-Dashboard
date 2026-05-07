@@ -32,6 +32,7 @@ function fileExtensionForContentType(contentType: string): string {
   if (contentType === 'image/jpeg' || contentType === 'image/jpg') return 'jpg'
   if (contentType === 'image/png') return 'png'
   if (contentType === 'image/webp') return 'webp'
+  if (contentType === 'image/gif') return 'gif'
   return 'bin'
 }
 
@@ -109,11 +110,21 @@ export async function deleteFile(key: string): Promise<void> {
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
 
-const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp']
+/** PNG, JPEG, WebP — default for dashboard image uploads */
+export const DEFAULT_IMAGE_MIME_TYPES = [
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/webp',
+] as const
+
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
 
-export function validateImageFile(file: File): string | null {
-  if (!IMAGE_TYPES.includes(file.type)) {
+export function validateImageFile(
+  file: File,
+  allowedMimeTypes: readonly string[] = DEFAULT_IMAGE_MIME_TYPES,
+): string | null {
+  if (!allowedMimeTypes.includes(file.type)) {
     return 'invalid_type'
   }
   if (file.size > MAX_FILE_SIZE) {

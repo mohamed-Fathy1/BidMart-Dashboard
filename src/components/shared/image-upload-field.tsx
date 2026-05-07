@@ -4,13 +4,20 @@ import { Upload, X, ImageOffIcon, LoaderIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { uploadFile, validateImageFile, type UploadCase } from '@/lib/upload'
+import {
+  uploadFile,
+  validateImageFile,
+  DEFAULT_IMAGE_MIME_TYPES,
+  type UploadCase,
+} from '@/lib/upload'
 
 interface ImageUploadFieldProps {
   value: string
   onChange: (url: string) => void
   uploadCase: UploadCase
   className?: string
+  /** Restricts file picker and validation. Defaults to PNG, JPEG, WebP. */
+  allowedMimeTypes?: readonly string[]
 }
 
 export function ImageUploadField({
@@ -18,6 +25,7 @@ export function ImageUploadField({
   onChange,
   uploadCase,
   className,
+  allowedMimeTypes = DEFAULT_IMAGE_MIME_TYPES,
 }: ImageUploadFieldProps) {
   const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement>(null)
@@ -27,9 +35,17 @@ export function ImageUploadField({
 
   const handleFile = useCallback(
     async (file: File) => {
-      const error = validateImageFile(file)
+      const error = validateImageFile(file, allowedMimeTypes)
       if (error === 'invalid_type') {
-        toast.error(t('components:image_upload.invalid_type'))
+        const gifOnly =
+          allowedMimeTypes.length === 1 && allowedMimeTypes[0] === 'image/gif'
+        toast.error(
+          t(
+            gifOnly
+              ? 'components:image_upload.gif_only'
+              : 'components:image_upload.invalid_type',
+          ),
+        )
         return
       }
       if (error === 'too_large') {
@@ -48,8 +64,10 @@ export function ImageUploadField({
         setIsUploading(false)
       }
     },
-    [onChange, uploadCase, t],
+    [onChange, uploadCase, allowedMimeTypes, t],
   )
+
+  const acceptAttr = allowedMimeTypes.join(',')
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -87,7 +105,7 @@ export function ImageUploadField({
       <input
         ref={inputRef}
         type="file"
-        accept="image/png,image/jpeg,image/jpg,image/webp"
+        accept={acceptAttr}
         className="hidden"
         onChange={handleInputChange}
       />

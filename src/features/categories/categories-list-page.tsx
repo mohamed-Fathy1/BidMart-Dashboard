@@ -383,6 +383,7 @@ export function CategoriesListPage() {
                       value={subCategoryImageUrl}
                       onChange={setSubCategoryImageUrl}
                       uploadCase="sub_category_image"
+                      allowedMimeTypes={['image/gif']}
                     />
                   </div>
                 </div>
