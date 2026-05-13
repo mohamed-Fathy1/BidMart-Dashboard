@@ -41,7 +41,8 @@
   "reason_dialog": {
     "reason_label": "Reason",
     "reason_placeholder": "Provide a reason...",
-    "reason_required": "Reason is required"
+    "reason_required": "Reason is required",
+    "counter": "{{current}} / {{max}}"
   },
   "form_dialog": {
     "cancel": "Cancel",
@@ -69,13 +70,22 @@
     "increase": "increase",
     "decrease": "decrease"
   },
+  "risk": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High"
+  },
+  "priority": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High"
+  },
   "image_upload": {
     "drop_or_click": "Drop an image here or click to browse",
     "uploading": "Uploading...",
     "remove": "Remove",
     "change": "Change",
-    "invalid_type": "Only PNG, JPG, and WebP images are allowed",
-    "gif_only": "Only GIF images are allowed",
+    "invalid_type": "Only {{types}} files are allowed",
     "too_large": "File must be under 5 MB",
     "upload_failed": "Upload failed. Try again."
   },
@@ -83,7 +93,12 @@
     "select_all": "Select all",
     "select_row": "Select row",
     "row_actions": "Row actions",
+    "row_actions_for": "Actions for {{name}}",
     "selected": "{{count}} selected",
-    "empty_hint": "Try adjusting your filters or search."
+    "empty_hint": "Try adjusting your filters or search.",
+    "no_data_title": "No records yet",
+    "no_data_hint": "Once records exist they'll appear here.",
+    "no_results_title": "No results match these filters",
+    "no_results_hint": "Try clearing the search or filters."
   }
 }

@@ -1,10 +1,12 @@
 import { api } from '@/lib/axios'
-import type {
-  ProviderSummary,
-  ProviderDetail,
-  PaginationMeta,
-  ProviderAccountStatus,
-  SellerStatus,
+import {
+  unwrap,
+  unwrapPaginated,
+  type ApiEnvelope,
+  type Paginated,
+  type ProviderSummary,
+  type ProviderDetail,
+  type ProviderAccountStatus,
 } from '@/types/api'
 
 export interface ListProvidersParams {
@@ -15,52 +17,21 @@ export interface ListProvidersParams {
   limit?: number
 }
 
-/** Maps provider store status strings to TanStack Seller badge enums */
-export function providerAccountStatusForSellerBadge(status: string): SellerStatus {
-  const s = String(status).toLowerCase()
-  if (s === 'pending') return 'PENDING'
-  if (s === 'approved') return 'APPROVED'
-  if (s === 'rejected') return 'REJECTED'
-  if (s === 'blocked') return 'SUSPENDED'
-  return 'PENDING'
-}
-
-function unwrapVerifyPayload(body: unknown): { isVerified: boolean } {
-  if (!body || typeof body !== 'object') {
-    throw new Error('Invalid verify response')
-  }
-  const o = body as Record<string, unknown>
-  const nested = o.data
-  if (nested && typeof nested === 'object' && 'isVerified' in nested) {
-    const v = (nested as { isVerified: unknown }).isVerified
-    if (typeof v === 'boolean') return { isVerified: v }
-  }
-  if (typeof o.isVerified === 'boolean') {
-    return { isVerified: o.isVerified }
-  }
-  throw new Error('Invalid verify response')
-}
+/** @deprecated Re-export — import from `@/components/shared/status-badge-mappers` instead. */
+export { providerAccountStatusForSellerBadge } from '@/components/shared/status-badge-mappers'
 
 export async function listProviders(
   params: ListProvidersParams,
-): Promise<{ data: ProviderSummary[]; meta: PaginationMeta }> {
-  const res = await api.get<{
-    success?: boolean
-    data: ProviderSummary[]
-    meta: PaginationMeta
-  }>('/admin/providers', { params })
-  return { data: res.data.data, meta: res.data.meta }
+): Promise<Paginated<ProviderSummary>> {
+  const res = await api.get<ApiEnvelope<ProviderSummary[]>>('/admin/providers', { params })
+  return unwrapPaginated(res.data)
 }
 
 export async function getProviderDetail(storeId: string): Promise<ProviderDetail> {
-  const res = await api.get<{ success?: boolean; data: ProviderDetail } | ProviderDetail>(
+  const res = await api.get<ApiEnvelope<ProviderDetail> | ProviderDetail>(
     `/admin/providers/${storeId}`,
   )
-  const raw = res.data as Record<string, unknown>
-  if (raw && typeof raw === 'object' && 'data' in raw && raw.data) {
-    return raw.data as ProviderDetail
-  }
-  return res.data as ProviderDetail
+  return unwrap(res.data)
 }
 
 export async function approveProvider(storeId: string): Promise<void> {
@@ -74,8 +45,14 @@ export async function rejectProvider(storeId: string, reason: string): Promise<v
 export async function toggleProviderVerification(
   storeId: string,
 ): Promise<{ isVerified: boolean }> {
-  const res = await api.patch<unknown>(`/admin/providers/${storeId}/verify`)
-  return unwrapVerifyPayload(res.data)
+  const res = await api.patch<ApiEnvelope<{ isVerified: boolean }> | { isVerified: boolean }>(
+    `/admin/providers/${storeId}/verify`,
+  )
+  const inner = unwrap(res.data)
+  if (!inner || typeof inner.isVerified !== 'boolean') {
+    throw new Error('Invalid verify response')
+  }
+  return { isVerified: inner.isVerified }
 }
 
 export async function blockProvider(storeId: string): Promise<void> {

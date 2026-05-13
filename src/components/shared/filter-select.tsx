@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Select,
@@ -19,6 +20,8 @@ interface FilterSelectProps {
   options: FilterOption[]
   placeholder: string
   className?: string
+  /** Coalesce rapid switches before notifying the parent. Defaults to 250ms. */
+  debounceMs?: number
 }
 
 export function FilterSelect({
@@ -27,13 +30,37 @@ export function FilterSelect({
   options,
   placeholder,
   className,
+  debounceMs = 250,
 }: FilterSelectProps) {
   const { t } = useTranslation()
+  const [internal, setInternal] = useState(value)
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(null)
+
+  useEffect(() => {
+    setInternal(value)
+  }, [value])
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
+
+  function handleChange(raw: string) {
+    const next = raw === '__all__' ? '' : raw
+    setInternal(next)
+    if (timerRef.current) clearTimeout(timerRef.current)
+    if (debounceMs <= 0) {
+      onChange(next)
+      return
+    }
+    timerRef.current = setTimeout(() => onChange(next), debounceMs)
+  }
 
   return (
     <Select
-      value={value}
-      onValueChange={(v) => onChange(v === '__all__' ? '' : v)}
+      value={internal}
+      onValueChange={handleChange}
     >
       <SelectTrigger
         data-slot="filter-select"

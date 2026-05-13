@@ -43,8 +43,14 @@
     "no_permission_modules": "Permission list is unavailable."
   },
   "delete_dialog": {
-    "title": "Delete Role",
-    "description": "This removes the role. You cannot undo this. Protected roles and roles assigned to admins stay blocked by the API."
+    "title": "Delete {{name}}",
+    "description": "Delete the role \"{{name}}\". This cannot be undone. Protected roles and roles assigned to admins stay blocked by the API."
+  },
+  "empty": {
+    "no_data_title": "No roles yet",
+    "no_data_hint": "Define the first role to start assigning admins.",
+    "no_results_title": "No roles match this search",
+    "no_results_hint": "Try clearing the search."
   },
   "errors": {
     "generic": "Could not save the role.",

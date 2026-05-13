@@ -117,7 +117,7 @@ const booleanStyles: Record<'true' | 'false', StatusStyle> = {
 
 const accountTypeStyles: Record<AccountType, StatusStyle> = {
   user_only:          neutral,
-  upgraded_to_seller: positive,
+  upgraded_to_seller: neutral,
 }
 
 const providerVerificationStyles: Record<ProviderVerificationStatus, StatusStyle> = {

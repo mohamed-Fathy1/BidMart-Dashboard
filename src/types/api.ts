@@ -2,12 +2,6 @@
 /*  Generic response wrappers                                          */
 /* ------------------------------------------------------------------ */
 
-export interface ApiResponse<T> {
-  success: true;
-  data: T;
-  timestamp: string;
-}
-
 export interface PaginationMeta {
   page: number;
   limit: number;
@@ -17,9 +11,58 @@ export interface PaginationMeta {
   hasPrevPage: boolean;
 }
 
-export interface PaginatedResponse<T> {
+/** Server envelope: every admin response is wrapped in `{ success, data, ... }`. */
+export interface ApiEnvelope<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+  meta?: PaginationMeta;
+  timestamp?: string;
+}
+
+/** Legacy strict alias — kept for compatibility. Prefer ApiEnvelope. */
+export type ApiResponse<T> = ApiEnvelope<T>;
+
+/** Standard list shape returned by `list*` api helpers after unwrapping. */
+export interface Paginated<T> {
   data: T[];
   meta: PaginationMeta;
+}
+
+/** Legacy alias — prefer `Paginated<T>`. */
+export type PaginatedResponse<T> = Paginated<T>;
+
+/**
+ * Unwraps an `{ success, data, ... }` envelope when present; otherwise returns
+ * the body as-is. Use in `*.api.ts` to keep call sites agnostic of whether the
+ * server wrapped a particular endpoint.
+ */
+export function unwrap<T>(body: ApiEnvelope<T> | T): T {
+  if (
+    body !== null &&
+    typeof body === "object" &&
+    "success" in (body as object) &&
+    "data" in (body as object)
+  ) {
+    return (body as ApiEnvelope<T>).data;
+  }
+  return body as T;
+}
+
+/**
+ * Unwraps a paginated `{ success, data: T[], meta }` envelope into the
+ * `Paginated<T>` shape every `list*` API helper returns. Throws if `meta` is
+ * missing — list endpoints are required to include it.
+ */
+export function unwrapPaginated<T>(
+  body: ApiEnvelope<T[]> | { data: T[]; meta: PaginationMeta },
+): Paginated<T> {
+  const data = "success" in body ? body.data : body.data;
+  const meta = body.meta;
+  if (!meta) {
+    throw new Error("unwrapPaginated: response has no `meta` — endpoint not paginated?");
+  }
+  return { data, meta };
 }
 
 /* ------------------------------------------------------------------ */

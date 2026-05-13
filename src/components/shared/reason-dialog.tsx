@@ -37,7 +37,7 @@ export function ReasonDialog({
   onConfirm,
   variant = 'destructive',
   isLoading = false,
-  maxLength = 500,
+  maxLength = 200,
 }: ReasonDialogProps) {
   const { t } = useTranslation()
   const [reason, setReason] = useState('')
@@ -85,11 +85,24 @@ export function ReasonDialog({
             aria-invalid={error}
             disabled={isLoading}
           />
-          {error && (
-            <p className="text-sm text-destructive">
-              {t('components:reason_dialog.reason_required')}
-            </p>
-          )}
+          <div className="flex items-start justify-between gap-3">
+            {error ? (
+              <p className="text-sm text-destructive">
+                {t('components:reason_dialog.reason_required')}
+              </p>
+            ) : (
+              <span aria-hidden className="text-xs text-muted-foreground" />
+            )}
+            <span
+              className="font-mono tabular-nums text-xs text-muted-foreground"
+              aria-live="polite"
+            >
+              {t('components:reason_dialog.counter', {
+                current: reason.length,
+                max: maxLength,
+              })}
+            </span>
+          </div>
         </div>
         <DialogFooter>
           <Button

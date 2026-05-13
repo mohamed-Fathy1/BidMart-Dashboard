@@ -1,9 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
+import { getRouteApi } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { KeyRound, LoaderIcon, Plus, Pencil, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
-import type { PaginationState } from '@tanstack/react-table'
 import type { RoleListItem, RolePermissionModule } from '@/types/api'
+import { useUrlListState } from '@/lib/use-url-list-state'
+import { useListPageData } from '@/lib/use-list-page-data'
+import { useConfirmTarget } from '@/lib/use-confirm-target'
+import type { RolesSearch } from '@/routes/_authed.roles'
+
+const rolesRoute = getRouteApi('/_authed/roles')
 import { PageHeader } from '@/components/shared/page-header'
 import { SearchInput } from '@/components/shared/search-input'
 import { TableFiltersShell } from '@/components/shared/table-filters-shell'
@@ -11,7 +17,7 @@ import {
   DataTable,
   type RowActionItem,
 } from '@/components/data-table/data-table'
-import { ConfirmDialog } from '@/components/shared/confirm-dialog'
+import { TargetedConfirmDialog } from '@/components/shared/targeted-confirm-dialog'
 import { FormDialog } from '@/components/shared/form-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -33,30 +39,28 @@ import {
 } from '@/features/roles/roles.queries'
 import { cn } from '@/lib/utils'
 import { format } from '@/lib/format'
+import { localizedName, localizedField } from '@/lib/localized-name'
 
 function ModuleHeaderCheckbox({
   module,
   selectedKeys,
   onToggleModule,
-  isAr,
+  title,
 }: {
   module: RolePermissionModule
   selectedKeys: Set<string>
   onToggleModule: (module: RolePermissionModule, select: boolean) => void
-  isAr: boolean
+  title: string
 }) {
   const keys = module.permissions.map((p) => p.key)
   const selectedInModule = keys.filter((k) => selectedKeys.has(k)).length
   const allSelected = keys.length > 0 && selectedInModule === keys.length
   const someSelected = selectedInModule > 0 && !allSelected
 
-  const title = isAr ? module.module_ar : module.module_en
-
   return (
     <div
       className={cn(
         'relative flex items-center gap-3 border-b border-border bg-muted/35 px-3 py-2.5 ps-4',
-        'transition-[background-color] duration-(--duration-hover) ease-(--ease-default)',
       )}
     >
       <span
@@ -105,28 +109,24 @@ function PermissionModulesSkeleton() {
 
 export function RolesListPage() {
   const { t, i18n } = useTranslation()
-  const isAr = i18n.language === 'ar'
   const currentRoleId = useAuthStore((s) => s.user?.roleId)
 
   const canUpdate = usePermission(PERMISSIONS.roles.update)
   const canDelete = usePermission(PERMISSIONS.roles.delete)
 
-  const [search, setSearch] = useState('')
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  })
+  const { searchValue, pagination, setPagination, setSearch } =
+    useUrlListState<RolesSearch>({ route: rolesRoute })
 
   const [formOpen, setFormOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<RoleListItem | null>(null)
-  const [deleteTarget, setDeleteTarget] = useState<RoleListItem | null>(null)
+  const deleteFlow = useConfirmTarget<RoleListItem>()
 
   const [nameEn, setNameEn] = useState('')
   const [nameAr, setNameAr] = useState('')
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(() => new Set())
 
   const { data: response, isLoading } = useRolesQuery({
-    search: search || undefined,
+    search: searchValue || undefined,
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
   })
@@ -136,8 +136,15 @@ export function RolesListPage() {
 
   const detailQuery = useRoleDetailQuery(editTarget?.id ?? '', !!editTarget && formOpen)
 
-  const data = response?.data ?? []
-  const meta = response?.meta
+  const hasActiveFilters = searchValue !== ''
+  const { rows, meta, tableProps } = useListPageData({
+    response,
+    isLoading,
+    pagination,
+    setPagination,
+    hasActiveFilters,
+    clearFilters: () => setSearch(''),
+  })
 
   const columns = useRoleColumns()
 
@@ -234,7 +241,7 @@ export function RolesListPage() {
       items.push({
         label: t('roles:actions.delete'),
         icon: Trash2,
-        onClick: (r) => setDeleteTarget(r),
+        onClick: (r) => deleteFlow.ask(r),
         variant: 'destructive',
         disabled: !canDeleteRow(role),
       })
@@ -286,17 +293,14 @@ export function RolesListPage() {
         }
       >
         <SearchInput
-          value={search}
-          onChange={(v) => {
-            setSearch(v)
-            setPagination((p) => ({ ...p, pageIndex: 0 }))
-          }}
+          value={searchValue}
+          onChange={(v) => setSearch(v)}
           placeholder={t('roles:search_placeholder')}
           className="w-full min-w-[min(100%,220px)] sm:max-w-md"
         />
       </TableFiltersShell>
     ),
-    [search, t, meta],
+    [searchValue, setSearch, t, meta],
   )
 
   const hasRowMenu = canUpdate || canDelete
@@ -320,14 +324,12 @@ export function RolesListPage() {
 
       <DataTable
         columns={columns}
-        data={data}
-        pageCount={meta?.totalPages}
-        totalRecords={meta?.total}
-        pagination={pagination}
-        onPaginationChange={setPagination}
-        isLoading={isLoading}
+        data={rows}
+        {...tableProps}
+        emptyKeyPrefix="roles:empty"
         toolbar={toolbar}
         actions={hasRowMenu ? getRowActions : undefined}
+        rowLabel={(row) => localizedName(row, i18n)}
         getRowId={(row) => row.id}
       />
 
@@ -452,11 +454,11 @@ export function RolesListPage() {
                         module={module}
                         selectedKeys={selectedKeys}
                         onToggleModule={toggleModule}
-                        isAr={isAr}
+                        title={localizedField(module, 'module', i18n)}
                       />
                       <ul className="grid gap-0 p-2 sm:grid-cols-2 sm:gap-1">
                         {module.permissions.map((perm) => {
-                          const label = isAr ? perm.label_ar : perm.label_en
+                          const label = localizedField(perm, 'label', i18n)
                           const checked = selectedKeys.has(perm.key)
                           return (
                             <li key={perm.key}>
@@ -511,16 +513,13 @@ export function RolesListPage() {
         </p>
       </FormDialog>
 
-      <ConfirmDialog
-        open={!!deleteTarget}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title={t('roles:delete_dialog.title')}
-        description={t('roles:delete_dialog.description')}
-        onConfirm={() => {
-          if (!deleteTarget || !canDeleteRow(deleteTarget)) return
-          deleteMutation.mutate(deleteTarget.id, {
-            onSettled: () => setDeleteTarget(null),
-          })
+      <TargetedConfirmDialog
+        flow={deleteFlow}
+        i18nPrefix="roles:delete_dialog"
+        getName={(r) => localizedName(r, i18n)}
+        onConfirm={(target) => {
+          if (!canDeleteRow(target)) return
+          deleteMutation.mutate(target.id, { onSettled: deleteFlow.close })
         }}
         isLoading={deleteMutation.isPending}
         variant="destructive"

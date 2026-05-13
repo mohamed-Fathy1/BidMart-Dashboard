@@ -1,11 +1,6 @@
-import axios from 'axios'
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query'
-import { toast } from 'sonner'
-import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
+import { createResourceKeys } from '@/lib/query-keys'
+import { useResourceMutation } from '@/lib/use-resource-mutation'
 import {
   listRoles,
   getRolePermissionModules,
@@ -18,25 +13,10 @@ import {
   type UpdateRolePayload,
 } from '@/features/roles/roles.api'
 
+const baseRoleKeys = createResourceKeys<ListRolesParams>('roles')
 export const roleKeys = {
-  all: ['roles'] as const,
-  lists: () => [...roleKeys.all, 'list'] as const,
-  list: (params: ListRolesParams) => [...roleKeys.lists(), params] as const,
-  permissionModules: () => [...roleKeys.all, 'permission-modules'] as const,
-  details: () => [...roleKeys.all, 'detail'] as const,
-  detail: (id: string) => [...roleKeys.details(), id] as const,
-}
-
-function extractMutationError(error: unknown): string | undefined {
-  if (axios.isAxiosError(error)) {
-    const data = error.response?.data as { message?: string } | undefined
-    return typeof data?.message === 'string' ? data.message : undefined
-  }
-  if (typeof error === 'object' && error !== null && 'message' in error) {
-    const m = (error as { message: unknown }).message
-    return typeof m === 'string' ? m : undefined
-  }
-  return undefined
+  ...baseRoleKeys,
+  permissionModules: () => ['roles', 'permission-modules'] as const,
 }
 
 export function useRolesQuery(params: ListRolesParams) {
@@ -64,56 +44,29 @@ export function useRoleDetailQuery(roleId: string, enabled = true) {
 }
 
 export function useCreateRoleMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (payload: CreateRolePayload) => createRole(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: roleKeys.all })
-      toast.success(t('roles:actions.create_success'))
-    },
-    onError: (error: unknown) => {
-      toast.error(extractMutationError(error) ?? t('roles:errors.generic'))
-    },
+    invalidate: [roleKeys.all],
+    successKey: 'roles:actions.create_success',
+    errorKey: 'roles:errors.generic',
   })
 }
 
 export function useUpdateRoleMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
-    mutationFn: ({
-      id,
-      payload,
-    }: {
-      id: string
-      payload: UpdateRolePayload
-    }) => updateRole(id, payload),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: roleKeys.all })
-      queryClient.invalidateQueries({ queryKey: roleKeys.detail(variables.id) })
-      toast.success(t('roles:actions.update_success'))
-    },
-    onError: (error: unknown) => {
-      toast.error(extractMutationError(error) ?? t('roles:errors.generic'))
-    },
+  return useResourceMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateRolePayload }) =>
+      updateRole(id, payload),
+    invalidate: [roleKeys.all],
+    successKey: 'roles:actions.update_success',
+    errorKey: 'roles:errors.generic',
   })
 }
 
 export function useDeleteRoleMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (roleId: string) => deleteRole(roleId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: roleKeys.all })
-      toast.success(t('roles:actions.delete_success'))
-    },
-    onError: (error: unknown) => {
-      toast.error(extractMutationError(error) ?? t('roles:errors.delete_failed'))
-    },
+    invalidate: [roleKeys.all],
+    successKey: 'roles:actions.delete_success',
+    errorKey: 'roles:errors.delete_failed',
   })
 }

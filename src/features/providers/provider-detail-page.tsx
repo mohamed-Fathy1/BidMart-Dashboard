@@ -20,12 +20,13 @@ import { StatusBadge } from '@/components/shared/status-badge'
 import { ImagePreview } from '@/components/shared/image-preview'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { DetailPageSkeleton } from '@/components/shared/detail-page-skeleton'
 import { ConfirmDialog } from '@/components/shared/confirm-dialog'
 import { ReasonDialog } from '@/components/shared/reason-dialog'
 import { Can } from '@/components/permissions/can'
 import { PERMISSIONS } from '@/lib/permissions'
 import { format } from '@/lib/format'
+import { localizedName } from '@/lib/localized-name'
 import { providerAccountStatusForSellerBadge } from '@/features/providers/providers.api'
 import {
   useApproveProviderMutation,
@@ -74,40 +75,7 @@ export function ProviderDetailPage({ storeId }: ProviderDetailPageProps) {
   const [unblockOpen, setUnblockOpen] = useState(false)
 
   if (isLoading) {
-    return (
-      <div className="space-y-8">
-        <div className="border-b border-border pb-8">
-          <div className="space-y-4">
-            <Skeleton className="h-9 w-40 rounded-md" />
-            <Skeleton className="h-8 w-[min(100%,320px)]" />
-            <Skeleton className="h-5 w-full max-w-xl" />
-            <div className="flex flex-wrap gap-2 pt-2">
-              <Skeleton className="h-9 w-35 rounded-md" />
-              <Skeleton className="h-9 w-28 rounded-md" />
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-border bg-card p-6 shadow-rest sm:p-8">
-          <div className="flex flex-col gap-8 sm:flex-row">
-            <Skeleton className="size-24 shrink-0 rounded-xl" />
-            <div className="grid min-w-0 flex-1 gap-6">
-              <div className="flex flex-wrap gap-2">
-                <Skeleton className="h-6 w-28 rounded-full" />
-                <Skeleton className="h-6 w-32 rounded-full" />
-                <Skeleton className="h-6 w-36 rounded-full" />
-              </div>
-              <Skeleton className="h-20 max-w-xl rounded-lg" />
-            </div>
-          </div>
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Skeleton className="h-64 w-full rounded-xl" />
-          <Skeleton className="h-64 w-full rounded-xl" />
-        </div>
-      </div>
-    )
+    return <DetailPageSkeleton cards={2} />
   }
 
   if (isError || !provider) {
@@ -134,22 +102,18 @@ export function ProviderDetailPage({ storeId }: ProviderDetailPageProps) {
     )
   }
 
-  const countryLabel = provider.country
-    ? i18n.language === 'ar'
-      ? provider.country.name_ar
-      : provider.country.name_en
-    : null
+  const countryLabel = provider.country ? localizedName(provider.country, i18n) : null
 
   const ownerStatus = provider.owner.accountStatus
 
   const subtitle = (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+    <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3 sm:gap-y-1">
       <span className="font-mono text-sm tabular-nums text-muted-foreground">
         {provider.owner.phoneNumber}
       </span>
       {countryLabel && (
         <>
-          <span aria-hidden className="text-muted-foreground/60 select-none">
+          <span aria-hidden className="hidden text-muted-foreground/60 select-none sm:inline">
             ·
           </span>
           <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -158,14 +122,12 @@ export function ProviderDetailPage({ storeId }: ProviderDetailPageProps) {
           </span>
         </>
       )}
-      <>
-        <span aria-hidden className="text-muted-foreground/60 select-none">
-          ·
-        </span>
-        <span className="font-mono text-xs tabular-nums text-muted-foreground">
-          {t('providers:detail.summary_since')} {format.dateTime(provider.createdAt)}
-        </span>
-      </>
+      <span aria-hidden className="hidden text-muted-foreground/60 select-none sm:inline">
+        ·
+      </span>
+      <span className="font-mono text-xs tabular-nums text-muted-foreground">
+        {t('providers:detail.summary_since')} {format.dateTime(provider.createdAt)}
+      </span>
     </div>
   )
 
@@ -344,8 +306,8 @@ export function ProviderDetailPage({ storeId }: ProviderDetailPageProps) {
       <ConfirmDialog
         open={approveOpen}
         onOpenChange={setApproveOpen}
-        title={t('providers:approve_dialog.title')}
-        description={t('providers:approve_dialog.description')}
+        title={t('providers:approve_dialog.title', { name: provider.owner.fullName })}
+        description={t('providers:approve_dialog.description', { name: provider.owner.fullName })}
         onConfirm={() => {
           approveMutation.mutate(storeId, {
             onSettled: () => setApproveOpen(false),
@@ -356,8 +318,8 @@ export function ProviderDetailPage({ storeId }: ProviderDetailPageProps) {
       <ReasonDialog
         open={rejectOpen}
         onOpenChange={setRejectOpen}
-        title={t('providers:reject_dialog.title')}
-        description={t('providers:reject_dialog.description')}
+        title={t('providers:reject_dialog.title', { name: provider.owner.fullName })}
+        description={t('providers:reject_dialog.description', { name: provider.owner.fullName })}
         onConfirm={(reason) => {
           rejectMutation.mutate(
             { storeId, reason },
@@ -370,16 +332,18 @@ export function ProviderDetailPage({ storeId }: ProviderDetailPageProps) {
       <ConfirmDialog
         open={verifyOpen}
         onOpenChange={setVerifyOpen}
-        title={
+        title={t(
           provider.isVerified
-            ? t('providers:verify_dialog.unverify_title')
-            : t('providers:verify_dialog.verify_title')
-        }
-        description={
+            ? 'providers:verify_dialog.unverify.title'
+            : 'providers:verify_dialog.verify.title',
+          { name: provider.owner.fullName },
+        )}
+        description={t(
           provider.isVerified
-            ? t('providers:verify_dialog.unverify_description')
-            : t('providers:verify_dialog.verify_description')
-        }
+            ? 'providers:verify_dialog.unverify.description'
+            : 'providers:verify_dialog.verify.description',
+          { name: provider.owner.fullName },
+        )}
         onConfirm={() => {
           verifyMutation.mutate(storeId, {
             onSettled: () => setVerifyOpen(false),
@@ -390,8 +354,8 @@ export function ProviderDetailPage({ storeId }: ProviderDetailPageProps) {
       <ConfirmDialog
         open={blockOpen}
         onOpenChange={setBlockOpen}
-        title={t('providers:block_dialog.title')}
-        description={t('providers:block_dialog.description')}
+        title={t('providers:block_dialog.title', { name: provider.owner.fullName })}
+        description={t('providers:block_dialog.description', { name: provider.owner.fullName })}
         confirmLabel={t('providers:actions.block')}
         onConfirm={() => {
           blockMutation.mutate(storeId, {
@@ -404,8 +368,8 @@ export function ProviderDetailPage({ storeId }: ProviderDetailPageProps) {
       <ConfirmDialog
         open={unblockOpen}
         onOpenChange={setUnblockOpen}
-        title={t('providers:unblock_dialog.title')}
-        description={t('providers:unblock_dialog.description')}
+        title={t('providers:unblock_dialog.title', { name: provider.owner.fullName })}
+        description={t('providers:unblock_dialog.description', { name: provider.owner.fullName })}
         confirmLabel={t('providers:actions.unblock')}
         onConfirm={() => {
           unblockMutation.mutate(storeId, {

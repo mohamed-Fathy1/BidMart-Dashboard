@@ -3,23 +3,17 @@ import type { AxiosRequestConfig } from 'axios'
 import { toast } from 'sonner'
 import { env } from '@/lib/env'
 import { i18n } from '@/lib/i18n'
+import { useAuthStore } from '@/features/auth/auth.store'
 
 export const api = axios.create({
   baseURL: env.VITE_API_URL,
+  timeout: 30_000,
 })
 
 api.interceptors.request.use((config) => {
-  const raw = localStorage.getItem('bidmart-auth')
-  if (raw) {
-    try {
-      const parsed = JSON.parse(raw) as { state?: { token?: string } }
-      const token = parsed?.state?.token
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`
-      }
-    } catch {
-      // ignore parse errors
-    }
+  const token = useAuthStore.getState().token
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
   }
   config.headers['Accept-Language'] = i18n.language
   return config
@@ -56,13 +50,30 @@ export function extractApiErrorMessage(error: unknown): string | undefined {
   return fromData ?? msg
 }
 
+/**
+ * Extract a user-facing error message from any thrown value:
+ * - AxiosError → nested `data.message` or `message` from the server body
+ * - Plain `{ message }` reject from the response interceptor below
+ * - Anything else → undefined (callers fall back to i18n copy)
+ */
+export function extractErrorMessage(error: unknown): string | undefined {
+  if (axios.isAxiosError(error)) {
+    return extractApiErrorMessage(error)
+  }
+  if (error && typeof error === 'object' && 'message' in error) {
+    const msg = (error as { message: unknown }).message
+    if (typeof msg === 'string' && msg.trim()) return msg
+  }
+  return undefined
+}
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (axios.isAxiosError(error)) {
       const status = error.response?.status
       if (status === 401 && !requestIsPublicAdminAuth(error.config)) {
-        localStorage.removeItem('bidmart-auth')
+        useAuthStore.getState().clearSession()
         window.location.href = '/login'
         return Promise.reject(error)
       }

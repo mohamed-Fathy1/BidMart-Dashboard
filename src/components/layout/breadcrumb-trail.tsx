@@ -86,7 +86,10 @@ function buildCrumbs(pathname: string): CrumbDef[] {
     acc += '/' + seg
     const isLast = i === segments.length - 1
     if (isProbablyId(seg)) {
-      crumbs.push({ labelKey: 'shell:topbar.detail' })
+      // Skip the trailing id segment — the page <h1> conveys the same context.
+      // For mid-path ids (e.g. /categories/<id>/sub-categories) keep a generic
+      // "Detail" placeholder so subsequent crumbs still chain correctly.
+      if (!isLast) crumbs.push({ labelKey: 'shell:topbar.detail' })
       continue
     }
     const labelKey = SEGMENT_LABELS[seg] ?? seg.replace(/-/g, ' ')

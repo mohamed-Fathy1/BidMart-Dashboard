@@ -30,7 +30,7 @@ export function PageHeader({ title, description, actions, onBack, className, bad
           {t('components:page_header.back')}
         </Button>
       )}
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <h1 className="text-[length:var(--type-h1-size)] font-[number:var(--type-h1-weight)] leading-[var(--type-h1-leading)] tracking-[var(--type-h1-tracking)] text-foreground">
@@ -45,7 +45,15 @@ export function PageHeader({ title, description, actions, onBack, className, bad
           )}
         </div>
         {actions && (
-          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">{actions}</div>
+          <div
+            className={cn(
+              '-mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-1',
+              '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+              'sm:mx-0 sm:shrink-0 sm:flex-wrap sm:overflow-visible sm:justify-end sm:px-0 sm:pb-0',
+            )}
+          >
+            {actions}
+          </div>
         )}
       </div>
     </div>

@@ -11,7 +11,8 @@
     "filter": "Filter",
     "reset": "Reset",
     "back": "Back",
-    "submit": "Submit"
+    "submit": "Submit",
+    "clear_filters": "Clear filters"
   },
   "states": {
     "loading": "Loading...",
@@ -51,7 +52,10 @@
   "errors": {
     "permission_denied": "You do not have permission to perform this action",
     "unexpected": "An unexpected error occurred",
-    "network": "Network connection error"
+    "network": "Network connection error",
+    "boundary_title": "Something went wrong",
+    "boundary_hint": "An unexpected error interrupted this page. Try reloading.",
+    "reload": "Reload page"
   },
   "labels": {
     "actions": "Actions",

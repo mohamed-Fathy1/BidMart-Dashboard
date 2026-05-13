@@ -1,9 +1,14 @@
-import { useState, useMemo } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useMemo } from "react";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { Eye, Ban, PauseCircle, CheckCircle, Trash2 } from "lucide-react";
-import type { PaginationState } from "@tanstack/react-table";
-import type { AdminUserListItem } from "@/types/api";
+import type { AdminUserListItem, AccountType } from "@/types/api";
+import { useUrlListState } from "@/lib/use-url-list-state";
+import { useListPageData } from "@/lib/use-list-page-data";
+import { useConfirmTarget } from "@/lib/use-confirm-target";
+import type { UsersSearch, UsersListStatus } from "@/routes/_authed.users";
+
+const usersRoute = getRouteApi("/_authed/users");
 import { PageHeader } from "@/components/shared/page-header";
 import { SearchInput } from "@/components/shared/search-input";
 import { FilterSelect } from "@/components/shared/filter-select";
@@ -12,8 +17,10 @@ import {
   DataTable,
   type RowActionItem,
 } from "@/components/data-table/data-table";
-import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import { ReasonDialog } from "@/components/shared/reason-dialog";
+import {
+  TargetedConfirmDialog,
+  TargetedReasonDialog,
+} from "@/components/shared/targeted-confirm-dialog";
 import { useUserColumns } from "@/features/users/users.columns";
 import {
   useUsersQuery,
@@ -22,13 +29,16 @@ import {
   useActivateUserMutation,
   useDeleteUserMutation,
 } from "@/features/users/users.queries";
-import type { ListUsersParams } from "@/features/users/users.api";
 import { PERMISSIONS, usePermission } from "@/lib/permissions";
 import { format } from "@/lib/format";
 
 export function UsersListPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { search, searchValue, pagination, setPagination, setSearch, setFilter } =
+    useUrlListState<UsersSearch>({ route: usersRoute });
+  const statusFilter = search.status ?? "";
+  const accountTypeFilter = search.accountType ?? "";
 
   /* ---------- permissions ---------- */
   const canBan = usePermission(PERMISSIONS.users.ban);
@@ -36,40 +46,35 @@ export function UsersListPage() {
   const canActivate = usePermission(PERMISSIONS.users.activate);
   const canDelete = usePermission(PERMISSIONS.users.delete);
 
-  /* ---------- filters ---------- */
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [accountTypeFilter, setAccountTypeFilter] = useState("");
-
-  /* ---------- pagination ---------- */
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-
   /* ---------- dialogs ---------- */
-  const [banTarget, setBanTarget] = useState<AdminUserListItem | null>(null);
-  const [suspendTarget, setSuspendTarget] = useState<AdminUserListItem | null>(
-    null,
-  );
-  const [activateTarget, setActivateTarget] =
-    useState<AdminUserListItem | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<AdminUserListItem | null>(
-    null,
-  );
+  const banFlow = useConfirmTarget<AdminUserListItem>();
+  const suspendFlow = useConfirmTarget<AdminUserListItem>();
+  const activateFlow = useConfirmTarget<AdminUserListItem>();
+  const deleteFlow = useConfirmTarget<AdminUserListItem>();
 
   /* ---------- data ---------- */
   const { data: response, isLoading } = useUsersQuery({
-    search: search || undefined,
-    status: (statusFilter as ListUsersParams["status"]) || undefined,
-    accountType:
-      (accountTypeFilter as ListUsersParams["accountType"]) || undefined,
+    search: searchValue || undefined,
+    status: search.status,
+    accountType: search.accountType,
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
   });
 
-  const data = response?.data ?? [];
-  const meta = response?.meta;
+  const hasActiveFilters =
+    searchValue !== "" || statusFilter !== "" || accountTypeFilter !== "";
+  const { rows, meta, tableProps } = useListPageData({
+    response,
+    isLoading,
+    pagination,
+    setPagination,
+    hasActiveFilters,
+    clearFilters: () => {
+      setSearch("");
+      setFilter("status", undefined);
+      setFilter("accountType", undefined);
+    },
+  });
 
   const columns = useUserColumns();
 
@@ -100,6 +105,11 @@ export function UsersListPage() {
     [t],
   );
 
+  function targetName(target: AdminUserListItem | null): string {
+    if (!target) return "";
+    return target.accountName || target.email || target.phoneNumber || "";
+  }
+
   /* ---------- row actions ---------- */
   function getRowActions(
     row: AdminUserListItem,
@@ -120,7 +130,7 @@ export function UsersListPage() {
       items.push({
         label: t("users:actions.activate"),
         icon: CheckCircle,
-        onClick: (r) => setActivateTarget(r),
+        onClick: (r) => activateFlow.ask(r),
       });
     }
 
@@ -128,7 +138,7 @@ export function UsersListPage() {
       items.push({
         label: t("users:actions.ban"),
         icon: Ban,
-        onClick: (r) => setBanTarget(r),
+        onClick: (r) => banFlow.ask(r),
         variant: "destructive",
       });
     }
@@ -137,7 +147,7 @@ export function UsersListPage() {
       items.push({
         label: t("users:actions.suspend"),
         icon: PauseCircle,
-        onClick: (r) => setSuspendTarget(r),
+        onClick: (r) => suspendFlow.ask(r),
         variant: "destructive",
       });
     }
@@ -148,7 +158,7 @@ export function UsersListPage() {
         {
           label: t("users:actions.delete"),
           icon: Trash2,
-          onClick: (r) => setDeleteTarget(r),
+          onClick: (r) => deleteFlow.ask(r),
           variant: "destructive",
         },
       );
@@ -169,30 +179,21 @@ export function UsersListPage() {
       }
     >
       <SearchInput
-        value={search}
-        onChange={(v) => {
-          setSearch(v);
-          setPagination((p) => ({ ...p, pageIndex: 0 }));
-        }}
+        value={searchValue}
+        onChange={(v) => setSearch(v)}
         placeholder={t("users:filters.search_placeholder")}
         className="w-full min-w-[min(100%,220px)] sm:w-72"
       />
       <FilterSelect
         value={statusFilter}
-        onChange={(v) => {
-          setStatusFilter(v);
-          setPagination((p) => ({ ...p, pageIndex: 0 }));
-        }}
+        onChange={(v) => setFilter("status", (v as UsersListStatus | "") || undefined)}
         options={statusOptions}
         placeholder={t("users:filters.status")}
         className="min-w-[148px]"
       />
       <FilterSelect
         value={accountTypeFilter}
-        onChange={(v) => {
-          setAccountTypeFilter(v);
-          setPagination((p) => ({ ...p, pageIndex: 0 }));
-        }}
+        onChange={(v) => setFilter("accountType", (v as AccountType | "") || undefined)}
         options={accountTypeOptions}
         placeholder={t("users:filters.account_type")}
         className="min-w-[180px]"
@@ -210,81 +211,61 @@ export function UsersListPage() {
 
       <DataTable
         columns={columns}
-        data={data}
-        pageCount={meta?.totalPages}
-        totalRecords={meta?.total}
-        pagination={pagination}
-        onPaginationChange={setPagination}
-        isLoading={isLoading}
+        data={rows}
+        {...tableProps}
+        emptyKeyPrefix="users:empty"
         toolbar={toolbar}
         actions={getRowActions}
+        rowLabel={(row) => row.accountName || row.email || row.phoneNumber || ""}
         getRowId={(row) => row.id}
         onRowClick={(row) =>
           navigate({ to: "/users/$userId", params: { userId: row.id } })
         }
       />
 
-      {/* Ban dialog */}
-      <ReasonDialog
-        open={!!banTarget}
-        onOpenChange={(open) => !open && setBanTarget(null)}
-        title={t("users:ban_dialog.title")}
-        description={t("users:ban_dialog.description")}
-        onConfirm={(reason) => {
-          if (!banTarget) return;
+      <TargetedReasonDialog
+        flow={banFlow}
+        i18nPrefix="users:ban_dialog"
+        getName={(r) => targetName(r)}
+        onConfirm={(target, reason) =>
           banMutation.mutate(
-            { userId: banTarget.id, reason },
-            { onSettled: () => setBanTarget(null) },
-          );
-        }}
+            { userId: target.id, reason },
+            { onSettled: banFlow.close },
+          )
+        }
         isLoading={banMutation.isPending}
-        variant="destructive"
       />
 
-      {/* Suspend dialog */}
-      <ReasonDialog
-        open={!!suspendTarget}
-        onOpenChange={(open) => !open && setSuspendTarget(null)}
-        title={t("users:suspend_dialog.title")}
-        description={t("users:suspend_dialog.description")}
-        onConfirm={(reason) => {
-          if (!suspendTarget) return;
+      <TargetedReasonDialog
+        flow={suspendFlow}
+        i18nPrefix="users:suspend_dialog"
+        getName={(r) => targetName(r)}
+        onConfirm={(target, reason) =>
           suspendMutation.mutate(
-            { userId: suspendTarget.id, reason },
-            { onSettled: () => setSuspendTarget(null) },
-          );
-        }}
+            { userId: target.id, reason },
+            { onSettled: suspendFlow.close },
+          )
+        }
         isLoading={suspendMutation.isPending}
-        variant="destructive"
       />
 
-      {/* Activate dialog */}
-      <ConfirmDialog
-        open={!!activateTarget}
-        onOpenChange={(open) => !open && setActivateTarget(null)}
-        title={t("users:activate_dialog.title")}
-        description={t("users:activate_dialog.description")}
-        onConfirm={() => {
-          if (!activateTarget) return;
-          activateMutation.mutate(activateTarget.id, {
-            onSettled: () => setActivateTarget(null),
-          });
-        }}
+      <TargetedConfirmDialog
+        flow={activateFlow}
+        i18nPrefix="users:activate_dialog"
+        getName={(r) => targetName(r)}
+        onConfirm={(target) =>
+          activateMutation.mutate(target.id, { onSettled: activateFlow.close })
+        }
         isLoading={activateMutation.isPending}
       />
 
-      {/* Delete dialog */}
-      <ConfirmDialog
-        open={!!deleteTarget}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title={t("users:delete_dialog.title")}
-        description={t("users:delete_dialog.description")}
-        onConfirm={() => {
-          if (!deleteTarget) return;
-          deleteMutation.mutate(deleteTarget.id, {
-            onSettled: () => setDeleteTarget(null),
-          });
-        }}
+      <TargetedConfirmDialog
+        flow={deleteFlow}
+        i18nPrefix="users:delete_dialog"
+        getName={(r) => targetName(r)}
+        onConfirm={(target) =>
+          deleteMutation.mutate(target.id, { onSettled: deleteFlow.close })
+        }
         isLoading={deleteMutation.isPending}
         variant="destructive"
       />

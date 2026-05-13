@@ -4,6 +4,12 @@
   "meta": {
     "total_stores": "{{count}} stores"
   },
+  "empty": {
+    "no_data_title": "No provider applications yet",
+    "no_data_hint": "Seller signups will appear here for review.",
+    "no_results_title": "No providers match these filters",
+    "no_results_hint": "Try clearing the search or status filter."
+  },
   "errors": {
     "approve_failed": "Could not approve this provider.",
     "reject_failed": "Could not reject this provider.",
@@ -42,28 +48,34 @@
     "unblock_success": "Provider unblocked"
   },
   "approve_dialog": {
-    "title": "Approve Provider",
-    "description": "This sets the store to approved and grants the seller role. Continue?"
+    "title": "Approve {{name}}",
+    "description": "Approve {{name}}'s store and grant the seller role. Continue?"
   },
   "reject_dialog": {
-    "title": "Reject Provider",
-    "description": "Provide a reason. The seller can resubmit after rejection."
+    "title": "Reject {{name}}",
+    "description": "Provide a reason. {{name}} can resubmit after rejection."
   },
   "verify_dialog": {
-    "verify_title": "Add Verified Badge",
-    "verify_description": "Adds the verified badge to this approved store. Continue?",
-    "unverify_title": "Remove Verified Badge",
-    "unverify_description": "Removes the verified badge from this store. Continue?",
-    "list_title": "Toggle Verified Badge",
-    "list_description": "Adds or removes the verified badge on this approved store."
+    "verify": {
+      "title": "Add verified badge to {{name}}",
+      "description": "Adds the verified badge to {{name}}'s approved store. Continue?"
+    },
+    "unverify": {
+      "title": "Remove verified badge from {{name}}",
+      "description": "Removes the verified badge from {{name}}'s store. Continue?"
+    },
+    "list": {
+      "title": "Toggle verified badge for {{name}}",
+      "description": "Adds or removes the verified badge on {{name}}'s approved store."
+    }
   },
   "block_dialog": {
-    "title": "Block Provider",
-    "description": "The seller cannot list products or go live until unblocked."
+    "title": "Block {{name}}",
+    "description": "{{name}} cannot list products or go live until unblocked."
   },
   "unblock_dialog": {
-    "title": "Unblock Provider",
-    "description": "Restores the store to approved. Listings become visible again."
+    "title": "Unblock {{name}}",
+    "description": "Restores {{name}}'s store to approved. Listings become visible again."
   },
   "detail": {
     "page_title": "Provider Details",

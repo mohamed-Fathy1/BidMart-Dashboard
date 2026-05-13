@@ -1,7 +1,6 @@
-import axios from 'axios'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
+import { createResourceKeys } from '@/lib/query-keys'
+import { useResourceMutation } from '@/lib/use-resource-mutation'
 import {
   listCountries,
   createCountry,
@@ -13,31 +12,7 @@ import {
   type UpdateCountryPayload,
 } from '@/features/countries/countries.api'
 
-function extractMutationError(error: unknown): string | undefined {
-  if (axios.isAxiosError(error)) {
-    const data = error.response?.data as { message?: string } | undefined
-    return typeof data?.message === 'string' ? data.message : undefined
-  }
-  if (typeof error === 'object' && error !== null && 'message' in error) {
-    const m = (error as { message: unknown }).message
-    return typeof m === 'string' ? m : undefined
-  }
-  return undefined
-}
-
-/* ------------------------------------------------------------------ */
-/*  Query keys                                                         */
-/* ------------------------------------------------------------------ */
-
-export const countryKeys = {
-  all: ['countries'] as const,
-  lists: () => [...countryKeys.all, 'list'] as const,
-  list: (params: ListCountriesParams) => [...countryKeys.lists(), params] as const,
-}
-
-/* ------------------------------------------------------------------ */
-/*  Queries                                                            */
-/* ------------------------------------------------------------------ */
+export const countryKeys = createResourceKeys<ListCountriesParams>('countries')
 
 export function useCountriesQuery(params: ListCountriesParams) {
   return useQuery({
@@ -46,75 +21,39 @@ export function useCountriesQuery(params: ListCountriesParams) {
   })
 }
 
-/* ------------------------------------------------------------------ */
-/*  Mutations                                                          */
-/* ------------------------------------------------------------------ */
-
 export function useCreateCountryMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (payload: CreateCountryPayload) => createCountry(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: countryKeys.all })
-      toast.success(t('countries:actions.create_success'))
-    },
-    onError: (error) => {
-      const msg = extractMutationError(error)
-      toast.error(msg ?? t('countries:errors.create_failed'))
-    },
+    invalidate: [countryKeys.all],
+    successKey: 'countries:actions.create_success',
+    errorKey: 'countries:errors.create_failed',
   })
 }
 
 export function useUpdateCountryMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: ({ id, payload }: { id: string; payload: UpdateCountryPayload }) =>
       updateCountry(id, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: countryKeys.all })
-      toast.success(t('countries:actions.update_success'))
-    },
-    onError: (error) => {
-      const msg = extractMutationError(error)
-      toast.error(msg ?? t('countries:errors.update_failed'))
-    },
+    invalidate: [countryKeys.all],
+    successKey: 'countries:actions.update_success',
+    errorKey: 'countries:errors.update_failed',
   })
 }
 
 export function useToggleCountryMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (id: string) => toggleCountryEnabled(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: countryKeys.all })
-      toast.success(t('countries:actions.toggle_success'))
-    },
-    onError: (error) => {
-      const msg = extractMutationError(error)
-      toast.error(msg ?? t('countries:errors.toggle_failed'))
-    },
+    invalidate: [countryKeys.all],
+    successKey: 'countries:actions.toggle_success',
+    errorKey: 'countries:errors.toggle_failed',
   })
 }
 
 export function useDeleteCountryMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (id: string) => deleteCountry(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: countryKeys.all })
-      toast.success(t('countries:actions.delete_success'))
-    },
-    onError: (error) => {
-      const msg = extractMutationError(error)
-      toast.error(msg ?? t('countries:errors.delete_failed'))
-    },
+    invalidate: [countryKeys.all],
+    successKey: 'countries:actions.delete_success',
+    errorKey: 'countries:errors.delete_failed',
   })
 }

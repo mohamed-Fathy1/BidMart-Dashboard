@@ -22,7 +22,7 @@
   "topbar": {
     "notifications": "الإشعارات",
     "notifications_empty": "لا توجد إشعارات حالياً.",
-    "notifications_empty_hint": "سنعرض هنا أي شيء يستدعي انتباهك.",
+    "notifications_empty_hint": "ستظهر هنا طلبات الموافقة وأحداث الإشراف وطلبات التحقق فور حدوثها.",
     "profile": "الملف الشخصي",
     "my_profile": "ملفي الشخصي",
     "logout": "تسجيل الخروج",
@@ -38,8 +38,114 @@
     "collapse": "طي القائمة",
     "expand": "توسيع القائمة"
   },
+  "notifications": {
+    "summary": "{{unread}} غير مقروء · {{today}} اليوم",
+    "mark_all_read": "تعليم الكل كمقروء",
+    "view_all": "عرض الكل",
+    "items": {
+      "withdrawal_review": {
+        "title": "عملية السحب #W-2281 بحاجة إلى مراجعة",
+        "subtitle": "1,575.00 ر.س · فارس الحربي"
+      },
+      "provider_verification": {
+        "title": "تم إرسال طلب توثيق مقدم خدمة",
+        "subtitle": "أطلس للمزادات رفعت 3 مستندات"
+      },
+      "stream_flagged": {
+        "title": "تم الإبلاغ عن بث مباشر من قبل المشاهدين",
+        "subtitle": "LS-0051 · 4 بلاغات خلال 5 دقائق"
+      },
+      "complaint_escalated": {
+        "title": "الشكوى #C-0451 تم تصعيدها",
+        "subtitle": "العميل يطلب استرداد المبلغ · مضى عليها 14 يوماً"
+      },
+      "daily_digest": {
+        "title": "الملخص اليومي جاهز",
+        "subtitle": "128 إجراء · 412 حدثاً · 1.2 ألف سجل"
+      }
+    }
+  },
   "overview": {
+    "title": "نظرة عامة",
     "subtitle": "أهلاً بعودتك. اختر قسماً من القائمة الجانبية لإدارة المنصة.",
-    "coming_soon": "ويدجتس لوحة التحكم قادمة قريباً."
+    "coming_soon": "ويدجتس لوحة التحكم قادمة قريباً.",
+    "last_refreshed": "آخر 30 يوماً · آخر تحديث الآن",
+    "actions": {
+      "last_30_days": "آخر 30 يوماً",
+      "export": "تصدير"
+    },
+    "kpi": {
+      "total_users": "إجمالي المستخدمين",
+      "live_auctions": "المزادات الحالية",
+      "pending_withdrawals": "عمليات السحب المعلّقة",
+      "gmv_30d": "إجمالي قيمة البضائع (30 يوماً)",
+      "detail": {
+        "vs_prev_30d": "مقارنةً بالـ 30 السابقة",
+        "right_now": "الآن",
+        "awaiting_review": "بانتظار المراجعة"
+      }
+    },
+    "chart": {
+      "title": "اتجاه إجمالي قيمة البضائع",
+      "subtitle": "قيمة المعاملات اليومية · جميع التصنيفات",
+      "range": {
+        "7d": "٧ أيام",
+        "30d": "٣٠ يوماً",
+        "90d": "٩٠ يوماً",
+        "1y": "سنة"
+      },
+      "breakdown": {
+        "watches": "الساعات",
+        "antiques": "التحف",
+        "jewelry": "المجوهرات",
+        "other": "أخرى"
+      }
+    },
+    "action_queue": {
+      "title": "قائمة المهام",
+      "subtitle": "عناصر تنتظر إجراءك",
+      "coming_soon": "قريباً",
+      "items": {
+        "withdrawals": {
+          "label": "عمليات سحب للمراجعة",
+          "sub": "9,021 ر.س"
+        },
+        "providers": {
+          "label": "طلبات مقدمي الخدمة",
+          "sub": "2 ذات قيمة عالية"
+        },
+        "complaints": {
+          "label": "شكاوى مفتوحة",
+          "sub": "3 عالية الأولوية"
+        },
+        "streams": {
+          "label": "بث مباشر للمتابعة",
+          "sub": "2,588 مشاهد"
+        }
+      }
+    },
+    "recent_activity": {
+      "title": "آخر النشاطات",
+      "subtitle": "أحدث إجراءات المسؤولين عبر المنصة",
+      "view_audit_log": "عرض سجل الأحداث",
+      "actions": {
+        "approved_withdrawal": "وافق على عملية سحب",
+        "verified_provider": "وثّق مقدم خدمة",
+        "suspended_user": "أوقف مستخدماً",
+        "flagged_withdrawal": "وضع علامة على عملية سحب",
+        "ended_stream": "أنهى بثاً مباشراً"
+      }
+    },
+    "top_providers": {
+      "title": "أفضل مقدمي الخدمة · 30 يوماً",
+      "subtitle": "مرتّبون حسب المساهمة في قيمة البضائع",
+      "categories": {
+        "jewelry": "المجوهرات",
+        "antiques": "التحف",
+        "collectibles": "المقتنيات",
+        "automotive": "السيارات",
+        "watches": "الساعات"
+      }
+    }
   }
 }

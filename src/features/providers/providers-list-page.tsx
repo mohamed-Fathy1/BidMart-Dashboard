@@ -1,9 +1,14 @@
-import { useMemo, useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { useMemo } from 'react'
+import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Eye, CheckCircle, XCircle, ShieldCheck, Ban, Unlock } from 'lucide-react'
-import type { PaginationState } from '@tanstack/react-table'
 import type { ProviderSummary, ProviderAccountStatus } from '@/types/api'
+import { useUrlListState } from '@/lib/use-url-list-state'
+import { useListPageData } from '@/lib/use-list-page-data'
+import { useConfirmTarget } from '@/lib/use-confirm-target'
+import type { ProvidersSearch } from '@/routes/_authed.providers'
+
+const providersRoute = getRouteApi('/_authed/providers')
 import { PageHeader } from '@/components/shared/page-header'
 import { SearchInput } from '@/components/shared/search-input'
 import { FilterSelect } from '@/components/shared/filter-select'
@@ -12,8 +17,10 @@ import {
   DataTable,
   type RowActionItem,
 } from '@/components/data-table/data-table'
-import { ConfirmDialog } from '@/components/shared/confirm-dialog'
-import { ReasonDialog } from '@/components/shared/reason-dialog'
+import {
+  TargetedConfirmDialog,
+  TargetedReasonDialog,
+} from '@/components/shared/targeted-confirm-dialog'
 import { useProviderColumns } from '@/features/providers/providers.columns'
 import {
   useProvidersQuery,
@@ -29,6 +36,9 @@ import { format } from '@/lib/format'
 export function ProvidersListPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { search, searchValue, pagination, setPagination, setSearch, setFilter } =
+    useUrlListState<ProvidersSearch>({ route: providersRoute })
+  const statusFilter = search.status ?? ''
 
   const canApprove = usePermission(PERMISSIONS.providers.approve)
   const canReject = usePermission(PERMISSIONS.providers.reject)
@@ -36,31 +46,38 @@ export function ProvidersListPage() {
   const canBlock = usePermission(PERMISSIONS.providers.block)
   const canUnblock = usePermission(PERMISSIONS.providers.unblock)
 
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('')
-
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  })
-
-  const [approveTarget, setApproveTarget] = useState<ProviderSummary | null>(null)
-  const [rejectTarget, setRejectTarget] = useState<ProviderSummary | null>(null)
-  const [verifyTarget, setVerifyTarget] = useState<ProviderSummary | null>(null)
-  const [blockTarget, setBlockTarget] = useState<ProviderSummary | null>(null)
-  const [unblockTarget, setUnblockTarget] = useState<ProviderSummary | null>(null)
+  const approveFlow = useConfirmTarget<ProviderSummary>()
+  const rejectFlow = useConfirmTarget<ProviderSummary>()
+  const verifyFlow = useConfirmTarget<ProviderSummary>()
+  const blockFlow = useConfirmTarget<ProviderSummary>()
+  const unblockFlow = useConfirmTarget<ProviderSummary>()
 
   const { data: response, isLoading } = useProvidersQuery({
-    search: search || undefined,
-    status: statusFilter ? (statusFilter as ProviderAccountStatus) : undefined,
+    search: searchValue || undefined,
+    status: search.status,
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
   })
 
-  const data = response?.data ?? []
-  const meta = response?.meta
+  const hasActiveFilters = searchValue !== '' || statusFilter !== ''
+  const { rows, meta, tableProps } = useListPageData({
+    response,
+    isLoading,
+    pagination,
+    setPagination,
+    hasActiveFilters,
+    clearFilters: () => {
+      setSearch('')
+      setFilter('status', undefined)
+    },
+  })
 
   const columns = useProviderColumns()
+
+  function targetName(target: ProviderSummary | null): string {
+    if (!target) return ''
+    return target.accountName || target.phoneNumber || ''
+  }
 
   const approveMutation = useApproveProviderMutation()
   const rejectMutation = useRejectProviderMutation()
@@ -92,7 +109,7 @@ export function ProvidersListPage() {
       items.push({
         label: t('providers:actions.approve'),
         icon: CheckCircle,
-        onClick: (r) => setApproveTarget(r),
+        onClick: (r) => approveFlow.ask(r),
         variant: 'success',
       })
     }
@@ -101,7 +118,7 @@ export function ProvidersListPage() {
       items.push({
         label: t('providers:actions.reject'),
         icon: XCircle,
-        onClick: (r) => setRejectTarget(r),
+        onClick: (r) => rejectFlow.ask(r),
         variant: 'destructive',
       })
     }
@@ -110,7 +127,7 @@ export function ProvidersListPage() {
       items.push({
         label: t('providers:actions.toggle_badge'),
         icon: ShieldCheck,
-        onClick: (r) => setVerifyTarget(r),
+        onClick: (r) => verifyFlow.ask(r),
       })
     }
 
@@ -118,7 +135,7 @@ export function ProvidersListPage() {
       items.push({
         label: t('providers:actions.block'),
         icon: Ban,
-        onClick: (r) => setBlockTarget(r),
+        onClick: (r) => blockFlow.ask(r),
         variant: 'destructive',
       })
     }
@@ -127,7 +144,7 @@ export function ProvidersListPage() {
       items.push({
         label: t('providers:actions.unblock'),
         icon: Unlock,
-        onClick: (r) => setUnblockTarget(r),
+        onClick: (r) => unblockFlow.ask(r),
       })
     }
 
@@ -143,20 +160,16 @@ export function ProvidersListPage() {
       }
     >
       <SearchInput
-        value={search}
-        onChange={(v) => {
-          setSearch(v)
-          setPagination((p) => ({ ...p, pageIndex: 0 }))
-        }}
+        value={searchValue}
+        onChange={(v) => setSearch(v)}
         placeholder={t('providers:filters.search_placeholder')}
         className="w-full min-w-[min(100%,220px)] sm:w-72"
       />
       <FilterSelect
         value={statusFilter}
-        onChange={(v) => {
-          setStatusFilter(v)
-          setPagination((p) => ({ ...p, pageIndex: 0 }))
-        }}
+        onChange={(v) =>
+          setFilter('status', (v as ProviderAccountStatus | '') || undefined)
+        }
         options={statusOptions}
         placeholder={t('providers:filters.status')}
         className="min-w-[148px]"
@@ -173,92 +186,71 @@ export function ProvidersListPage() {
 
       <DataTable
         columns={columns}
-        data={data}
-        pageCount={meta?.totalPages}
-        totalRecords={meta?.total}
-        pagination={pagination}
-        onPaginationChange={setPagination}
-        isLoading={isLoading}
+        data={rows}
+        {...tableProps}
+        emptyKeyPrefix="providers:empty"
         toolbar={toolbar}
         actions={getRowActions}
+        rowLabel={(row) => row.accountName || row.phoneNumber}
         getRowId={(row) => row.id}
         onRowClick={(row) =>
           navigate({ to: '/providers/$storeId', params: { storeId: row.id } })
         }
       />
 
-      <ConfirmDialog
-        open={!!approveTarget}
-        onOpenChange={(open) => !open && setApproveTarget(null)}
-        title={t('providers:approve_dialog.title')}
-        description={t('providers:approve_dialog.description')}
-        onConfirm={() => {
-          if (!approveTarget) return
-          approveMutation.mutate(approveTarget.id, {
-            onSettled: () => setApproveTarget(null),
-          })
-        }}
+      <TargetedConfirmDialog
+        flow={approveFlow}
+        i18nPrefix="providers:approve_dialog"
+        getName={(r) => targetName(r)}
+        onConfirm={(target) =>
+          approveMutation.mutate(target.id, { onSettled: approveFlow.close })
+        }
         isLoading={approveMutation.isPending}
       />
 
-      <ReasonDialog
-        open={!!rejectTarget}
-        onOpenChange={(open) => !open && setRejectTarget(null)}
-        title={t('providers:reject_dialog.title')}
-        description={t('providers:reject_dialog.description')}
-        onConfirm={(reason) => {
-          if (!rejectTarget) return
+      <TargetedReasonDialog
+        flow={rejectFlow}
+        i18nPrefix="providers:reject_dialog"
+        getName={(r) => targetName(r)}
+        onConfirm={(target, reason) =>
           rejectMutation.mutate(
-            { storeId: rejectTarget.id, reason },
-            { onSettled: () => setRejectTarget(null) },
+            { storeId: target.id, reason },
+            { onSettled: rejectFlow.close },
           )
-        }}
+        }
         isLoading={rejectMutation.isPending}
-        variant="destructive"
       />
 
-      <ConfirmDialog
-        open={!!verifyTarget}
-        onOpenChange={(open) => !open && setVerifyTarget(null)}
-        title={t('providers:verify_dialog.list_title')}
-        description={t('providers:verify_dialog.list_description')}
-        onConfirm={() => {
-          if (!verifyTarget) return
-          verifyMutation.mutate(verifyTarget.id, {
-            onSettled: () => setVerifyTarget(null),
-          })
-        }}
+      <TargetedConfirmDialog
+        flow={verifyFlow}
+        i18nPrefix="providers:verify_dialog.list"
+        getName={(r) => targetName(r)}
+        onConfirm={(target) =>
+          verifyMutation.mutate(target.id, { onSettled: verifyFlow.close })
+        }
         isLoading={verifyMutation.isPending}
       />
 
-      <ConfirmDialog
-        open={!!blockTarget}
-        onOpenChange={(open) => !open && setBlockTarget(null)}
-        title={t('providers:block_dialog.title')}
-        description={t('providers:block_dialog.description')}
+      <TargetedConfirmDialog
+        flow={blockFlow}
+        i18nPrefix="providers:block_dialog"
+        getName={(r) => targetName(r)}
         confirmLabel={t('providers:actions.block')}
-        onConfirm={() => {
-          if (!blockTarget) return
-          blockMutation.mutate(blockTarget.id, {
-            onSettled: () => setBlockTarget(null),
-          })
-        }}
+        onConfirm={(target) =>
+          blockMutation.mutate(target.id, { onSettled: blockFlow.close })
+        }
         isLoading={blockMutation.isPending}
         variant="destructive"
       />
 
-      <ConfirmDialog
-        open={!!unblockTarget}
-        onOpenChange={(open) => !open && setUnblockTarget(null)}
-        title={t('providers:unblock_dialog.title')}
-        description={t('providers:unblock_dialog.description')}
+      <TargetedConfirmDialog
+        flow={unblockFlow}
+        i18nPrefix="providers:unblock_dialog"
+        getName={(r) => targetName(r)}
         confirmLabel={t('providers:actions.unblock')}
-        onConfirm={() => {
-          if (!unblockTarget) return
-          unblockMutation.mutate(unblockTarget.id, {
-            onSettled: () => setUnblockTarget(null),
-          })
-        }}
+        onConfirm={(target) =>
+          unblockMutation.mutate(target.id, { onSettled: unblockFlow.close })
+        }
         isLoading={unblockMutation.isPending}
       />
     </div>

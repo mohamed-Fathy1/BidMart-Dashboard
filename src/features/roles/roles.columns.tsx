@@ -4,6 +4,7 @@ import { Layers2, Shield } from 'lucide-react'
 import type { RoleListItem } from '@/types/api'
 import { Badge } from '@/components/ui/badge'
 import { format } from '@/lib/format'
+import { localizedName } from '@/lib/localized-name'
 import { cn } from '@/lib/utils'
 
 export function useRoleColumns(): ColumnDef<RoleListItem>[] {
@@ -13,11 +14,11 @@ export function useRoleColumns(): ColumnDef<RoleListItem>[] {
   return [
     {
       id: 'name_display',
-      accessorFn: (row) => (isAr ? row.name_ar : row.name_en),
+      accessorFn: (row) => localizedName(row, i18n),
       header: t('roles:columns.name'),
       size: 220,
       cell: ({ row }) => {
-        const primary = isAr ? row.original.name_ar : row.original.name_en
+        const primary = localizedName(row.original, i18n)
         const secondary = isAr ? row.original.name_en : row.original.name_ar
         return (
           <div className="flex min-w-40 flex-col gap-0.5 py-0.5">

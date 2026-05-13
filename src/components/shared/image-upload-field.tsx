@@ -11,6 +11,22 @@ import {
   type UploadCase,
 } from '@/lib/upload'
 
+const MIME_LABELS: Record<string, string> = {
+  'image/png': 'PNG',
+  'image/jpeg': 'JPEG',
+  'image/jpg': 'JPEG',
+  'image/webp': 'WebP',
+  'image/gif': 'GIF',
+  'image/svg+xml': 'SVG',
+}
+
+function formatAllowedTypes(types: readonly string[]): string {
+  const labels = Array.from(
+    new Set(types.map((t) => MIME_LABELS[t] ?? t.replace(/^image\//, '').toUpperCase())),
+  )
+  return labels.join(', ')
+}
+
 interface ImageUploadFieldProps {
   value: string
   onChange: (url: string) => void
@@ -37,14 +53,10 @@ export function ImageUploadField({
     async (file: File) => {
       const error = validateImageFile(file, allowedMimeTypes)
       if (error === 'invalid_type') {
-        const gifOnly =
-          allowedMimeTypes.length === 1 && allowedMimeTypes[0] === 'image/gif'
         toast.error(
-          t(
-            gifOnly
-              ? 'components:image_upload.gif_only'
-              : 'components:image_upload.invalid_type',
-          ),
+          t('components:image_upload.invalid_type', {
+            types: formatAllowedTypes(allowedMimeTypes),
+          }),
         )
         return
       }
@@ -121,7 +133,7 @@ export function ImageUploadField({
               className="size-full object-cover"
             />
           </div>
-          <div className="absolute inset-x-0 bottom-0 flex items-center justify-end gap-1.5 p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-[var(--duration-hover)] ease-[var(--ease-default)]">
+          <div className="absolute inset-x-0 bottom-0 flex items-center justify-end gap-1.5 p-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-[var(--duration-hover)] ease-[var(--ease-default)]">
             <Button
               type="button"
               variant="secondary"
@@ -156,7 +168,7 @@ export function ImageUploadField({
             'flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-muted/50 px-4 py-6 text-sm text-muted-foreground transition-colors duration-[var(--duration-hover)] ease-[var(--ease-default)]',
             'hover:bg-muted hover:border-ring/50',
             'focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
-            isDragging && 'border-ring bg-muted',
+            isDragging && 'border-2 border-primary/45 bg-primary/5 text-foreground',
             isUploading && 'pointer-events-none opacity-60',
           )}
         >

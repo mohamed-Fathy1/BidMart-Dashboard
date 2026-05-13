@@ -62,21 +62,24 @@
     "role_hint": "Choose the closest operational role; you can edit permissions under Roles."
   },
   "delete_dialog": {
-    "title": "Delete administrator",
-    "description": "Permanently removes this account and ends their sessions. You cannot undo this.",
-    "description_named": "Remove {{name}} permanently and end their sessions. You cannot undo this."
+    "title": "Delete {{name}}",
+    "description": "Remove {{name}} permanently and end their sessions. You cannot undo this."
   },
   "block_dialog": {
-    "title": "Block administrator",
-    "description": "Blocks sign-in and ends active sessions immediately until unblocked.",
-    "description_named": "{{name}} will be signed out everywhere and cannot sign in until unblocked.",
+    "title": "Block {{name}}",
+    "description": "{{name}} will be signed out everywhere and cannot sign in until unblocked.",
     "confirm": "Block"
   },
   "unblock_dialog": {
-    "title": "Unblock administrator",
-    "description": "Restores active status so they can sign in again.",
-    "description_named": "Restore access for {{name}} so they can sign in again.",
+    "title": "Unblock {{name}}",
+    "description": "Restore access for {{name}} so they can sign in again.",
     "confirm": "Unblock"
+  },
+  "empty": {
+    "no_data_title": "No administrators yet",
+    "no_data_hint": "Add the first administrator to grant dashboard access.",
+    "no_results_title": "No administrators match these filters",
+    "no_results_hint": "Try clearing the search or status filter."
   },
   "errors": {
     "generic": "Could not save the administrator.",

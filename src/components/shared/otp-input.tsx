@@ -87,7 +87,7 @@ export function OtpInput({
           onPaste={handlePaste}
           onFocus={(e) => e.target.select()}
           className={cn(
-            'size-11 rounded-md border border-input bg-transparent text-center text-lg font-semibold shadow-xs outline-none transition-[color,box-shadow]',
+            'size-11 rounded-md border border-input bg-transparent text-center text-lg font-semibold shadow-xs outline-none transition-[color,border-color,box-shadow] duration-(--duration-hover) ease-(--ease-default)',
             'focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
             'disabled:cursor-not-allowed disabled:opacity-50',
             'aria-invalid:border-destructive aria-invalid:ring-destructive/20',

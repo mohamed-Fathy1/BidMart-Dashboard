@@ -91,7 +91,7 @@ interface EmailStepProps {
 
 function EmailStep({ isPending, onSubmit }: EmailStepProps) {
   const { t } = useTranslation();
-  const form = useForm<EmailForm>({ resolver: zodResolver(emailSchema) });
+  const form = useForm<EmailForm>({ resolver: zodResolver(emailSchema), mode: "onBlur" });
 
   return (
     <>
@@ -163,7 +163,7 @@ function ResetStep({
   onBack,
 }: ResetStepProps) {
   const { t } = useTranslation();
-  const form = useForm<ResetForm>({ resolver: zodResolver(resetSchema) });
+  const form = useForm<ResetForm>({ resolver: zodResolver(resetSchema), mode: "onBlur" });
 
   return (
     <>

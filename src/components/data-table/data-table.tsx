@@ -50,7 +50,7 @@ import { cn } from '@/lib/utils'
 /*  Row action types                                                   */
 /* ------------------------------------------------------------------ */
 
-interface RowAction<TData> {
+export interface RowAction<TData> {
   label: string
   icon?: ElementType
   onClick: (row: TData) => void
@@ -58,11 +58,11 @@ interface RowAction<TData> {
   disabled?: boolean
 }
 
-interface RowActionSeparator {
+export interface RowActionSeparator {
   type: 'separator'
 }
 
-type RowActionItem<TData> = RowAction<TData> | RowActionSeparator
+export type RowActionItem<TData> = RowAction<TData> | RowActionSeparator
 
 function isActionSeparator<TData>(item: RowActionItem<TData>): item is RowActionSeparator {
   return 'type' in item && item.type === 'separator'
@@ -72,17 +72,24 @@ function isActionSeparator<TData>(item: RowActionItem<TData>): item is RowAction
 /*  Row actions cell                                                   */
 /* ------------------------------------------------------------------ */
 
-function RowActionsCell<TData>({
+export function RowActionsCell<TData>({
   row,
   actions,
+  rowLabel,
 }: {
   row: Row<TData>
   actions: (row: TData) => RowActionItem<TData>[]
+  rowLabel?: (row: TData) => string
 }) {
   const { t } = useTranslation()
   const items = actions(row.original)
 
   if (items.length === 0) return null
+
+  const label = rowLabel?.(row.original)
+  const ariaLabel = label
+    ? t('components:data_table.row_actions_for', { name: label })
+    : t('components:data_table.row_actions')
 
   return (
     <div onClick={(e) => e.stopPropagation()} className="flex items-center justify-center">
@@ -91,7 +98,7 @@ function RowActionsCell<TData>({
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={t('components:data_table.row_actions')}
+            aria-label={ariaLabel}
           >
             <EllipsisVertical className="size-4" />
           </Button>
@@ -149,11 +156,31 @@ interface DataTableProps<TData, TValue> {
   /** Adds a sticky kebab-menu column on the inline-end edge. */
   actions?: (row: TData) => RowActionItem<TData>[]
 
+  /** Provides a per-row label so the action-menu trigger announces context to screen readers. */
+  rowLabel?: (row: TData) => string
+
   /** Maps each row to a stable ID (for selection across pages). */
   getRowId?: (row: TData) => string
 
   /** Called when a data cell (not checkbox/actions) is clicked. */
   onRowClick?: (row: TData) => void
+
+  /**
+   * When true, the empty state copy reflects "no results from current filters"
+   * and (if `onClearFilters` is provided) renders a Clear filters CTA.
+   * When false / omitted, the empty state reflects "no records yet".
+   */
+  hasActiveFilters?: boolean
+  onClearFilters?: () => void
+
+  /**
+   * i18n namespace prefix for the empty-state copy. Defaults to the generic
+   * `components:data_table`. Pass a feature prefix (e.g. `users:empty`) to use
+   * per-surface copy that names the resource ("No users yet" vs the generic
+   * "No records yet"). The prefix must expose four keys:
+   * `no_data_title`, `no_data_hint`, `no_results_title`, `no_results_hint`.
+   */
+  emptyKeyPrefix?: string
 }
 
 const defaultPageSizeOptions = [10, 25, 50]
@@ -174,8 +201,12 @@ export function DataTable<TData, TValue>({
   rowSelection,
   onRowSelectionChange,
   actions,
+  rowLabel,
   getRowId,
   onRowClick,
+  hasActiveFilters = false,
+  onClearFilters,
+  emptyKeyPrefix = 'components:data_table',
 }: DataTableProps<TData, TValue>) {
   const { t } = useTranslation()
 
@@ -224,7 +255,7 @@ export function DataTable<TData, TValue>({
       cols.push({
         id: 'actions',
         header: () => null,
-        cell: ({ row }) => <RowActionsCell row={row} actions={actions} />,
+        cell: ({ row }) => <RowActionsCell row={row} actions={actions} rowLabel={rowLabel} />,
         size: 48,
         enableSorting: false,
         enableHiding: false,
@@ -232,7 +263,7 @@ export function DataTable<TData, TValue>({
     }
 
     return cols
-  }, [columns, hasSelect, hasActions, actions, t])
+  }, [columns, hasSelect, hasActions, actions, rowLabel, t])
 
   /* ---------- table instance ---------- */
 
@@ -309,7 +340,7 @@ export function DataTable<TData, TValue>({
       {toolbar && <div>{toolbar}</div>}
 
       {selectedCount > 0 && (
-        <div className="flex items-center justify-between gap-3 rounded-[var(--radius-md)] border border-primary/20 bg-primary/5 px-3 py-2">
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
           <span className="text-sm font-medium text-foreground">
             {t('components:data_table.selected', { count: selectedCount })}
           </span>
@@ -337,28 +368,41 @@ export function DataTable<TData, TValue>({
           <TableHeader className={cn('sticky top-0 bg-card', hasStickyColumns && '[&_tr]:border-b-0')}>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className={hasStickyColumns ? 'border-b-0' : undefined}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    className={cn(
-                      'h-12',
-                      getHeadSticky(header.column.id),
-                      getWidthClass(header.column.id),
-                      hasStickyColumns && 'border-b border-border',
-                    )}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
+                {headerGroup.headers.map((header) => {
+                  const canSort = header.column.getCanSort()
+                  const sortDir = header.column.getIsSorted()
+                  const ariaSort =
+                    !canSort || header.column.id === 'select' || header.column.id === 'actions'
+                      ? undefined
+                      : sortDir === 'asc'
+                        ? 'ascending'
+                        : sortDir === 'desc'
+                          ? 'descending'
+                          : 'none'
+                  return (
+                    <TableHead
+                      key={header.id}
+                      aria-sort={ariaSort as React.AriaAttributes['aria-sort']}
+                      className={cn(
+                        'h-12',
+                        getHeadSticky(header.column.id),
+                        getWidthClass(header.column.id),
+                        hasStickyColumns && 'border-b border-border',
+                      )}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  )
+                })}
               </TableRow>
             ))}
           </TableHeader>
 
           <TableBody className={hasStickyColumns ? '[&_tr:last-child]:border-0' : undefined}>
             {isLoading ? (
-              Array.from({ length: 5 }).map((_, i) => (
+              Array.from({ length: Math.min(5, pagination?.pageSize ?? 5) }).map((_, i) => (
                 <TableRow key={i} className={hasStickyColumns ? 'border-b-0' : undefined}>
                   {allColumns.map((col, j) => {
                     const colId = 'id' in col ? (col.id ?? '') : ''
@@ -394,10 +438,23 @@ export function DataTable<TData, TValue>({
                     className={cn(
                       'group/row h-[var(--table-row-height)]',
                       hasStickyColumns && 'border-b-0',
-                      onRowClick && 'cursor-pointer',
+                      onRowClick &&
+                        'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/60',
                       isSelected && 'bg-primary/5',
                     )}
                     onClick={() => onRowClick?.(row.original)}
+                    {...(onRowClick
+                      ? {
+                          tabIndex: 0,
+                          role: 'button',
+                          onKeyDown: (e: React.KeyboardEvent<HTMLTableRowElement>) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault()
+                              onRowClick(row.original)
+                            }
+                          },
+                        }
+                      : {})}
                     data-state={isSelected ? 'selected' : undefined}
                   >
                     {row.getVisibleCells().map((cell) => (
@@ -426,11 +483,26 @@ export function DataTable<TData, TValue>({
                       <Inbox className="size-5" />
                     </div>
                     <p className="text-sm font-medium text-foreground">
-                      {t('common:states.no_results')}
+                      {hasActiveFilters
+                        ? t(`${emptyKeyPrefix}.no_results_title`)
+                        : t(`${emptyKeyPrefix}.no_data_title`)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {t('components:data_table.empty_hint')}
+                      {hasActiveFilters
+                        ? t(`${emptyKeyPrefix}.no_results_hint`)
+                        : t(`${emptyKeyPrefix}.no_data_hint`)}
                     </p>
+                    {hasActiveFilters && onClearFilters && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="mt-2"
+                        onClick={onClearFilters}
+                      >
+                        {t('common:buttons.clear_filters')}
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
@@ -526,4 +598,3 @@ export function DataTable<TData, TValue>({
   )
 }
 
-export type { RowAction, RowActionSeparator, RowActionItem }

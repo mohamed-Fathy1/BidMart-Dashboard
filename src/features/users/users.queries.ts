@@ -1,7 +1,6 @@
-import axios from 'axios'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
+import { createResourceKeys } from '@/lib/query-keys'
+import { useResourceMutation } from '@/lib/use-resource-mutation'
 import {
   listUsers,
   getUserDetail,
@@ -12,29 +11,7 @@ import {
   type ListUsersParams,
 } from '@/features/users/users.api'
 
-function extractMutationError(error: unknown): string | undefined {
-  if (axios.isAxiosError(error)) {
-    const data = error.response?.data as { message?: string } | undefined
-    return typeof data?.message === 'string' ? data.message : undefined
-  }
-  if (typeof error === 'object' && error !== null && 'message' in error) {
-    const m = (error as { message: unknown }).message
-    return typeof m === 'string' ? m : undefined
-  }
-  return undefined
-}
-
-/* ------------------------------------------------------------------ */
-/*  Query keys                                                         */
-/* ------------------------------------------------------------------ */
-
-export const userKeys = {
-  all: ['users'] as const,
-  lists: () => [...userKeys.all, 'list'] as const,
-  list: (params: ListUsersParams) => [...userKeys.lists(), params] as const,
-  details: () => [...userKeys.all, 'detail'] as const,
-  detail: (id: string) => [...userKeys.details(), id] as const,
-}
+export const userKeys = createResourceKeys<ListUsersParams>('users')
 
 /* ------------------------------------------------------------------ */
 /*  Queries                                                            */
@@ -60,71 +37,39 @@ export function useUserDetailQuery(userId: string) {
 /* ------------------------------------------------------------------ */
 
 export function useBanUserMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: ({ userId, reason }: { userId: string; reason: string }) =>
       banUser(userId, reason),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.all })
-      toast.success(t('users:actions.ban_success'))
-    },
-    onError: (error) => {
-      const msg = extractMutationError(error)
-      toast.error(msg ?? t('users:errors.ban_failed'))
-    },
+    invalidate: [userKeys.all],
+    successKey: 'users:actions.ban_success',
+    errorKey: 'users:errors.ban_failed',
   })
 }
 
 export function useSuspendUserMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: ({ userId, reason }: { userId: string; reason: string }) =>
       suspendUser(userId, reason),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.all })
-      toast.success(t('users:actions.suspend_success'))
-    },
-    onError: (error) => {
-      const msg = extractMutationError(error)
-      toast.error(msg ?? t('users:errors.suspend_failed'))
-    },
+    invalidate: [userKeys.all],
+    successKey: 'users:actions.suspend_success',
+    errorKey: 'users:errors.suspend_failed',
   })
 }
 
 export function useActivateUserMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (userId: string) => activateUser(userId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.all })
-      toast.success(t('users:actions.activate_success'))
-    },
-    onError: (error) => {
-      const msg = extractMutationError(error)
-      toast.error(msg ?? t('users:errors.activate_failed'))
-    },
+    invalidate: [userKeys.all],
+    successKey: 'users:actions.activate_success',
+    errorKey: 'users:errors.activate_failed',
   })
 }
 
 export function useDeleteUserMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (userId: string) => deleteUser(userId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.all })
-      toast.success(t('users:actions.delete_success'))
-    },
-    onError: (error) => {
-      const msg = extractMutationError(error)
-      toast.error(msg ?? t('users:errors.delete_failed'))
-    },
+    invalidate: [userKeys.all],
+    successKey: 'users:actions.delete_success',
+    errorKey: 'users:errors.delete_failed',
   })
 }

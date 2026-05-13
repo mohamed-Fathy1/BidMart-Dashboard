@@ -14,7 +14,15 @@ export function Providers() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <RouterProvider router={router} context={{ auth: { token, permissions } }} />
-        <Toaster position="top-center" closeButton />
+        <Toaster
+          position="top-center"
+          closeButton
+          duration={3500}
+          visibleToasts={4}
+          toastOptions={{
+            classNames: { error: 'border-destructive/40 bg-destructive/5' },
+          }}
+        />
       </TooltipProvider>
     </QueryClientProvider>
   )

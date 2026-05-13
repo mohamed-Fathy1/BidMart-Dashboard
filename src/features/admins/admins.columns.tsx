@@ -5,6 +5,7 @@ import type { AdminAccountListItem } from '@/types/api'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { format } from '@/lib/format'
+import { localizedName } from '@/lib/localized-name'
 
 export function useAdminColumns(): ColumnDef<AdminAccountListItem>[] {
   const { t, i18n } = useTranslation()
@@ -46,11 +47,10 @@ export function useAdminColumns(): ColumnDef<AdminAccountListItem>[] {
     },
     {
       id: 'role',
-      accessorFn: (row) => (i18n.language === 'ar' ? row.role.name_ar : row.role.name_en),
+      accessorFn: (row) => localizedName(row.role, i18n),
       header: t('admins:columns.role'),
       cell: ({ row }) => {
-        const label =
-          i18n.language === 'ar' ? row.original.role.name_ar : row.original.role.name_en
+        const label = localizedName(row.original.role, i18n)
         return (
           <Badge
             variant="outline"

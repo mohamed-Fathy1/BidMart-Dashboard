@@ -1,9 +1,12 @@
 import { api } from '@/lib/axios'
-import type {
-  PaginationMeta,
-  RoleDetail,
-  RoleListItem,
-  RolePermissionModule,
+import {
+  unwrap,
+  unwrapPaginated,
+  type ApiEnvelope,
+  type Paginated,
+  type RoleDetail,
+  type RoleListItem,
+  type RolePermissionModule,
 } from '@/types/api'
 
 /* ------------------------------------------------------------------ */
@@ -132,22 +135,14 @@ function extractRoleDetailFromHttpBody(body: unknown, roleIdHint: string): RoleD
 
 export async function listRoles(
   params: ListRolesParams,
-): Promise<{ data: RoleListItem[]; meta: PaginationMeta }> {
-  const res = await api.get<{
-    success?: boolean
-    data: RoleListItem[]
-    meta: PaginationMeta
-  }>('/admin/roles', { params })
-  const body = res.data
-  return { data: body.data, meta: body.meta }
+): Promise<Paginated<RoleListItem>> {
+  const res = await api.get<ApiEnvelope<RoleListItem[]>>('/admin/roles', { params })
+  return unwrapPaginated(res.data)
 }
 
 export async function getRolePermissionModules(): Promise<RolePermissionModule[]> {
-  const res = await api.get<{
-    success?: boolean
-    data: RolePermissionModule[]
-  }>('/admin/roles/permissions')
-  return res.data.data
+  const res = await api.get<ApiEnvelope<RolePermissionModule[]>>('/admin/roles/permissions')
+  return unwrap(res.data)
 }
 
 export async function getRole(roleId: string): Promise<RoleDetail> {

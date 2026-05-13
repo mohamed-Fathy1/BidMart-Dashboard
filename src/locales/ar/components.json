@@ -41,7 +41,8 @@
   "reason_dialog": {
     "reason_label": "السبب",
     "reason_placeholder": "اذكر السبب...",
-    "reason_required": "السبب مطلوب"
+    "reason_required": "السبب مطلوب",
+    "counter": "{{current}} / {{max}}"
   },
   "form_dialog": {
     "cancel": "إلغاء",
@@ -69,13 +70,22 @@
     "increase": "زيادة",
     "decrease": "انخفاض"
   },
+  "risk": {
+    "low": "منخفض",
+    "medium": "متوسط",
+    "high": "مرتفع"
+  },
+  "priority": {
+    "low": "منخفضة",
+    "medium": "متوسطة",
+    "high": "عالية"
+  },
   "image_upload": {
     "drop_or_click": "اسحب صورة هنا أو انقر للاختيار",
     "uploading": "جاري الرفع...",
     "remove": "إزالة",
     "change": "تغيير",
-    "invalid_type": "يُسمح فقط بصور PNG و JPG و WebP",
-    "gif_only": "يُسمح فقط بصور GIF",
+    "invalid_type": "يُسمح فقط بملفات {{types}}",
     "too_large": "يجب أن يكون حجم الملف أقل من 5 ميغابايت",
     "upload_failed": "فشل الرفع. حاول مرة أخرى."
   },
@@ -83,7 +93,12 @@
     "select_all": "تحديد الكل",
     "select_row": "تحديد الصف",
     "row_actions": "إجراءات الصف",
+    "row_actions_for": "إجراءات لـ {{name}}",
     "selected": "{{count}} محدد",
-    "empty_hint": "جرّب تعديل المرشحات أو البحث."
+    "empty_hint": "جرّب تعديل المرشحات أو البحث.",
+    "no_data_title": "لا توجد سجلات بعد",
+    "no_data_hint": "ستظهر هنا فور إضافتها.",
+    "no_results_title": "لا توجد نتائج مطابقة لهذه المرشحات",
+    "no_results_hint": "جرّب مسح البحث أو المرشحات."
   }
 }

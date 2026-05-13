@@ -1,11 +1,6 @@
-import axios from 'axios'
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query'
-import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
+import { useQuery } from '@tanstack/react-query'
+import { createResourceKeys } from '@/lib/query-keys'
+import { useResourceMutation } from '@/lib/use-resource-mutation'
 import {
   blockAdmin,
   createAdmin,
@@ -18,23 +13,7 @@ import {
   type UpdateAdminPayload,
 } from '@/features/admins/admins.api'
 
-export const adminKeys = {
-  all: ['admins'] as const,
-  lists: () => [...adminKeys.all, 'list'] as const,
-  list: (params: ListAdminsParams) => [...adminKeys.lists(), params] as const,
-}
-
-function extractMutationError(error: unknown): string | undefined {
-  if (axios.isAxiosError(error)) {
-    const data = error.response?.data as { message?: string } | undefined
-    return typeof data?.message === 'string' ? data.message : undefined
-  }
-  if (typeof error === 'object' && error !== null && 'message' in error) {
-    const m = (error as { message: unknown }).message
-    return typeof m === 'string' ? m : undefined
-  }
-  return undefined
-}
+export const adminKeys = createResourceKeys<ListAdminsParams>('admins')
 
 export function useAdminsQuery(params: ListAdminsParams) {
   return useQuery({
@@ -44,87 +23,47 @@ export function useAdminsQuery(params: ListAdminsParams) {
 }
 
 export function useCreateAdminMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (payload: CreateAdminPayload) => createAdmin(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.all })
-      toast.success(t('admins:actions.create_success'))
-    },
-    onError: (error: unknown) => {
-      toast.error(extractMutationError(error) ?? t('admins:errors.generic'))
-    },
+    invalidate: [adminKeys.all],
+    successKey: 'admins:actions.create_success',
+    errorKey: 'admins:errors.generic',
   })
 }
 
 export function useUpdateAdminMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
-    mutationFn: ({
-      id,
-      payload,
-    }: {
-      id: string
-      payload: UpdateAdminPayload
-    }) => updateAdmin(id, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.all })
-      toast.success(t('admins:actions.update_success'))
-    },
-    onError: (error: unknown) => {
-      toast.error(extractMutationError(error) ?? t('admins:errors.generic'))
-    },
+  return useResourceMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateAdminPayload }) =>
+      updateAdmin(id, payload),
+    invalidate: [adminKeys.all],
+    successKey: 'admins:actions.update_success',
+    errorKey: 'admins:errors.generic',
   })
 }
 
 export function useDeleteAdminMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (adminId: string) => deleteAdmin(adminId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.all })
-      toast.success(t('admins:actions.delete_success'))
-    },
-    onError: (error: unknown) => {
-      toast.error(extractMutationError(error) ?? t('admins:errors.delete_failed'))
-    },
+    invalidate: [adminKeys.all],
+    successKey: 'admins:actions.delete_success',
+    errorKey: 'admins:errors.delete_failed',
   })
 }
 
 export function useBlockAdminMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (adminId: string) => blockAdmin(adminId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.all })
-      toast.success(t('admins:actions.block_success'))
-    },
-    onError: (error: unknown) => {
-      toast.error(extractMutationError(error) ?? t('admins:errors.block_failed'))
-    },
+    invalidate: [adminKeys.all],
+    successKey: 'admins:actions.block_success',
+    errorKey: 'admins:errors.block_failed',
   })
 }
 
 export function useUnblockAdminMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (adminId: string) => unblockAdmin(adminId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.all })
-      toast.success(t('admins:actions.unblock_success'))
-    },
-    onError: (error: unknown) => {
-      toast.error(extractMutationError(error) ?? t('admins:errors.unblock_failed'))
-    },
+    invalidate: [adminKeys.all],
+    successKey: 'admins:actions.unblock_success',
+    errorKey: 'admins:errors.unblock_failed',
   })
 }

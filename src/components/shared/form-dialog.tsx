@@ -43,6 +43,11 @@ interface FormDialogProps {
    * so the primary focus ring does not appear on one field only before the user interacts.
    */
   suppressInitialFocus?: boolean
+  /**
+   * Optional inline error rendered between the form body and the footer (e.g. server
+   * validation failure). Use this instead of building per-form alert chrome.
+   */
+  errorMessage?: ReactNode
 }
 
 export function FormDialog({
@@ -60,6 +65,7 @@ export function FormDialog({
   contentClassName,
   bodyClassName,
   suppressInitialFocus = false,
+  errorMessage,
 }: FormDialogProps) {
   const { t } = useTranslation()
 
@@ -87,7 +93,9 @@ export function FormDialog({
         }}
       >
         <DialogHeader className="border-b border-border/60 px-6 py-5 pe-12">
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 focus-visible:ring-offset-card">
+            {title}
+          </DialogTitle>
           {description && (
             <DialogDescription className="leading-relaxed">
               {description}
@@ -101,6 +109,14 @@ export function FormDialog({
           }}
           className="grid min-h-0"
         >
+          {errorMessage && (
+            <div
+              role="alert"
+              className="border-b border-destructive/30 bg-destructive/5 px-6 py-3 text-sm text-destructive"
+            >
+              {errorMessage}
+            </div>
+          )}
           <div
             className={cn(
               'max-h-[min(70vh,580px)] overflow-y-auto px-6 py-5 [scrollbar-gutter:stable]',

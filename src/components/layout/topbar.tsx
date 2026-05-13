@@ -24,6 +24,8 @@ import {
   CommandPalette,
   useCommandPaletteHotkey,
 } from '@/components/layout/command-palette'
+import { NotificationsPopoverContent } from '@/features/notifications/notifications-popover-content'
+import { NOTIFICATIONS } from '@/features/notifications/notifications.mock'
 import { accountInitials, cn } from '@/lib/utils'
 import { useUIStore } from '@/features/ui/ui.store'
 import { useAuthStore } from '@/features/auth/auth.store'
@@ -91,6 +93,17 @@ export function Topbar() {
           </kbd>
         </button>
 
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={() => setPaletteOpen(true)}
+          aria-label={t('shell:topbar.search')}
+          className="md:hidden"
+        >
+          <Search className="h-4 w-4" />
+        </Button>
+
         <div className="flex shrink-0 items-center gap-1">
           <LangSwitcher />
           <Separator orientation="vertical" className="mx-1 h-5" />
@@ -101,25 +114,19 @@ export function Topbar() {
                 variant="ghost"
                 size="icon"
                 aria-label={t('shell:topbar.notifications')}
+                className="relative"
               >
                 <Bell className="h-4 w-4" />
+                {NOTIFICATIONS.length > 0 && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute top-1.5 end-1.5 size-1.5 rounded-full bg-destructive"
+                  />
+                )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-80 p-0">
-              <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                <span className="text-sm font-medium text-foreground">
-                  {t('shell:topbar.notifications')}
-                </span>
-              </div>
-              <div className="flex flex-col items-center justify-center gap-2 px-4 py-10 text-center">
-                <Bell className="h-8 w-8 text-muted-foreground/40" />
-                <p className="text-sm font-medium text-foreground">
-                  {t('shell:topbar.notifications_empty')}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {t('shell:topbar.notifications_empty_hint')}
-                </p>
-              </div>
+            <PopoverContent align="end" className="w-96 overflow-hidden p-0">
+              <NotificationsPopoverContent />
             </PopoverContent>
           </Popover>
 

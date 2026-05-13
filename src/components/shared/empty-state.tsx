@@ -24,8 +24,8 @@ export function EmptyState({ icon: Icon, title, message, actionLabel, onAction, 
       )}
     >
       {Icon && (
-        <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground/70">
-          <Icon className="size-5" />
+        <div className="flex size-9 items-center justify-center rounded-full bg-muted text-muted-foreground/70">
+          <Icon className="size-[18px]" />
         </div>
       )}
       <div className="space-y-1">

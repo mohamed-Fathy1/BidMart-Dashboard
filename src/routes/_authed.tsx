@@ -1,4 +1,5 @@
-import { createFileRoute, redirect, Outlet } from '@tanstack/react-router'
+import { useEffect } from 'react'
+import { createFileRoute, redirect, useNavigate, Outlet } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Shell } from '@/components/layout/shell'
 import { useMeQuery } from '@/features/auth/auth.queries'
@@ -17,9 +18,18 @@ export const Route = createFileRoute('/_authed')({
 
 function AuthedLayout() {
   const status = useAuthStore((s) => s.status)
-  const { isLoading } = useMeQuery()
+  const navigate = useNavigate()
+  useMeQuery()
 
-  if (isLoading || status === 'idle' || status === 'loading') {
+  // If the profile query failed and cleared the session, get the user back to login
+  // before any child route fires a request with no token.
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      navigate({ to: '/login', replace: true })
+    }
+  }, [status, navigate])
+
+  if (status !== 'authenticated') {
     return (
       <Shell>
         <div className="space-y-4 p-6">

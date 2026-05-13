@@ -37,6 +37,7 @@ function LoginPage() {
     formState: { errors },
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
+    mode: "onBlur",
     defaultValues: { email: "", password: "", rememberMe: false },
   });
 

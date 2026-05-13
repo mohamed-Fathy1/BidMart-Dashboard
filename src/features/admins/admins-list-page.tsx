@@ -1,10 +1,31 @@
 import { useMemo, useState } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { useQuery } from '@tanstack/react-query'
+import { getRouteApi } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
 import { Ban, Plus, Pencil, Shield, Trash2, Unlock, User } from 'lucide-react'
-import type { PaginationState } from '@tanstack/react-table'
 import type { AdminAccountListItem } from '@/types/api'
+import { useUrlListState } from '@/lib/use-url-list-state'
+import { useListPageData } from '@/lib/use-list-page-data'
+import { useConfirmTarget } from '@/lib/use-confirm-target'
+import type { AdminsSearch } from '@/routes/_authed.admins'
+
+const adminsRoute = getRouteApi('/_authed/admins')
+
+const adminFormSchema = z.object({
+  fullName: z.string().trim().min(1, { message: 'admins:errors.validation_name' }),
+  email: z
+    .string()
+    .trim()
+    .min(1, { message: 'admins:errors.validation_email' })
+    .email({ message: 'admins:errors.validation_email' }),
+  phone: z.string().trim(),
+  roleId: z.string().trim().min(1, { message: 'admins:errors.validation_role' }),
+})
+
+type AdminFormValues = z.infer<typeof adminFormSchema>
 import { PageHeader } from '@/components/shared/page-header'
 import { TableFiltersShell } from '@/components/shared/table-filters-shell'
 import { SearchInput } from '@/components/shared/search-input'
@@ -13,7 +34,7 @@ import {
   DataTable,
   type RowActionItem,
 } from '@/components/data-table/data-table'
-import { ConfirmDialog } from '@/components/shared/confirm-dialog'
+import { TargetedConfirmDialog } from '@/components/shared/targeted-confirm-dialog'
 import { FormDialog } from '@/components/shared/form-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -41,6 +62,7 @@ import {
   useUnblockAdminMutation,
 } from '@/features/admins/admins.queries'
 import { format } from '@/lib/format'
+import { localizedName } from '@/lib/localized-name'
 
 export function AdminsListPage() {
   const { t, i18n } = useTranslation()
@@ -49,32 +71,33 @@ export function AdminsListPage() {
   const canUpdate = usePermission(PERMISSIONS.admins.update)
   const canDelete = usePermission(PERMISSIONS.admins.delete)
 
-  const [search, setSearch] = useState('')
-  const [activeFilter, setActiveFilter] = useState('')
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  })
+  const { search, searchValue, pagination, setPagination, setSearch, setFilter } =
+    useUrlListState<AdminsSearch>({ route: adminsRoute })
+  const activeFilter =
+    search.isActive === true ? 'true' : search.isActive === false ? 'false' : ''
 
   const [formOpen, setFormOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<AdminAccountListItem | null>(null)
-  const [deleteTarget, setDeleteTarget] = useState<AdminAccountListItem | null>(null)
-  const [blockTarget, setBlockTarget] = useState<AdminAccountListItem | null>(null)
-  const [unblockTarget, setUnblockTarget] = useState<AdminAccountListItem | null>(null)
+  const deleteFlow = useConfirmTarget<AdminAccountListItem>()
+  const blockFlow = useConfirmTarget<AdminAccountListItem>()
+  const unblockFlow = useConfirmTarget<AdminAccountListItem>()
 
-  const [fullName, setFullName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [email, setEmail] = useState('')
-  const [roleId, setRoleId] = useState('')
+  const form = useForm<AdminFormValues>({
+    resolver: zodResolver(adminFormSchema),
+    mode: 'onBlur',
+    defaultValues: { fullName: '', email: '', phone: '', roleId: '' },
+  })
+  const {
+    register,
+    control,
+    handleSubmit: rhfHandleSubmit,
+    reset,
+    formState: { errors },
+  } = form
 
   const { data: response, isLoading } = useAdminsQuery({
-    search: search || undefined,
-    isActive:
-      activeFilter === 'true'
-        ? true
-        : activeFilter === 'false'
-          ? false
-          : undefined,
+    search: searchValue || undefined,
+    isActive: search.isActive,
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
   })
@@ -88,8 +111,18 @@ export function AdminsListPage() {
 
   const roles = rolesPage?.data ?? []
 
-  const data = response?.data ?? []
-  const meta = response?.meta
+  const hasActiveFilters = searchValue !== '' || activeFilter !== ''
+  const { rows, meta, tableProps } = useListPageData({
+    response,
+    isLoading,
+    pagination,
+    setPagination,
+    hasActiveFilters,
+    clearFilters: () => {
+      setSearch('')
+      setFilter('isActive', undefined)
+    },
+  })
 
   const columns = useAdminColumns()
 
@@ -101,83 +134,65 @@ export function AdminsListPage() {
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending
 
-  function resetForm() {
-    setFullName('')
-    setPhone('')
-    setEmail('')
-    setRoleId('')
-  }
-
   function openCreate() {
-    resetForm()
+    reset({ fullName: '', email: '', phone: '', roleId: '' })
     setEditTarget(null)
     setFormOpen(true)
   }
 
   function openEdit(row: AdminAccountListItem) {
     if (row.isSuperAdmin && row.id !== currentUserId) return
-    setFullName(row.fullName)
-    setPhone(row.phone ?? '')
-    setEmail(row.email)
-    setRoleId(row.role.id)
+    reset({
+      fullName: row.fullName,
+      email: row.email,
+      phone: row.phone ?? '',
+      roleId: row.role.id,
+    })
     setEditTarget(row)
     setFormOpen(true)
   }
 
-  function handleSubmit() {
-    const nameTrim = fullName.trim()
-    const emailTrim = email.trim()
-    const phoneTrim = phone.trim()
+  function closeForm() {
+    setFormOpen(false)
+    setEditTarget(null)
+    reset({ fullName: '', email: '', phone: '', roleId: '' })
+  }
 
-    if (!nameTrim) {
-      toast.error(t('admins:errors.validation_name'))
-      return
-    }
-    if (!emailTrim) {
-      toast.error(t('admins:errors.validation_email'))
-      return
-    }
-    if (!roleId) {
-      toast.error(t('admins:errors.validation_role'))
-      return
-    }
-
-    const phonePayload = phoneTrim ? phoneTrim : undefined
-
+  const onSubmit = (values: AdminFormValues) => {
+    const phonePayload = values.phone.trim() ? values.phone.trim() : undefined
     if (editTarget) {
       updateMutation.mutate(
         {
           id: editTarget.id,
           payload: {
-            fullName: nameTrim,
+            fullName: values.fullName,
             phone: phonePayload ?? null,
-            email: emailTrim,
-            roleId,
+            email: values.email,
+            roleId: values.roleId,
           },
         },
-        {
-          onSuccess: () => {
-            setFormOpen(false)
-            setEditTarget(null)
-          },
-        },
+        { onSuccess: closeForm },
       )
     } else {
       createMutation.mutate(
         {
-          fullName: nameTrim,
-          email: emailTrim,
-          roleId,
+          fullName: values.fullName,
+          email: values.email,
+          roleId: values.roleId,
           ...(phonePayload ? { phone: phonePayload } : {}),
         },
-        {
-          onSuccess: () => {
-            setFormOpen(false)
-          },
-        },
+        { onSuccess: closeForm },
       )
     }
   }
+
+  const firstErrorKey = (
+    ['fullName', 'email', 'phone', 'roleId'] as const
+  ).find((k) => errors[k]?.message)
+  const firstErrorMessage =
+    firstErrorKey && typeof errors[firstErrorKey]?.message === 'string'
+      ? t(errors[firstErrorKey]!.message as string)
+      : undefined
 
   const activeFilterOptions = useMemo(
     () => [
@@ -213,7 +228,7 @@ export function AdminsListPage() {
       items.push({
         label: t('admins:actions.block'),
         icon: Ban,
-        onClick: (r) => setBlockTarget(r),
+        onClick: (r) => blockFlow.ask(r),
         variant: 'destructive',
       })
     }
@@ -227,7 +242,7 @@ export function AdminsListPage() {
       items.push({
         label: t('admins:actions.unblock'),
         icon: Unlock,
-        onClick: (r) => setUnblockTarget(r),
+        onClick: (r) => unblockFlow.ask(r),
       })
     }
 
@@ -237,7 +252,7 @@ export function AdminsListPage() {
         {
           label: t('admins:actions.delete'),
           icon: Trash2,
-          onClick: (r) => setDeleteTarget(r),
+          onClick: (r) => deleteFlow.ask(r),
           variant: 'destructive',
         },
       )
@@ -257,20 +272,16 @@ export function AdminsListPage() {
       }
     >
       <SearchInput
-        value={search}
-        onChange={(v) => {
-          setSearch(v)
-          setPagination((p) => ({ ...p, pageIndex: 0 }))
-        }}
+        value={searchValue}
+        onChange={(v) => setSearch(v)}
         placeholder={t('admins:search_placeholder')}
         className="w-full min-w-[min(100%,220px)] sm:w-72"
       />
       <FilterSelect
         value={activeFilter}
-        onChange={(v) => {
-          setActiveFilter(v)
-          setPagination((p) => ({ ...p, pageIndex: 0 }))
-        }}
+        onChange={(v) =>
+          setFilter('isActive', v === 'true' ? true : v === 'false' ? false : undefined)
+        }
         options={activeFilterOptions}
         placeholder={t('admins:filters.status')}
         className="min-w-[148px]"
@@ -297,24 +308,19 @@ export function AdminsListPage() {
 
       <DataTable
         columns={columns}
-        data={data}
-        pageCount={meta?.totalPages}
-        totalRecords={meta?.total}
-        pagination={pagination}
-        onPaginationChange={setPagination}
-        isLoading={isLoading}
+        data={rows}
+        {...tableProps}
+        emptyKeyPrefix="admins:empty"
         toolbar={toolbar}
         actions={showRowActions ? getRowActions : undefined}
+        rowLabel={(row) => row.fullName || row.email}
         getRowId={(row) => row.id}
       />
 
       <FormDialog
         open={formOpen}
         onOpenChange={(open) => {
-          if (!open) {
-            setFormOpen(false)
-            setEditTarget(null)
-          }
+          if (!open) closeForm()
         }}
         title={
           editTarget ? t('admins:form.edit_title') : t('admins:form.create_title')
@@ -325,7 +331,8 @@ export function AdminsListPage() {
         isEdit={!!editTarget}
         isLoading={isSubmitting}
         submitDisabled={!editTarget && (rolesLoading || roles.length === 0)}
-        onSubmit={() => handleSubmit()}
+        onSubmit={rhfHandleSubmit(onSubmit)}
+        errorMessage={firstErrorMessage}
         size="md"
         suppressInitialFocus
       >
@@ -353,11 +360,11 @@ export function AdminsListPage() {
                 <Label htmlFor="admin-full-name">{t('admins:form.full_name')}</Label>
                 <Input
                   id="admin-full-name"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
+                  {...register('fullName')}
                   placeholder={t('admins:form.full_name_placeholder')}
                   autoComplete="name"
                   className="h-10"
+                  aria-invalid={errors.fullName ? true : undefined}
                 />
               </div>
               <div className="grid gap-2">
@@ -365,19 +372,18 @@ export function AdminsListPage() {
                 <Input
                   id="admin-email"
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  {...register('email')}
                   placeholder={t('admins:form.email_placeholder')}
                   autoComplete="email"
                   className="h-10"
+                  aria-invalid={errors.email ? true : undefined}
                 />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="admin-phone">{t('admins:form.phone')}</Label>
                 <Input
                   id="admin-phone"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  {...register('phone')}
                   placeholder={t('admins:form.phone_placeholder')}
                   dir="ltr"
                   className="h-10 font-mono tabular-nums"
@@ -426,18 +432,32 @@ export function AdminsListPage() {
                   <p className="text-sm text-muted-foreground">{t('admins:form.empty_roles')}</p>
                 </div>
               ) : (
-                <Select value={roleId || undefined} onValueChange={setRoleId}>
-                  <SelectTrigger id="admin-role-trigger" data-slot="admin-role-select" className="h-10 w-full bg-card">
-                    <SelectValue placeholder={t('admins:form.role_placeholder')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roles.map((r) => (
-                      <SelectItem key={r.id} value={r.id}>
-                        {i18n.language === 'ar' ? r.name_ar : r.name_en}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Controller
+                  name="roleId"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      value={field.value || undefined}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger
+                        id="admin-role-trigger"
+                        data-slot="admin-role-select"
+                        className="h-10 w-full bg-card"
+                        aria-invalid={errors.roleId ? true : undefined}
+                      >
+                        <SelectValue placeholder={t('admins:form.role_placeholder')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {roles.map((r) => (
+                          <SelectItem key={r.id} value={r.id}>
+                            {localizedName(r, i18n)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               )}
             </div>
           </section>
@@ -450,62 +470,38 @@ export function AdminsListPage() {
         </div>
       </FormDialog>
 
-      <ConfirmDialog
-        open={!!deleteTarget}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title={t('admins:delete_dialog.title')}
-        description={
-          deleteTarget
-            ? t('admins:delete_dialog.description_named', { name: deleteTarget.fullName })
-            : t('admins:delete_dialog.description')
+      <TargetedConfirmDialog
+        flow={deleteFlow}
+        i18nPrefix="admins:delete_dialog"
+        getName={(r) => r.fullName}
+        onConfirm={(target) =>
+          deleteMutation.mutate(target.id, { onSettled: deleteFlow.close })
         }
-        onConfirm={() => {
-          if (!deleteTarget) return
-          deleteMutation.mutate(deleteTarget.id, {
-            onSettled: () => setDeleteTarget(null),
-          })
-        }}
         isLoading={deleteMutation.isPending}
         variant="destructive"
       />
 
-      <ConfirmDialog
-        open={!!blockTarget}
-        onOpenChange={(open) => !open && setBlockTarget(null)}
-        title={t('admins:block_dialog.title')}
-        description={
-          blockTarget
-            ? t('admins:block_dialog.description_named', { name: blockTarget.fullName })
-            : t('admins:block_dialog.description')
+      <TargetedConfirmDialog
+        flow={blockFlow}
+        i18nPrefix="admins:block_dialog"
+        getName={(r) => r.fullName}
+        confirmLabel={t('admins:block_dialog.confirm')}
+        onConfirm={(target) =>
+          blockMutation.mutate(target.id, { onSettled: blockFlow.close })
         }
-        onConfirm={() => {
-          if (!blockTarget) return
-          blockMutation.mutate(blockTarget.id, {
-            onSettled: () => setBlockTarget(null),
-          })
-        }}
         isLoading={blockMutation.isPending}
         variant="destructive"
-        confirmLabel={t('admins:block_dialog.confirm')}
       />
 
-      <ConfirmDialog
-        open={!!unblockTarget}
-        onOpenChange={(open) => !open && setUnblockTarget(null)}
-        title={t('admins:unblock_dialog.title')}
-        description={
-          unblockTarget
-            ? t('admins:unblock_dialog.description_named', { name: unblockTarget.fullName })
-            : t('admins:unblock_dialog.description')
-        }
-        onConfirm={() => {
-          if (!unblockTarget) return
-          unblockMutation.mutate(unblockTarget.id, {
-            onSettled: () => setUnblockTarget(null),
-          })
-        }}
-        isLoading={unblockMutation.isPending}
+      <TargetedConfirmDialog
+        flow={unblockFlow}
+        i18nPrefix="admins:unblock_dialog"
+        getName={(r) => r.fullName}
         confirmLabel={t('admins:unblock_dialog.confirm')}
+        onConfirm={(target) =>
+          unblockMutation.mutate(target.id, { onSettled: unblockFlow.close })
+        }
+        isLoading={unblockMutation.isPending}
       />
     </div>
   )

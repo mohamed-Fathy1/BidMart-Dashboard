@@ -15,7 +15,6 @@ export function TableFiltersShell({ children, meta, className }: TableFiltersShe
       data-slot="table-filters-shell"
       className={cn(
         'rounded-xl border border-border bg-card p-4 shadow-rest',
-        'transition-[background-color] duration-(--duration-hover) ease-(--ease-default)',
         className,
       )}
     >

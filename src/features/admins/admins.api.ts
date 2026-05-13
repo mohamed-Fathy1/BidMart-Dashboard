@@ -1,5 +1,11 @@
 import { api } from '@/lib/axios'
-import type { AdminAccountDetail, AdminAccountListItem, PaginationMeta } from '@/types/api'
+import {
+  unwrapPaginated,
+  type AdminAccountDetail,
+  type AdminAccountListItem,
+  type ApiEnvelope,
+  type Paginated,
+} from '@/types/api'
 
 /* ------------------------------------------------------------------ */
 /*  Query params                                                       */
@@ -44,23 +50,9 @@ function unwrapAdmin(
 
 export async function listAdmins(
   params: ListAdminsParams,
-): Promise<{ data: AdminAccountListItem[]; meta: PaginationMeta }> {
-  const res = await api.get<{
-    success?: boolean
-    data: AdminAccountListItem[]
-    meta: PaginationMeta
-  }>('/admin/admins', { params })
-  return { data: res.data.data, meta: res.data.meta }
-}
-
-export async function getAdmin(adminId: string): Promise<AdminAccountDetail> {
-  const res = await api.get<AdminAccountDetail | { data: AdminAccountDetail }>(
-    `/admin/admins/${adminId}`,
-  )
-  const raw = res.data as Record<string, unknown>
-  if (raw && typeof raw === 'object' && 'data' in raw && raw.data)
-    return raw.data as AdminAccountDetail
-  return res.data as AdminAccountDetail
+): Promise<Paginated<AdminAccountListItem>> {
+  const res = await api.get<ApiEnvelope<AdminAccountListItem[]>>('/admin/admins', { params })
+  return unwrapPaginated(res.data)
 }
 
 export async function createAdmin(payload: CreateAdminPayload): Promise<AdminAccountDetail> {

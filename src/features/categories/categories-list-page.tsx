@@ -1,15 +1,52 @@
 import { useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import type { PaginationState } from '@tanstack/react-table'
 import { Plus, Pencil, Trash2, List, Table2 } from 'lucide-react'
 import type { Category } from '@/types/api'
+import { useUrlListState } from '@/lib/use-url-list-state'
+import { useListPageData } from '@/lib/use-list-page-data'
+import { useConfirmTarget } from '@/lib/use-confirm-target'
+import type { CategoriesSearch } from '@/routes/_authed.categories.index'
+
+const categoriesIndexRoute = getRouteApi('/_authed/categories/')
+
+const categoryFormSchema = z.object({
+  nameEn: z.string().trim().min(1, { message: 'categories:errors.name_en_required' }),
+  nameAr: z.string().trim().min(1, { message: 'categories:errors.name_ar_required' }),
+  imageUrl: z.string().trim().min(1, { message: 'categories:errors.image_required' }),
+  iconUrl: z.string().trim().min(1, { message: 'categories:errors.icon_required' }),
+  subCategoryImageUrl: z
+    .string()
+    .trim()
+    .min(1, { message: 'categories:errors.sub_image_required' }),
+  descriptionEn: z.string(),
+  descriptionAr: z.string(),
+  displayOrder: z.number().min(0, { message: 'categories:errors.display_order_invalid' }),
+  isActive: z.boolean(),
+})
+
+type CategoryFormValues = z.infer<typeof categoryFormSchema>
+
+const CATEGORY_FORM_DEFAULTS: CategoryFormValues = {
+  nameEn: '',
+  nameAr: '',
+  imageUrl: '',
+  iconUrl: '',
+  subCategoryImageUrl: '',
+  descriptionEn: '',
+  descriptionAr: '',
+  displayOrder: 0,
+  isActive: true,
+}
 import { PageHeader } from '@/components/shared/page-header'
 import { SearchInput } from '@/components/shared/search-input'
 import { TableFiltersShell } from '@/components/shared/table-filters-shell'
 import { DataTable, type RowActionItem } from '@/components/data-table/data-table'
-import { ConfirmDialog } from '@/components/shared/confirm-dialog'
+import { TargetedConfirmDialog } from '@/components/shared/targeted-confirm-dialog'
 import { FormDialog } from '@/components/shared/form-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,6 +59,7 @@ import { ImageUploadField } from '@/components/shared/image-upload-field'
 import { Can } from '@/components/permissions/can'
 import { PERMISSIONS, usePermission } from '@/lib/permissions'
 import { format } from '@/lib/format'
+import { localizedName } from '@/lib/localized-name'
 import { useCategoryColumns } from '@/features/categories/categories.columns'
 import {
   categoryKeys,
@@ -33,7 +71,7 @@ import {
 import { getCategoryDetail } from '@/features/categories/categories.api'
 
 export function CategoriesListPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
@@ -41,43 +79,31 @@ export function CategoriesListPage() {
   const canDelete = usePermission(PERMISSIONS.categories.delete)
   const canViewSubs = usePermission(PERMISSIONS.subCategories.view)
 
-  const [search, setSearch] = useState('')
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  })
+  const { searchValue, pagination, setPagination, setSearch } =
+    useUrlListState<CategoriesSearch>({ route: categoriesIndexRoute })
 
   /* ---------- dialogs ---------- */
   const [formOpen, setFormOpen] = useState(false)
   const [formPrefilling, setFormPrefilling] = useState(false)
   const [editTarget, setEditTarget] = useState<Category | null>(null)
-  const [deleteTarget, setDeleteTarget] = useState<Category | null>(null)
+  const deleteFlow = useConfirmTarget<Category>()
 
-  /* ---------- form state ---------- */
-  const [nameEn, setNameEn] = useState('')
-  const [nameAr, setNameAr] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
-  const [iconUrl, setIconUrl] = useState('')
-  const [subCategoryImageUrl, setSubCategoryImageUrl] = useState('')
-  const [descriptionEn, setDescriptionEn] = useState('')
-  const [descriptionAr, setDescriptionAr] = useState('')
-  const [displayOrder, setDisplayOrder] = useState(0)
-  const [isActive, setIsActive] = useState(true)
-
-  function resetForm() {
-    setNameEn('')
-    setNameAr('')
-    setImageUrl('')
-    setIconUrl('')
-    setSubCategoryImageUrl('')
-    setDescriptionEn('')
-    setDescriptionAr('')
-    setDisplayOrder(0)
-    setIsActive(true)
-  }
+  /* ---------- form ---------- */
+  const form = useForm<CategoryFormValues>({
+    resolver: zodResolver(categoryFormSchema),
+    mode: 'onBlur',
+    defaultValues: CATEGORY_FORM_DEFAULTS,
+  })
+  const {
+    register,
+    control,
+    handleSubmit: rhfHandleSubmit,
+    reset,
+    formState: { errors },
+  } = form
 
   function openCreate() {
-    resetForm()
+    reset(CATEGORY_FORM_DEFAULTS)
     setEditTarget(null)
     setFormPrefilling(false)
     setFormOpen(true)
@@ -92,39 +118,56 @@ export function CategoriesListPage() {
         queryKey: categoryKeys.detail(category.id),
         queryFn: () => getCategoryDetail(category.id),
       })
-      setNameEn(detail.name_en)
-      setNameAr(detail.name_ar)
-      setImageUrl(detail.image_url)
-      setIconUrl(detail.icon_url)
-      setSubCategoryImageUrl(detail.sub_category_image_url)
-      setDescriptionEn(detail.description_en ?? '')
-      setDescriptionAr(detail.description_ar ?? '')
-      setDisplayOrder(detail.display_order)
-      setIsActive(detail.is_active)
+      reset({
+        nameEn: detail.name_en,
+        nameAr: detail.name_ar,
+        imageUrl: detail.image_url,
+        iconUrl: detail.icon_url,
+        subCategoryImageUrl: detail.sub_category_image_url,
+        descriptionEn: detail.description_en ?? '',
+        descriptionAr: detail.description_ar ?? '',
+        displayOrder: detail.display_order,
+        isActive: detail.is_active,
+      })
     } catch {
-      setNameEn(category.name_en)
-      setNameAr(category.name_ar)
-      setImageUrl(category.image_url)
-      setIconUrl(category.icon_url)
-      setSubCategoryImageUrl('')
-      setDescriptionEn('')
-      setDescriptionAr('')
-      setDisplayOrder(category.display_order)
-      setIsActive(category.is_active)
+      reset({
+        nameEn: category.name_en,
+        nameAr: category.name_ar,
+        imageUrl: category.image_url,
+        iconUrl: category.icon_url,
+        subCategoryImageUrl: '',
+        descriptionEn: '',
+        descriptionAr: '',
+        displayOrder: category.display_order,
+        isActive: category.is_active,
+      })
     } finally {
       setFormPrefilling(false)
     }
   }
 
+  function closeForm() {
+    setFormOpen(false)
+    setEditTarget(null)
+    setFormPrefilling(false)
+  }
+
   /* ---------- data ---------- */
   const { data: response, isLoading } = useCategoriesQuery({
-    search: search || undefined,
+    search: searchValue || undefined,
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
   })
 
-  const data = response?.data ?? []
-  const meta = response?.meta
+  const hasActiveFilters = searchValue !== ''
+  const { rows, meta, tableProps } = useListPageData({
+    response,
+    isLoading,
+    pagination,
+    setPagination,
+    hasActiveFilters,
+    clearFilters: () => setSearch(''),
+  })
   const columns = useCategoryColumns()
 
   /* ---------- mutations ---------- */
@@ -178,7 +221,7 @@ export function CategoriesListPage() {
       items.push({
         label: t('categories:actions.delete'),
         icon: Trash2,
-        onClick: (r) => setDeleteTarget(r),
+        onClick: (r) => deleteFlow.ask(r),
         variant: 'destructive',
       })
     }
@@ -186,51 +229,56 @@ export function CategoriesListPage() {
     return items
   }
 
-  /* ---------- handlers ---------- */
-  function handleSubmit() {
+  const onSubmit = (values: CategoryFormValues) => {
     if (editTarget) {
       updateMutation.mutate(
         {
           id: editTarget.id,
           payload: {
-            name_en: nameEn,
-            name_ar: nameAr,
-            image_url: imageUrl,
-            icon_url: iconUrl,
-            sub_category_image_url: subCategoryImageUrl,
-            description_en: descriptionEn.trim() ? descriptionEn : null,
-            description_ar: descriptionAr.trim() ? descriptionAr : null,
-            display_order: displayOrder,
-            is_active: isActive,
+            name_en: values.nameEn,
+            name_ar: values.nameAr,
+            image_url: values.imageUrl,
+            icon_url: values.iconUrl,
+            sub_category_image_url: values.subCategoryImageUrl,
+            description_en: values.descriptionEn.trim() ? values.descriptionEn : null,
+            description_ar: values.descriptionAr.trim() ? values.descriptionAr : null,
+            display_order: values.displayOrder,
+            is_active: values.isActive,
           },
         },
-        {
-          onSuccess: () => {
-            setFormOpen(false)
-            setEditTarget(null)
-          },
-        },
+        { onSuccess: closeForm },
       )
     } else {
       createMutation.mutate(
         {
-          name_en: nameEn,
-          name_ar: nameAr,
-          image_url: imageUrl,
-          icon_url: iconUrl,
-          sub_category_image_url: subCategoryImageUrl,
-          description_en: descriptionEn.trim() || undefined,
-          description_ar: descriptionAr.trim() || undefined,
-          display_order: displayOrder,
+          name_en: values.nameEn,
+          name_ar: values.nameAr,
+          image_url: values.imageUrl,
+          icon_url: values.iconUrl,
+          sub_category_image_url: values.subCategoryImageUrl,
+          description_en: values.descriptionEn.trim() || undefined,
+          description_ar: values.descriptionAr.trim() || undefined,
+          display_order: values.displayOrder,
         },
-        {
-          onSuccess: () => {
-            setFormOpen(false)
-          },
-        },
+        { onSuccess: closeForm },
       )
     }
   }
+
+  const firstErrorKey = (
+    [
+      'nameEn',
+      'nameAr',
+      'imageUrl',
+      'iconUrl',
+      'subCategoryImageUrl',
+      'displayOrder',
+    ] as const
+  ).find((k) => errors[k]?.message)
+  const firstErrorMessage =
+    firstErrorKey && typeof errors[firstErrorKey]?.message === 'string'
+      ? t(errors[firstErrorKey]!.message as string)
+      : undefined
 
   const toolbar = (
     <TableFiltersShell
@@ -241,11 +289,8 @@ export function CategoriesListPage() {
       }
     >
       <SearchInput
-        value={search}
-        onChange={(v) => {
-          setSearch(v)
-          setPagination((p) => ({ ...p, pageIndex: 0 }))
-        }}
+        value={searchValue}
+        onChange={(v) => setSearch(v)}
         placeholder={t('categories:filters.search_placeholder')}
         className="w-full min-w-[min(100%,220px)] sm:max-w-xs md:w-80"
       />
@@ -270,14 +315,12 @@ export function CategoriesListPage() {
 
       <DataTable
         columns={columns}
-        data={data}
-        pageCount={meta?.totalPages}
-        totalRecords={meta?.total}
-        pagination={pagination}
-        onPaginationChange={setPagination}
-        isLoading={isLoading}
+        data={rows}
+        {...tableProps}
+        emptyKeyPrefix="categories:empty"
         toolbar={toolbar}
         actions={getRowActions}
+        rowLabel={(row) => localizedName(row, i18n)}
         getRowId={(row) => row.id}
         onRowClick={(row) =>
           navigate({
@@ -290,11 +333,7 @@ export function CategoriesListPage() {
       <FormDialog
         open={formOpen}
         onOpenChange={(open) => {
-          if (!open) {
-            setFormOpen(false)
-            setEditTarget(null)
-            setFormPrefilling(false)
-          }
+          if (!open) closeForm()
         }}
         title={
           editTarget ? t('categories:form.edit_title') : t('categories:form.create_title')
@@ -302,7 +341,8 @@ export function CategoriesListPage() {
         isEdit={!!editTarget}
         isLoading={isSubmitting}
         submitDisabled={formPrefilling}
-        onSubmit={handleSubmit}
+        onSubmit={rhfHandleSubmit(onSubmit)}
+        errorMessage={firstErrorMessage}
         suppressInitialFocus
       >
         <>
@@ -339,19 +379,19 @@ export function CategoriesListPage() {
                     <Label htmlFor="cat-name-en">{t('categories:form.name_en')}</Label>
                     <Input
                       id="cat-name-en"
-                      value={nameEn}
-                      onChange={(e) => setNameEn(e.target.value)}
+                      {...register('nameEn')}
                       placeholder={t('categories:form.name_en_placeholder')}
+                      aria-invalid={errors.nameEn ? true : undefined}
                     />
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="cat-name-ar">{t('categories:form.name_ar')}</Label>
                     <Input
                       id="cat-name-ar"
-                      value={nameAr}
-                      onChange={(e) => setNameAr(e.target.value)}
+                      {...register('nameAr')}
                       placeholder={t('categories:form.name_ar_placeholder')}
                       dir="rtl"
+                      aria-invalid={errors.nameAr ? true : undefined}
                     />
                   </div>
                 </div>
@@ -361,29 +401,47 @@ export function CategoriesListPage() {
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   <div className="grid gap-2 rounded-lg border border-border bg-muted/20 p-4">
                     <Label className="text-foreground">{t('categories:form.image_url')}</Label>
-                    <ImageUploadField
-                      value={imageUrl}
-                      onChange={setImageUrl}
-                      uploadCase="category_image"
+                    <Controller
+                      name="imageUrl"
+                      control={control}
+                      render={({ field }) => (
+                        <ImageUploadField
+                          value={field.value}
+                          onChange={field.onChange}
+                          uploadCase="category_image"
+                        />
+                      )}
                     />
                   </div>
                   <div className="grid gap-2 rounded-lg border border-border bg-muted/20 p-4">
                     <Label className="text-foreground">{t('categories:form.icon_url')}</Label>
-                    <ImageUploadField
-                      value={iconUrl}
-                      onChange={setIconUrl}
-                      uploadCase="category_image"
+                    <Controller
+                      name="iconUrl"
+                      control={control}
+                      render={({ field }) => (
+                        <ImageUploadField
+                          value={field.value}
+                          onChange={field.onChange}
+                          uploadCase="category_image"
+                        />
+                      )}
                     />
                   </div>
                   <div className="grid gap-2 rounded-lg border border-border bg-muted/20 p-4 sm:col-span-2 lg:col-span-1">
                     <Label className="text-foreground">
                       {t('categories:form.sub_category_image_url')}
                     </Label>
-                    <ImageUploadField
-                      value={subCategoryImageUrl}
-                      onChange={setSubCategoryImageUrl}
-                      uploadCase="sub_category_image"
-                      allowedMimeTypes={['image/gif']}
+                    <Controller
+                      name="subCategoryImageUrl"
+                      control={control}
+                      render={({ field }) => (
+                        <ImageUploadField
+                          value={field.value}
+                          onChange={field.onChange}
+                          uploadCase="sub_category_image"
+                          allowedMimeTypes={['image/gif']}
+                        />
+                      )}
                     />
                   </div>
                 </div>
@@ -395,8 +453,7 @@ export function CategoriesListPage() {
                     <Label htmlFor="cat-desc-en">{t('categories:form.description_en')}</Label>
                     <Textarea
                       id="cat-desc-en"
-                      value={descriptionEn}
-                      onChange={(e) => setDescriptionEn(e.target.value)}
+                      {...register('descriptionEn')}
                       placeholder={t('categories:form.description_en_placeholder')}
                       rows={3}
                       className="min-h-20 resize-y"
@@ -406,8 +463,7 @@ export function CategoriesListPage() {
                     <Label htmlFor="cat-desc-ar">{t('categories:form.description_ar')}</Label>
                     <Textarea
                       id="cat-desc-ar"
-                      value={descriptionAr}
-                      onChange={(e) => setDescriptionAr(e.target.value)}
+                      {...register('descriptionAr')}
                       placeholder={t('categories:form.description_ar_placeholder')}
                       dir="rtl"
                       rows={3}
@@ -424,11 +480,14 @@ export function CategoriesListPage() {
                     <Input
                       id="cat-order"
                       type="number"
-                      value={displayOrder}
-                      onChange={(e) => setDisplayOrder(Number(e.target.value))}
+                      {...register('displayOrder', { valueAsNumber: true })}
                       min={0}
                       className="max-w-48 font-mono tabular-nums"
+                      aria-invalid={errors.displayOrder ? true : undefined}
                     />
+                    <p className="text-xs text-muted-foreground">
+                      {t('categories:form.display_order_hint')}
+                    </p>
                   </div>
                   {editTarget ? (
                     <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/20 px-4 py-3 md:justify-between">
@@ -440,10 +499,16 @@ export function CategoriesListPage() {
                           {t('categories:form.is_active_hint')}
                         </p>
                       </div>
-                      <Switch
-                        id="cat-active"
-                        checked={isActive}
-                        onCheckedChange={setIsActive}
+                      <Controller
+                        name="isActive"
+                        control={control}
+                        render={({ field }) => (
+                          <Switch
+                            id="cat-active"
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        )}
                       />
                     </div>
                   ) : (
@@ -458,17 +523,13 @@ export function CategoriesListPage() {
         </>
       </FormDialog>
 
-      <ConfirmDialog
-        open={!!deleteTarget}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title={t('categories:delete_dialog.title')}
-        description={t('categories:delete_dialog.description')}
-        onConfirm={() => {
-          if (!deleteTarget) return
-          deleteMutation.mutate(deleteTarget.id, {
-            onSettled: () => setDeleteTarget(null),
-          })
-        }}
+      <TargetedConfirmDialog
+        flow={deleteFlow}
+        i18nPrefix="categories:delete_dialog"
+        getName={(r) => localizedName(r, i18n)}
+        onConfirm={(target) =>
+          deleteMutation.mutate(target.id, { onSettled: deleteFlow.close })
+        }
         isLoading={deleteMutation.isPending}
         variant="destructive"
       />

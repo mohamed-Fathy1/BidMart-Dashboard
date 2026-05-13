@@ -1,7 +1,6 @@
-import axios from 'axios'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
+import { createResourceKeys } from '@/lib/query-keys'
+import { useResourceMutation } from '@/lib/use-resource-mutation'
 import {
   listCategories,
   getCategoryDetail,
@@ -21,37 +20,8 @@ import {
   type UpdateSubCategoryPayload,
 } from '@/features/categories/categories.api'
 
-function extractMutationError(error: unknown): string | undefined {
-  if (axios.isAxiosError(error)) {
-    const data = error.response?.data as { message?: string } | undefined
-    return typeof data?.message === 'string' ? data.message : undefined
-  }
-  if (typeof error === 'object' && error !== null && 'message' in error) {
-    const m = (error as { message: unknown }).message
-    return typeof m === 'string' ? m : undefined
-  }
-  return undefined
-}
-
-/* ------------------------------------------------------------------ */
-/*  Query keys                                                         */
-/* ------------------------------------------------------------------ */
-
-export const categoryKeys = {
-  all: ['categories'] as const,
-  lists: () => [...categoryKeys.all, 'list'] as const,
-  list: (params: ListCategoriesParams) => [...categoryKeys.lists(), params] as const,
-  details: () => [...categoryKeys.all, 'detail'] as const,
-  detail: (id: string) => [...categoryKeys.details(), id] as const,
-}
-
-export const subCategoryKeys = {
-  all: ['sub-categories'] as const,
-  lists: () => [...subCategoryKeys.all, 'list'] as const,
-  list: (params: ListSubCategoriesParams) => [...subCategoryKeys.lists(), params] as const,
-  details: () => [...subCategoryKeys.all, 'detail'] as const,
-  detail: (id: string) => [...subCategoryKeys.details(), id] as const,
-}
+export const categoryKeys = createResourceKeys<ListCategoriesParams>('categories')
+export const subCategoryKeys = createResourceKeys<ListSubCategoriesParams>('sub-categories')
 
 /* ------------------------------------------------------------------ */
 /*  Category queries                                                   */
@@ -77,52 +47,30 @@ export function useCategoryDetailQuery(id: string) {
 /* ------------------------------------------------------------------ */
 
 export function useCreateCategoryMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (payload: CreateCategoryPayload) => createCategory(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: categoryKeys.all })
-      toast.success(t('categories:actions.create_success'))
-    },
-    onError: (error: unknown) => {
-      toast.error(extractMutationError(error) ?? t('categories:errors.create_failed'))
-    },
+    invalidate: [categoryKeys.all],
+    successKey: 'categories:actions.create_success',
+    errorKey: 'categories:errors.create_failed',
   })
 }
 
 export function useUpdateCategoryMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: ({ id, payload }: { id: string; payload: UpdateCategoryPayload }) =>
       updateCategory(id, payload),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: categoryKeys.all })
-      queryClient.invalidateQueries({ queryKey: categoryKeys.detail(variables.id) })
-      toast.success(t('categories:actions.update_success'))
-    },
-    onError: (error: unknown) => {
-      toast.error(extractMutationError(error) ?? t('categories:errors.update_failed'))
-    },
+    invalidate: [categoryKeys.all],
+    successKey: 'categories:actions.update_success',
+    errorKey: 'categories:errors.update_failed',
   })
 }
 
 export function useDeleteCategoryMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (id: string) => deleteCategory(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: categoryKeys.all })
-      toast.success(t('categories:actions.delete_success'))
-    },
-    onError: (error: unknown) => {
-      toast.error(extractMutationError(error) ?? t('categories:errors.delete_failed'))
-    },
+    invalidate: [categoryKeys.all],
+    successKey: 'categories:actions.delete_success',
+    errorKey: 'categories:errors.delete_failed',
   })
 }
 
@@ -151,57 +99,29 @@ export function useSubCategoryDetailQuery(id: string, enabled = true) {
 /* ------------------------------------------------------------------ */
 
 export function useCreateSubCategoryMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (payload: CreateSubCategoryPayload) => createSubCategory(payload),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: subCategoryKeys.all })
-      queryClient.invalidateQueries({ queryKey: categoryKeys.all })
-      queryClient.invalidateQueries({ queryKey: categoryKeys.detail(variables.category_id) })
-      toast.success(t('categories:sub.actions.create_success'))
-    },
-    onError: (error: unknown) => {
-      toast.error(extractMutationError(error) ?? t('categories:sub.errors.create_failed'))
-    },
+    invalidate: [subCategoryKeys.all, categoryKeys.all],
+    successKey: 'categories:sub.actions.create_success',
+    errorKey: 'categories:sub.errors.create_failed',
   })
 }
 
 export function useUpdateSubCategoryMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: ({ id, payload }: { id: string; payload: UpdateSubCategoryPayload }) =>
       updateSubCategory(id, payload),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: subCategoryKeys.all })
-      queryClient.invalidateQueries({ queryKey: subCategoryKeys.detail(variables.id) })
-      queryClient.invalidateQueries({ queryKey: categoryKeys.all })
-      queryClient.invalidateQueries({ queryKey: categoryKeys.details() })
-      toast.success(t('categories:sub.actions.update_success'))
-    },
-    onError: (error: unknown) => {
-      toast.error(extractMutationError(error) ?? t('categories:sub.errors.update_failed'))
-    },
+    invalidate: [subCategoryKeys.all, categoryKeys.all],
+    successKey: 'categories:sub.actions.update_success',
+    errorKey: 'categories:sub.errors.update_failed',
   })
 }
 
 export function useDeleteSubCategoryMutation() {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (id: string) => deleteSubCategory(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: subCategoryKeys.all })
-      queryClient.invalidateQueries({ queryKey: categoryKeys.all })
-      queryClient.invalidateQueries({ queryKey: categoryKeys.details() })
-      toast.success(t('categories:sub.actions.delete_success'))
-    },
-    onError: (error: unknown) => {
-      toast.error(extractMutationError(error) ?? t('categories:sub.errors.delete_failed'))
-    },
+    invalidate: [subCategoryKeys.all, categoryKeys.all],
+    successKey: 'categories:sub.actions.delete_success',
+    errorKey: 'categories:sub.errors.delete_failed',
   })
 }

@@ -4,6 +4,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import type { ProviderSummary, ProviderVerificationStatus } from '@/types/api'
 import { StatusBadge } from '@/components/shared/status-badge'
 import { format } from '@/lib/format'
+import { localizedName } from '@/lib/localized-name'
 import { providerAccountStatusForSellerBadge } from '@/features/providers/providers.api'
 
 export function useProviderColumns(): ColumnDef<ProviderSummary>[] {
@@ -47,7 +48,7 @@ export function useProviderColumns(): ColumnDef<ProviderSummary>[] {
               </span>
             )
           }
-          const label = i18n.language === 'ar' ? c.name_ar : c.name_en
+          const label = localizedName(c, i18n)
           return (
             <span className="max-w-36 truncate text-sm text-muted-foreground" title={label}>
               {label}

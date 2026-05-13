@@ -1,28 +1,15 @@
 import { api } from '@/lib/axios'
-import type {
-  Category,
-  CategoryDetail,
-  CategoryRecord,
-  PaginationMeta,
-  SubCategoryListItem,
-  SubCategoryRecord,
+import {
+  unwrap,
+  unwrapPaginated,
+  type ApiEnvelope,
+  type Category,
+  type CategoryDetail,
+  type CategoryRecord,
+  type Paginated,
+  type SubCategoryListItem,
+  type SubCategoryRecord,
 } from '@/types/api'
-
-/* ------------------------------------------------------------------ */
-/*  Response helpers                                                   */
-/* ------------------------------------------------------------------ */
-
-function unwrapEntity<T>(body: unknown): T {
-  if (
-    body &&
-    typeof body === 'object' &&
-    'data' in body &&
-    (body as { data: unknown }).data != null
-  ) {
-    return (body as { data: T }).data
-  }
-  return body as T
-}
 
 /* ------------------------------------------------------------------ */
 /*  Category list params                                               */
@@ -99,33 +86,37 @@ export interface UpdateSubCategoryPayload {
 
 export async function listCategories(
   params: ListCategoriesParams,
-): Promise<{ data: Category[]; meta: PaginationMeta }> {
-  const res = await api.get<{
-    success?: boolean
-    data: Category[]
-    meta: PaginationMeta
-  }>('/admin/categories', { params })
-  return { data: res.data.data, meta: res.data.meta }
+): Promise<Paginated<Category>> {
+  const res = await api.get<ApiEnvelope<Category[]>>('/admin/categories', { params })
+  return unwrapPaginated(res.data)
 }
 
 export async function getCategoryDetail(id: string): Promise<CategoryDetail> {
-  const res = await api.get<unknown>(`/admin/categories/${id}`)
-  return unwrapEntity<CategoryDetail>(res.data)
+  const res = await api.get<ApiEnvelope<CategoryDetail> | CategoryDetail>(
+    `/admin/categories/${id}`,
+  )
+  return unwrap(res.data)
 }
 
 export async function createCategory(
   payload: CreateCategoryPayload,
 ): Promise<CategoryRecord> {
-  const res = await api.post<unknown>('/admin/categories', payload)
-  return unwrapEntity<CategoryRecord>(res.data)
+  const res = await api.post<ApiEnvelope<CategoryRecord> | CategoryRecord>(
+    '/admin/categories',
+    payload,
+  )
+  return unwrap(res.data)
 }
 
 export async function updateCategory(
   id: string,
   payload: UpdateCategoryPayload,
 ): Promise<CategoryRecord> {
-  const res = await api.patch<unknown>(`/admin/categories/${id}`, payload)
-  return unwrapEntity<CategoryRecord>(res.data)
+  const res = await api.patch<ApiEnvelope<CategoryRecord> | CategoryRecord>(
+    `/admin/categories/${id}`,
+    payload,
+  )
+  return unwrap(res.data)
 }
 
 export async function deleteCategory(id: string): Promise<void> {
@@ -138,33 +129,37 @@ export async function deleteCategory(id: string): Promise<void> {
 
 export async function listSubCategories(
   params: ListSubCategoriesParams,
-): Promise<{ data: SubCategoryListItem[]; meta: PaginationMeta }> {
-  const res = await api.get<{
-    success?: boolean
-    data: SubCategoryListItem[]
-    meta: PaginationMeta
-  }>('/admin/sub-categories', { params })
-  return { data: res.data.data, meta: res.data.meta }
+): Promise<Paginated<SubCategoryListItem>> {
+  const res = await api.get<ApiEnvelope<SubCategoryListItem[]>>('/admin/sub-categories', { params })
+  return unwrapPaginated(res.data)
 }
 
 export async function getSubCategoryDetail(id: string): Promise<SubCategoryRecord> {
-  const res = await api.get<unknown>(`/admin/sub-categories/${id}`)
-  return unwrapEntity<SubCategoryRecord>(res.data)
+  const res = await api.get<ApiEnvelope<SubCategoryRecord> | SubCategoryRecord>(
+    `/admin/sub-categories/${id}`,
+  )
+  return unwrap(res.data)
 }
 
 export async function createSubCategory(
   payload: CreateSubCategoryPayload,
 ): Promise<SubCategoryRecord> {
-  const res = await api.post<unknown>('/admin/sub-categories', payload)
-  return unwrapEntity<SubCategoryRecord>(res.data)
+  const res = await api.post<ApiEnvelope<SubCategoryRecord> | SubCategoryRecord>(
+    '/admin/sub-categories',
+    payload,
+  )
+  return unwrap(res.data)
 }
 
 export async function updateSubCategory(
   id: string,
   payload: UpdateSubCategoryPayload,
 ): Promise<SubCategoryRecord> {
-  const res = await api.patch<unknown>(`/admin/sub-categories/${id}`, payload)
-  return unwrapEntity<SubCategoryRecord>(res.data)
+  const res = await api.patch<ApiEnvelope<SubCategoryRecord> | SubCategoryRecord>(
+    `/admin/sub-categories/${id}`,
+    payload,
+  )
+  return unwrap(res.data)
 }
 
 export async function deleteSubCategory(id: string): Promise<void> {

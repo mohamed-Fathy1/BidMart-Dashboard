@@ -1,15 +1,27 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { Ban, PauseCircle, CheckCircle, Trash2 } from 'lucide-react'
+import {
+  Ban,
+  PauseCircle,
+  CheckCircle,
+  Monitor,
+  ShoppingCart,
+  Trash2,
+  UserX,
+  Wallet,
+} from 'lucide-react'
 import type { AdminUserDetail } from '@/types/api'
 import { PageHeader } from '@/components/shared/page-header'
 import { DetailCard } from '@/components/shared/detail-card'
 import { DetailField } from '@/components/shared/detail-field'
 import { StatusBadge } from '@/components/shared/status-badge'
 import { ImagePreview } from '@/components/shared/image-preview'
+import { EmptyState } from '@/components/shared/empty-state'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Card, CardContent } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { DetailPageSkeleton } from '@/components/shared/detail-page-skeleton'
 import { ConfirmDialog } from '@/components/shared/confirm-dialog'
 import { ReasonDialog } from '@/components/shared/reason-dialog'
 import { Can } from '@/components/permissions/can'
@@ -43,31 +55,34 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
 
   const { data: user, isLoading } = useUserDetailQuery(userId)
 
-  /* ---------- mutations ---------- */
   const banMutation = useBanUserMutation()
   const suspendMutation = useSuspendUserMutation()
   const activateMutation = useActivateUserMutation()
   const deleteMutation = useDeleteUserMutation()
 
-  /* ---------- dialogs ---------- */
   const [banOpen, setBanOpen] = useState(false)
   const [suspendOpen, setSuspendOpen] = useState(false)
   const [activateOpen, setActivateOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
 
   if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-64 w-full" />
-      </div>
-    )
+    return <DetailPageSkeleton cards={1} />
   }
 
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 py-20 text-muted-foreground">
-        <p className="text-sm">{t('common:states.no_data')}</p>
+      <div className="space-y-6">
+        <PageHeader
+          title={t('users:detail.page_title')}
+          onBack={() => navigate({ to: '/users' })}
+        />
+        <EmptyState
+          icon={UserX}
+          title={t('users:detail.not_found_title')}
+          message={t('users:detail.not_found_hint')}
+          actionLabel={t('users:detail.back_to_list')}
+          onAction={() => navigate({ to: '/users' })}
+        />
       </div>
     )
   }
@@ -82,7 +97,7 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
     <div className="flex flex-wrap items-center gap-2">
       {showActivate && (
         <Can permission={PERMISSIONS.users.activate}>
-          <Button variant="outline" size="sm" onClick={() => setActivateOpen(true)}>
+          <Button size="sm" onClick={() => setActivateOpen(true)}>
             <CheckCircle className="size-4" />
             {t('users:actions.activate')}
           </Button>
@@ -98,7 +113,7 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
       )}
       {showBan && (
         <Can permission={PERMISSIONS.users.ban}>
-          <Button variant="destructive" size="sm" onClick={() => setBanOpen(true)}>
+          <Button variant="outline" size="sm" onClick={() => setBanOpen(true)}>
             <Ban className="size-4" />
             {t('users:actions.ban')}
           </Button>
@@ -126,99 +141,120 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
         actions={actions}
       />
 
-      <div className="flex items-start gap-4">
-        <ImagePreview
-          src={user.profile_picture}
-          alt={displayName(user) || user.phone_number}
-          size="lg"
-        />
-        <div className="min-w-0 space-y-1">
-          <h2 className="text-lg font-semibold">
-            {displayName(user) || t('components:detail.not_available')}
-          </h2>
-          {user.email ? (
-            <p className="text-sm text-muted-foreground">{user.email}</p>
-          ) : null}
-        </div>
-      </div>
+      <UserHeroCard user={user} />
 
-      <DetailCard title={t('users:detail.user_info')} columns={3}>
-        <DetailField label={t('users:detail.full_name')} value={user.full_name} />
-        <DetailField label={t('users:detail.email')} value={user.email} mono />
-        <DetailField label={t('users:detail.phone')} value={user.phone_number} mono />
-        <DetailField
-          label={t('users:detail.role')}
-          value={t(`users:roles.${user.role}`)}
-        />
-        <DetailField
-          label={t('users:detail.account_status')}
-          value={<StatusBadge status={user.account_status} />}
-        />
-        <DetailField
-          label={t('users:detail.created_at')}
-          value={format.dateTime(user.created_at)}
-          mono
-        />
-        <DetailField
-          label={t('users:detail.updated_at')}
-          value={format.dateTime(user.updated_at)}
-          mono
-        />
-      </DetailCard>
+      <Tabs defaultValue="overview" className="gap-4">
+        <TabsList>
+          <TabsTrigger value="overview">{t('users:detail.tabs.overview')}</TabsTrigger>
+          <TabsTrigger value="orders">{t('users:detail.tabs.orders')}</TabsTrigger>
+          <TabsTrigger value="wallet">{t('users:detail.tabs.wallet')}</TabsTrigger>
+          <TabsTrigger value="sessions">{t('users:detail.tabs.sessions')}</TabsTrigger>
+        </TabsList>
 
-      {user.stores.map((store, index) => (
-        <DetailCard
-          key={store.id}
-          title={t('users:detail.store_card_title', { index: index + 1 })}
-          columns={3}
-        >
-          <DetailField
-            label={t('users:detail.commercial_registration')}
-            value={store.commercial_registration_number}
-            mono
-          />
-          <DetailField
-            label={t('users:detail.store_status')}
-            value={
-              <StatusBadge
-                type="seller"
-                status={providerAccountStatusForSellerBadge(store.status)}
+        <TabsContent value="overview" className="space-y-6">
+          <DetailCard title={t('users:detail.user_info')} columns={3}>
+            <DetailField label={t('users:detail.full_name')} value={user.full_name} />
+            <DetailField label={t('users:detail.email')} value={user.email} mono />
+            <DetailField label={t('users:detail.phone')} value={user.phone_number} mono />
+            <DetailField
+              label={t('users:detail.role')}
+              value={t(`users:roles.${user.role}`)}
+            />
+            <DetailField
+              label={t('users:detail.account_status')}
+              value={<StatusBadge status={user.account_status} />}
+            />
+            <DetailField
+              label={t('users:detail.created_at')}
+              value={format.dateTime(user.created_at)}
+              mono
+            />
+            <DetailField
+              label={t('users:detail.updated_at')}
+              value={format.dateTime(user.updated_at)}
+              mono
+            />
+          </DetailCard>
+
+          {user.stores.map((store, index) => (
+            <DetailCard
+              key={store.id}
+              title={t('users:detail.store_card_title', { index: index + 1 })}
+              columns={3}
+            >
+              <DetailField
+                label={t('users:detail.commercial_registration')}
+                value={store.commercial_registration_number}
+                mono
               />
-            }
-          />
-          <DetailField
-            label={t('users:detail.platform_verified')}
-            value={
-              <StatusBadge
-                type="sellerVerified"
-                status={store.is_verified ? 'true' : 'false'}
+              <DetailField
+                label={t('users:detail.store_status')}
+                value={
+                  <StatusBadge
+                    type="seller"
+                    status={providerAccountStatusForSellerBadge(store.status)}
+                  />
+                }
               />
-            }
+              <DetailField
+                label={t('users:detail.platform_verified')}
+                value={
+                  <StatusBadge
+                    type="sellerVerified"
+                    status={store.is_verified ? 'true' : 'false'}
+                  />
+                }
+              />
+              <DetailField
+                label={t('users:detail.store_created_at')}
+                value={format.dateTime(store.created_at)}
+                mono
+              />
+              <DetailField
+                label={t('users:detail.commercial_registration_doc')}
+                value={store.commercial_registration_doc}
+                mono
+                span={2}
+              />
+              <DetailField
+                label={t('users:detail.verification_requests_count')}
+                value={format.number(store.verification_requests.length)}
+                mono
+              />
+            </DetailCard>
+          ))}
+        </TabsContent>
+
+        <TabsContent value="orders">
+          <EmptyState
+            icon={ShoppingCart}
+            title={t('users:detail.tabs.orders_empty_title')}
+            message={t('users:detail.tabs.orders_empty_hint')}
           />
-          <DetailField
-            label={t('users:detail.store_created_at')}
-            value={format.dateTime(store.created_at)}
-            mono
+        </TabsContent>
+
+        <TabsContent value="wallet">
+          <EmptyState
+            icon={Wallet}
+            title={t('users:detail.tabs.wallet_empty_title')}
+            message={t('users:detail.tabs.wallet_empty_hint')}
           />
-          <DetailField
-            label={t('users:detail.commercial_registration_doc')}
-            value={store.commercial_registration_doc}
-            mono
-            span={2}
+        </TabsContent>
+
+        <TabsContent value="sessions">
+          <EmptyState
+            icon={Monitor}
+            title={t('users:detail.tabs.sessions_empty_title')}
+            message={t('users:detail.tabs.sessions_empty_hint')}
           />
-          <DetailField
-            label={t('users:detail.verification_requests_count')}
-            value={format.number(store.verification_requests.length)}
-            mono
-          />
-        </DetailCard>
-      ))}
+        </TabsContent>
+      </Tabs>
 
       <ReasonDialog
         open={banOpen}
         onOpenChange={setBanOpen}
-        title={t('users:ban_dialog.title')}
-        description={t('users:ban_dialog.description')}
+        title={t('users:ban_dialog.title', { name: title })}
+        description={t('users:ban_dialog.description', { name: title })}
         onConfirm={(reason) => {
           banMutation.mutate(
             { userId, reason },
@@ -231,8 +267,8 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
       <ReasonDialog
         open={suspendOpen}
         onOpenChange={setSuspendOpen}
-        title={t('users:suspend_dialog.title')}
-        description={t('users:suspend_dialog.description')}
+        title={t('users:suspend_dialog.title', { name: title })}
+        description={t('users:suspend_dialog.description', { name: title })}
         onConfirm={(reason) => {
           suspendMutation.mutate(
             { userId, reason },
@@ -245,8 +281,8 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
       <ConfirmDialog
         open={activateOpen}
         onOpenChange={setActivateOpen}
-        title={t('users:activate_dialog.title')}
-        description={t('users:activate_dialog.description')}
+        title={t('users:activate_dialog.title', { name: title })}
+        description={t('users:activate_dialog.description', { name: title })}
         onConfirm={() => {
           activateMutation.mutate(userId, {
             onSettled: () => setActivateOpen(false),
@@ -257,8 +293,8 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
       <ConfirmDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-        title={t('users:delete_dialog.title')}
-        description={t('users:delete_dialog.description')}
+        title={t('users:delete_dialog.title', { name: title })}
+        description={t('users:delete_dialog.description', { name: title })}
         onConfirm={() => {
           deleteMutation.mutate(userId, {
             onSuccess: () => navigate({ to: '/users' }),
@@ -269,5 +305,50 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
         variant="destructive"
       />
     </div>
+  )
+}
+
+function UserHeroCard({ user }: { user: AdminUserDetail }) {
+  const { t } = useTranslation()
+  const stats: Array<{ key: 'orders_placed' | 'wallet_balance' | 'stores'; value: string }> = [
+    { key: 'orders_placed', value: '—' },
+    { key: 'wallet_balance', value: '—' },
+    { key: 'stores', value: format.number(user.stores.length) },
+  ]
+  return (
+    <Card>
+      <CardContent className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex items-start gap-4">
+          <ImagePreview
+            src={user.profile_picture}
+            alt={displayName(user) || user.phone_number}
+            size="lg"
+          />
+          <div className="min-w-0 space-y-1">
+            <h2 className="text-lg font-semibold">
+              {displayName(user) || t('components:detail.not_available')}
+            </h2>
+            {user.email ? (
+              <p className="text-sm text-muted-foreground">{user.email}</p>
+            ) : null}
+          </div>
+        </div>
+        <div className="grid grid-cols-3 divide-x divide-border rtl:divide-x-reverse">
+          {stats.map((s, i) => (
+            <div
+              key={s.key}
+              className={i === 0 ? 'pe-6' : i === stats.length - 1 ? 'ps-6' : 'px-6'}
+            >
+              <div className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
+                {t(`users:detail.hero.${s.key}`)}
+              </div>
+              <div className="mt-1 font-mono text-xl font-semibold tabular-nums text-foreground">
+                {s.value}
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   )
 }

@@ -55,6 +55,7 @@
     "image_url_placeholder": "https://flagcdn.com/w320/sa.png",
     "is_enabled": "مفعّل",
     "sort_order": "ترتيب العرض",
+    "sort_order_hint": "الأرقام الأصغر تظهر أولاً في قائمة اختيار الدولة عند التسجيل.",
     "section_names": "الأسماء",
     "section_codes": "الرمز والترتيب",
     "section_flag": "صورة العلم",
@@ -63,7 +64,13 @@
     "iso_locked_hint": "لا يمكن تغيير رمز ISO بعد إنشاء الدولة."
   },
   "delete_dialog": {
-    "title": "حذف الدولة",
-    "description": "هل أنت متأكد من حذف هذه الدولة؟ لا يمكن التراجع عن هذا الإجراء."
+    "title": "حذف {{name}}",
+    "description": "حذف {{name}}؟ هذا إجراء دائم وقد يُمنع إذا كان هناك مستخدمون مرتبطون."
+  },
+  "empty": {
+    "no_data_title": "لا توجد دول بعد",
+    "no_data_hint": "أضف أول دولة لتظهر في قائمة التسجيل.",
+    "no_results_title": "لا توجد دول مطابقة لهذه المرشحات",
+    "no_results_hint": "جرّب مسح البحث أو فلتر الحالة."
   }
 }

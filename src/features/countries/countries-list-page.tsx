@@ -1,9 +1,42 @@
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { getRouteApi } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 import { Plus, Pencil, Trash2, ToggleLeft } from "lucide-react";
-import type { PaginationState } from "@tanstack/react-table";
 import type { Country } from "@/types/api";
+import { useUrlListState } from "@/lib/use-url-list-state";
+import { useListPageData } from "@/lib/use-list-page-data";
+import { useConfirmTarget } from "@/lib/use-confirm-target";
+import type { CountriesSearch } from "@/routes/_authed.countries";
+
+const countriesRoute = getRouteApi("/_authed/countries");
+
+const ISO_RE = /^[A-Z]{3}$/;
+
+const countryFormSchema = z
+  .object({
+    nameEn: z.string().trim().min(1, { message: "countries:errors.name_en_required" }),
+    nameAr: z.string().trim().min(1, { message: "countries:errors.name_ar_required" }),
+    isoCode: z.string().trim().toUpperCase(),
+    imageUrl: z.string().trim().min(1, { message: "countries:errors.image_required" }),
+    isEnabled: z.boolean(),
+    sortOrder: z.number().min(0, { message: "countries:errors.sort_order_invalid" }),
+    isEdit: z.boolean(),
+  })
+  .superRefine((val, ctx) => {
+    // ISO is required + format-validated only when creating; on edit it's disabled.
+    if (!val.isEdit && !ISO_RE.test(val.isoCode)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["isoCode"],
+        message: "countries:errors.iso_invalid",
+      });
+    }
+  });
+
+type CountryFormValues = z.infer<typeof countryFormSchema>;
 import { PageHeader } from "@/components/shared/page-header";
 import { FilterSelect } from "@/components/shared/filter-select";
 import { TableFiltersShell } from "@/components/shared/table-filters-shell";
@@ -12,7 +45,7 @@ import {
   DataTable,
   type RowActionItem,
 } from "@/components/data-table/data-table";
-import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { TargetedConfirmDialog } from "@/components/shared/targeted-confirm-dialog";
 import { FormDialog } from "@/components/shared/form-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,77 +64,98 @@ import {
   useDeleteCountryMutation,
 } from "@/features/countries/countries.queries";
 import { format } from "@/lib/format";
+import { localizedName } from "@/lib/localized-name";
 
 export function CountriesListPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { search, searchValue, pagination, setPagination, setSearch, setFilter } =
+    useUrlListState<CountriesSearch>({ route: countriesRoute });
+  const enabledFilter =
+    search.isEnabled === true ? "true" : search.isEnabled === false ? "false" : "";
 
   const canUpdate = usePermission(PERMISSIONS.countries.update);
   const canDelete = usePermission(PERMISSIONS.countries.delete);
 
-  /* ---------- filters ---------- */
-  const [search, setSearch] = useState("");
-  const [enabledFilter, setEnabledFilter] = useState("");
-
-  /* ---------- pagination ---------- */
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-
   /* ---------- dialogs ---------- */
   const [formOpen, setFormOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Country | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Country | null>(null);
+  const deleteFlow = useConfirmTarget<Country>();
 
-  /* ---------- form state ---------- */
-  const [nameEn, setNameEn] = useState("");
-  const [nameAr, setNameAr] = useState("");
-  const [isoCode, setIsoCode] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [isEnabled, setIsEnabled] = useState(true);
-  const [sortOrder, setSortOrder] = useState(0);
-
-  function resetForm() {
-    setNameEn("");
-    setNameAr("");
-    setIsoCode("");
-    setImageUrl("");
-    setIsEnabled(true);
-    setSortOrder(0);
-  }
+  /* ---------- form ---------- */
+  const form = useForm<CountryFormValues>({
+    resolver: zodResolver(countryFormSchema),
+    mode: "onBlur",
+    defaultValues: {
+      nameEn: "",
+      nameAr: "",
+      isoCode: "",
+      imageUrl: "",
+      isEnabled: true,
+      sortOrder: 0,
+      isEdit: false,
+    },
+  });
+  const {
+    register,
+    control,
+    handleSubmit: rhfHandleSubmit,
+    reset,
+    formState: { errors },
+  } = form;
 
   function openCreate() {
-    resetForm();
+    reset({
+      nameEn: "",
+      nameAr: "",
+      isoCode: "",
+      imageUrl: "",
+      isEnabled: true,
+      sortOrder: 0,
+      isEdit: false,
+    });
     setEditTarget(null);
     setFormOpen(true);
   }
 
   function openEdit(country: Country) {
-    setNameEn(country.name_en);
-    setNameAr(country.name_ar);
-    setIsoCode(country.iso_code);
-    setImageUrl(country.image_url);
-    setIsEnabled(country.is_enabled);
-    setSortOrder(country.sort_order);
+    reset({
+      nameEn: country.name_en,
+      nameAr: country.name_ar,
+      isoCode: country.iso_code,
+      imageUrl: country.image_url,
+      isEnabled: country.is_enabled,
+      sortOrder: country.sort_order,
+      isEdit: true,
+    });
     setEditTarget(country);
     setFormOpen(true);
   }
 
+  function closeForm() {
+    setFormOpen(false);
+    setEditTarget(null);
+  }
+
   /* ---------- data ---------- */
   const { data: response, isLoading } = useCountriesQuery({
-    search: search.trim() || undefined,
-    isEnabled:
-      enabledFilter === "true"
-        ? true
-        : enabledFilter === "false"
-          ? false
-          : undefined,
+    search: searchValue.trim() || undefined,
+    isEnabled: search.isEnabled,
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
   });
 
-  const data = response?.data ?? [];
-  const meta = response?.meta;
+  const hasActiveFilters = searchValue.trim() !== "" || enabledFilter !== "";
+  const { rows, meta, tableProps } = useListPageData({
+    response,
+    isLoading,
+    pagination,
+    setPagination,
+    hasActiveFilters,
+    clearFilters: () => {
+      setSearch("");
+      setFilter("isEnabled", undefined);
+    },
+  });
 
   const columns = useCountryColumns();
 
@@ -113,16 +167,13 @@ export function CountriesListPage() {
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
-  const canSave = useMemo(() => {
-    const nameEnOk = nameEn.trim().length > 0;
-    const nameArOk = nameAr.trim().length > 0;
-    const imageOk = imageUrl.trim().length > 0;
-    const orderOk = Number.isFinite(sortOrder) && sortOrder >= 0;
-    const iso = isoCode.trim().toUpperCase();
-    const isoOk =
-      !!editTarget || (iso.length === 3 && /^[A-Z]{3}$/.test(iso));
-    return nameEnOk && nameArOk && imageOk && orderOk && isoOk;
-  }, [nameEn, nameAr, isoCode, imageUrl, sortOrder, editTarget]);
+  const firstErrorKey = (
+    ["nameEn", "nameAr", "isoCode", "imageUrl", "sortOrder"] as const
+  ).find((k) => errors[k]?.message);
+  const firstErrorMessage =
+    firstErrorKey && typeof errors[firstErrorKey]?.message === "string"
+      ? t(errors[firstErrorKey]!.message as string)
+      : undefined;
 
   /* ---------- filter options ---------- */
   const enabledOptions = useMemo(
@@ -160,7 +211,7 @@ export function CountriesListPage() {
       items.push({
         label: t("countries:actions.delete"),
         icon: Trash2,
-        onClick: (r) => setDeleteTarget(r),
+        onClick: (r) => deleteFlow.ask(r),
         variant: "destructive",
       });
     }
@@ -168,71 +219,35 @@ export function CountriesListPage() {
     return items;
   }
 
-  /* ---------- handlers ---------- */
-  function handleSubmit() {
-    const name_en = nameEn.trim();
-    const name_ar = nameAr.trim();
-    const iso_code = isoCode.trim().toUpperCase();
-    const image_url = imageUrl.trim();
-
-    if (!name_en) {
-      toast.error(t("countries:errors.name_en_required"));
-      return;
-    }
-    if (!name_ar) {
-      toast.error(t("countries:errors.name_ar_required"));
-      return;
-    }
-    if (!editTarget && (iso_code.length !== 3 || !/^[A-Z]{3}$/.test(iso_code))) {
-      toast.error(t("countries:errors.iso_invalid"));
-      return;
-    }
-    if (!image_url) {
-      toast.error(t("countries:errors.image_required"));
-      return;
-    }
-    if (!Number.isFinite(sortOrder) || sortOrder < 0) {
-      toast.error(t("countries:errors.sort_order_invalid"));
-      return;
-    }
-
+  const onSubmit = (values: CountryFormValues) => {
     if (editTarget) {
       updateMutation.mutate(
         {
           id: editTarget.id,
           payload: {
-            name_en,
-            name_ar,
-            image_url,
-            is_enabled: isEnabled,
-            sort_order: sortOrder,
+            name_en: values.nameEn,
+            name_ar: values.nameAr,
+            image_url: values.imageUrl,
+            is_enabled: values.isEnabled,
+            sort_order: values.sortOrder,
           },
         },
-        {
-          onSuccess: () => {
-            setFormOpen(false);
-            setEditTarget(null);
-          },
-        },
+        { onSuccess: closeForm },
       );
     } else {
       createMutation.mutate(
         {
-          name_en,
-          name_ar,
-          iso_code,
-          image_url,
-          is_enabled: isEnabled,
-          sort_order: sortOrder,
+          name_en: values.nameEn,
+          name_ar: values.nameAr,
+          iso_code: values.isoCode,
+          image_url: values.imageUrl,
+          is_enabled: values.isEnabled,
+          sort_order: values.sortOrder,
         },
-        {
-          onSuccess: () => {
-            setFormOpen(false);
-          },
-        },
+        { onSuccess: closeForm },
       );
     }
-  }
+  };
 
   /* ---------- toolbar ---------- */
   const toolbar = (
@@ -246,20 +261,16 @@ export function CountriesListPage() {
       }
     >
       <SearchInput
-        value={search}
-        onChange={(v) => {
-          setSearch(v);
-          setPagination((p) => ({ ...p, pageIndex: 0 }));
-        }}
+        value={searchValue}
+        onChange={(v) => setSearch(v)}
         placeholder={t("countries:filters.search_placeholder")}
         className="w-full min-w-[min(100%,220px)] sm:max-w-xs md:w-80"
       />
       <FilterSelect
         value={enabledFilter}
-        onChange={(v) => {
-          setEnabledFilter(v);
-          setPagination((p) => ({ ...p, pageIndex: 0 }));
-        }}
+        onChange={(v) =>
+          setFilter("isEnabled", v === "true" ? true : v === "false" ? false : undefined)
+        }
         options={enabledOptions}
         placeholder={t("countries:filters.enabled")}
         className="min-w-[160px]"
@@ -285,26 +296,20 @@ export function CountriesListPage() {
 
       <DataTable
         columns={columns}
-        data={data}
-        pageCount={meta?.totalPages}
-        totalRecords={meta?.total}
-        pagination={pagination}
-        onPaginationChange={setPagination}
-        isLoading={isLoading}
+        data={rows}
+        {...tableProps}
+        emptyKeyPrefix="countries:empty"
         toolbar={toolbar}
         actions={canUpdate || canDelete ? getRowActions : undefined}
+        rowLabel={(row) => localizedName(row, i18n)}
         getRowId={(row) => row.id}
         onRowClick={canUpdate ? (row) => openEdit(row) : undefined}
       />
 
-      {/* Create / Edit dialog */}
       <FormDialog
         open={formOpen}
         onOpenChange={(open) => {
-          if (!open) {
-            setFormOpen(false);
-            setEditTarget(null);
-          }
+          if (!open) closeForm();
         }}
         title={
           editTarget
@@ -314,8 +319,8 @@ export function CountriesListPage() {
         description={t("countries:form.dialog_description")}
         isEdit={!!editTarget}
         isLoading={isSubmitting}
-        submitDisabled={!canSave}
-        onSubmit={handleSubmit}
+        onSubmit={rhfHandleSubmit(onSubmit)}
+        errorMessage={firstErrorMessage}
         suppressInitialFocus
       >
         <div className="space-y-0">
@@ -327,9 +332,9 @@ export function CountriesListPage() {
                 </Label>
                 <Input
                   id="country-name-en"
-                  value={nameEn}
-                  onChange={(e) => setNameEn(e.target.value)}
+                  {...register("nameEn")}
                   placeholder={t("countries:form.name_en_placeholder")}
+                  aria-invalid={errors.nameEn ? true : undefined}
                 />
               </div>
               <div className="grid gap-2">
@@ -338,10 +343,10 @@ export function CountriesListPage() {
                 </Label>
                 <Input
                   id="country-name-ar"
-                  value={nameAr}
-                  onChange={(e) => setNameAr(e.target.value)}
+                  {...register("nameAr")}
                   placeholder={t("countries:form.name_ar_placeholder")}
                   dir="rtl"
+                  aria-invalid={errors.nameAr ? true : undefined}
                 />
               </div>
             </div>
@@ -353,14 +358,22 @@ export function CountriesListPage() {
                 <Label htmlFor="country-iso">
                   {t("countries:form.iso_code")}
                 </Label>
-                <Input
-                  id="country-iso"
-                  value={isoCode}
-                  onChange={(e) => setIsoCode(e.target.value.toUpperCase())}
-                  placeholder={t("countries:form.iso_code_placeholder")}
-                  maxLength={3}
-                  className="font-mono uppercase"
-                  disabled={!!editTarget}
+                <Controller
+                  name="isoCode"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      id="country-iso"
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                      onBlur={field.onBlur}
+                      placeholder={t("countries:form.iso_code_placeholder")}
+                      maxLength={3}
+                      className="font-mono uppercase"
+                      disabled={!!editTarget}
+                      aria-invalid={errors.isoCode ? true : undefined}
+                    />
+                  )}
                 />
                 {editTarget ? (
                   <p className="text-xs text-muted-foreground">
@@ -375,11 +388,14 @@ export function CountriesListPage() {
                 <Input
                   id="country-sort"
                   type="number"
-                  value={sortOrder}
-                  onChange={(e) => setSortOrder(Number(e.target.value))}
+                  {...register("sortOrder", { valueAsNumber: true })}
                   min={0}
                   className="font-mono tabular-nums"
+                  aria-invalid={errors.sortOrder ? true : undefined}
                 />
+                <p className="text-xs text-muted-foreground">
+                  {t("countries:form.sort_order_hint")}
+                </p>
               </div>
             </div>
           </FormSection>
@@ -387,10 +403,16 @@ export function CountriesListPage() {
           <FormSection title={t("countries:form.section_flag")}>
             <div className="grid gap-2">
               <Label>{t("countries:form.image_url")}</Label>
-              <ImageUploadField
-                value={imageUrl}
-                onChange={setImageUrl}
-                uploadCase="country_image"
+              <Controller
+                name="imageUrl"
+                control={control}
+                render={({ field }) => (
+                  <ImageUploadField
+                    value={field.value}
+                    onChange={field.onChange}
+                    uploadCase="country_image"
+                  />
+                )}
               />
             </div>
           </FormSection>
@@ -407,10 +429,16 @@ export function CountriesListPage() {
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center sm:ps-4">
-                  <Switch
-                    id="country-enabled"
-                    checked={isEnabled}
-                    onCheckedChange={setIsEnabled}
+                  <Controller
+                    name="isEnabled"
+                    control={control}
+                    render={({ field }) => (
+                      <Switch
+                        id="country-enabled"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
                   />
                 </div>
               </div>
@@ -420,17 +448,13 @@ export function CountriesListPage() {
       </FormDialog>
 
       {/* Delete dialog */}
-      <ConfirmDialog
-        open={!!deleteTarget}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title={t("countries:delete_dialog.title")}
-        description={t("countries:delete_dialog.description")}
-        onConfirm={() => {
-          if (!deleteTarget) return;
-          deleteMutation.mutate(deleteTarget.id, {
-            onSettled: () => setDeleteTarget(null),
-          });
-        }}
+      <TargetedConfirmDialog
+        flow={deleteFlow}
+        i18nPrefix="countries:delete_dialog"
+        getName={(r) => localizedName(r, i18n)}
+        onConfirm={(target) =>
+          deleteMutation.mutate(target.id, { onSettled: deleteFlow.close })
+        }
         isLoading={deleteMutation.isPending}
         variant="destructive"
       />

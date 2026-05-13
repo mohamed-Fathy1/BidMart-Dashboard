@@ -22,7 +22,7 @@
   "topbar": {
     "notifications": "Notifications",
     "notifications_empty": "You're all caught up.",
-    "notifications_empty_hint": "We'll surface anything that needs your attention here.",
+    "notifications_empty_hint": "Approvals, moderation events, and verification requests will surface here once they happen.",
     "profile": "Profile",
     "my_profile": "My profile",
     "logout": "Logout",
@@ -38,8 +38,114 @@
     "collapse": "Collapse sidebar",
     "expand": "Expand sidebar"
   },
+  "notifications": {
+    "summary": "{{unread}} unread · {{today}} today",
+    "mark_all_read": "Mark all read",
+    "view_all": "View all",
+    "items": {
+      "withdrawal_review": {
+        "title": "Withdrawal #W-2281 needs review",
+        "subtitle": "SAR 1,575.00 · Faris Al-Harbi"
+      },
+      "provider_verification": {
+        "title": "Provider verification submitted",
+        "subtitle": "Atlas Auctions Co. uploaded 3 documents"
+      },
+      "stream_flagged": {
+        "title": "Live stream flagged by viewers",
+        "subtitle": "LS-0051 · 4 reports in 5 minutes"
+      },
+      "complaint_escalated": {
+        "title": "Complaint #C-0451 escalated",
+        "subtitle": "Customer requested refund · 14 days old"
+      },
+      "daily_digest": {
+        "title": "Daily digest ready",
+        "subtitle": "128 actions · 412 events · 1.2k logs"
+      }
+    }
+  },
   "overview": {
+    "title": "Overview",
     "subtitle": "Welcome back. Pick a section from the sidebar to manage the marketplace.",
-    "coming_soon": "Dashboard widgets are coming soon."
+    "coming_soon": "Dashboard widgets are coming soon.",
+    "last_refreshed": "Last 30 days · last refreshed just now",
+    "actions": {
+      "last_30_days": "Last 30 days",
+      "export": "Export"
+    },
+    "kpi": {
+      "total_users": "Total users",
+      "live_auctions": "Live auctions",
+      "pending_withdrawals": "Pending withdrawals",
+      "gmv_30d": "GMV (30d)",
+      "detail": {
+        "vs_prev_30d": "vs prev. 30d",
+        "right_now": "right now",
+        "awaiting_review": "awaiting review"
+      }
+    },
+    "chart": {
+      "title": "GMV trend",
+      "subtitle": "Daily gross merchandise value · all categories",
+      "range": {
+        "7d": "7d",
+        "30d": "30d",
+        "90d": "90d",
+        "1y": "1y"
+      },
+      "breakdown": {
+        "watches": "Watches",
+        "antiques": "Antiques",
+        "jewelry": "Jewelry",
+        "other": "Other"
+      }
+    },
+    "action_queue": {
+      "title": "Action queue",
+      "subtitle": "Items waiting on you",
+      "coming_soon": "Coming soon",
+      "items": {
+        "withdrawals": {
+          "label": "Withdrawals to review",
+          "sub": "SAR 9,021"
+        },
+        "providers": {
+          "label": "Provider applications",
+          "sub": "2 high-value"
+        },
+        "complaints": {
+          "label": "Open complaints",
+          "sub": "3 high priority"
+        },
+        "streams": {
+          "label": "Live streams to monitor",
+          "sub": "2,588 viewers"
+        }
+      }
+    },
+    "recent_activity": {
+      "title": "Recent activity",
+      "subtitle": "Latest admin actions across the platform",
+      "view_audit_log": "View audit log",
+      "actions": {
+        "approved_withdrawal": "approved withdrawal",
+        "verified_provider": "verified provider",
+        "suspended_user": "suspended user",
+        "flagged_withdrawal": "flagged withdrawal",
+        "ended_stream": "ended live stream"
+      }
+    },
+    "top_providers": {
+      "title": "Top providers · 30 days",
+      "subtitle": "Ranked by GMV contribution",
+      "categories": {
+        "jewelry": "Jewelry",
+        "antiques": "Antiques",
+        "collectibles": "Collectibles",
+        "automotive": "Automotive",
+        "watches": "Watches"
+      }
+    }
   }
 }

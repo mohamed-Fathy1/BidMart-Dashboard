@@ -17,6 +17,12 @@
     "update_failed": "Could not update category",
     "delete_failed": "Could not delete category"
   },
+  "empty": {
+    "no_data_title": "No categories yet",
+    "no_data_hint": "Add the first category to start the storefront taxonomy.",
+    "no_results_title": "No categories match this search",
+    "no_results_hint": "Try clearing the search."
+  },
   "columns": {
     "media": "Media",
     "image": "Image",
@@ -59,13 +65,14 @@
     "description_ar": "Description (Arabic)",
     "description_ar_placeholder": "اختياري — يظهر للمشترين في صفحة التصنيف",
     "display_order": "Display Order",
+    "display_order_hint": "Lower numbers appear first in the storefront. 0 sits at the top.",
     "is_active": "Active",
     "is_active_hint": "Inactive categories stay hidden from storefront navigation.",
     "create_active_hint": "New categories are active by default. You can change this after saving."
   },
   "delete_dialog": {
-    "title": "Delete Category",
-    "description": "This permanently deletes the category. You must remove all sub-categories first. Continue?"
+    "title": "Delete {{name}}",
+    "description": "Delete the category \"{{name}}\". All sub-categories must be removed first. This cannot be undone."
   },
   "sub": {
     "page_title": "Sub-categories",
@@ -126,18 +133,25 @@
       "image_url": "Image URL",
       "image_url_placeholder": "https://cdn.bidmart.com/cats/phones.png",
       "display_order": "Display Order",
+      "display_order_hint": "Lower numbers appear first within the parent category.",
       "is_active": "Active",
       "is_active_hint": "Inactive sub-categories stay hidden when buyers browse this category.",
       "create_active_hint": "New sub-categories are active by default."
     },
     "delete_dialog": {
-      "title": "Delete Sub-category",
-      "description": "This permanently deletes the sub-category. Continue?"
+      "title": "Delete {{name}}",
+      "description": "Delete the sub-category \"{{name}}\". This cannot be undone."
     },
     "errors": {
       "create_failed": "Could not create sub-category",
       "update_failed": "Could not update sub-category",
       "delete_failed": "Could not delete sub-category"
+    },
+    "empty": {
+      "no_data_title": "No sub-categories yet",
+      "no_data_hint": "Add the first sub-category under this parent.",
+      "no_results_title": "No sub-categories match this search",
+      "no_results_hint": "Try clearing the search."
     }
   }
 }

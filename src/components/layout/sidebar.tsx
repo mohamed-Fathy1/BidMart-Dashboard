@@ -72,7 +72,7 @@ function NavLink({ item, collapsed }: { item: NavLeaf; collapsed: boolean }) {
             <span
               className={cn(
                 'absolute -start-3 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-e-full bg-primary',
-                'transition-all duration-[var(--duration-layout)] ease-[var(--ease-sidebar)]',
+                'transition-[opacity,transform] duration-[var(--duration-layout)] ease-[var(--ease-sidebar)]',
                 isActive ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0',
               )}
             />
@@ -241,7 +241,7 @@ function NavGroupItem({
               <span
                 className={cn(
                   'absolute -start-3 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-e-full bg-primary',
-                  'transition-all duration-[var(--duration-layout)] ease-[var(--ease-sidebar)]',
+                  'transition-[opacity,transform] duration-[var(--duration-layout)] ease-[var(--ease-sidebar)]',
                   hasActiveChild ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0',
                 )}
               />
@@ -411,14 +411,14 @@ export function Sidebar() {
             <div className="relative z-[1] h-4 w-4 shrink-0">
               <ChevronsLeft
                 className={cn(
-                  'absolute inset-0 h-4 w-4 transition-all duration-[var(--duration-layout)] ease-[var(--ease-sidebar)]',
+                  'absolute inset-0 h-4 w-4 transition-[transform,opacity] duration-[var(--duration-layout)] ease-[var(--ease-sidebar)]',
                   collapsed ? 'rotate-180 opacity-0' : 'rotate-0 opacity-100',
                   'rtl:rotate-180 rtl:data-[collapsed=true]:rotate-0',
                 )}
               />
               <ChevronsRight
                 className={cn(
-                  'absolute inset-0 h-4 w-4 transition-all duration-[var(--duration-layout)] ease-[var(--ease-sidebar)]',
+                  'absolute inset-0 h-4 w-4 transition-[transform,opacity] duration-[var(--duration-layout)] ease-[var(--ease-sidebar)]',
                   collapsed ? 'rotate-0 opacity-100' : '-rotate-180 opacity-0',
                   'rtl:rotate-180 rtl:data-[collapsed=true]:rotate-0',
                 )}

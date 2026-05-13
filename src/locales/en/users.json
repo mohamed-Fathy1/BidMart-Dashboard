@@ -29,20 +29,20 @@
     "delete_success": "User has been deleted"
   },
   "ban_dialog": {
-    "title": "Ban User",
-    "description": "This will permanently ban the user from accessing the platform. Provide a reason for the ban."
+    "title": "Ban {{name}}",
+    "description": "This will permanently ban {{name}} from the platform. Provide a reason for the ban."
   },
   "suspend_dialog": {
-    "title": "Suspend User",
-    "description": "This will temporarily suspend the user's account. Provide a reason for the suspension."
+    "title": "Suspend {{name}}",
+    "description": "This will temporarily suspend the account for {{name}}. Provide a reason for the suspension."
   },
   "delete_dialog": {
-    "title": "Delete User",
-    "description": "This will soft-delete the user account. This action cannot be undone."
+    "title": "Delete {{name}}",
+    "description": "Soft-delete the account for {{name}}. This action cannot be undone."
   },
   "activate_dialog": {
-    "title": "Activate User",
-    "description": "This will reactivate the user's account, allowing them to log in again."
+    "title": "Activate {{name}}",
+    "description": "Reactivate the account for {{name}}, allowing them to log in again."
   },
   "errors": {
     "ban_failed": "Could not ban user",
@@ -70,6 +70,32 @@
     "store_status": "Store status",
     "platform_verified": "Platform verified",
     "store_created_at": "Store created",
-    "verification_requests_count": "Verification requests"
+    "verification_requests_count": "Verification requests",
+    "not_found_title": "User not found",
+    "not_found_hint": "The account you're looking for may have been deleted or the link is stale.",
+    "back_to_list": "Back to users",
+    "hero": {
+      "orders_placed": "Orders placed",
+      "wallet_balance": "Wallet balance",
+      "stores": "Stores"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "orders": "Orders",
+      "wallet": "Wallet",
+      "sessions": "Sessions",
+      "orders_empty_title": "Order history not available yet",
+      "orders_empty_hint": "Buyer order history will land here once the orders service is wired up.",
+      "wallet_empty_title": "Wallet ledger coming soon",
+      "wallet_empty_hint": "Deposits, payouts, and balances will surface here.",
+      "sessions_empty_title": "Sessions coming soon",
+      "sessions_empty_hint": "Active devices, last seen, and revoke controls will surface here."
+    }
+  },
+  "empty": {
+    "no_data_title": "No users yet",
+    "no_data_hint": "Once users register they'll appear here.",
+    "no_results_title": "No users match these filters",
+    "no_results_hint": "Try clearing the search or filters."
   }
 }

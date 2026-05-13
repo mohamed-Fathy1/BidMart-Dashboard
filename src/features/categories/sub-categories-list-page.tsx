@@ -8,8 +8,10 @@ import { PageHeader } from '@/components/shared/page-header'
 import { SearchInput } from '@/components/shared/search-input'
 import { TableFiltersShell } from '@/components/shared/table-filters-shell'
 import { DataTable, type RowActionItem } from '@/components/data-table/data-table'
-import { ConfirmDialog } from '@/components/shared/confirm-dialog'
+import { TargetedConfirmDialog } from '@/components/shared/targeted-confirm-dialog'
 import { FormDialog } from '@/components/shared/form-dialog'
+import { useConfirmTarget } from '@/lib/use-confirm-target'
+import { useListPageData } from '@/lib/use-list-page-data'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -29,6 +31,7 @@ import { ImagePreview } from '@/components/shared/image-preview'
 import { Can } from '@/components/permissions/can'
 import { PERMISSIONS, usePermission } from '@/lib/permissions'
 import { format } from '@/lib/format'
+import { localizedName } from '@/lib/localized-name'
 import { useSubCategoryColumns } from '@/features/categories/sub-categories.columns'
 import {
   subCategoryKeys,
@@ -57,7 +60,7 @@ export function SubCategoriesListPage({
   variant,
   onHubParentChange,
 }: SubCategoriesListPageProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
 
   const canUpdate = usePermission(PERMISSIONS.subCategories.update)
@@ -83,8 +86,18 @@ export function SubCategoriesListPage({
 
   const { data: listResponse, isLoading: isLoadingSubs } = useSubCategoriesQuery(listParams)
 
-  const subRows = listResponse?.data ?? []
-  const meta = listResponse?.meta
+  const hasActiveFilters = !!categoryId && search !== ''
+  const { rows: subRows, meta, tableProps } = useListPageData({
+    response: categoryId ? listResponse : undefined,
+    isLoading: !!categoryId && isLoadingSubs,
+    pagination,
+    setPagination,
+    hasActiveFilters,
+    clearFilters: () => {
+      setSearch('')
+      setPagination((p) => ({ ...p, pageIndex: 0 }))
+    },
+  })
 
   const { data: categoryPickResponse } = useCategoriesQuery({
     search: categoryPickSearch || undefined,
@@ -107,7 +120,7 @@ export function SubCategoriesListPage({
   const [formOpen, setFormOpen] = useState(false)
   const [formPrefilling, setFormPrefilling] = useState(false)
   const [editTargetId, setEditTargetId] = useState<string | null>(null)
-  const [deleteTarget, setDeleteTarget] = useState<SubCategoryListItem | null>(null)
+  const deleteFlow = useConfirmTarget<SubCategoryListItem>()
 
   /* ---------- form state ---------- */
   const [parentCategoryId, setParentCategoryId] = useState(categoryId)
@@ -195,7 +208,7 @@ export function SubCategoriesListPage({
       items.push({
         label: t('categories:sub.actions.delete'),
         icon: Trash2,
-        onClick: (r) => setDeleteTarget(r),
+        onClick: (r) => deleteFlow.ask(r),
         variant: 'destructive',
       })
     }
@@ -268,7 +281,7 @@ export function SubCategoriesListPage({
               </SelectItem>
               {categoryOptions.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
-                  {c.name_en}
+                  {localizedName(c, i18n)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -312,7 +325,7 @@ export function SubCategoriesListPage({
           </div>
         </div>
         <p className="text-sm leading-snug text-muted-foreground sm:max-w-md sm:border-s sm:border-border sm:ps-5">
-          {t('categories:sub.page_description', { category: parentCategory.name_en })}
+          {t('categories:sub.page_description', { category: localizedName(parentCategory, i18n) })}
         </p>
       </div>
     ) : undefined
@@ -370,14 +383,12 @@ export function SubCategoriesListPage({
 
       <DataTable
         columns={columns}
-        data={categoryId ? subRows : []}
-        pageCount={categoryId ? meta?.totalPages : 0}
-        totalRecords={categoryId ? meta?.total : 0}
-        pagination={pagination}
-        onPaginationChange={setPagination}
-        isLoading={!!categoryId && isLoadingSubs}
+        data={subRows}
+        {...tableProps}
+        emptyKeyPrefix="categories:sub.empty"
         toolbar={toolbar}
         actions={categoryId && (canUpdate || canDelete) ? getRowActions : undefined}
+        rowLabel={(row) => localizedName(row, i18n)}
         getRowId={(row) => row.id}
       />
 
@@ -422,7 +433,7 @@ export function SubCategoriesListPage({
                         <SelectContent>
                           {formCategoryOptions.map((c) => (
                             <SelectItem key={c.id} value={c.id}>
-                              {c.name_en}
+                              {localizedName(c, i18n)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -512,6 +523,9 @@ export function SubCategoriesListPage({
                       min={0}
                       className="max-w-48 font-mono tabular-nums"
                     />
+                    <p className="text-xs text-muted-foreground">
+                      {t('categories:sub.form.display_order_hint')}
+                    </p>
                   </div>
                   {editTargetId ? (
                     <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/20 px-4 py-3 md:justify-between">
@@ -537,17 +551,13 @@ export function SubCategoriesListPage({
         </>
       </FormDialog>
 
-      <ConfirmDialog
-        open={!!deleteTarget}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title={t('categories:sub.delete_dialog.title')}
-        description={t('categories:sub.delete_dialog.description')}
-        onConfirm={() => {
-          if (!deleteTarget) return
-          deleteMutation.mutate(deleteTarget.id, {
-            onSettled: () => setDeleteTarget(null),
-          })
-        }}
+      <TargetedConfirmDialog
+        flow={deleteFlow}
+        i18nPrefix="categories:sub.delete_dialog"
+        getName={(r) => localizedName(r, i18n)}
+        onConfirm={(target) =>
+          deleteMutation.mutate(target.id, { onSettled: deleteFlow.close })
+        }
         isLoading={deleteMutation.isPending}
         variant="destructive"
       />

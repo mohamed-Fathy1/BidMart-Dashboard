@@ -44,6 +44,7 @@ export function ProfilePage() {
     formState: { errors, isDirty },
   } = useForm<ProfileForm>({
     resolver: zodResolver(profileFormSchema),
+    mode: "onBlur",
     defaultValues: {
       fullName: "",
       email: "",

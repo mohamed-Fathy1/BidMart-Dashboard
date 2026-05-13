@@ -1,38 +1,18 @@
 import { api } from '@/lib/axios'
-import type { Country, PaginationMeta } from '@/types/api'
+import {
+  unwrap,
+  unwrapPaginated,
+  type ApiEnvelope,
+  type Country,
+  type Paginated,
+} from '@/types/api'
 
-/* ------------------------------------------------------------------ */
-/*  Response helpers                                                  */
-/* ------------------------------------------------------------------ */
-
-function unwrapCountry(body: unknown): Country {
-  if (!body || typeof body !== 'object') {
-    throw new Error('Invalid country response')
-  }
-  const o = body as Record<string, unknown>
-  const inner = o.data
-  if (inner && typeof inner === 'object') {
-    return inner as Country
-  }
-  return body as Country
-}
-
+/** Toggle endpoint accepts both camel + snake case from older deployments. */
 function unwrapTogglePayload(body: unknown): { isEnabled: boolean } {
-  if (!body || typeof body !== 'object') {
-    throw new Error('Invalid toggle response')
-  }
-  const o = body as Record<string, unknown>
-  const nested = o.data
-  if (nested && typeof nested === 'object') {
-    const n = nested as Record<string, unknown>
-    if (typeof n.isEnabled === 'boolean') return { isEnabled: n.isEnabled }
-    if (typeof n.is_enabled === 'boolean') return { isEnabled: n.is_enabled }
-  }
-  if (typeof o.isEnabled === 'boolean') {
-    return { isEnabled: o.isEnabled }
-  }
-  if (typeof o.is_enabled === 'boolean') {
-    return { isEnabled: o.is_enabled }
+  const inner = unwrap(body as ApiEnvelope<unknown> | unknown) as Record<string, unknown> | null
+  if (inner && typeof inner === 'object') {
+    if (typeof inner.isEnabled === 'boolean') return { isEnabled: inner.isEnabled }
+    if (typeof inner.is_enabled === 'boolean') return { isEnabled: inner.is_enabled }
   }
   throw new Error('Invalid toggle response')
 }
@@ -76,26 +56,22 @@ export interface UpdateCountryPayload {
 
 export async function listCountries(
   params: ListCountriesParams,
-): Promise<{ data: Country[]; meta: PaginationMeta }> {
-  const res = await api.get<{
-    success?: boolean
-    data: Country[]
-    meta: PaginationMeta
-  }>('/admin/countries', { params })
-  return { data: res.data.data, meta: res.data.meta }
+): Promise<Paginated<Country>> {
+  const res = await api.get<ApiEnvelope<Country[]>>('/admin/countries', { params })
+  return unwrapPaginated(res.data)
 }
 
 export async function createCountry(payload: CreateCountryPayload): Promise<Country> {
-  const res = await api.post<unknown>('/admin/countries', payload)
-  return unwrapCountry(res.data)
+  const res = await api.post<ApiEnvelope<Country> | Country>('/admin/countries', payload)
+  return unwrap(res.data)
 }
 
 export async function updateCountry(
   id: string,
   payload: UpdateCountryPayload,
 ): Promise<Country> {
-  const res = await api.patch<unknown>(`/admin/countries/${id}`, payload)
-  return unwrapCountry(res.data)
+  const res = await api.patch<ApiEnvelope<Country> | Country>(`/admin/countries/${id}`, payload)
+  return unwrap(res.data)
 }
 
 export async function deleteCountry(id: string): Promise<void> {
