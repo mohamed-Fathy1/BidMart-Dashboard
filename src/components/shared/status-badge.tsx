@@ -58,6 +58,14 @@ interface SellerVerifiedBadgeProps {
   className?: string
 }
 
+type ComplaintStatusValue = 'UNDER_REVIEW' | 'IN_PROGRESS' | 'RESOLVED' | 'REJECTED'
+
+interface ComplaintBadgeProps {
+  type: 'complaint'
+  status: ComplaintStatusValue
+  className?: string
+}
+
 type StatusBadgeProps =
   | AccountBadgeProps
   | SellerBadgeProps
@@ -67,6 +75,7 @@ type StatusBadgeProps =
   | AccountTypeBadgeProps
   | ProviderVerificationBadgeProps
   | SellerVerifiedBadgeProps
+  | ComplaintBadgeProps
 
 interface StatusStyle {
   badge: string
@@ -82,6 +91,7 @@ const positive: StatusStyle = { badge: 'bg-emerald-50 text-emerald-700 border-em
 const warning: StatusStyle  = { badge: 'bg-amber-50 text-amber-700 border-amber-200/70',       dot: 'bg-amber-500' }
 const danger: StatusStyle   = { badge: 'bg-red-50 text-red-700 border-red-200/70',             dot: 'bg-red-500' }
 const neutral: StatusStyle  = { badge: 'bg-stone-100 text-stone-600 border-stone-200/70',       dot: 'bg-stone-400' }
+const info: StatusStyle     = { badge: 'bg-blue-50 text-blue-700 border-blue-200/70',           dot: 'bg-blue-500' }
 
 const accountStyles: Record<AccountStatus, StatusStyle> = {
   active:               positive,
@@ -131,6 +141,13 @@ const sellerVerifiedStyles: Record<'true' | 'false', StatusStyle> = {
   false: neutral,
 }
 
+const complaintStyles: Record<ComplaintStatusValue, StatusStyle> = {
+  UNDER_REVIEW: warning,
+  IN_PROGRESS:  info,
+  RESOLVED:     positive,
+  REJECTED:     danger,
+}
+
 const fallbackStyle: StatusStyle = neutral
 
 function getStyle(status: string, type: StatusBadgeProps['type']): StatusStyle {
@@ -149,6 +166,8 @@ function getStyle(status: string, type: StatusBadgeProps['type']): StatusStyle {
       return providerVerificationStyles[status as ProviderVerificationStatus] ?? fallbackStyle
     case 'sellerVerified':
       return sellerVerifiedStyles[status as 'true' | 'false'] ?? fallbackStyle
+    case 'complaint':
+      return complaintStyles[status as ComplaintStatusValue] ?? fallbackStyle
     case 'account':
     default:
       return accountStyles[status as AccountStatus] ?? fallbackStyle
@@ -166,6 +185,9 @@ function getI18nKey(status: string, type: StatusBadgeProps['type']): string {
     return status === 'true'
       ? 'components:status.verified'
       : 'components:status.unverified'
+  }
+  if (type === 'complaint') {
+    return `complaints:status.${status.toLowerCase()}`
   }
   return `components:status.${status}`
 }

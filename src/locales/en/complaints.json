@@ -1,0 +1,221 @@
+{
+  "title": "Complaints",
+  "description": "Triage, investigate, and resolve customer complaints.",
+  "empty": {
+    "no_data_title": "No complaints yet",
+    "no_data_hint": "New complaints submitted by users will appear here.",
+    "no_results_title": "No complaints match these filters",
+    "no_results_hint": "Try clearing the search or filters."
+  },
+  "filters": {
+    "search_placeholder": "Search by complainant name or complaint ID",
+    "status_placeholder": "Status",
+    "type_placeholder": "Type",
+    "all_statuses": "All",
+    "all_types": "All types",
+    "loading_counts": "Loading…",
+    "results_count_one": "{{count}} complaint",
+    "results_count_other": "{{count}} complaints"
+  },
+  "wait": {
+    "just_now": "just now",
+    "minutes": "{{value}}m",
+    "hours": "{{value}}h",
+    "days": "{{value}}d",
+    "days_hours": "{{days}}d {{hours}}h",
+    "waiting_for": "waiting"
+  },
+  "hero": {
+    "complaint_label": "Complaint",
+    "submitted_relative": "Submitted {{value}} ago",
+    "last_update_relative": "Updated {{value}} ago",
+    "resolution_band_title": "Resolution shared with complainant",
+    "rejection_band_title": "Rejection reason shared with complainant"
+  },
+  "status": {
+    "under_review": "Under review",
+    "in_progress": "In progress",
+    "resolved": "Resolved",
+    "rejected": "Rejected"
+  },
+  "columns": {
+    "id": "ID",
+    "submitter": "Complainant",
+    "type": "Type",
+    "status": "Status",
+    "last_message": "Last message",
+    "created_at": "Submitted",
+    "waiting": "Waiting",
+    "no_messages": "No messages yet",
+    "image_message": "[Image]",
+    "unread_label": "{{count}} unread"
+  },
+  "actions": {
+    "view": "View details",
+    "start": "Start investigation",
+    "resolve": "Resolve",
+    "reject": "Reject",
+    "close_conversation": "Close conversation",
+    "add_note": "Add note",
+    "send_notification": "Send notification",
+    "back_to_list": "Back to complaints"
+  },
+  "tabs": {
+    "conversation": "Conversation",
+    "notes": "Internal notes",
+    "activity": "Activity"
+  },
+  "info": {
+    "section_title": "Complaint details",
+    "submitter": "Complainant",
+    "phone": "Phone",
+    "type": "Type",
+    "submitted": "Submitted",
+    "updated": "Updated",
+    "description": "Description",
+    "attachments": "Attachments",
+    "no_attachments": "No attachments",
+    "resolution_title": "Resolution",
+    "resolved_at": "Resolved",
+    "rejected_at": "Rejected",
+    "resolved_by": "By",
+    "resolution_note": "Resolution note",
+    "rejection_reason": "Rejection reason"
+  },
+  "chat": {
+    "title": "Conversation",
+    "empty": "No messages have been exchanged yet.",
+    "input_placeholder": "Write a reply to the complainant…",
+    "send": "Send",
+    "attach_image": "Attach image",
+    "image_attached": "Ready to send",
+    "image_too_large": "Image is over the 5 MB limit.",
+    "send_failed": "Could not send the message. Try again.",
+    "locked_under_review": "Start the investigation to open the chat with the complainant.",
+    "locked_resolved": "This complaint was resolved. The conversation is closed.",
+    "locked_rejected": "This complaint was rejected. The conversation is closed.",
+    "locked_manually_closed": "An admin closed this conversation. Reopen by changing the complaint status.",
+    "connecting": "Connecting…",
+    "reconnecting": "Reconnecting…",
+    "disconnected": "Disconnected",
+    "connected": "Live",
+    "typing_someone": "{{who}} is typing…",
+    "you": "You",
+    "support": "Support",
+    "complainant": "Complainant",
+    "status_sent": "Sent",
+    "status_delivered": "Delivered",
+    "status_read": "Read",
+    "composer": {
+      "shortcut_hint": "Enter to send · Shift + Enter for new line",
+      "attach_remove": "Remove attachment"
+    }
+  },
+  "socket_errors": {
+    "AUTH_REQUIRED": "Sign in again to continue chatting.",
+    "INVALID_TOKEN": "Your session expired. Sign in again.",
+    "USER_BLOCKED": "This account is blocked from support chat.",
+    "COMPLAINT_CHAT_NOT_OPEN": "Chat is not open yet.",
+    "COMPLAINT_CLOSED": "This complaint is closed.",
+    "COMPLAINT_CONVERSATION_CLOSED": "The conversation was closed.",
+    "INVALID_PAYLOAD": "Could not send the message — please retry.",
+    "UNKNOWN": "Real-time chat ran into an issue."
+  },
+  "force_logout": {
+    "TOKEN_REVOKED": "Your session was revoked. Sign in again.",
+    "USER_BLOCKED": "This account has been blocked."
+  },
+  "notes": {
+    "title": "Internal notes",
+    "subtitle": "Notes are visible to admins only.",
+    "empty": "No internal notes have been added.",
+    "add_button": "Add note",
+    "form_title": "Add internal note",
+    "form_description": "Notes are never shown to the complainant.",
+    "placeholder": "Write an internal note (max 5000 characters)…",
+    "submit": "Save note",
+    "added_by": "by {{name}}",
+    "counter": "{{count}} / 5000"
+  },
+  "activity": {
+    "title": "Activity log",
+    "empty": "No activity recorded yet.",
+    "actor_system": "System",
+    "actor_admin": "Admin",
+    "action": {
+      "started_investigation": "Started investigation",
+      "resolved": "Resolved the complaint",
+      "rejected": "Rejected the complaint",
+      "added_note": "Added an internal note",
+      "sent_notification": "Sent a push notification",
+      "closed_conversation": "Closed the conversation"
+    }
+  },
+  "dialogs": {
+    "start": {
+      "title": "Start investigation?",
+      "description": "The complaint will move to In Progress and the complainant will be notified. Chat will be enabled.",
+      "confirm": "Start investigation"
+    },
+    "resolve": {
+      "title": "Resolve complaint",
+      "description": "Provide a short note that will be shared with the complainant.",
+      "note_label": "Resolution note",
+      "note_placeholder": "Explain what was done to address the complaint…",
+      "submit": "Mark as resolved",
+      "counter": "{{count}} / 1000"
+    },
+    "reject": {
+      "title": "Reject complaint",
+      "description": "Provide a short reason that will be shared with the complainant.",
+      "reason_label": "Rejection reason",
+      "reason_placeholder": "Explain why the complaint cannot be accepted…",
+      "submit": "Mark as rejected",
+      "counter": "{{count}} / 1000"
+    },
+    "close_conversation": {
+      "title": "Close conversation?",
+      "description": "The chat will be locked but the complaint will stay open for internal processing.",
+      "confirm": "Close conversation"
+    },
+    "notify": {
+      "title": "Send a notification",
+      "description": "Sends a push notification to the complainant. This is not added to the chat thread.",
+      "message_label": "Notification text",
+      "message_placeholder": "We need more information from you about order #12345…",
+      "submit": "Send notification",
+      "counter": "{{count}} / 500"
+    }
+  },
+  "toasts": {
+    "start_success": "Investigation started.",
+    "resolve_success": "Complaint marked as resolved.",
+    "reject_success": "Complaint rejected.",
+    "close_success": "Conversation closed.",
+    "note_success": "Note added.",
+    "notify_success": "Notification sent."
+  },
+  "errors": {
+    "load_failed": "Could not load the complaints.",
+    "detail_load_failed": "Could not load the complaint.",
+    "notes_load_failed": "Could not load the notes.",
+    "start_failed": "Could not start the investigation.",
+    "resolve_failed": "Could not resolve the complaint.",
+    "reject_failed": "Could not reject the complaint.",
+    "close_failed": "Could not close the conversation.",
+    "note_failed": "Could not add the note.",
+    "notify_failed": "Could not send the notification.",
+    "not_found": "This complaint no longer exists.",
+    "already_closed": "The complaint is already closed."
+  },
+  "validation": {
+    "note_required": "Write a note before saving.",
+    "note_too_long": "Notes are limited to 5000 characters.",
+    "resolution_required": "Add a resolution note.",
+    "resolution_too_long": "Resolution notes are limited to 1000 characters.",
+    "reason_required": "Add a rejection reason.",
+    "reason_too_long": "Rejection reasons are limited to 1000 characters.",
+    "notification_required": "Write a message to send.",
+    "notification_too_long": "Notifications are limited to 500 characters."
+  }
+}

@@ -390,3 +390,118 @@ export interface AdminAccountListItem {
 
 /** Detail payload matches list rows from this API */
 export type AdminAccountDetail = AdminAccountListItem;
+
+/* ------------------------------------------------------------------ */
+/*  Complaints (support chat)                                          */
+/* ------------------------------------------------------------------ */
+
+export type ComplaintStatus =
+  | "UNDER_REVIEW"
+  | "IN_PROGRESS"
+  | "RESOLVED"
+  | "REJECTED";
+
+export type ComplaintChatClosedReason =
+  | "resolved"
+  | "rejected"
+  | "manually_closed"
+  | null;
+
+export type ComplaintMessageType = "TEXT" | "IMAGE";
+export type ComplaintMessageStatus = "SENT" | "DELIVERED" | "READ";
+export type ComplaintMessageSender = "USER" | "ADMIN";
+
+export interface ComplaintTypeRef {
+  id: string;
+  name_en: string;
+  name_ar: string;
+}
+
+/** Localized complaint type (mobile GET /complaints/types). */
+export interface ComplaintTypeOption {
+  id: string;
+  name: string;
+}
+
+export interface ComplaintSubmitterRef {
+  id: string;
+  full_name: string | null;
+}
+
+export interface ComplaintSubmitterDetail extends ComplaintSubmitterRef {
+  phone_number: string | null;
+}
+
+export interface ComplaintLastMessage {
+  content: string;
+  messageType: ComplaintMessageType;
+  createdAt: string;
+  isRead: boolean;
+}
+
+export interface ComplaintSummary {
+  id: string;
+  submitter: ComplaintSubmitterRef;
+  complaint_type: ComplaintTypeRef;
+  status: ComplaintStatus;
+  description_preview: string;
+  adminUnreadCount: number;
+  lastMessage: ComplaintLastMessage | null;
+  created_at: string;
+}
+
+export interface ComplaintMessageAdmin {
+  id: string;
+  sender: ComplaintMessageSender;
+  senderId: string;
+  messageType: ComplaintMessageType;
+  content: string | null;
+  imageUrl: string | null;
+  status: ComplaintMessageStatus;
+  deliveredAt: string | null;
+  readAt: string | null;
+  isMe: boolean;
+  createdAt: string;
+}
+
+export interface ComplaintNoteItem {
+  id: string;
+  adminName: string;
+  note: string;
+  createdAt: string;
+}
+
+export type ComplaintActivityAction =
+  | "started_investigation"
+  | "resolved"
+  | "rejected"
+  | "added_note"
+  | "sent_notification"
+  | "closed_conversation";
+
+export interface ComplaintActivityItem {
+  id: string;
+  actor_type: "admin" | "system";
+  actor_id: string | null;
+  action: ComplaintActivityAction | string;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface ComplaintDetail {
+  id: string;
+  submitter: ComplaintSubmitterDetail;
+  complaint_type: ComplaintTypeRef;
+  status: ComplaintStatus;
+  description: string;
+  attachment_urls: string[];
+  notes: ComplaintNoteItem[];
+  activities: ComplaintActivityItem[];
+  resolution_note: string | null;
+  resolved_by: string | null;
+  resolved_at: string | null;
+  conversation_closed: boolean;
+  messages: ComplaintMessageAdmin[];
+  created_at: string;
+  updated_at: string;
+}

@@ -1,0 +1,225 @@
+{
+  "title": "الشكاوى",
+  "description": "استلام الشكاوى ومراجعتها وحلّها.",
+  "empty": {
+    "no_data_title": "لا توجد شكاوى بعد",
+    "no_data_hint": "ستظهر هنا الشكاوى التي يرسلها المستخدمون.",
+    "no_results_title": "لا توجد شكاوى مطابقة للتصفية",
+    "no_results_hint": "جرّب مسح البحث أو التصفية."
+  },
+  "filters": {
+    "search_placeholder": "ابحث باسم مقدّم الشكوى أو معرّف الشكوى",
+    "status_placeholder": "الحالة",
+    "type_placeholder": "النوع",
+    "all_statuses": "الكل",
+    "all_types": "كل الأنواع",
+    "loading_counts": "تحميل…",
+    "results_count_zero": "لا توجد شكاوى",
+    "results_count_one": "شكوى واحدة",
+    "results_count_two": "شكويان",
+    "results_count_few": "{{count}} شكاوى",
+    "results_count_many": "{{count}} شكوى",
+    "results_count_other": "{{count}} شكوى"
+  },
+  "wait": {
+    "just_now": "الآن",
+    "minutes": "{{value}}د",
+    "hours": "{{value}}س",
+    "days": "{{value}}ي",
+    "days_hours": "{{days}}ي {{hours}}س",
+    "waiting_for": "في الانتظار"
+  },
+  "hero": {
+    "complaint_label": "شكوى",
+    "submitted_relative": "مرسلة منذ {{value}}",
+    "last_update_relative": "آخر تحديث منذ {{value}}",
+    "resolution_band_title": "ملاحظة الحلّ المرسلة لمقدّم الشكوى",
+    "rejection_band_title": "سبب الرفض المرسل لمقدّم الشكوى"
+  },
+  "status": {
+    "under_review": "قيد المراجعة",
+    "in_progress": "قيد المعالجة",
+    "resolved": "تم الحل",
+    "rejected": "مرفوضة"
+  },
+  "columns": {
+    "id": "المعرّف",
+    "submitter": "مقدّم الشكوى",
+    "type": "النوع",
+    "status": "الحالة",
+    "last_message": "آخر رسالة",
+    "created_at": "تاريخ الإرسال",
+    "waiting": "الانتظار",
+    "no_messages": "لا توجد رسائل بعد",
+    "image_message": "[صورة]",
+    "unread_label": "{{count}} غير مقروءة"
+  },
+  "actions": {
+    "view": "عرض التفاصيل",
+    "start": "بدء المعالجة",
+    "resolve": "حلّ الشكوى",
+    "reject": "رفض الشكوى",
+    "close_conversation": "إغلاق المحادثة",
+    "add_note": "إضافة ملاحظة",
+    "send_notification": "إرسال إشعار",
+    "back_to_list": "العودة للشكاوى"
+  },
+  "tabs": {
+    "conversation": "المحادثة",
+    "notes": "ملاحظات داخلية",
+    "activity": "السجل"
+  },
+  "info": {
+    "section_title": "تفاصيل الشكوى",
+    "submitter": "مقدّم الشكوى",
+    "phone": "الجوال",
+    "type": "النوع",
+    "submitted": "تاريخ الإرسال",
+    "updated": "آخر تحديث",
+    "description": "الوصف",
+    "attachments": "المرفقات",
+    "no_attachments": "لا توجد مرفقات",
+    "resolution_title": "الحلّ",
+    "resolved_at": "تم الحلّ",
+    "rejected_at": "تم الرفض",
+    "resolved_by": "بواسطة",
+    "resolution_note": "ملاحظة الحلّ",
+    "rejection_reason": "سبب الرفض"
+  },
+  "chat": {
+    "title": "المحادثة",
+    "empty": "لم يتم تبادل أي رسائل بعد.",
+    "input_placeholder": "اكتب ردّاً لمقدّم الشكوى…",
+    "send": "إرسال",
+    "attach_image": "إرفاق صورة",
+    "image_attached": "جاهزة للإرسال",
+    "image_too_large": "حجم الصورة يتجاوز ٥ ميغابايت.",
+    "send_failed": "تعذّر إرسال الرسالة. حاول مرة أخرى.",
+    "locked_under_review": "ابدأ المعالجة لفتح المحادثة مع مقدّم الشكوى.",
+    "locked_resolved": "تم حلّ هذه الشكوى. المحادثة مغلقة.",
+    "locked_rejected": "تم رفض هذه الشكوى. المحادثة مغلقة.",
+    "locked_manually_closed": "تم إغلاق هذه المحادثة من قِبَل أحد المسؤولين.",
+    "connecting": "جاري الاتصال…",
+    "reconnecting": "إعادة الاتصال…",
+    "disconnected": "غير متّصل",
+    "connected": "متّصل",
+    "typing_someone": "{{who}} يكتب الآن…",
+    "you": "أنت",
+    "support": "الدعم الفني",
+    "complainant": "مقدّم الشكوى",
+    "status_sent": "تم الإرسال",
+    "status_delivered": "تم التسليم",
+    "status_read": "تم القراءة",
+    "composer": {
+      "shortcut_hint": "اضغط Enter للإرسال · Shift + Enter لسطر جديد",
+      "attach_remove": "إزالة المرفق"
+    }
+  },
+  "socket_errors": {
+    "AUTH_REQUIRED": "سجّل الدخول مجدّداً لمتابعة المحادثة.",
+    "INVALID_TOKEN": "انتهت الجلسة. سجّل الدخول مجدّداً.",
+    "USER_BLOCKED": "هذا الحساب محظور من المحادثة.",
+    "COMPLAINT_CHAT_NOT_OPEN": "المحادثة لم تُفتح بعد.",
+    "COMPLAINT_CLOSED": "هذه الشكوى مغلقة.",
+    "COMPLAINT_CONVERSATION_CLOSED": "تم إغلاق المحادثة.",
+    "INVALID_PAYLOAD": "تعذّر إرسال الرسالة — حاول مجدّداً.",
+    "UNKNOWN": "حدث خطأ في المحادثة الفورية."
+  },
+  "force_logout": {
+    "TOKEN_REVOKED": "تم إلغاء الجلسة. سجّل الدخول مجدّداً.",
+    "USER_BLOCKED": "تم حظر هذا الحساب."
+  },
+  "notes": {
+    "title": "ملاحظات داخلية",
+    "subtitle": "الملاحظات مرئية للمسؤولين فقط.",
+    "empty": "لا توجد ملاحظات داخلية بعد.",
+    "add_button": "إضافة ملاحظة",
+    "form_title": "إضافة ملاحظة داخلية",
+    "form_description": "لا تظهر الملاحظات لمقدّم الشكوى أبداً.",
+    "placeholder": "اكتب ملاحظة داخلية (٥٠٠٠ حرف كحدّ أقصى)…",
+    "submit": "حفظ الملاحظة",
+    "added_by": "بواسطة {{name}}",
+    "counter": "{{count}} / 5000"
+  },
+  "activity": {
+    "title": "سجل النشاط",
+    "empty": "لا توجد أنشطة مسجّلة بعد.",
+    "actor_system": "النظام",
+    "actor_admin": "المسؤول",
+    "action": {
+      "started_investigation": "بدأ معالجة الشكوى",
+      "resolved": "حلّ الشكوى",
+      "rejected": "رفض الشكوى",
+      "added_note": "أضاف ملاحظة داخلية",
+      "sent_notification": "أرسل إشعاراً",
+      "closed_conversation": "أغلق المحادثة"
+    }
+  },
+  "dialogs": {
+    "start": {
+      "title": "بدء معالجة الشكوى؟",
+      "description": "ستنتقل الشكوى إلى \"قيد المعالجة\" وسيتم إعلام مقدّم الشكوى. ستفتح المحادثة.",
+      "confirm": "بدء المعالجة"
+    },
+    "resolve": {
+      "title": "حلّ الشكوى",
+      "description": "أضف ملاحظة قصيرة سيراها مقدّم الشكوى.",
+      "note_label": "ملاحظة الحلّ",
+      "note_placeholder": "اشرح ما تم لمعالجة الشكوى…",
+      "submit": "تأكيد الحلّ",
+      "counter": "{{count}} / 1000"
+    },
+    "reject": {
+      "title": "رفض الشكوى",
+      "description": "أضف سبباً قصيراً سيراه مقدّم الشكوى.",
+      "reason_label": "سبب الرفض",
+      "reason_placeholder": "اشرح سبب عدم قبول الشكوى…",
+      "submit": "تأكيد الرفض",
+      "counter": "{{count}} / 1000"
+    },
+    "close_conversation": {
+      "title": "إغلاق المحادثة؟",
+      "description": "ستُغلق المحادثة لكنّ الشكوى تظلّ مفتوحة للمعالجة الداخلية.",
+      "confirm": "إغلاق المحادثة"
+    },
+    "notify": {
+      "title": "إرسال إشعار",
+      "description": "يتم إرسال إشعار دفعي إلى مقدّم الشكوى. لن يُضاف إلى المحادثة.",
+      "message_label": "نص الإشعار",
+      "message_placeholder": "نحتاج مزيداً من المعلومات بخصوص الطلب رقم ١٢٣٤٥…",
+      "submit": "إرسال الإشعار",
+      "counter": "{{count}} / 500"
+    }
+  },
+  "toasts": {
+    "start_success": "تم بدء المعالجة.",
+    "resolve_success": "تم تحديد الشكوى كمحلولة.",
+    "reject_success": "تم رفض الشكوى.",
+    "close_success": "تم إغلاق المحادثة.",
+    "note_success": "تمت إضافة الملاحظة.",
+    "notify_success": "تم إرسال الإشعار."
+  },
+  "errors": {
+    "load_failed": "تعذّر تحميل الشكاوى.",
+    "detail_load_failed": "تعذّر تحميل الشكوى.",
+    "notes_load_failed": "تعذّر تحميل الملاحظات.",
+    "start_failed": "تعذّر بدء المعالجة.",
+    "resolve_failed": "تعذّر حلّ الشكوى.",
+    "reject_failed": "تعذّر رفض الشكوى.",
+    "close_failed": "تعذّر إغلاق المحادثة.",
+    "note_failed": "تعذّر إضافة الملاحظة.",
+    "notify_failed": "تعذّر إرسال الإشعار.",
+    "not_found": "هذه الشكوى لم تعد موجودة.",
+    "already_closed": "الشكوى مغلقة مسبقاً."
+  },
+  "validation": {
+    "note_required": "اكتب الملاحظة قبل الحفظ.",
+    "note_too_long": "الحدّ الأقصى للملاحظات ٥٠٠٠ حرف.",
+    "resolution_required": "أضف ملاحظة الحلّ.",
+    "resolution_too_long": "الحدّ الأقصى لملاحظة الحلّ ١٠٠٠ حرف.",
+    "reason_required": "أضف سبب الرفض.",
+    "reason_too_long": "الحدّ الأقصى لسبب الرفض ١٠٠٠ حرف.",
+    "notification_required": "اكتب رسالة الإشعار.",
+    "notification_too_long": "الحدّ الأقصى لرسالة الإشعار ٥٠٠ حرف."
+  }
+}

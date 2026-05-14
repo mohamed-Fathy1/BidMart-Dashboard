@@ -8,6 +8,7 @@ import {
   UserCog,
   FolderTree,
   LayoutGrid,
+  MessageCircleWarning,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { PERMISSIONS, type Permission } from '@/lib/permissions'
@@ -51,6 +52,7 @@ export const navSections: NavSection[] = [
     entries: [
       { kind: 'leaf', labelKey: 'shell:nav.users', icon: Users, to: '/users', permission: PERMISSIONS.users.view },
       { kind: 'leaf', labelKey: 'shell:nav.providers', icon: Store, to: '/providers', permission: PERMISSIONS.providers.view },
+      { kind: 'leaf', labelKey: 'shell:nav.complaints', icon: MessageCircleWarning, to: '/complaints', permission: PERMISSIONS.complaints.view },
       {
         kind: 'group',
         labelKey: 'shell:nav.catalog',

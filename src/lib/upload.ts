@@ -27,6 +27,7 @@ export type UploadCase =
   | 'country_image'
   | 'sub_category_image'
   | 'product_image'
+  | 'complaint_chat_attachment'
 
 function fileExtensionForContentType(contentType: string): string {
   if (contentType === 'image/jpeg' || contentType === 'image/jpg') return 'jpg'

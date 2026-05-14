@@ -1,0 +1,1663 @@
+{
+  "info": {
+    "_postman_id": "c9d8e7f6-a5b4-3c2d-1e0f-9a8b7c6d5e4f",
+    "name": "BidMart — Complaints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Complete REST coverage for the Complaints module — user side, admin side, and complaint-type management.\n\n**Seeded accounts (all environments):**\n| Role   | Phone / Email            | Password      |\n|--------|--------------------------|---------------|\n| Buyer  | +966500000003 (Omar)     | Buyer@123456  |\n| Buyer  | +971500000001 (Sara)     | Buyer@123456  |\n| Buyer  | +96550000001  (Khalid)   | Buyer@123456  |\n| Seller | +966500000002 (Ahmed)    | Seller@123456 |\n| Admin  | admin@bidmart.com        | Admin@123     |\n\n**Seeded complaints:**\n1. Omar → Item Not Received → UNDER_REVIEW (2 messages, 1 admin note)\n2. Sara → Damaged Item → RESOLVED (1 message, resolution note, conv closed)\n3. Khalid → Other → REJECTED (no messages, resolution note, conv closed)\n4. Omar → Seller Misconduct → UNDER_REVIEW (3 messages, conversation manually closed)\n\n**Recommended run order:**\n1. 🔑 Setup — Login (all 4 login requests)\n2. 📋 Complaint Types → List Types (sets `complaintTypeId`)\n3. 👤 User → Submit Complaint (sets `complaintId`)\n4. 👤 User → List My Complaints as Sara (sets `resolvedComplaintId`)\n5. 🛡 Admin → View & Filter → List All Complaints\n6. 🛡 Admin → Actions → Start Investigation (transitions `complaintId` to IN_PROGRESS)\n7. 👤 User → Get Support Conversations → unified shape (source, otherParticipant, conversationClosed)\n8. 👤 User → Get Complaint Messages (sets `messageCursor`)\n9. Remaining requests in any order\n\n**Inbox response shape (v2 — unified):**\nGET /complaints/support/active now returns the same `UnifiedInboxItem` shape as GET /inbox. Fields `chatAvailable`, `chatClosedReason`, `complaint_type`, and `status` are no longer in the list response — fetch GET /complaints/:id to get those when opening a specific complaint.\n\n⚠️  Real-time chat messages are sent via Socket.IO (`/complaint-chat` namespace), NOT via REST. Use the complaint-chat tester at `/complaint-chat-tester` for socket testing."
+  },
+  "variable": [
+    { "key": "baseUrl",             "value": "http://localhost:3000/api/v1", "type": "string" },
+    { "key": "userToken",           "value": "", "type": "string",  "description": "Omar's JWT — auto-set by Setup" },
+    { "key": "sara_token",          "value": "", "type": "string",  "description": "Sara's JWT — auto-set by Setup" },
+    { "key": "khalid_token",        "value": "", "type": "string",  "description": "Khalid's JWT — auto-set by Setup" },
+    { "key": "adminToken",          "value": "", "type": "string",  "description": "Admin JWT — auto-set by Setup" },
+    { "key": "complaintTypeId",     "value": "", "type": "string",  "description": "Auto-set by List Complaint Types" },
+    { "key": "complaintId",         "value": "", "type": "string",  "description": "Auto-set by Submit Complaint (fresh complaint for this session)" },
+    { "key": "resolvedComplaintId", "value": "", "type": "string",  "description": "Auto-set by List My Complaints as Sara (Damaged Item, RESOLVED)" },
+    { "key": "rejectedComplaintId", "value": "", "type": "string",  "description": "Auto-set by List My Complaints as Khalid (Other, REJECTED)" },
+    { "key": "newTypeId",           "value": "", "type": "string",  "description": "Auto-set by Create Complaint Type" },
+    { "key": "messageCursor",        "value": "", "type": "string",  "description": "Auto-set by Get Complaint Messages — pass as cursor to load older messages" },
+    { "key": "conversationsCursor", "value": "", "type": "string",  "description": "Auto-set by Get Support Conversations — pass as cursor to load next page" },
+    { "key": "adminMessageCursor",  "value": "", "type": "string",  "description": "Auto-set by Get Complaint Messages (Admin) — pass as cursor to load older messages" }
+  ],
+  "item": [
+
+    {
+      "name": "🔑 Setup — Login (run first)",
+      "description": "Login as all test users to populate JWT tokens. Run all 4 in order.",
+      "item": [
+        {
+          "name": "Login as Omar (buyer · +966500000003)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Has accessToken', () => pm.expect(res.data.accessToken).to.be.a('string'));",
+              "if (res.success && res.data && res.data.accessToken) {",
+              "  pm.collectionVariables.set('userToken', res.data.accessToken);",
+              "  if (res.data.user) pm.collectionVariables.set('omar_id', res.data.user.id);",
+              "  console.log('Omar token saved');",
+              "}"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": { "mode": "raw", "raw": "{\n  \"phone\": \"+966500000003\",\n  \"password\": \"Buyer@123456\",\n  \"deviceId\": \"postman-omar\"\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Buyer Omar — submitter of complaints #1 (Item Not Received, UNDER_REVIEW) and #4 (Seller Misconduct, UNDER_REVIEW + conv closed)."
+          },
+          "response": []
+        },
+        {
+          "name": "Login as Sara (buyer · +971500000001)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "if (res.success && res.data && res.data.accessToken) {",
+              "  pm.collectionVariables.set('sara_token', res.data.accessToken);",
+              "  if (res.data.user) pm.collectionVariables.set('sara_id', res.data.user.id);",
+              "  console.log('Sara token saved');",
+              "}"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": { "mode": "raw", "raw": "{\n  \"phone\": \"+971500000001\",\n  \"password\": \"Buyer@123456\",\n  \"deviceId\": \"postman-sara\"\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Buyer Sara — submitter of complaint #2 (Damaged Item, RESOLVED). Useful for testing 403 cross-access and closed-complaint error cases."
+          },
+          "response": []
+        },
+        {
+          "name": "Login as Khalid (buyer · +96550000001)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "if (res.success && res.data && res.data.accessToken) {",
+              "  pm.collectionVariables.set('khalid_token', res.data.accessToken);",
+              "  if (res.data.user) pm.collectionVariables.set('khalid_id', res.data.user.id);",
+              "  console.log('Khalid token saved');",
+              "}"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": { "mode": "raw", "raw": "{\n  \"phone\": \"+96550000001\",\n  \"password\": \"Buyer@123456\",\n  \"deviceId\": \"postman-khalid\"\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Buyer Khalid — submitter of complaint #3 (Other, REJECTED). Useful for verifying that closed complaints appear in GET /support/active alongside open ones."
+          },
+          "response": []
+        },
+        {
+          "name": "Login as Admin (admin@bidmart.com)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Has accessToken', () => pm.expect(res.data.accessToken).to.be.a('string'));",
+              "if (res.success && res.data && res.data.accessToken) {",
+              "  pm.collectionVariables.set('adminToken', res.data.accessToken);",
+              "  console.log('Admin token saved');",
+              "}"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/admin/auth/login", "host": ["{{baseUrl}}"], "path": ["admin", "auth", "login"] },
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@bidmart.com\",\n  \"password\": \"Admin@123\",\n  \"rememberMe\": false,\n  \"deviceId\": \"admin-panel\",\n  \"fcmToken\": \"string\"\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Super admin — has all permissions. Required for all /admin/complaints/* endpoints."
+          },
+          "response": []
+        }
+      ]
+    },
+
+    {
+      "name": "📋 Complaint Types — User",
+      "description": "Public (authenticated) endpoints for the complaint type dropdown. The first request auto-sets `complaintTypeId`.",
+      "item": [
+        {
+          "name": "List Types — English",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "const res = pm.response.json();",
+              "const types = res.data ?? res;",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Returns array', () => pm.expect(Array.isArray(types)).to.be.true);",
+              "pm.test('Has 8 seeded types', () => pm.expect(types.length).to.equal(8));",
+              "pm.test('Each type has id and name', () => {",
+              "  types.forEach(t => {",
+              "    pm.expect(t.id).to.be.a('string');",
+              "    pm.expect(t.name).to.be.a('string');",
+              "  });",
+              "});",
+              "if (Array.isArray(types) && types.length > 0) {",
+              "  pm.collectionVariables.set('complaintTypeId', types[0].id);",
+              "  console.log('complaintTypeId set to', types[0].id, '(' + types[0].name + ')');",
+              "}"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization",   "value": "Bearer {{userToken}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": { "raw": "{{baseUrl}}/complaints/types", "host": ["{{baseUrl}}"], "path": ["complaints", "types"] },
+            "description": "Returns all active complaint types with names in English. Seeded: Fraud or Scam, Fake Product, Item Not Received, Wrong Item Delivered, Damaged Item, Seller Misconduct, Payment Issue, Other."
+          },
+          "response": []
+        },
+        {
+          "name": "List Types — Arabic",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization",   "value": "Bearer {{userToken}}" },
+              { "key": "Accept-Language", "value": "ar" }
+            ],
+            "url": { "raw": "{{baseUrl}}/complaints/types", "host": ["{{baseUrl}}"], "path": ["complaints", "types"] },
+            "description": "Same endpoint with Accept-Language: ar — names returned in Arabic (e.g. 'لم يصل الطلب' instead of 'Item Not Received')."
+          },
+          "response": []
+        }
+      ]
+    },
+
+    {
+      "name": "👤 User — Complaint Management",
+      "description": "All user-facing complaint endpoints. Use `userToken` (Omar) unless noted.",
+      "item": [
+
+        {
+          "name": "Submit Complaint — Item Not Received",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "const res = pm.response.json();",
+              "const complaint = res.data ?? res;",
+              "pm.test('Status 201', () => pm.response.to.have.status(201));",
+              "pm.test('Status is UNDER_REVIEW', () => pm.expect(complaint.status).to.equal('UNDER_REVIEW'));",
+              "pm.test('chatAvailable is false', () => pm.expect(complaint.chatAvailable).to.equal(false));",
+              "pm.test('chatClosedReason is null', () => pm.expect(complaint.chatClosedReason).to.be.null);",
+              "pm.test('admin_notes not exposed', () => pm.expect(complaint.admin_notes).to.be.undefined);",
+              "if (complaint && complaint.id) {",
+              "  pm.collectionVariables.set('complaintId', complaint.id);",
+              "  console.log('complaintId set to', complaint.id);",
+              "}"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",    "value": "application/json" },
+              { "key": "Authorization",   "value": "Bearer {{userToken}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": { "raw": "{{baseUrl}}/complaints", "host": ["{{baseUrl}}"], "path": ["complaints"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"complaint_type_id\": \"{{complaintTypeId}}\",\n  \"description\": \"I placed an order on 2026-05-01 and paid in full via wallet. It has been 8 days and the item has still not arrived. The tracking number provided by the seller shows no updates since 2026-05-02.\",\n  \"attachment_urls\": []\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Creates a fresh complaint for this test session. Auto-sets `complaintId` for subsequent requests. Initial status is always UNDER_REVIEW. Chat is not available yet — admin must run Start Investigation first."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Submit Complaint — with Attachments",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{userToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/complaints", "host": ["{{baseUrl}}"], "path": ["complaints"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"complaint_type_id\": \"{{complaintTypeId}}\",\n  \"description\": \"The handbag I received was damaged — the zipper is broken and there are scratches on the leather. Photos attached as evidence.\",\n  \"attachment_urls\": [\n    \"https://cdn.bidmart.sa/complaints/photo-zipper.jpg\",\n    \"https://cdn.bidmart.sa/complaints/photo-scratches.jpg\"\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Example with attachment_urls. Upload files first via POST /file-upload to get real S3 URLs; replace the placeholder URLs here with the returned values."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Submit — 400 Missing complaint_type_id",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));",
+              "const res = pm.response.json();",
+              "pm.test('success is false', () => pm.expect(res.success).to.equal(false));",
+              "pm.test('error code is VALIDATION_FAILED', () => pm.expect(res.error.code).to.equal('VALIDATION_FAILED'));"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{userToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/complaints", "host": ["{{baseUrl}}"], "path": ["complaints"] },
+            "body": { "mode": "raw", "raw": "{\n  \"description\": \"Item never arrived.\"\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Expects 400 VALIDATION_FAILED — complaint_type_id is required."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Submit — 400 Empty Description",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{userToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/complaints", "host": ["{{baseUrl}}"], "path": ["complaints"] },
+            "body": { "mode": "raw", "raw": "{\n  \"complaint_type_id\": \"{{complaintTypeId}}\",\n  \"description\": \"\"\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Expects 400 — description cannot be empty."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Submit — 404 Inactive / Unknown Type",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 404', () => pm.response.to.have.status(404));"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{userToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/complaints", "host": ["{{baseUrl}}"], "path": ["complaints"] },
+            "body": { "mode": "raw", "raw": "{\n  \"complaint_type_id\": \"00000000-0000-4000-8000-000000000000\",\n  \"description\": \"Test with a non-existent type UUID.\"\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Expects 404 — complaint type not found or inactive."
+          },
+          "response": []
+        },
+
+        {
+          "name": "List My Complaints — Omar (page 1)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('data is array', () => pm.expect(res.data).to.be.an('array'));",
+              "pm.test('meta has total', () => pm.expect(res.meta).to.have.property('total'));",
+              "pm.test('Sorted newest-first', () => {",
+              "  if (res.data.length >= 2) {",
+              "    const t1 = new Date(res.data[0].created_at).getTime();",
+              "    const t2 = new Date(res.data[1].created_at).getTime();",
+              "    pm.expect(t1).to.be.at.least(t2);",
+              "  }",
+              "});",
+              "pm.test('admin_notes not in list items', () => {",
+              "  res.data.forEach(c => pm.expect(c.admin_notes).to.be.undefined);",
+              "});"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization",   "value": "Bearer {{userToken}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/complaints?page=1&limit=10",
+              "host": ["{{baseUrl}}"], "path": ["complaints"],
+              "query": [
+                { "key": "page",  "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            },
+            "description": "Omar has 2 seeded complaints (Item Not Received, Seller Misconduct) plus any submitted in this session. Each item includes: id, complaint_type, status, description_preview (100 chars), created_at."
+          },
+          "response": []
+        },
+
+        {
+          "name": "List My Complaints — Sara (sets resolvedComplaintId)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const list = res.data ?? [];",
+              "pm.test('Sara has at least 1 seeded complaint', () => pm.expect(list.length).to.be.at.least(1));",
+              "const resolved = list.find(c => c.status === 'RESOLVED');",
+              "if (resolved) {",
+              "  pm.collectionVariables.set('resolvedComplaintId', resolved.id);",
+              "  console.log('resolvedComplaintId set to', resolved.id, '- Damaged Item (RESOLVED)');",
+              "}"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization",   "value": "Bearer {{sara_token}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/complaints?page=1&limit=10",
+              "host": ["{{baseUrl}}"], "path": ["complaints"],
+              "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }]
+            },
+            "description": "Sara's list — seeded with 1 RESOLVED complaint (Damaged Item). Auto-sets `resolvedComplaintId` for use in closed-complaint error tests."
+          },
+          "response": []
+        },
+
+        {
+          "name": "List My Complaints — Khalid (sets rejectedComplaintId)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const list = res.data ?? [];",
+              "const rejected = list.find(c => c.status === 'REJECTED');",
+              "if (rejected) {",
+              "  pm.collectionVariables.set('rejectedComplaintId', rejected.id);",
+              "  console.log('rejectedComplaintId set to', rejected.id, '- Other (REJECTED)');",
+              "}"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization",   "value": "Bearer {{khalid_token}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/complaints?page=1&limit=10",
+              "host": ["{{baseUrl}}"], "path": ["complaints"],
+              "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }]
+            },
+            "description": "Khalid's list — seeded with 1 REJECTED complaint (Other). Auto-sets `rejectedComplaintId`."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Complaint Detail — full (Omar's fresh complaint)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "const res = pm.response.json();",
+              "const c = res.data ?? res;",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Has chatAvailable flag', () => pm.expect(c).to.have.property('chatAvailable'));",
+              "pm.test('Has chatClosedReason', () => pm.expect(c).to.have.property('chatClosedReason'));",
+              "pm.test('No messages in detail response', () => pm.expect(c.messages).to.be.undefined);",
+              "pm.test('admin_notes not exposed to user', () => pm.expect(c.admin_notes).to.be.undefined);",
+              "pm.test('notes not exposed to user', () => pm.expect(c.notes).to.be.undefined);"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization",   "value": "Bearer {{userToken}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/complaints/{{complaintId}}",
+              "host": ["{{baseUrl}}"], "path": ["complaints", "{{complaintId}}"]
+            },
+            "description": "Metadata for the fresh complaint submitted earlier. Includes: id, complaint_type, status, description, attachment_urls, resolution_note, conversation_closed, chatAvailable, chatClosedReason, created_at. Messages are NOT included — use GET /complaints/:id/messages."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Complaint Detail — Sara's RESOLVED (chatClosedReason: resolved)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "const res = pm.response.json();",
+              "const c = res.data;",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Status is RESOLVED', () => pm.expect(c.status).to.equal('RESOLVED'));",
+              "pm.test('chatAvailable is false', () => pm.expect(c.chatAvailable).to.equal(false));",
+              "pm.test('chatClosedReason is resolved', () => pm.expect(c.chatClosedReason).to.equal('resolved'));",
+              "pm.test('resolution_note is present', () => pm.expect(c.resolution_note).to.be.a('string'));"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization",   "value": "Bearer {{sara_token}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/complaints/{{resolvedComplaintId}}",
+              "host": ["{{baseUrl}}"], "path": ["complaints", "{{resolvedComplaintId}}"]
+            },
+            "description": "Sara's Damaged Item complaint — RESOLVED. Demonstrates chatClosedReason: 'resolved' and resolution_note visible to user. Run 'List My Complaints — Sara' first to populate resolvedComplaintId."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Complaint Detail — 404 Not Found",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 404', () => pm.response.to.have.status(404));",
+              "const res = pm.response.json();",
+              "pm.test('success is false', () => pm.expect(res.success).to.equal(false));"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{userToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/complaints/00000000-0000-4000-8000-000000000000",
+              "host": ["{{baseUrl}}"], "path": ["complaints", "00000000-0000-4000-8000-000000000000"]
+            },
+            "description": "Expects 404 — complaint does not exist."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Complaint Detail — 403 Wrong User (Sara tries Omar's)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 403', () => pm.response.to.have.status(403));",
+              "const res = pm.response.json();",
+              "pm.test('Error COMPLAINT_ACCESS_DENIED', () => pm.expect(res.error.code).to.equal('COMPLAINT_ACCESS_DENIED'));"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{sara_token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/complaints/{{complaintId}}",
+              "host": ["{{baseUrl}}"], "path": ["complaints", "{{complaintId}}"]
+            },
+            "description": "Sara attempts to access Omar's complaint. Expects 403 COMPLAINT_ACCESS_DENIED."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Support Conversations — Omar (unified shape)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('data is array', () => pm.expect(res.data).to.be.an('array'));",
+              "pm.test('meta has cursor fields', () => {",
+              "  pm.expect(res.meta).to.have.property('nextCursor');",
+              "  pm.expect(res.meta).to.have.property('hasNextPage');",
+              "});",
+              "if (res.meta.nextCursor) { pm.collectionVariables.set('conversationsCursor', res.meta.nextCursor); console.log('conversationsCursor set to', res.meta.nextCursor); }",
+              "pm.test('Each item has unified shape', () => {",
+              "  res.data.forEach(c => {",
+              "    pm.expect(c.source).to.equal('support');",
+              "    pm.expect(c).to.have.property('lastMessageAt');",
+              "    pm.expect(c).to.have.property('lastMessagePreview');",
+              "    pm.expect(c.unreadCount).to.be.a('number');",
+              "    pm.expect(c.conversationClosed).to.be.a('boolean');",
+              "    pm.expect(c.otherParticipant).to.be.an('object');",
+              "    pm.expect(c.otherParticipant.id).to.be.null;",
+              "    pm.expect(c.otherParticipant.username).to.equal('support');",
+              "    pm.expect(c.otherParticipant.fullName).to.equal('Support');",
+              "    pm.expect(c.otherParticipant.profilePicture).to.be.null;",
+              "  });",
+              "});",
+              "pm.test('complaint_type and chatAvailable not in list response', () => {",
+              "  res.data.forEach(c => {",
+              "    pm.expect(c.complaint_type).to.be.undefined;",
+              "    pm.expect(c.chatAvailable).to.be.undefined;",
+              "    pm.expect(c.messages).to.be.undefined;",
+              "  });",
+              "});"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization",   "value": "Bearer {{userToken}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": { "raw": "{{baseUrl}}/complaints/support/active?limit=10", "host": ["{{baseUrl}}"], "path": ["complaints", "support", "active"], "query": [{ "key": "limit", "value": "10" }] },
+            "description": "Returns Omar's complaints in unified UnifiedInboxItem shape. Cursor-paginated — meta.nextCursor holds the ISO 8601 lastMessageAt of the last item; pass as ?cursor= on next load. Status, chatAvailable, and complaint_type are NOT in this response — fetch GET /complaints/:id to get those."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Support Conversations — Filter by status=IN_PROGRESS",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('data is array', () => pm.expect(res.data).to.be.an('array'));",
+              "pm.test('Each item has unified shape with source=support', () => {",
+              "  res.data.forEach(c => {",
+              "    pm.expect(c.source).to.equal('support');",
+              "    pm.expect(c.otherParticipant.username).to.equal('support');",
+              "  });",
+              "});",
+              "console.log('Filtered IN_PROGRESS count:', res.data.length, '(Run Start Investigation first if 0)');"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization",   "value": "Bearer {{userToken}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/complaints/support/active?status=IN_PROGRESS",
+              "host": ["{{baseUrl}}"], "path": ["complaints", "support", "active"],
+              "query": [{ "key": "status", "value": "IN_PROGRESS" }]
+            },
+            "description": "The ?status= filter still works as a query-level filter even though status is not returned in the unified response. Accepts: UNDER_REVIEW | IN_PROGRESS | RESOLVED | REJECTED. Run 'Start Investigation' first so Omar has at least one IN_PROGRESS complaint. To verify the actual status of a returned item, call GET /complaints/:id."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Support Conversations — Khalid (REJECTED included, unified shape)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('data is array', () => pm.expect(res.data).to.be.an('array'));",
+              "pm.test('Khalid has at least 1 complaint (seeded REJECTED)', () => pm.expect(res.data.length).to.be.at.least(1));",
+              "pm.test('Each item has unified shape', () => {",
+              "  res.data.forEach(c => {",
+              "    pm.expect(c.source).to.equal('support');",
+              "    pm.expect(c.conversationClosed).to.be.a('boolean');",
+              "    pm.expect(c.otherParticipant.id).to.be.null;",
+              "    pm.expect(c.otherParticipant.username).to.equal('support');",
+              "  });",
+              "});",
+              "pm.test('status and chatClosedReason not in list response', () => {",
+              "  res.data.forEach(c => {",
+              "    pm.expect(c.status).to.be.undefined;",
+              "    pm.expect(c.chatClosedReason).to.be.undefined;",
+              "  });",
+              "});",
+              "console.log('Khalid complaints:', res.data.length, '— call GET /complaints/:id to check chatAvailable');"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization",   "value": "Bearer {{khalid_token}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": { "raw": "{{baseUrl}}/complaints/support/active", "host": ["{{baseUrl}}"], "path": ["complaints", "support", "active"] },
+            "description": "Khalid's seeded REJECTED complaint appears in the list — all conversations returned regardless of status. The unified shape has conversationClosed=true for REJECTED complaints. Status and chatClosedReason are NOT in this response; fetch GET /complaints/:id to get chatAvailable and chatClosedReason ('rejected')."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Complaint Messages — Initial Load (no cursor)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('data contains day groups', () => {",
+              "  pm.expect(res.data).to.be.an('array');",
+              "  res.data.forEach(g => {",
+              "    pm.expect(g.date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+              "    pm.expect(g.listOfMessages).to.be.an('array');",
+              "  });",
+              "});",
+              "pm.test('meta has hasNextPage and nextCursor', () => {",
+              "  pm.expect(res.meta).to.have.property('hasNextPage');",
+              "  pm.expect(res.meta).to.have.property('nextCursor');",
+              "});",
+              "pm.test('Messages are oldest-first within page', () => {",
+              "  const all = res.data.flatMap(g => g.listOfMessages);",
+              "  if (all.length >= 2) {",
+              "    const t1 = new Date(all[0].createdAt).getTime();",
+              "    const t2 = new Date(all[all.length - 1].createdAt).getTime();",
+              "    pm.expect(t1).to.be.at.most(t2);",
+              "  }",
+              "});",
+              "if (res.meta.nextCursor) {",
+              "  pm.collectionVariables.set('messageCursor', res.meta.nextCursor);",
+              "  console.log('messageCursor set to', res.meta.nextCursor, '— ISO 8601 timestamp, pass as cursor to load older messages');",
+              "} else {",
+              "  console.log('nextCursor is null — no earlier messages exist');",
+              "}"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization",   "value": "Bearer {{userToken}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/complaints/{{complaintId}}/messages?limit=20",
+              "host": ["{{baseUrl}}"], "path": ["complaints", "{{complaintId}}", "messages"],
+              "query": [{ "key": "limit", "value": "20" }]
+            },
+            "description": "Initial load — no cursor. Response: { data: [{ date, listOfMessages[] }], meta: { nextCursor, hasNextPage } } — same structure as the regular chat. `meta.nextCursor` is the ISO 8601 createdAt of the oldest message on the page; pass it as `cursor` to load earlier messages. Auto-sets `messageCursor`."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Complaint Messages — Load Older (with cursor)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('data is array of day groups', () => pm.expect(res.data).to.be.an('array'));",
+              "pm.test('Messages returned are older than cursor', () => {",
+              "  const all = res.data.flatMap(g => g.listOfMessages);",
+              "  console.log('Messages in this page:', all.length, '| nextCursor:', res.meta.nextCursor);",
+              "});",
+              "if (res.meta.nextCursor) {",
+              "  pm.collectionVariables.set('messageCursor', res.meta.nextCursor);",
+              "}"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization",   "value": "Bearer {{userToken}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/complaints/{{complaintId}}/messages?cursor={{messageCursor}}&limit=20",
+              "host": ["{{baseUrl}}"], "path": ["complaints", "{{complaintId}}", "messages"],
+              "query": [
+                { "key": "cursor", "value": "{{messageCursor}}" },
+                { "key": "limit",  "value": "20" }
+              ]
+            },
+            "description": "Scroll-up load — pass `messageCursor` (an ISO 8601 timestamp, set by the initial load) as `cursor`. Returns messages with createdAt < cursor, grouped by day, oldest-first. Repeat with the new `meta.nextCursor` to keep loading further back."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Complaint Messages — 403 Wrong User (Sara tries Omar's)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 403', () => pm.response.to.have.status(403));",
+              "const res = pm.response.json();",
+              "pm.test('Error COMPLAINT_ACCESS_DENIED', () => pm.expect(res.error.code).to.equal('COMPLAINT_ACCESS_DENIED'));"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{sara_token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/complaints/{{complaintId}}/messages",
+              "host": ["{{baseUrl}}"], "path": ["complaints", "{{complaintId}}", "messages"]
+            },
+            "description": "Sara attempts to read Omar's messages. Expects 403 COMPLAINT_ACCESS_DENIED."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Complaint Messages — 404 Not Found",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 404', () => pm.response.to.have.status(404));"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{userToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/complaints/00000000-0000-4000-8000-000000000000/messages",
+              "host": ["{{baseUrl}}"], "path": ["complaints", "00000000-0000-4000-8000-000000000000", "messages"]
+            },
+            "description": "Expects 404 — complaint does not exist."
+          },
+          "response": []
+        }
+
+      ]
+    },
+
+    {
+      "name": "🛡 Admin — View & Filter",
+      "description": "Admin read endpoints. All requests use `adminToken`.",
+      "item": [
+
+        {
+          "name": "List All Complaints",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const res = pm.response.json();",
+              "pm.test('data is array', () => pm.expect(res.data).to.be.an('array'));",
+              "pm.test('meta has total', () => pm.expect(res.meta.total).to.be.a('number'));",
+              "pm.test('Sorted newest-first', () => {",
+              "  if (res.data.length >= 2) {",
+              "    const t1 = new Date(res.data[0].created_at).getTime();",
+              "    const t2 = new Date(res.data[1].created_at).getTime();",
+              "    pm.expect(t1).to.be.at.least(t2);",
+              "  }",
+              "});",
+              "pm.test('Each item has adminUnreadCount', () => {",
+              "  res.data.forEach(c => pm.expect(c.adminUnreadCount).to.be.a('number'));",
+              "});",
+              "pm.test('lastMessage is object or null', () => {",
+              "  res.data.forEach(c => {",
+              "    if (c.lastMessage !== null) {",
+              "      pm.expect(c.lastMessage).to.have.property('content');",
+              "      pm.expect(c.lastMessage).to.have.property('messageType');",
+              "      pm.expect(c.lastMessage).to.have.property('createdAt');",
+              "      pm.expect(c.lastMessage.isRead).to.be.a('boolean');",
+              "    }",
+              "  });",
+              "});"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints?page=1&limit=20",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints"],
+              "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "20" }]
+            },
+            "description": "Lists all complaints across all users. Default limit 20. Seeded: 4 complaints (2 from Omar, 1 from Sara, 1 from Khalid)."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Filter — UNDER_REVIEW",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const res = pm.response.json();",
+              "pm.test('All items are UNDER_REVIEW', () => {",
+              "  res.data.forEach(c => pm.expect(c.status).to.equal('UNDER_REVIEW'));",
+              "});"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints?status=UNDER_REVIEW&page=1&limit=20",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints"],
+              "query": [{ "key": "status", "value": "UNDER_REVIEW" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "20" }]
+            },
+            "description": "Seeded: 2 UNDER_REVIEW complaints (Omar's Item Not Received and Seller Misconduct)."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Filter — IN_PROGRESS",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints?status=IN_PROGRESS&page=1&limit=20",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints"],
+              "query": [{ "key": "status", "value": "IN_PROGRESS" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "20" }]
+            },
+            "description": "No seeded IN_PROGRESS complaints. Returns 0 results until 'Start Investigation' is run on a complaint."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Filter — RESOLVED",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const res = pm.response.json();",
+              "pm.test('All items are RESOLVED', () => {",
+              "  res.data.forEach(c => pm.expect(c.status).to.equal('RESOLVED'));",
+              "});"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints?status=RESOLVED&page=1&limit=20",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints"],
+              "query": [{ "key": "status", "value": "RESOLVED" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "20" }]
+            },
+            "description": "Seeded: 1 RESOLVED complaint — Sara's Damaged Item with resolution note."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Filter — REJECTED",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints?status=REJECTED&page=1&limit=20",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints"],
+              "query": [{ "key": "status", "value": "REJECTED" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "20" }]
+            },
+            "description": "Seeded: 1 REJECTED complaint — Khalid's 'Other' complaint about missed promotion."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Search — by User Name 'Omar'",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const res = pm.response.json();",
+              "pm.test('Returns complaints from Omar', () => {",
+              "  res.data.forEach(c => pm.expect(c.submitter.full_name).to.include('Omar'));",
+              "});"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints?search=Omar&page=1&limit=20",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints"],
+              "query": [{ "key": "search", "value": "Omar" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "20" }]
+            },
+            "description": "ILIKE search on submitter's full_name. 'Omar' matches 'Omar Abdullah' — returns 2 seeded complaints."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Search — by User Name 'Sara'",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints?search=Sara&page=1&limit=20",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints"],
+              "query": [{ "key": "search", "value": "Sara" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "20" }]
+            },
+            "description": "Returns Sara Al-Mansouri's 1 complaint (Damaged Item, RESOLVED)."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Search — by Complaint UUID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints?search={{complaintId}}&page=1&limit=20",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints"],
+              "query": [{ "key": "search", "value": "{{complaintId}}" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "20" }]
+            },
+            "description": "Exact UUID match — bypasses ILIKE and uses equality. Returns exactly 1 result if the complaint exists."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Filter — by Complaint Type",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints?type_id={{complaintTypeId}}&page=1&limit=20",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints"],
+              "query": [{ "key": "type_id", "value": "{{complaintTypeId}}" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "20" }]
+            },
+            "description": "Filter by complaint type UUID. Run 'List Types — English' first to populate complaintTypeId."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Complaint Detail — Admin view (fresh complaint)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "const res = pm.response.json();",
+              "const c = res.data ?? res;",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Has notes array (not admin_notes)', () => {",
+              "  pm.expect(c.notes).to.be.an('array');",
+              "  pm.expect(c.admin_notes).to.be.undefined;",
+              "});",
+              "pm.test('Has activities array', () => pm.expect(c.activities).to.be.an('array'));",
+              "pm.test('Submitter has phone_number', () => pm.expect(c.submitter).to.have.property('phone_number'));",
+              "pm.test('complaint_type has name_en and name_ar', () => {",
+              "  pm.expect(c.complaint_type.name_en).to.be.a('string');",
+              "  pm.expect(c.complaint_type.name_ar).to.be.a('string');",
+              "});",
+              "pm.test('Messages have unified camelCase shape', () => {",
+              "  pm.expect(c.messages).to.be.an('array');",
+              "  c.messages.forEach(m => {",
+              "    pm.expect(m.senderId).to.be.a('string');",
+              "    pm.expect(['TEXT','IMAGE']).to.include(m.messageType);",
+              "    pm.expect(['SENT','DELIVERED','READ']).to.include(m.status);",
+              "    pm.expect(m.isMe).to.be.a('boolean');",
+              "  });",
+              "});",
+              "pm.test('Admin messages have isMe: true', () => {",
+              "  const adminMsgs = c.messages.filter(m => m.sender === 'ADMIN');",
+              "  adminMsgs.forEach(m => pm.expect(m.isMe).to.equal(true));",
+              "});",
+              "pm.test('User messages have isMe: false', () => {",
+              "  const userMsgs = c.messages.filter(m => m.sender === 'USER');",
+              "  userMsgs.forEach(m => pm.expect(m.isMe).to.equal(false));",
+              "});"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints/{{complaintId}}",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints", "{{complaintId}}"]
+            },
+            "description": "Admin view includes: submitter (id, full_name, phone_number), complaint_type (name_en + name_ar), notes[] (internal, attributed), activities[] (audit trail), messages[] (with sender_id, status, delivered_at, read_at, isMe), resolved_by, resolved_at. Fetching this endpoint marks SENT user messages as DELIVERED and resets admin_unread_count to 0."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Complaint Messages — Admin (initial load)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('data is array of date groups', () => pm.expect(res.data).to.be.an('array'));",
+              "pm.test('meta has cursor fields', () => {",
+              "  pm.expect(res.meta).to.have.property('nextCursor');",
+              "  pm.expect(res.meta).to.have.property('hasNextPage');",
+              "});",
+              "pm.test('Messages have unified camelCase shape', () => {",
+              "  res.data.forEach(group => {",
+              "    pm.expect(group.date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+              "    group.listOfMessages.forEach(m => {",
+              "      pm.expect(m.senderId).to.be.a('string');",
+              "      pm.expect(['TEXT','IMAGE']).to.include(m.messageType);",
+              "      pm.expect(m.isMe).to.be.a('boolean');",
+              "    });",
+              "  });",
+              "});",
+              "const cursor = res.meta.nextCursor;",
+              "if (cursor) { pm.collectionVariables.set('adminMessageCursor', cursor); console.log('adminMessageCursor set to', cursor); }"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints/{{complaintId}}/messages?limit=20",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints", "{{complaintId}}", "messages"],
+              "query": [{ "key": "limit", "value": "20" }]
+            },
+            "description": "Cursor-paginated complaint message thread grouped by calendar date. Same structure as GET /complaints/:id/messages on the user side. Marks SENT user messages as DELIVERED on fetch. meta.nextCursor is null when no older messages exist."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Complaint Messages — Admin (load older with cursor)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints/{{complaintId}}/messages?cursor={{adminMessageCursor}}&limit=20",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints", "{{complaintId}}", "messages"],
+              "query": [
+                { "key": "cursor", "value": "{{adminMessageCursor}}" },
+                { "key": "limit",  "value": "20" }
+              ]
+            },
+            "description": "Pass adminMessageCursor (auto-set by the initial load request) to fetch the next page of older messages. Returns empty data[] with hasNextPage: false when fully exhausted."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Complaint Detail — Seeded Omar's Item Not Received",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints?search=Omar&status=UNDER_REVIEW&page=1&limit=20",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints"],
+              "query": [
+                { "key": "search", "value": "Omar" },
+                { "key": "status", "value": "UNDER_REVIEW" },
+                { "key": "page",   "value": "1" },
+                { "key": "limit",  "value": "20" }
+              ]
+            },
+            "description": "First, use this to find Omar's UNDER_REVIEW complaints. Then paste one of the returned IDs into GET /admin/complaints/:id. The seeded 'Item Not Received' complaint has 2 messages and 1 admin note already attached."
+          },
+          "response": []
+        }
+
+      ]
+    },
+
+    {
+      "name": "🛡 Admin — Actions",
+      "description": "State-changing admin endpoints. Recommended order: Start → Add Note → Notify → [chat via socket] → Close Conversation (optional) → Resolve or Reject.",
+      "item": [
+
+        {
+          "name": "Start Investigation (UNDER_REVIEW → IN_PROGRESS)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 204', () => pm.response.to.have.status(204));",
+              "pm.test('Body is empty', () => pm.expect(pm.response.text()).to.equal(''));"
+            ]}
+          }],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints/{{complaintId}}/start",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints", "{{complaintId}}", "start"]
+            },
+            "description": "Transitions complaint from UNDER_REVIEW to IN_PROGRESS. This:\n- Activates the /complaint-chat socket chat\n- Emits `complaint:status:updated` to the user's socket\n- Sends a push notification to the user\n- Logs 'started_investigation' in activities[]\n\nAfter this, the user's GET /complaints/support/active will return 200."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Start — 409 Not in UNDER_REVIEW (Sara's RESOLVED)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 409', () => pm.response.to.have.status(409));",
+              "const res = pm.response.json();",
+              "pm.test('Error COMPLAINT_ALREADY_CLOSED', () => pm.expect(res.error.code).to.equal('COMPLAINT_ALREADY_CLOSED'));"
+            ]}
+          }],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints/{{resolvedComplaintId}}/start",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints", "{{resolvedComplaintId}}", "start"]
+            },
+            "description": "Sara's complaint is RESOLVED — cannot be started. Expects 409 COMPLAINT_ALREADY_CLOSED. Run 'List My Complaints — Sara' first to populate resolvedComplaintId."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Add Internal Note",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 201', () => pm.response.to.have.status(201));",
+              "const res = pm.response.json();",
+              "const note = res.data ?? res;",
+              "pm.test('Has id', () => pm.expect(note.id).to.be.a('string'));",
+              "pm.test('Has adminName', () => pm.expect(note.adminName).to.be.a('string'));",
+              "pm.test('Has note content', () => pm.expect(note.note).to.be.a('string'));",
+              "pm.test('Has createdAt', () => pm.expect(note.createdAt).to.be.a('string'));"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints/{{complaintId}}/notes",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints", "{{complaintId}}", "notes"]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"note\": \"Contacted the seller on 2026-05-09. Seller confirmed shipment was delayed due to a warehouse issue. Awaiting new tracking number within 48 hours.\"\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Appends an internal note attributed to this admin. Returns 201 + ComplaintNoteItem { id, adminName, note, createdAt }. Notes are NEVER returned in user-facing endpoints. Allowed while status is UNDER_REVIEW or IN_PROGRESS."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Add Note — Second Note (same complaint)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints/{{complaintId}}/notes",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints", "{{complaintId}}", "notes"]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"note\": \"Escalated to the fraud team for review of the seller's shipping history. Ticket #FRD-2026-0512 created.\"\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Multiple notes can be added to the same complaint, each attributed separately. Run List Notes to see all."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Add Note — 409 Complaint Already Closed (Sara's RESOLVED)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 409', () => pm.response.to.have.status(409));",
+              "const res = pm.response.json();",
+              "pm.test('Error COMPLAINT_ALREADY_CLOSED', () => pm.expect(res.error.code).to.equal('COMPLAINT_ALREADY_CLOSED'));"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints/{{resolvedComplaintId}}/notes",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints", "{{resolvedComplaintId}}", "notes"]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"note\": \"This should fail — complaint is already resolved.\"\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Expects 409 — notes are read-only on RESOLVED/REJECTED complaints."
+          },
+          "response": []
+        },
+
+        {
+          "name": "List Internal Notes",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const res = pm.response.json();",
+              "const notes = res.data ?? res;",
+              "pm.test('Returns array', () => pm.expect(Array.isArray(notes)).to.be.true);",
+              "pm.test('Notes are chronological (oldest first)', () => {",
+              "  if (notes.length >= 2) {",
+              "    const t1 = new Date(notes[0].createdAt).getTime();",
+              "    const t2 = new Date(notes[1].createdAt).getTime();",
+              "    pm.expect(t1).to.be.at.most(t2);",
+              "  }",
+              "});",
+              "pm.test('Each note has adminName', () => {",
+              "  notes.forEach(n => pm.expect(n.adminName).to.be.a('string'));",
+              "});"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints/{{complaintId}}/notes",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints", "{{complaintId}}", "notes"]
+            },
+            "description": "Returns all internal notes in chronological order. Each note includes: id, adminName (resolved from the admins table), note, createdAt."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Send Custom Notification to User",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 204', () => pm.response.to.have.status(204));"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints/{{complaintId}}/notify",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints", "{{complaintId}}", "notify"]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"message\": \"Your complaint is currently under investigation. Our team is in contact with the seller and will update you within 24 hours. We appreciate your patience.\"\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Dispatches a custom in-app push notification to the complaint submitter. Available regardless of complaint status (1–500 chars). Returns 204. Action is logged in activities[]."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Send Notification — 400 Empty Message",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints/{{complaintId}}/notify",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints", "{{complaintId}}", "notify"]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"message\": \"\"\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Expects 400 — message cannot be empty."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Close Conversation (without resolving)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 204', () => pm.response.to.have.status(204));"
+            ]}
+          }],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints/{{complaintId}}/close-conversation",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints", "{{complaintId}}", "close-conversation"]
+            },
+            "description": "Closes the chat thread without changing complaint status. After this:\n- Neither admin nor user can send further messages (COMPLAINT_CONVERSATION_CLOSED)\n- Socket emits `complaint:conversation:closed` to all participants\n- chatClosedReason becomes 'manually_closed'\n- Complaint status remains unchanged (still IN_PROGRESS or UNDER_REVIEW)\n- Use /resolve or /reject to actually close the complaint"
+          },
+          "response": []
+        },
+
+        {
+          "name": "Close Conversation — 422 Already Closed",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 422', () => pm.response.to.have.status(422));",
+              "const res = pm.response.json();",
+              "pm.test('Error COMPLAINT_CONVERSATION_CLOSED', () => pm.expect(res.error.code).to.equal('COMPLAINT_CONVERSATION_CLOSED'));"
+            ]}
+          }],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints/{{complaintId}}/close-conversation",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints", "{{complaintId}}", "close-conversation"]
+            },
+            "description": "Run after 'Close Conversation' — expects 422 COMPLAINT_CONVERSATION_CLOSED. Also returns 422 for Sara's seeded complaint which has conversation_closed: true."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Resolve Complaint",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 204', () => pm.response.to.have.status(204));"
+            ]}
+          }],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints/{{complaintId}}/resolve",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints", "{{complaintId}}", "resolve"]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"resolution_note\": \"We have reviewed your complaint and confirmed the item was not delivered within the promised timeframe. A full refund of SAR 250.00 has been issued to your wallet. We apologise for the inconvenience and have taken action with the seller.\"\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Marks complaint as RESOLVED. Allowed from UNDER_REVIEW or IN_PROGRESS. This:\n- Saves resolution_note (visible to user)\n- Sets conversation_closed = true\n- Emits `complaint:closed` with status 'resolved' via socket\n- Sends push notification to user\n- Logs 'resolved' in activities[]"
+          },
+          "response": []
+        },
+
+        {
+          "name": "Resolve — 409 Already RESOLVED (Sara's complaint)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 409', () => pm.response.to.have.status(409));",
+              "const res = pm.response.json();",
+              "pm.test('Error COMPLAINT_ALREADY_CLOSED', () => pm.expect(res.error.code).to.equal('COMPLAINT_ALREADY_CLOSED'));"
+            ]}
+          }],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints/{{resolvedComplaintId}}/resolve",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints", "{{resolvedComplaintId}}", "resolve"]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"resolution_note\": \"This should fail.\"\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Sara's complaint is already RESOLVED. Expects 409 COMPLAINT_ALREADY_CLOSED."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Reject Complaint — Khalid's seeded complaint",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 409 (already REJECTED) or 204 (first run)', () => {",
+              "  pm.expect([204, 409]).to.include(pm.response.code);",
+              "});"
+            ]}
+          }],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints/{{rejectedComplaintId}}/reject",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints", "{{rejectedComplaintId}}", "reject"]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"rejection_reason\": \"After reviewing the live show recording, we found that the BOGO promotion was limited to the first 10 buyers, clearly announced during the stream. Your order (#14) did not qualify. We are unable to take further action.\"\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Khalid's complaint is already seeded as REJECTED — this will return 409 on a fresh DB. Submit a new complaint as Khalid to get a fresh complaintId, then use that here. Allowed from UNDER_REVIEW or IN_PROGRESS."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Reject — 400 Missing rejection_reason",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]}
+          }],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaints/{{complaintId}}/reject",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaints", "{{complaintId}}", "reject"]
+            },
+            "body": { "mode": "raw", "raw": "{}", "options": { "raw": { "language": "json" } } },
+            "description": "Expects 400 VALIDATION_FAILED — rejection_reason is required."
+          },
+          "response": []
+        }
+
+      ]
+    },
+
+    {
+      "name": "🛡 Admin — Complaint Types CRUD",
+      "description": "Admin CRUD for complaint type management. These types populate the dropdown users see when submitting a complaint.",
+      "item": [
+
+        {
+          "name": "List All Types (Admin)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const res = pm.response.json();",
+              "pm.test('data is array', () => pm.expect(res.data).to.be.an('array'));",
+              "pm.test('Each type has name_en and name_ar', () => {",
+              "  res.data.forEach(t => {",
+              "    pm.expect(t.name_en).to.be.a('string');",
+              "    pm.expect(t.name_ar).to.be.a('string');",
+              "  });",
+              "});",
+              "if (res.data && res.data.length > 0) {",
+              "  pm.collectionVariables.set('complaintTypeId', res.data[0].id);",
+              "  console.log('complaintTypeId updated to', res.data[0].id, '(' + res.data[0].name_en + ')');",
+              "}"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaint-types?page=1&limit=10",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaint-types"],
+              "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }]
+            },
+            "description": "Lists all types (active and inactive) with both EN and AR names. Seeded: Fraud or Scam, Fake Product, Item Not Received, Wrong Item Delivered, Damaged Item, Seller Misconduct, Payment Issue, Other."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Search — 'payment'",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const res = pm.response.json();",
+              "pm.test('Returns Payment Issue type', () => pm.expect(res.data.length).to.be.at.least(1));"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaint-types?search=payment&page=1&limit=10",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaint-types"],
+              "query": [{ "key": "search", "value": "payment" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "10" }]
+            },
+            "description": "ILIKE on name_en and name_ar. 'payment' matches 'Payment Issue' / 'مشكلة في الدفع'."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Create New Complaint Type",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 201', () => pm.response.to.have.status(201));",
+              "const res = pm.response.json();",
+              "const type = res.data ?? res;",
+              "pm.test('Has id', () => pm.expect(type.id).to.be.a('string'));",
+              "pm.test('is_active is true by default', () => pm.expect(type.is_active).to.equal(true));",
+              "if (type && type.id) {",
+              "  pm.collectionVariables.set('newTypeId', type.id);",
+              "  console.log('newTypeId set to', type.id);",
+              "}"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/admin/complaint-types", "host": ["{{baseUrl}}"], "path": ["admin", "complaint-types"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name_en\": \"Counterfeit Product\",\n  \"name_ar\": \"منتج مقلد\"\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Creates a new complaint type. Both name_en and name_ar must be unique. Active by default. Sets `newTypeId` for update/delete tests."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Create — 409 Duplicate Name (Fraud or Scam)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 409', () => pm.response.to.have.status(409));"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/admin/complaint-types", "host": ["{{baseUrl}}"], "path": ["admin", "complaint-types"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name_en\": \"Fraud or Scam\",\n  \"name_ar\": \"احتيال أو نصب\"\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Expects 409 — these names already exist in the seeded data."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Type — Deactivate (hide from user dropdown)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const res = pm.response.json();",
+              "pm.test('is_active is false', () => pm.expect((res.data ?? res).is_active).to.equal(false));"
+            ]}
+          }],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaint-types/{{newTypeId}}",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaint-types", "{{newTypeId}}"]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"is_active\": false\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Deactivating hides the type from GET /complaints/types (user dropdown). Existing complaints with this type are unaffected."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Type — Re-activate",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const res = pm.response.json();",
+              "pm.test('is_active is true', () => pm.expect((res.data ?? res).is_active).to.equal(true));"
+            ]}
+          }],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaint-types/{{newTypeId}}",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaint-types", "{{newTypeId}}"]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"is_active\": true\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Re-activates the type — it reappears in the user dropdown."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Type — Rename",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaint-types/{{newTypeId}}",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaint-types", "{{newTypeId}}"]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"name_en\": \"Counterfeit or Replica Product\",\n  \"name_ar\": \"منتج مقلد أو مقلوب\"\n}", "options": { "raw": { "language": "json" } } },
+            "description": "Renames the type. Partial updates are supported — only provided fields change."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Delete New Type",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 204', () => pm.response.to.have.status(204));"
+            ]}
+          }],
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaint-types/{{newTypeId}}",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaint-types", "{{newTypeId}}"]
+            },
+            "description": "Permanently deletes the type created earlier (which has no associated complaints). Returns 204."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Delete — 409 In Use (seeded type with complaints)",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 409', () => pm.response.to.have.status(409));",
+              "const res = pm.response.json();",
+              "pm.test('Error COMPLAINT_TYPE_IN_USE', () => pm.expect(res.error.code).to.equal('COMPLAINT_TYPE_IN_USE'));"
+            ]}
+          }],
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/complaint-types/{{complaintTypeId}}",
+              "host": ["{{baseUrl}}"], "path": ["admin", "complaint-types", "{{complaintTypeId}}"]
+            },
+            "description": "Expects 409 COMPLAINT_TYPE_IN_USE — the seeded type (e.g. 'Fraud or Scam') is referenced by existing complaints and cannot be deleted."
+          },
+          "response": []
+        }
+
+      ]
+    }
+
+  ]
+}

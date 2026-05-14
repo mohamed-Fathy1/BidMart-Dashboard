@@ -47,6 +47,15 @@ export const PERMISSIONS = {
     update: "admin:admins:update",
     delete: "admin:admins:delete",
   },
+  complaints: {
+    view: "admin:complaints:view",
+    start: "admin:complaints:start",
+    resolve: "admin:complaints:resolve",
+    reject: "admin:complaints:reject",
+    addNote: "admin:complaints:addNote",
+    sendNotification: "admin:complaints:sendNotification",
+    closeConversation: "admin:complaints:closeConversation",
+  },
 } as const;
 
 // For each group K, collect the union of its values; then union across all groups.
