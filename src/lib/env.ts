@@ -5,12 +5,14 @@ const RAW_API_URL =
 const RAW_SOCKET_URL = import.meta.env.VITE_SOCKET_URL as string | undefined
 
 /**
- * Strip `/api` (or `/api/`) from the end of the API URL so socket.io can
- * connect to the namespace root. Falls back to the API URL itself when no
- * trailing `/api` is present.
+ * Strip a trailing `/api` (optionally followed by `/v<digits>`) from the API
+ * URL so socket.io connects to the host root. The server hosts the namespace
+ * at `/complaint-chat`; if we carried `/api/v1` into the URL, the client
+ * would request namespace `/api/v1/complaint-chat` and the server would reject
+ * with "Invalid namespace".
  */
 function deriveSocketUrl(apiUrl: string): string {
-  return apiUrl.replace(/\/api\/?$/, '') || apiUrl
+  return apiUrl.replace(/\/api(\/v\d+)?\/?$/, '') || apiUrl
 }
 
 export const env = {
