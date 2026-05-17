@@ -1,0 +1,76 @@
+{
+  "title": "الإعدادات",
+  "description": "إعدادات عامة تؤثر على جميع الحسابات في المنصة.",
+  "tabs": {
+    "aria": "أقسام الإعدادات",
+    "system": "النظام",
+    "complaint_types": "أنواع الشكاوى"
+  },
+  "system": {
+    "title": "إعدادات النظام",
+    "description": "سعر الصرف، العمولات، قنوات التواصل، وروابط وسائل التواصل.",
+    "sections": {
+      "financial": {
+        "title": "الجوانب المالية",
+        "description": "سعر الصرف، العمولات، وحدود السحب."
+      },
+      "contact": {
+        "title": "التواصل",
+        "description": "البريد الإلكتروني وأرقام الهاتف المعروضة للمستخدمين."
+      },
+      "social": {
+        "title": "وسائل التواصل",
+        "description": "روابط تظهر داخل التطبيق والمواد التسويقية."
+      }
+    },
+    "fields": {
+      "dollar_to_riyal_rate": "سعر صرف الدولار → الريال",
+      "dollar_to_riyal_rate_hint": "يُستخدم في عمليات التحويل داخل التطبيق.",
+      "order_commission_percentage": "عمولة الطلبات",
+      "order_commission_percentage_hint": "النسبة المحتجزة من كل طلب مكتمل (0–100).",
+      "referral_amount_sar": "مكافأة الإحالة",
+      "referral_amount_sar_hint": "المبلغ بالريال السعودي لكل إحالة ناجحة.",
+      "min_liquidation_amount_sar": "الحد الأدنى للسحب",
+      "min_liquidation_amount_sar_hint": "أقل رصيد يمكن للمستخدم سحبه.",
+      "email": "البريد الإلكتروني للدعم",
+      "phone_numbers": "أرقام الهاتف",
+      "whatsapp_numbers": "أرقام واتساب",
+      "twitter": "إكس (تويتر)",
+      "tiktok": "تيك توك",
+      "snapchat": "سناب شات",
+      "youtube": "يوتيوب",
+      "instagram": "إنستغرام",
+      "facebook": "فيسبوك"
+    },
+    "phone_field": {
+      "country_code_placeholder": "+966",
+      "number_placeholder": "5XXXXXXXX",
+      "add": "إضافة رقم",
+      "remove": "إزالة",
+      "empty": "لا توجد أرقام مضافة."
+    },
+    "actions": {
+      "save": "حفظ التغييرات",
+      "saving": "جارٍ الحفظ…",
+      "reset": "إعادة تعيين",
+      "unsaved": "تغييرات غير محفوظة"
+    }
+  },
+  "validation": {
+    "rate_min": "يجب أن يكون السعر 1 على الأقل.",
+    "commission_range": "يجب أن تكون النسبة بين 0 و100.",
+    "min_positive": "القيمة يجب ألا تقل عن 1.",
+    "email_invalid": "أدخل بريداً إلكترونياً صالحاً.",
+    "url_invalid": "أدخل رابطاً صالحاً (https://…).",
+    "country_code_invalid": "رمز الدولة يجب أن يبدأ بـ + ويتبعه من 1 إلى 4 أرقام.",
+    "phone_digits_only": "استخدم الأرقام فقط.",
+    "phone_required": "أضف رقماً واحداً على الأقل."
+  },
+  "toasts": {
+    "update_success": "تم حفظ الإعدادات."
+  },
+  "errors": {
+    "load_failed": "تعذّر تحميل الإعدادات.",
+    "update_failed": "تعذّر حفظ الإعدادات."
+  }
+}

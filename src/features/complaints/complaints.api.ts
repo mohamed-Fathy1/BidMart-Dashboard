@@ -9,14 +9,19 @@ import {
   type ComplaintStatus,
   type ComplaintSummary,
   type ComplaintTypeOption,
+  type ComplaintTypeRef,
   type Paginated,
 } from '@/types/api'
 import {
   MOCK_COMPLAINT_DETAILS,
   MOCK_COMPLAINT_NOTES,
   MOCK_COMPLAINT_SUMMARIES,
+  MOCK_COMPLAINT_TYPE_REFS,
   MOCK_COMPLAINT_TYPES,
   cloneComplaintDetail,
+  mockCreateComplaintType,
+  mockDeleteComplaintType,
+  mockUpdateComplaintType,
 } from './complaints.mock'
 
 export interface ListComplaintsParams {
@@ -59,6 +64,67 @@ export async function listComplaintTypes(): Promise<ComplaintTypeOption[]> {
     if (isMissingEndpoint(err)) return MOCK_COMPLAINT_TYPES(i18n.language)
     // Non-404 errors (network, 500, etc.) shouldn't take down the filter dropdown.
     if (!DEV_FALLBACK) return []
+    throw err
+  }
+}
+
+/** Admin-facing list of complaint types (both languages). */
+export async function listComplaintTypeRefs(): Promise<ComplaintTypeRef[]> {
+  try {
+    const res = await api.get<ApiEnvelope<ComplaintTypeRef[]> | ComplaintTypeRef[]>(
+      '/admin/complaints/types',
+    )
+    return unwrap(res.data) as ComplaintTypeRef[]
+  } catch (err) {
+    if (isMissingEndpoint(err)) return MOCK_COMPLAINT_TYPE_REFS.map((t) => ({ ...t }))
+    throw err
+  }
+}
+
+export interface ComplaintTypePayload {
+  name_en: string
+  name_ar: string
+}
+
+export async function createComplaintType(
+  payload: ComplaintTypePayload,
+): Promise<ComplaintTypeRef> {
+  try {
+    const res = await api.post<ApiEnvelope<ComplaintTypeRef> | ComplaintTypeRef>(
+      '/admin/complaints/types',
+      payload,
+    )
+    return unwrap(res.data)
+  } catch (err) {
+    if (isMissingEndpoint(err)) return mockCreateComplaintType(payload)
+    throw err
+  }
+}
+
+export async function updateComplaintType(
+  id: string,
+  payload: Partial<ComplaintTypePayload>,
+): Promise<ComplaintTypeRef> {
+  try {
+    const res = await api.patch<ApiEnvelope<ComplaintTypeRef> | ComplaintTypeRef>(
+      `/admin/complaints/types/${id}`,
+      payload,
+    )
+    return unwrap(res.data)
+  } catch (err) {
+    if (isMissingEndpoint(err)) return mockUpdateComplaintType(id, payload)
+    throw err
+  }
+}
+
+export async function deleteComplaintType(id: string): Promise<void> {
+  try {
+    await api.delete(`/admin/complaints/types/${id}`)
+  } catch (err) {
+    if (isMissingEndpoint(err)) {
+      mockDeleteComplaintType(id)
+      return
+    }
     throw err
   }
 }

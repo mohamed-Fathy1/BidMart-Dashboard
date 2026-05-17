@@ -1,0 +1,78 @@
+{
+  "title": "تذاكر الدعم",
+  "description": "متابعة الرسائل المرسلة من المستخدمين والرد عليها.",
+  "detail": {
+    "title": "التذكرة #{{serial}}",
+    "back_to_list": "العودة إلى التذاكر",
+    "submitted_at": "أُرسلت {{value}}",
+    "sender": "المرسل",
+    "message": "الرسالة",
+    "history": "سجل الحالات",
+    "history_empty": "لم يتم تغيير الحالة بعد.",
+    "status_set_by": "بواسطة {{name}}"
+  },
+  "status": {
+    "NEW": "جديدة",
+    "CONTACTED": "تم التواصل",
+    "UNDER_REVIEW": "قيد المراجعة"
+  },
+  "message_type": {
+    "COMPLAINT": "شكوى",
+    "SUGGESTION": "اقتراح",
+    "INQUIRY": "استفسار",
+    "ADVERTISEMENT": "إعلان",
+    "OTHER": "أخرى"
+  },
+  "columns": {
+    "serial": "#",
+    "sender": "المرسل",
+    "phone": "الهاتف",
+    "type": "النوع",
+    "status": "الحالة",
+    "submitted": "تاريخ الإرسال"
+  },
+  "filters": {
+    "search_placeholder": "ابحث بالاسم…",
+    "status_placeholder": "الحالة",
+    "type_placeholder": "النوع",
+    "date_from_label": "من",
+    "date_to_label": "إلى",
+    "results_count_zero": "لا توجد تذاكر",
+    "results_count_one": "تذكرة واحدة",
+    "results_count_two": "تذكرتان",
+    "results_count_few": "{{count}} تذاكر",
+    "results_count_many": "{{count}} تذكرة",
+    "results_count_other": "{{count}} تذكرة"
+  },
+  "empty": {
+    "title": "لا توجد تذاكر بعد",
+    "description": "ستظهر هنا فور إرسال المستخدمين رسائلهم من التطبيق.",
+    "filtered_title": "لا توجد نتائج",
+    "filtered_description": "جرّب تعديل الفلاتر أو مسحها.",
+    "clear_filters": "مسح الفلاتر"
+  },
+  "actions": {
+    "view": "عرض التذكرة",
+    "update_status": "تحديث الحالة",
+    "copy_phone": "نسخ الهاتف",
+    "phone_copied": "تم نسخ الهاتف"
+  },
+  "transitions": {
+    "to_contacted_title": "تحديد كـ ”تم التواصل“",
+    "to_contacted_description": "نقل التذكرة إلى ”تم التواصل“ للإشارة إلى التواصل مع المستخدم.",
+    "to_under_review_title": "نقل إلى ”قيد المراجعة“",
+    "to_under_review_description": "نقل التذكرة إلى ”قيد المراجعة“ أثناء عمل الفريق على الحل.",
+    "to_new_title": "إعادة فتح كـ ”جديدة“",
+    "to_new_description": "إعادة التذكرة إلى حالة ”جديدة“.",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء"
+  },
+  "toasts": {
+    "update_success": "تم تحديث حالة التذكرة."
+  },
+  "errors": {
+    "load_failed": "تعذّر تحميل التذاكر.",
+    "detail_load_failed": "تعذّر تحميل التذكرة.",
+    "update_failed": "تعذّر تحديث حالة التذكرة."
+  }
+}

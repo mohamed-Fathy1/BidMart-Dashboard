@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Bell } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { format } from '@/lib/format'
 import {
   NOTIFICATIONS,
   type NotificationItem,
@@ -10,7 +11,7 @@ import {
 
 const TINT: Record<NotificationKind, string> = {
   alert: 'bg-destructive/10 text-destructive',
-  pending: 'bg-amber-100 text-amber-800',
+  pending: 'bg-amber-50 text-amber-700',
   info: 'bg-primary/10 text-primary',
 }
 
@@ -21,7 +22,7 @@ export function NotificationsPopoverContent() {
     return (
       <>
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <span className="text-sm font-medium text-foreground">
+          <span className="text-sm font-semibold text-foreground">
             {t('shell:topbar.notifications')}
           </span>
         </div>
@@ -38,17 +39,19 @@ export function NotificationsPopoverContent() {
     )
   }
 
+  const unread = NOTIFICATIONS.length
+
   return (
     <div className="flex flex-col">
       <div className="flex items-start justify-between gap-3 border-b border-border px-4 py-3">
         <div className="min-w-0">
-          <div className="text-sm font-medium text-foreground">
+          <div className="text-sm font-semibold text-foreground">
             {t('shell:topbar.notifications')}
           </div>
           <div className="mt-0.5 text-xs text-muted-foreground">
             {t('shell:notifications.summary', {
-              unread: NOTIFICATIONS.length,
-              today: 28,
+              unread: format.number(unread),
+              today: format.number(unread),
             })}
           </div>
         </div>
@@ -74,7 +77,7 @@ function NotificationRow({ item }: { item: NotificationItem }) {
   const { t } = useTranslation()
   const Icon = item.icon
   return (
-    <li className="flex cursor-default items-start gap-3 px-4 py-3 transition-colors duration-(--duration-hover) ease-(--ease-default) hover:bg-muted/60">
+    <li className="group/notif relative flex items-start gap-3 px-4 py-3">
       <span
         className={cn(
           'inline-flex size-8 shrink-0 items-center justify-center rounded-md',
@@ -84,7 +87,7 @@ function NotificationRow({ item }: { item: NotificationItem }) {
         <Icon className="size-4" />
       </span>
       <div className="min-w-0 flex-1">
-        <div className="text-sm font-medium leading-snug text-foreground">
+        <div className="text-sm leading-snug font-medium text-foreground">
           {t(item.titleKey)}
         </div>
         <div className="mt-0.5 text-xs leading-snug text-muted-foreground">

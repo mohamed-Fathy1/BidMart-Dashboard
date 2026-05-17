@@ -30,7 +30,7 @@ const ICON_BY_ACTION: Record<RecentActivityItem['actionKey'], LucideIcon> = {
 const TONE: Record<RecentActivityItem['tone'], string> = {
   positive: 'bg-primary/10 text-primary',
   negative: 'bg-destructive/10 text-destructive',
-  warning: 'bg-amber-100 text-amber-800',
+  warning: 'bg-amber-50 text-amber-700',
   neutral: 'bg-muted text-muted-foreground',
 }
 
@@ -38,8 +38,8 @@ export function RecentActivity() {
   const { t } = useTranslation()
 
   return (
-    <Card>
-      <CardHeader className="border-b">
+    <Card className="gap-4">
+      <CardHeader className="border-b pb-4">
         <CardTitle>{t('shell:overview.recent_activity.title')}</CardTitle>
         <CardDescription>
           {t('shell:overview.recent_activity.subtitle')}
@@ -51,11 +51,11 @@ export function RecentActivity() {
         </CardAction>
       </CardHeader>
       <CardContent>
-        <ul className="-my-2 divide-y divide-border">
+        <ul className="divide-y divide-border">
           {RECENT_ACTIVITY.map((r) => {
             const Icon = ICON_BY_ACTION[r.actionKey]
             return (
-              <li key={r.id} className="flex items-center gap-3 py-3">
+              <li key={r.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
                 <span
                   className={cn(
                     'inline-flex size-7 shrink-0 items-center justify-center rounded-md',
@@ -77,7 +77,7 @@ export function RecentActivity() {
                     </span>
                   )}
                 </p>
-                <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
+                <span className="shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground">
                   {r.when}
                 </span>
               </li>

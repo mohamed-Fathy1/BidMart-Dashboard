@@ -55,6 +55,17 @@ export const PERMISSIONS = {
     addNote: "admin:complaints:addNote",
     sendNotification: "admin:complaints:sendNotification",
     closeConversation: "admin:complaints:closeConversation",
+    createType: "admin:complaints:createType",
+    updateType: "admin:complaints:updateType",
+    deleteType: "admin:complaints:deleteType",
+  },
+  contactMessages: {
+    view: "admin:contact-messages:view",
+    update: "admin:contact-messages:update",
+  },
+  settings: {
+    view: "admin:settings:view",
+    update: "admin:settings:update",
   },
 } as const;
 

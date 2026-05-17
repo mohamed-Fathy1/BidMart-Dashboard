@@ -6,12 +6,18 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { ACTION_QUEUE, type ActionQueueItem } from './overview.mock'
 
 const TONE_BG: Record<ActionQueueItem['tone'], string> = {
-  amber: 'bg-amber-100 text-amber-800',
+  amber: 'bg-amber-50 text-amber-700',
   red: 'bg-destructive/10 text-destructive',
   neutral: 'bg-muted text-foreground',
 }
@@ -20,7 +26,7 @@ export function ActionQueue() {
   const { t } = useTranslation()
 
   return (
-    <Card>
+    <Card className="gap-4">
       <CardHeader>
         <CardTitle>{t('shell:overview.action_queue.title')}</CardTitle>
         <CardDescription>
@@ -35,6 +41,9 @@ export function ActionQueue() {
     </Card>
   )
 }
+
+const ROW_BASE =
+  'group/row flex w-full items-center gap-3 rounded-md border border-border bg-card p-3 text-start transition-colors duration-(--duration-hover) ease-(--ease-default) focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
 
 function ActionRow({ item }: { item: ActionQueueItem }) {
   const { t } = useTranslation()
@@ -55,16 +64,13 @@ function ActionRow({ item }: { item: ActionQueueItem }) {
         <div className="text-sm font-medium text-foreground">{label}</div>
         <div className="mt-0.5 text-xs text-muted-foreground">{sub}</div>
       </div>
-      <ChevronRight className="size-3.5 shrink-0 text-muted-foreground rtl:rotate-180" />
+      <ChevronRight className="size-3.5 shrink-0 text-muted-foreground transition-transform duration-(--duration-hover) ease-(--ease-default) group-hover/row:translate-x-0.5 rtl:rotate-180 rtl:group-hover/row:-translate-x-0.5" />
     </>
   )
 
-  const base =
-    'flex items-center gap-3 rounded-md border border-border bg-card p-3 text-start transition-colors duration-(--duration-hover) ease-(--ease-default)'
-
   if (item.ready) {
     return (
-      <Link to={item.to} className={cn(base, 'hover:bg-muted/50')}>
+      <Link to={item.to} className={cn(ROW_BASE, 'hover:bg-muted/50')}>
         {inner}
       </Link>
     )
@@ -73,14 +79,15 @@ function ActionRow({ item }: { item: ActionQueueItem }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div
-          aria-disabled
-          className={cn(base, 'cursor-not-allowed opacity-60')}
+        <button
+          type="button"
+          disabled
+          className={cn(ROW_BASE, 'cursor-not-allowed opacity-60 disabled:pointer-events-auto')}
         >
           {inner}
-        </div>
+        </button>
       </TooltipTrigger>
-      <TooltipContent>
+      <TooltipContent side="top">
         {t('shell:overview.action_queue.coming_soon')}
       </TooltipContent>
     </Tooltip>

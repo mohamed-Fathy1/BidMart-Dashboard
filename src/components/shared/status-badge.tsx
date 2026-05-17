@@ -66,6 +66,27 @@ interface ComplaintBadgeProps {
   className?: string
 }
 
+type SupportTicketStatusValue = 'NEW' | 'CONTACTED' | 'UNDER_REVIEW'
+
+interface SupportTicketBadgeProps {
+  type: 'supportTicket'
+  status: SupportTicketStatusValue
+  className?: string
+}
+
+type SupportTicketTypeValue =
+  | 'COMPLAINT'
+  | 'SUGGESTION'
+  | 'INQUIRY'
+  | 'ADVERTISEMENT'
+  | 'OTHER'
+
+interface SupportTicketTypeBadgeProps {
+  type: 'supportTicketType'
+  status: SupportTicketTypeValue
+  className?: string
+}
+
 type StatusBadgeProps =
   | AccountBadgeProps
   | SellerBadgeProps
@@ -76,6 +97,8 @@ type StatusBadgeProps =
   | ProviderVerificationBadgeProps
   | SellerVerifiedBadgeProps
   | ComplaintBadgeProps
+  | SupportTicketBadgeProps
+  | SupportTicketTypeBadgeProps
 
 interface StatusStyle {
   badge: string
@@ -92,6 +115,7 @@ const warning: StatusStyle  = { badge: 'bg-amber-50 text-amber-700 border-amber-
 const danger: StatusStyle   = { badge: 'bg-red-50 text-red-700 border-red-200/70',             dot: 'bg-red-500' }
 const neutral: StatusStyle  = { badge: 'bg-stone-100 text-stone-600 border-stone-200/70',       dot: 'bg-stone-400' }
 const info: StatusStyle     = { badge: 'bg-blue-50 text-blue-700 border-blue-200/70',           dot: 'bg-blue-500' }
+const accent: StatusStyle   = { badge: 'bg-violet-50 text-violet-700 border-violet-200/70',     dot: 'bg-violet-500' }
 
 const accountStyles: Record<AccountStatus, StatusStyle> = {
   active:               positive,
@@ -148,6 +172,20 @@ const complaintStyles: Record<ComplaintStatusValue, StatusStyle> = {
   REJECTED:     danger,
 }
 
+const supportTicketStyles: Record<SupportTicketStatusValue, StatusStyle> = {
+  NEW:          info,
+  CONTACTED:    warning,
+  UNDER_REVIEW: positive,
+}
+
+const supportTicketTypeStyles: Record<SupportTicketTypeValue, StatusStyle> = {
+  COMPLAINT:     danger,
+  SUGGESTION:    accent,
+  INQUIRY:       info,
+  ADVERTISEMENT: warning,
+  OTHER:         neutral,
+}
+
 const fallbackStyle: StatusStyle = neutral
 
 function getStyle(status: string, type: StatusBadgeProps['type']): StatusStyle {
@@ -168,6 +206,10 @@ function getStyle(status: string, type: StatusBadgeProps['type']): StatusStyle {
       return sellerVerifiedStyles[status as 'true' | 'false'] ?? fallbackStyle
     case 'complaint':
       return complaintStyles[status as ComplaintStatusValue] ?? fallbackStyle
+    case 'supportTicket':
+      return supportTicketStyles[status as SupportTicketStatusValue] ?? fallbackStyle
+    case 'supportTicketType':
+      return supportTicketTypeStyles[status as SupportTicketTypeValue] ?? fallbackStyle
     case 'account':
     default:
       return accountStyles[status as AccountStatus] ?? fallbackStyle
@@ -188,6 +230,12 @@ function getI18nKey(status: string, type: StatusBadgeProps['type']): string {
   }
   if (type === 'complaint') {
     return `complaints:status.${status.toLowerCase()}`
+  }
+  if (type === 'supportTicket') {
+    return `supportTickets:status.${status}`
+  }
+  if (type === 'supportTicketType') {
+    return `supportTickets:message_type.${status}`
   }
   return `components:status.${status}`
 }

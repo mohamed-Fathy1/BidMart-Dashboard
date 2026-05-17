@@ -20,11 +20,21 @@ function initials(name: string): string {
     .toUpperCase()
 }
 
+function compactCurrency(value: number, lang: string): string {
+  const locale = lang === 'ar' ? 'ar-SA' : 'en-SA'
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: 'SAR',
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(value)
+}
+
 export function TopProviders() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   return (
-    <Card>
+    <Card className="gap-4">
       <CardHeader>
         <CardTitle>{t('shell:overview.top_providers.title')}</CardTitle>
         <CardDescription>
@@ -32,11 +42,14 @@ export function TopProviders() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ul className="-my-2 divide-y divide-border">
+        <ul className="divide-y divide-border">
           {TOP_PROVIDERS.map((p) => (
-            <li key={p.rank} className="flex items-center gap-3 py-2.5">
-              <span className="w-4 shrink-0 text-center font-mono text-xs tabular-nums text-muted-foreground">
-                {p.rank}
+            <li
+              key={p.rank}
+              className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0"
+            >
+              <span className="w-5 shrink-0 text-center font-mono text-xs tabular-nums text-muted-foreground">
+                {format.number(p.rank)}
               </span>
               <Avatar className="size-7">
                 <AvatarFallback className="text-[10px] font-semibold">
@@ -52,9 +65,9 @@ export function TopProviders() {
                   {format.percent(p.share / 100)}
                 </div>
               </div>
-              <Sparkline data={p.trend} width={60} height={20} />
+              <Sparkline data={p.trend} width={60} height={20} className="hidden sm:block" />
               <span className="w-20 text-end font-mono text-xs font-medium tabular-nums">
-                {format.currency(p.gmv)}
+                {compactCurrency(p.gmv, i18n.language)}
               </span>
             </li>
           ))}

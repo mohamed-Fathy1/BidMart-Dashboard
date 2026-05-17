@@ -57,28 +57,34 @@ export function OverviewPage() {
         }
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {KPIS.map((k) => (
           <KpiCard key={k.id} kpi={k} />
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <Card className="gap-4 xl:col-span-2">
           <CardHeader>
             <CardTitle>{t('shell:overview.chart.title')}</CardTitle>
             <CardDescription>
               {t('shell:overview.chart.subtitle')}
             </CardDescription>
             <CardAction>
-              <div className="inline-flex gap-1 rounded-md bg-muted p-0.5">
+              <div
+                className="inline-flex gap-0.5 rounded-md border border-border bg-muted/60 p-0.5"
+                role="tablist"
+                aria-label={t('shell:overview.chart.title')}
+              >
                 {RANGES.map((r) => (
                   <button
                     key={r}
                     type="button"
+                    role="tab"
+                    aria-selected={range === r}
                     onClick={() => setRange(r)}
                     className={cn(
-                      'h-6 rounded px-3 text-xs font-medium transition-colors duration-(--duration-hover) ease-(--ease-default)',
+                      'h-7 rounded px-3 text-xs font-medium transition-colors duration-(--duration-hover) ease-(--ease-default)',
                       range === r
                         ? 'bg-card text-foreground shadow-rest'
                         : 'text-muted-foreground hover:text-foreground',
@@ -90,9 +96,9 @@ export function OverviewPage() {
               </div>
             </CardAction>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-5">
             <GmvTrendChart data={GMV_SERIES} />
-            <div className="mt-5 grid grid-cols-2 gap-4 border-t border-border pt-4 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 border-t border-border pt-4 sm:grid-cols-4">
               {CATEGORY_BREAKDOWN.map((c) => (
                 <div key={c.key}>
                   <div className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
@@ -101,7 +107,7 @@ export function OverviewPage() {
                   <div className="mt-1 font-mono text-base font-semibold tabular-nums">
                     {c.value}
                   </div>
-                  <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-muted">
+                  <div className="mt-2 h-1 overflow-hidden rounded-full bg-muted">
                     <div
                       className="h-full rounded-full bg-primary"
                       style={{ width: `${c.share}%` }}
@@ -128,27 +134,27 @@ function KpiCard({ kpi }: { kpi: OverviewKpi }) {
   const { t } = useTranslation()
   const Arrow = kpi.positive ? ArrowUp : ArrowDown
   return (
-    <Card className="gap-4 py-4">
-      <CardContent className="space-y-2.5">
+    <Card className="gap-3 py-5">
+      <CardContent className="space-y-3">
         <div className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
           {t(`shell:overview.kpi.${kpi.id}`)}
         </div>
         <div className="flex items-end justify-between gap-3">
-          <span className="font-mono text-2xl font-semibold tracking-tight tabular-nums leading-none text-foreground">
+          <span className="font-mono text-2xl font-semibold leading-none tracking-tight tabular-nums text-foreground">
             {kpi.value}
           </span>
           <Sparkline
             data={kpi.spark}
             color={kpi.positive ? 'var(--color-primary)' : 'var(--color-muted-foreground)'}
             fill
-            width={70}
+            width={72}
             height={28}
           />
         </div>
         <div className="flex items-center gap-1 text-xs">
           <span
             className={cn(
-              'inline-flex items-center gap-0.5',
+              'inline-flex items-center gap-0.5 font-medium',
               kpi.positive ? 'text-primary' : 'text-destructive',
             )}
           >

@@ -1,0 +1,74 @@
+{
+  "title": "Support Tickets",
+  "description": "Triage and respond to user-submitted contact messages.",
+  "detail": {
+    "title": "Ticket #{{serial}}",
+    "back_to_list": "Back to tickets",
+    "submitted_at": "Submitted {{value}}",
+    "sender": "Sender",
+    "message": "Message",
+    "history": "Status history",
+    "history_empty": "No status changes recorded yet.",
+    "status_set_by": "Set by {{name}}"
+  },
+  "status": {
+    "NEW": "New",
+    "CONTACTED": "Contacted",
+    "UNDER_REVIEW": "Under review"
+  },
+  "message_type": {
+    "COMPLAINT": "Complaint",
+    "SUGGESTION": "Suggestion",
+    "INQUIRY": "Inquiry",
+    "ADVERTISEMENT": "Advertisement",
+    "OTHER": "Other"
+  },
+  "columns": {
+    "serial": "#",
+    "sender": "Sender",
+    "phone": "Phone",
+    "type": "Type",
+    "status": "Status",
+    "submitted": "Submitted"
+  },
+  "filters": {
+    "search_placeholder": "Search by name…",
+    "status_placeholder": "Status",
+    "type_placeholder": "Type",
+    "date_from_label": "From",
+    "date_to_label": "To",
+    "results_count_one": "{{count}} ticket",
+    "results_count_other": "{{count}} tickets"
+  },
+  "empty": {
+    "title": "No tickets yet",
+    "description": "When users send messages from the app, they will appear here.",
+    "filtered_title": "No matches",
+    "filtered_description": "Try adjusting the filters or clearing them.",
+    "clear_filters": "Clear filters"
+  },
+  "actions": {
+    "view": "View ticket",
+    "update_status": "Update status",
+    "copy_phone": "Copy phone",
+    "phone_copied": "Phone copied"
+  },
+  "transitions": {
+    "to_contacted_title": "Mark as contacted",
+    "to_contacted_description": "Move this ticket to Contacted to indicate the user has been reached out to.",
+    "to_under_review_title": "Move to under review",
+    "to_under_review_description": "Move this ticket to Under review while the team works on a resolution.",
+    "to_new_title": "Reopen as new",
+    "to_new_description": "Move this ticket back to New.",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "toasts": {
+    "update_success": "Ticket status updated."
+  },
+  "errors": {
+    "load_failed": "Failed to load tickets.",
+    "detail_load_failed": "Failed to load the ticket.",
+    "update_failed": "Failed to update the ticket status."
+  }
+}

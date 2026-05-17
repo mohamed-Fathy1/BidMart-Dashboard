@@ -10,13 +10,13 @@ interface RiskPillProps {
 
 const TONE: Record<RiskLevel, string> = {
   low: 'bg-primary/10 text-primary',
-  medium: 'bg-amber-100 text-amber-800',
+  medium: 'bg-amber-50 text-amber-700',
   high: 'bg-destructive/10 text-destructive',
 }
 
 const DOT: Record<RiskLevel, string> = {
   low: 'bg-primary',
-  medium: 'bg-amber-600',
+  medium: 'bg-amber-500',
   high: 'bg-destructive',
 }
 

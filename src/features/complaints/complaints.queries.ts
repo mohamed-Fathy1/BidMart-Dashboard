@@ -5,14 +5,19 @@ import type { ComplaintStatus } from '@/types/api'
 import {
   addComplaintNote,
   closeComplaintConversation,
+  createComplaintType,
+  deleteComplaintType,
   getComplaintDetail,
   listComplaintNotes,
+  listComplaintTypeRefs,
   listComplaintTypes,
   listComplaints,
   rejectComplaint,
   resolveComplaint,
   sendComplaintNotification,
   startInvestigation,
+  updateComplaintType,
+  type ComplaintTypePayload,
   type ListComplaintsParams,
 } from '@/features/complaints/complaints.api'
 
@@ -20,6 +25,7 @@ export const complaintKeys = createResourceKeys<ListComplaintsParams>('complaint
 
 export const complaintTypeKeys = {
   all: ['complaint-types'] as const,
+  refs: ['complaint-types', 'refs'] as const,
 }
 
 export const complaintNoteKeys = {
@@ -51,6 +57,41 @@ export function useComplaintTypesQuery() {
     queryKey: complaintTypeKeys.all,
     queryFn: () => listComplaintTypes(),
     staleTime: 60 * 60 * 1000,
+  })
+}
+
+export function useComplaintTypeRefsQuery() {
+  return useQuery({
+    queryKey: complaintTypeKeys.refs,
+    queryFn: () => listComplaintTypeRefs(),
+    staleTime: 60 * 60 * 1000,
+  })
+}
+
+export function useCreateComplaintTypeMutation() {
+  return useResourceMutation<ComplaintTypePayload>({
+    mutationFn: (payload) => createComplaintType(payload),
+    invalidate: [complaintTypeKeys.all, complaintTypeKeys.refs],
+    successKey: 'complaints:types.actions.create_success',
+    errorKey: 'complaints:types.errors.create_failed',
+  })
+}
+
+export function useUpdateComplaintTypeMutation() {
+  return useResourceMutation<{ id: string; payload: Partial<ComplaintTypePayload> }>({
+    mutationFn: ({ id, payload }) => updateComplaintType(id, payload),
+    invalidate: [complaintTypeKeys.all, complaintTypeKeys.refs],
+    successKey: 'complaints:types.actions.update_success',
+    errorKey: 'complaints:types.errors.update_failed',
+  })
+}
+
+export function useDeleteComplaintTypeMutation() {
+  return useResourceMutation<string>({
+    mutationFn: (id) => deleteComplaintType(id),
+    invalidate: [complaintTypeKeys.all, complaintTypeKeys.refs],
+    successKey: 'complaints:types.actions.delete_success',
+    errorKey: 'complaints:types.errors.delete_failed',
   })
 }
 

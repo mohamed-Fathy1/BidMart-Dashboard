@@ -9,6 +9,8 @@ import {
   FolderTree,
   LayoutGrid,
   MessageCircleWarning,
+  Inbox,
+  Settings,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { PERMISSIONS, type Permission } from '@/lib/permissions'
@@ -53,6 +55,7 @@ export const navSections: NavSection[] = [
       { kind: 'leaf', labelKey: 'shell:nav.users', icon: Users, to: '/users', permission: PERMISSIONS.users.view },
       { kind: 'leaf', labelKey: 'shell:nav.providers', icon: Store, to: '/providers', permission: PERMISSIONS.providers.view },
       { kind: 'leaf', labelKey: 'shell:nav.complaints', icon: MessageCircleWarning, to: '/complaints', permission: PERMISSIONS.complaints.view },
+      { kind: 'leaf', labelKey: 'shell:nav.support_tickets', icon: Inbox, to: '/support-tickets', permission: PERMISSIONS.contactMessages.view },
       {
         kind: 'group',
         labelKey: 'shell:nav.catalog',
@@ -85,6 +88,7 @@ export const navSections: NavSection[] = [
     entries: [
       { kind: 'leaf', labelKey: 'shell:nav.roles', icon: Shield, to: '/roles', permission: PERMISSIONS.roles.view },
       { kind: 'leaf', labelKey: 'shell:nav.admins', icon: UserCog, to: '/admins', permission: PERMISSIONS.admins.view },
+      { kind: 'leaf', labelKey: 'shell:nav.settings', icon: Settings, to: '/settings', permission: PERMISSIONS.settings.view },
     ],
   },
 ]

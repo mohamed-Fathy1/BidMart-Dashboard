@@ -221,5 +221,47 @@
     "reason_too_long": "الحدّ الأقصى لسبب الرفض ١٠٠٠ حرف.",
     "notification_required": "اكتب رسالة الإشعار.",
     "notification_too_long": "الحدّ الأقصى لرسالة الإشعار ٥٠٠ حرف."
+  },
+  "types": {
+    "title": "أنواع الشكاوى",
+    "description": "الفئات التي يختارها المستخدمون عند تقديم الشكوى. مترجمة بكلا اللغتين.",
+    "columns": {
+      "name_en": "الإنجليزية",
+      "name_ar": "العربية",
+      "actions": "إجراءات"
+    },
+    "empty": {
+      "title": "لا توجد أنواع شكاوى بعد",
+      "hint": "أضف أول نوع ليتمكن المستخدمون من اختياره عند تقديم شكوى."
+    },
+    "actions": {
+      "create": "إضافة نوع",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "create_success": "تمّت إضافة النوع.",
+      "update_success": "تمّ تحديث النوع.",
+      "delete_success": "تمّ حذف النوع."
+    },
+    "form": {
+      "create_title": "إضافة نوع شكوى",
+      "edit_title": "تعديل نوع شكوى",
+      "dialog_description": "يظهر الاسمان للمستخدمين كلٌّ بلغته.",
+      "section_names": "الأسماء",
+      "name_en": "الاسم بالإنجليزية",
+      "name_en_placeholder": "مثال: Wrong Item Received",
+      "name_ar": "الاسم بالعربية",
+      "name_ar_placeholder": "مثال: استلام منتج خاطئ"
+    },
+    "delete_dialog": {
+      "title": "حذف \"{{name}}\"",
+      "description": "الشكاوى السابقة المرتبطة بهذا النوع لن تتأثر، لكنه لن يظهر للمستخدمين كخيار بعد الآن. لا يمكن التراجع."
+    },
+    "errors": {
+      "name_en_required": "الاسم بالإنجليزية مطلوب.",
+      "name_ar_required": "الاسم بالعربية مطلوب.",
+      "create_failed": "تعذّر إنشاء نوع الشكوى.",
+      "update_failed": "تعذّر تحديث نوع الشكوى.",
+      "delete_failed": "تعذّر حذف نوع الشكوى."
+    }
   }
 }

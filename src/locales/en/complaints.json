@@ -217,5 +217,47 @@
     "reason_too_long": "Rejection reasons are limited to 1000 characters.",
     "notification_required": "Write a message to send.",
     "notification_too_long": "Notifications are limited to 500 characters."
+  },
+  "types": {
+    "title": "Complaint types",
+    "description": "Categories users pick when submitting a complaint. Localized in both languages.",
+    "columns": {
+      "name_en": "English",
+      "name_ar": "Arabic",
+      "actions": "Actions"
+    },
+    "empty": {
+      "title": "No complaint types yet",
+      "hint": "Add the first type so users have something to choose from when filing a complaint."
+    },
+    "actions": {
+      "create": "Add type",
+      "edit": "Edit",
+      "delete": "Delete",
+      "create_success": "Complaint type created.",
+      "update_success": "Complaint type updated.",
+      "delete_success": "Complaint type deleted."
+    },
+    "form": {
+      "create_title": "Add complaint type",
+      "edit_title": "Edit complaint type",
+      "dialog_description": "Both names are shown to users in their language.",
+      "section_names": "Names",
+      "name_en": "English name",
+      "name_en_placeholder": "e.g. Wrong Item Received",
+      "name_ar": "Arabic name",
+      "name_ar_placeholder": "مثل: استلام منتج خاطئ"
+    },
+    "delete_dialog": {
+      "title": "Delete \"{{name}}\"",
+      "description": "Existing complaints referencing this type are unaffected, but users won't see it as an option anymore. This cannot be undone."
+    },
+    "errors": {
+      "name_en_required": "English name is required.",
+      "name_ar_required": "Arabic name is required.",
+      "create_failed": "Could not create the complaint type.",
+      "update_failed": "Could not update the complaint type.",
+      "delete_failed": "Could not delete the complaint type."
+    }
   }
 }

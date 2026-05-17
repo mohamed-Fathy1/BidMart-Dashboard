@@ -34,6 +34,8 @@ const TYPE_PAYMENT: ComplaintTypeRef = {
   name_ar: 'مشكلة في الدفع',
 }
 
+// Mutable in DEV so the complaint-types admin page can CRUD against the mock
+// while the real /admin/complaints/types CUD endpoints aren't deployed yet.
 export const MOCK_COMPLAINT_TYPE_REFS: ComplaintTypeRef[] = [
   TYPE_WRONG_ITEM,
   TYPE_SHIPPING,
@@ -46,6 +48,48 @@ export function MOCK_COMPLAINT_TYPES(lang: string): ComplaintTypeOption[] {
     id: type.id,
     name: lang === 'ar' ? type.name_ar : type.name_en,
   }))
+}
+
+function makeId(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID()
+  }
+  return `mock-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+export function mockCreateComplaintType(input: {
+  name_en: string
+  name_ar: string
+}): ComplaintTypeRef {
+  const next: ComplaintTypeRef = {
+    id: makeId(),
+    name_en: input.name_en,
+    name_ar: input.name_ar,
+  }
+  MOCK_COMPLAINT_TYPE_REFS.push(next)
+  return next
+}
+
+export function mockUpdateComplaintType(
+  id: string,
+  patch: { name_en?: string; name_ar?: string },
+): ComplaintTypeRef {
+  const idx = MOCK_COMPLAINT_TYPE_REFS.findIndex((t) => t.id === id)
+  if (idx === -1) throw new Error(`complaint type ${id} not found`)
+  const current = MOCK_COMPLAINT_TYPE_REFS[idx]!
+  const next: ComplaintTypeRef = {
+    id: current.id,
+    name_en: patch.name_en ?? current.name_en,
+    name_ar: patch.name_ar ?? current.name_ar,
+  }
+  MOCK_COMPLAINT_TYPE_REFS[idx] = next
+  return next
+}
+
+export function mockDeleteComplaintType(id: string): void {
+  const idx = MOCK_COMPLAINT_TYPE_REFS.findIndex((t) => t.id === id)
+  if (idx === -1) throw new Error(`complaint type ${id} not found`)
+  MOCK_COMPLAINT_TYPE_REFS.splice(idx, 1)
 }
 
 export const MOCK_COMPLAINT_SUMMARIES: ComplaintSummary[] = [

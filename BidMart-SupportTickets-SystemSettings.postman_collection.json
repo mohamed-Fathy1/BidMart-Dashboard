@@ -1,0 +1,866 @@
+{
+  "info": {
+    "_postman_id": "d1e2f3a4-b5c6-7d8e-9f0a-1b2c3d4e5f6a",
+    "name": "BidMart — Support Tickets & System Settings",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "New APIs added in the support-tickets + system-settings task.\n\n**Admin credentials (seeded):**\n| Email                | Password    |\n|----------------------|-------------|\n| admin@bidmart.com    | Admin@1234  |\n\n**Seeded support tickets (5 rows):**\n1. Ahmed Al-Rashidi — COMPLAINT — NEW\n2. Sara Al-Otaibi — SUGGESTION — CONTACTED\n3. Mohammed Al-Ghamdi — INQUIRY — UNDER_REVIEW\n4. Noura Al-Zahrani — OTHER — NEW\n5. Khalid Al-Shehri — COMPLAINT — CONTACTED\n\n**Seeded system settings:** exchange rate 3.75, commission 15%, referral 20 SAR, min liquidation 50 SAR, full social media links.\n\n**Recommended run order:**\n1. 🔑 Setup — Login as Admin\n2. 🎫 Support Tickets → List Tickets (auto-sets `ticketId`)\n3. 🎫 Support Tickets → Get Ticket Detail\n4. 🎫 Support Tickets → Update Ticket Status\n5. ⚙️  System Settings → Get Settings\n6. ⚙️  System Settings → Update Settings\n\n**Permissions required:**\n- `admin:contact-messages:view` — list + detail\n- `admin:contact-messages:update` — update status\n- `admin:settings:view` — get settings\n- `admin:settings:update` — update settings\n\nSuper admin bypasses all permission checks."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string",
+      "description": "Base URL including API prefix and version"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string",
+      "description": "Admin JWT — auto-set by Login request"
+    },
+    {
+      "key": "ticketId",
+      "value": "",
+      "type": "string",
+      "description": "UUID of a support ticket — auto-set by List Tickets"
+    }
+  ],
+  "item": [
+
+    {
+      "name": "🔑 Setup — Login",
+      "description": "Run first to populate the adminToken variable used by all subsequent requests.",
+      "item": [
+        {
+          "name": "Login as Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has accessToken', () => pm.expect(res.data.accessToken).to.be.a('string'));",
+                  "if (res.success && res.data && res.data.accessToken) {",
+                  "  pm.collectionVariables.set('adminToken', res.data.accessToken);",
+                  "  console.log('Admin token saved');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@bidmart.com\",\n  \"password\": \"Admin@1234\",\n  \"rememberMe\": false,\n  \"deviceId\": \"postman-admin\",\n  \"fcmToken\": \"string\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Logs in as the seeded super admin. The test script saves `accessToken` into the `adminToken` collection variable used by every subsequent request."
+          },
+          "response": []
+        }
+      ]
+    },
+
+    {
+      "name": "🎫 Support Tickets",
+      "description": "Admin endpoints for viewing and managing user support tickets (contact messages).\n\nAll routes require `admin:contact-messages:view` (list + detail) or `admin:contact-messages:update` (status update).\n\nBase path: /admin/support-tickets",
+      "item": [
+
+        {
+          "name": "List Tickets — no filters (default)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success is true', () => pm.expect(res.success).to.equal(true));",
+                  "pm.test('data is array', () => pm.expect(res.data).to.be.an('array'));",
+                  "pm.test('meta has total', () => pm.expect(res.meta.total).to.be.a('number'));",
+                  "pm.test('sorted newest first', () => {",
+                  "  if (res.data.length >= 2) {",
+                  "    const first = new Date(res.data[0].created_at).getTime();",
+                  "    const second = new Date(res.data[1].created_at).getTime();",
+                  "    pm.expect(first).to.be.at.least(second);",
+                  "  }",
+                  "});",
+                  "if (res.data && res.data.length > 0) {",
+                  "  pm.collectionVariables.set('ticketId', res.data[0].id);",
+                  "  console.log('ticketId set to', res.data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/support-tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "support-tickets"]
+            },
+            "description": "Returns the first page (10 items) sorted newest-first. The test script auto-sets `ticketId` from the first result."
+          },
+          "response": []
+        },
+
+        {
+          "name": "List Tickets — filter by status NEW",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('all items are NEW', () => {",
+                  "  res.data.forEach(t => pm.expect(t.status).to.equal('NEW'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/support-tickets?status=NEW",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "support-tickets"],
+              "query": [
+                { "key": "status", "value": "NEW", "description": "NEW | CONTACTED | UNDER_REVIEW" }
+              ]
+            },
+            "description": "Filter by status. Returns only tickets with status = NEW."
+          },
+          "response": []
+        },
+
+        {
+          "name": "List Tickets — filter by type COMPLAINT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('all items are COMPLAINT', () => {",
+                  "  res.data.forEach(t => pm.expect(t.message_type).to.equal('COMPLAINT'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/support-tickets?message_type=COMPLAINT",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "support-tickets"],
+              "query": [
+                {
+                  "key": "message_type",
+                  "value": "COMPLAINT",
+                  "description": "COMPLAINT | SUGGESTION | INQUIRY | ADVERTISEMENT | OTHER"
+                }
+              ]
+            },
+            "description": "Filter by message_type = COMPLAINT. Returns 2 seeded complaints."
+          },
+          "response": []
+        },
+
+        {
+          "name": "List Tickets — search by name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('results contain search term', () => {",
+                  "  res.data.forEach(t => pm.expect(t.user_name.toLowerCase()).to.include('ahmed'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/support-tickets?search=Ahmed",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "support-tickets"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Ahmed",
+                  "description": "Partial ILIKE match on sender full_name"
+                }
+              ]
+            },
+            "description": "Search by sender name (case-insensitive). Returns tickets where full_name contains 'Ahmed'."
+          },
+          "response": []
+        },
+
+        {
+          "name": "List Tickets — date range filter",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/support-tickets?date_from=2025-01-01&date_to=2027-12-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "support-tickets"],
+              "query": [
+                { "key": "date_from", "value": "2025-01-01", "description": "ISO date (inclusive start)" },
+                { "key": "date_to", "value": "2027-12-31", "description": "ISO date (inclusive end — internally shifted +1 day)" }
+              ]
+            },
+            "description": "Filter by submission date range. `date_to` is inclusive (the query adds 1 day internally so 2027-12-31 includes all tickets submitted that day)."
+          },
+          "response": []
+        },
+
+        {
+          "name": "List Tickets — pagination page 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('meta.page is 2', () => pm.expect(res.meta.page).to.equal(2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/support-tickets?page=2&limit=2",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "support-tickets"],
+              "query": [
+                { "key": "page", "value": "2" },
+                { "key": "limit", "value": "2" }
+              ]
+            },
+            "description": "Page 2 with 2 items per page. Default page size is 10."
+          },
+          "response": []
+        },
+
+        {
+          "name": "List Tickets — 401 missing token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/support-tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "support-tickets"]
+            },
+            "description": "No Authorization header — should return 401."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Ticket Detail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success is true', () => pm.expect(res.success).to.equal(true));",
+                  "const t = res.data;",
+                  "pm.test('has serial_number', () => pm.expect(t.serial_number).to.be.a('number'));",
+                  "pm.test('has full content', () => pm.expect(t.content).to.be.a('string'));",
+                  "pm.test('has phone_number', () => pm.expect(t.phone_number).to.be.a('string'));",
+                  "pm.test('has email', () => pm.expect(t.email).to.be.a('string'));",
+                  "pm.test('has status', () => pm.expect(['NEW','CONTACTED','UNDER_REVIEW']).to.include(t.status));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/support-tickets/{{ticketId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "support-tickets", "{{ticketId}}"]
+            },
+            "description": "Full ticket detail including phone number, email, complete message text, and current status. `ticketId` is auto-set by the List Tickets request."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Ticket Detail — 404 not found",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('error code is CONTACT_MESSAGE_NOT_FOUND', () => {",
+                  "  pm.expect(res.errorCode).to.equal('CONTACT_MESSAGE_NOT_FOUND');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/support-tickets/00000000-0000-0000-0000-000000000000",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "support-tickets", "00000000-0000-0000-0000-000000000000"]
+            },
+            "description": "Non-existent UUID — should return 404 CONTACT_MESSAGE_NOT_FOUND."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Ticket Status → CONTACTED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));",
+                  "console.log('Ticket status updated to CONTACTED. Verify with Get Ticket Detail.');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/support-tickets/{{ticketId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "support-tickets", "{{ticketId}}", "status"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONTACTED\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Changes ticket status to CONTACTED. Records admin name and timestamp in the status_history audit log. Returns 204 No Content on success.\n\nValid values: NEW | CONTACTED | UNDER_REVIEW"
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Ticket Status → UNDER_REVIEW",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/support-tickets/{{ticketId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "support-tickets", "{{ticketId}}", "status"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"UNDER_REVIEW\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Transitions ticket to UNDER_REVIEW. Run after CONTACTED to simulate full status progression."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Ticket Status — 400 invalid status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "const res = pm.response.json();",
+                  "pm.test('success is false', () => pm.expect(res.success).to.equal(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/support-tickets/{{ticketId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "support-tickets", "{{ticketId}}", "status"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CLOSED\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "CLOSED is not a valid status value — should return 400 VALIDATION_FAILED."
+          },
+          "response": []
+        }
+
+      ]
+    },
+
+    {
+      "name": "⚙️ System Settings",
+      "description": "Admin endpoints for reading and updating platform-wide system settings.\n\nGet requires `admin:settings:view`. Update requires `admin:settings:update`.\n\nBase path: /admin/settings",
+      "item": [
+
+        {
+          "name": "Get Settings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success is true', () => pm.expect(res.success).to.equal(true));",
+                  "const s = res.data;",
+                  "pm.test('has phone_numbers array', () => pm.expect(s.phone_numbers).to.be.an('array'));",
+                  "pm.test('has whatsapp_numbers array', () => pm.expect(s.whatsapp_numbers).to.be.an('array'));",
+                  "pm.test('dollar_to_riyal_rate is a number', () => pm.expect(s.dollar_to_riyal_rate).to.be.a('number'));",
+                  "pm.test('order_commission_percentage 0-100', () => {",
+                  "  pm.expect(s.order_commission_percentage).to.be.at.least(0);",
+                  "  pm.expect(s.order_commission_percentage).to.be.at.most(100);",
+                  "});",
+                  "pm.test('referral_amount_sar >= 1', () => pm.expect(s.referral_amount_sar).to.be.at.least(1));",
+                  "pm.test('min_liquidation_amount_sar >= 1', () => pm.expect(s.min_liquidation_amount_sar).to.be.at.least(1));",
+                  "console.log('Exchange rate:', s.dollar_to_riyal_rate, '| Commission:', s.order_commission_percentage + '%');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "settings"]
+            },
+            "description": "Returns the current system settings. All numeric fields are returned as numbers. phone_numbers and whatsapp_numbers are arrays of `{country_code, number}` objects."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Settings — 401 missing token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "settings"]
+            },
+            "description": "No auth — should return 401."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Settings — full update",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success is true', () => pm.expect(res.success).to.equal(true));",
+                  "const s = res.data;",
+                  "pm.test('exchange rate updated', () => pm.expect(s.dollar_to_riyal_rate).to.equal(3.75));",
+                  "pm.test('commission updated', () => pm.expect(s.order_commission_percentage).to.equal(15));",
+                  "pm.test('social media has tiktok', () => pm.expect(s.social_media.tiktok).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "settings"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_numbers\": [\n    { \"country_code\": \"+966\", \"number\": \"112345678\" },\n    { \"country_code\": \"+966\", \"number\": \"119876543\" }\n  ],\n  \"whatsapp_numbers\": [\n    { \"country_code\": \"+966\", \"number\": \"501234567\" }\n  ],\n  \"email\": \"support@bidmart.com\",\n  \"dollar_to_riyal_rate\": 3.75,\n  \"order_commission_percentage\": 15,\n  \"referral_amount_sar\": 20,\n  \"min_liquidation_amount_sar\": 50,\n  \"social_media\": {\n    \"twitter\": \"https://x.com/bidmart\",\n    \"tiktok\": \"https://tiktok.com/@bidmart\",\n    \"snapchat\": \"https://snapchat.com/add/bidmart\",\n    \"youtube\": \"https://youtube.com/@bidmart\",\n    \"instagram\": \"https://instagram.com/bidmart\",\n    \"facebook\": \"https://facebook.com/bidmart\"\n  }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Full settings update. All fields are optional — only send what you want to change. Partial updates are fully supported."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Settings — partial (exchange rate only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('exchange rate is 4.00', () => pm.expect(res.data.dollar_to_riyal_rate).to.equal(4));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "settings"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dollar_to_riyal_rate\": 4.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Partial update — only the exchange rate. All other settings remain unchanged. Uses targeted DB UPDATE to prevent lost-update race conditions."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Settings — update contact info only",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('email updated', () => pm.expect(res.data.email).to.equal('info@bidmart.com'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "settings"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_numbers\": [\n    { \"country_code\": \"+966\", \"number\": \"112345678\" },\n    { \"country_code\": \"+966\", \"number\": \"119876543\" },\n    { \"country_code\": \"+971\", \"number\": \"43456789\" }\n  ],\n  \"whatsapp_numbers\": [\n    { \"country_code\": \"+966\", \"number\": \"501234567\" },\n    { \"country_code\": \"+966\", \"number\": \"502345678\" }\n  ],\n  \"email\": \"info@bidmart.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Update phone numbers (multiple with country codes), WhatsApp numbers, and email. Demonstrates multi-number support."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Settings — update social media links",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('has all 6 social platforms', () => {",
+                  "  const sm = res.data.social_media;",
+                  "  pm.expect(sm).to.have.property('twitter');",
+                  "  pm.expect(sm).to.have.property('tiktok');",
+                  "  pm.expect(sm).to.have.property('snapchat');",
+                  "  pm.expect(sm).to.have.property('youtube');",
+                  "  pm.expect(sm).to.have.property('instagram');",
+                  "  pm.expect(sm).to.have.property('facebook');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "settings"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"social_media\": {\n    \"twitter\": \"https://x.com/bidmart\",\n    \"tiktok\": \"https://tiktok.com/@bidmart\",\n    \"snapchat\": \"https://snapchat.com/add/bidmart\",\n    \"youtube\": \"https://youtube.com/@bidmart\",\n    \"instagram\": \"https://instagram.com/bidmart\",\n    \"facebook\": \"https://facebook.com/bidmart\"\n  }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Update all 6 social media links (Twitter/X, TikTok, Snapchat, YouTube, Instagram, Facebook). Omit a platform to clear it."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Settings — 400 commission > 100",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "const res = pm.response.json();",
+                  "pm.test('success is false', () => pm.expect(res.success).to.equal(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "settings"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"order_commission_percentage\": 101\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Commission must be 0–100. 101 should return 400 VALIDATION_FAILED."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Settings — 400 exchange rate < 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "const res = pm.response.json();",
+                  "pm.test('success is false', () => pm.expect(res.success).to.equal(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "settings"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dollar_to_riyal_rate\": 0.5\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Exchange rate must be >= 1. 0.5 should return 400 VALIDATION_FAILED."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Settings — 400 invalid email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "const res = pm.response.json();",
+                  "pm.test('success is false', () => pm.expect(res.success).to.equal(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "settings"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"not-an-email\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Email must be a valid address. 'not-an-email' should return 400 VALIDATION_FAILED."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Settings — 400 invalid social media URL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "const res = pm.response.json();",
+                  "pm.test('success is false', () => pm.expect(res.success).to.equal(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "settings"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"social_media\": {\n    \"twitter\": \"not-a-url\"\n  }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Social media links must be valid URLs. 'not-a-url' should return 400 VALIDATION_FAILED."
+          },
+          "response": []
+        }
+
+      ]
+    }
+
+  ]
+}

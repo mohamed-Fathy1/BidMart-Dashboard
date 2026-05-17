@@ -505,3 +505,70 @@ export interface ComplaintDetail {
   created_at: string;
   updated_at: string;
 }
+
+/* ------------------------------------------------------------------ */
+/*  Support tickets (contact messages)                                 */
+/* ------------------------------------------------------------------ */
+
+export type SupportTicketStatus = "NEW" | "CONTACTED" | "UNDER_REVIEW";
+
+export type SupportTicketMessageType =
+  | "COMPLAINT"
+  | "SUGGESTION"
+  | "INQUIRY"
+  | "ADVERTISEMENT"
+  | "OTHER";
+
+export interface SupportTicketStatusHistoryEntry {
+  id: string;
+  status: SupportTicketStatus;
+  admin_name: string;
+  changed_at: string;
+}
+
+/** Row from GET /admin/support-tickets (paginated list). */
+export interface SupportTicketListItem {
+  id: string;
+  serial_number: number;
+  user_name: string;
+  email: string;
+  phone_number: string;
+  message_type: SupportTicketMessageType;
+  status: SupportTicketStatus;
+  created_at: string;
+}
+
+/** Full record from GET /admin/support-tickets/{id}. */
+export interface SupportTicketDetail extends SupportTicketListItem {
+  content: string;
+  status_history?: SupportTicketStatusHistoryEntry[];
+}
+
+/* ------------------------------------------------------------------ */
+/*  System settings                                                    */
+/* ------------------------------------------------------------------ */
+
+export interface PhoneEntry {
+  country_code: string;
+  number: string;
+}
+
+export interface SocialMediaLinks {
+  twitter?: string;
+  tiktok?: string;
+  snapchat?: string;
+  youtube?: string;
+  instagram?: string;
+  facebook?: string;
+}
+
+export interface SystemSettings {
+  phone_numbers: PhoneEntry[];
+  whatsapp_numbers: PhoneEntry[];
+  email: string;
+  dollar_to_riyal_rate: number;
+  order_commission_percentage: number;
+  referral_amount_sar: number;
+  min_liquidation_amount_sar: number;
+  social_media: SocialMediaLinks;
+}

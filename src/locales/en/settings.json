@@ -1,0 +1,76 @@
+{
+  "title": "Settings",
+  "description": "Platform-wide configuration that affects every account.",
+  "tabs": {
+    "aria": "Settings sections",
+    "system": "System",
+    "complaint_types": "Complaint Types"
+  },
+  "system": {
+    "title": "System settings",
+    "description": "Exchange rate, commissions, contact channels, and social links.",
+    "sections": {
+      "financial": {
+        "title": "Financial",
+        "description": "Exchange rate, commissions, and payout thresholds."
+      },
+      "contact": {
+        "title": "Contact",
+        "description": "Email and phone numbers shown to users for support."
+      },
+      "social": {
+        "title": "Social media",
+        "description": "Links shown across the app and marketing surfaces."
+      }
+    },
+    "fields": {
+      "dollar_to_riyal_rate": "USD → SAR rate",
+      "dollar_to_riyal_rate_hint": "Used for conversions across the app.",
+      "order_commission_percentage": "Order commission",
+      "order_commission_percentage_hint": "Percentage withheld from each completed order (0–100).",
+      "referral_amount_sar": "Referral reward",
+      "referral_amount_sar_hint": "Amount in SAR credited per successful referral.",
+      "min_liquidation_amount_sar": "Minimum liquidation",
+      "min_liquidation_amount_sar_hint": "Minimum SAR balance a user can withdraw.",
+      "email": "Support email",
+      "phone_numbers": "Phone numbers",
+      "whatsapp_numbers": "WhatsApp numbers",
+      "twitter": "X (Twitter)",
+      "tiktok": "TikTok",
+      "snapchat": "Snapchat",
+      "youtube": "YouTube",
+      "instagram": "Instagram",
+      "facebook": "Facebook"
+    },
+    "phone_field": {
+      "country_code_placeholder": "+966",
+      "number_placeholder": "5XXXXXXXX",
+      "add": "Add number",
+      "remove": "Remove",
+      "empty": "No numbers added yet."
+    },
+    "actions": {
+      "save": "Save changes",
+      "saving": "Saving…",
+      "reset": "Reset",
+      "unsaved": "Unsaved changes"
+    }
+  },
+  "validation": {
+    "rate_min": "Rate must be at least 1.",
+    "commission_range": "Commission must be between 0 and 100.",
+    "min_positive": "Value must be at least 1.",
+    "email_invalid": "Enter a valid email address.",
+    "url_invalid": "Enter a valid URL (https://…).",
+    "country_code_invalid": "Country code must start with + and 1–4 digits.",
+    "phone_digits_only": "Use digits only.",
+    "phone_required": "Add at least one number."
+  },
+  "toasts": {
+    "update_success": "Settings saved."
+  },
+  "errors": {
+    "load_failed": "Failed to load settings.",
+    "update_failed": "Failed to save settings."
+  }
+}

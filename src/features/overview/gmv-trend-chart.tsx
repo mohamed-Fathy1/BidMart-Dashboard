@@ -24,7 +24,7 @@ export function GmvTrendChart({ data }: GmvTrendChartProps) {
       aria-hidden="true"
       viewBox={`0 0 ${w} ${h}`}
       preserveAspectRatio="none"
-      className="block h-[200px] w-full"
+      className="block h-44 w-full sm:h-48"
     >
       <defs>
         <linearGradient id="gmv-gradient" x1="0" x2="0" y1="0" y2="1">

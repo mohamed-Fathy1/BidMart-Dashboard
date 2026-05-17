@@ -10,7 +10,7 @@ interface PriorityPillProps {
 
 const TONE: Record<PriorityLevel, string> = {
   low: 'bg-muted text-muted-foreground',
-  medium: 'bg-amber-100 text-amber-800',
+  medium: 'bg-amber-50 text-amber-700',
   high: 'bg-destructive/10 text-destructive',
 }
 

@@ -27,6 +27,7 @@ import { ReasonDialog } from '@/components/shared/reason-dialog'
 import { Can } from '@/components/permissions/can'
 import { PERMISSIONS } from '@/lib/permissions'
 import { format } from '@/lib/format'
+import { cn } from '@/lib/utils'
 import { providerAccountStatusForSellerBadge } from '@/features/providers/providers.api'
 import {
   useUserDetailQuery,
@@ -226,7 +227,7 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
         </TabsContent>
 
         <TabsContent value="orders">
-          <EmptyState
+          <ComingSoonCard
             icon={ShoppingCart}
             title={t('users:detail.tabs.orders_empty_title')}
             message={t('users:detail.tabs.orders_empty_hint')}
@@ -234,7 +235,7 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
         </TabsContent>
 
         <TabsContent value="wallet">
-          <EmptyState
+          <ComingSoonCard
             icon={Wallet}
             title={t('users:detail.tabs.wallet_empty_title')}
             message={t('users:detail.tabs.wallet_empty_hint')}
@@ -242,7 +243,7 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
         </TabsContent>
 
         <TabsContent value="sessions">
-          <EmptyState
+          <ComingSoonCard
             icon={Monitor}
             title={t('users:detail.tabs.sessions_empty_title')}
             message={t('users:detail.tabs.sessions_empty_hint')}
@@ -310,14 +311,17 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
 
 function UserHeroCard({ user }: { user: AdminUserDetail }) {
   const { t } = useTranslation()
-  const stats: Array<{ key: 'orders_placed' | 'wallet_balance' | 'stores'; value: string }> = [
-    { key: 'orders_placed', value: '—' },
-    { key: 'wallet_balance', value: '—' },
+  const stats: Array<{
+    key: 'orders_placed' | 'wallet_balance' | 'stores'
+    value: string | null
+  }> = [
+    { key: 'orders_placed', value: null },
+    { key: 'wallet_balance', value: null },
     { key: 'stores', value: format.number(user.stores.length) },
   ]
   return (
-    <Card>
-      <CardContent className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+    <Card className="gap-4 py-5">
+      <CardContent className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-start gap-4">
           <ImagePreview
             src={user.profile_picture}
@@ -325,30 +329,60 @@ function UserHeroCard({ user }: { user: AdminUserDetail }) {
             size="lg"
           />
           <div className="min-w-0 space-y-1">
-            <h2 className="text-lg font-semibold">
+            <h2 className="truncate text-lg font-semibold leading-tight">
               {displayName(user) || t('components:detail.not_available')}
             </h2>
             {user.email ? (
-              <p className="text-sm text-muted-foreground">{user.email}</p>
+              <p className="truncate text-sm text-muted-foreground">{user.email}</p>
             ) : null}
           </div>
         </div>
-        <div className="grid grid-cols-3 divide-x divide-border rtl:divide-x-reverse">
+        <div className="grid grid-cols-3 overflow-hidden rounded-md border border-border bg-muted/30">
           {stats.map((s, i) => (
             <div
               key={s.key}
-              className={i === 0 ? 'pe-6' : i === stats.length - 1 ? 'ps-6' : 'px-6'}
+              className={cn(
+                'min-w-0 px-4 py-3 sm:px-5',
+                i > 0 && 'border-s border-border',
+              )}
             >
               <div className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
                 {t(`users:detail.hero.${s.key}`)}
               </div>
-              <div className="mt-1 font-mono text-xl font-semibold tabular-nums text-foreground">
-                {s.value}
+              <div
+                className={cn(
+                  'mt-1 font-mono text-lg leading-tight font-semibold tabular-nums',
+                  s.value == null ? 'text-muted-foreground/60' : 'text-foreground',
+                )}
+              >
+                {s.value ?? '—'}
               </div>
             </div>
           ))}
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+interface ComingSoonCardProps {
+  icon: typeof ShoppingCart
+  title: string
+  message: string
+}
+
+function ComingSoonCard({ icon: Icon, title, message }: ComingSoonCardProps) {
+  return (
+    <div className="rounded-xl border border-dashed border-border bg-muted/20 px-6 py-12">
+      <div className="mx-auto flex max-w-sm flex-col items-center gap-3 text-center">
+        <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+          <Icon className="size-[18px]" />
+        </div>
+        <div className="space-y-1">
+          <p className="text-sm font-semibold text-foreground">{title}</p>
+          <p className="text-xs leading-relaxed text-muted-foreground">{message}</p>
+        </div>
+      </div>
+    </div>
   )
 }
