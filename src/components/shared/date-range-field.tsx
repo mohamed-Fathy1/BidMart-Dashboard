@@ -21,26 +21,23 @@ export function DateRangeField({
   className,
 }: DateRangeFieldProps) {
   return (
-    <div className={cn('flex flex-wrap items-end gap-2', className)}>
-      <label className="flex flex-col gap-1">
-        <span className="text-[11px] font-medium text-muted-foreground">{fromLabel}</span>
-        <Input
-          type="date"
-          value={from}
-          onChange={(e) => onFromChange(e.target.value)}
-          className="h-8 w-[148px] text-sm"
-        />
-      </label>
-      <label className="flex flex-col gap-1">
-        <span className="text-[11px] font-medium text-muted-foreground">{toLabel}</span>
-        <Input
-          type="date"
-          value={to}
-          onChange={(e) => onToChange(e.target.value)}
-          min={from || undefined}
-          className="h-8 w-[148px] text-sm"
-        />
-      </label>
+    <div className={cn('flex items-center gap-1.5', className)}>
+      <Input
+        type="date"
+        value={from}
+        onChange={(e) => onFromChange(e.target.value)}
+        aria-label={fromLabel}
+        className="h-8 w-[140px] text-sm"
+      />
+      <span className="select-none text-xs text-muted-foreground">—</span>
+      <Input
+        type="date"
+        value={to}
+        onChange={(e) => onToChange(e.target.value)}
+        min={from || undefined}
+        aria-label={toLabel}
+        className="h-8 w-[140px] text-sm"
+      />
     </div>
   )
 }

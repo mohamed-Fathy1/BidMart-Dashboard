@@ -5,7 +5,6 @@ import { toast } from 'sonner'
 import {
   AlertCircle,
   ArrowLeftIcon,
-  Check,
   ChevronDown,
   Copy,
   Mail,
@@ -180,7 +179,7 @@ function SupportTicketDetailContent({
         <DropdownMenuTrigger asChild>
           <Button size="sm" disabled={isUpdating}>
             {t('supportTickets:actions.update_status')}
-            <ChevronDown className="size-4 rtl:rotate-180" aria-hidden />
+            <ChevronDown className="size-4" aria-hidden />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -192,7 +191,6 @@ function SupportTicketDetailContent({
                 onRequestStatus(status)
               }}
             >
-              <Check className="size-4 opacity-0 group-data-[active=true]:opacity-100" aria-hidden />
               {t(`supportTickets:status.${status}`)}
             </DropdownMenuItem>
           ))}

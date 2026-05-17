@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { PhoneNumberListField } from '@/components/shared/phone-number-list-field'
+import { PageHeader } from '@/components/shared/page-header'
 import { Can } from '@/components/permissions/can'
 import { PERMISSIONS, usePermission } from '@/lib/permissions'
 import {
@@ -211,14 +212,10 @@ export function SystemSettingsPage() {
 
   return (
     <form className="space-y-6" noValidate onSubmit={handleSubmit(onSubmit)}>
-      <div className="space-y-1">
-        <h2 className="text-lg font-semibold text-foreground">
-          {t('settings:system.title')}
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          {t('settings:system.description')}
-        </p>
-      </div>
+      <PageHeader
+        title={t('settings:system.title')}
+        description={t('settings:system.description')}
+      />
 
       <Card className="gap-0 py-0">
         <CardContent className="space-y-4 px-5 py-5">
@@ -374,7 +371,7 @@ export function SystemSettingsPage() {
         </CardContent>
       </Card>
 
-      <div className="sticky bottom-0 z-(--z-sticky) -mx-1 flex flex-wrap items-center justify-end gap-2 rounded-xl border border-border bg-card/95 px-4 py-3 shadow-rest backdrop-blur supports-[backdrop-filter]:bg-card/80">
+      <div className="sticky bottom-0 z-(--z-sticky) -mx-1 flex flex-wrap items-center justify-end gap-2 rounded-xl border border-border bg-card px-4 py-3 shadow-rest">
         {isDirty && (
           <span className="me-auto text-xs text-muted-foreground">
             {t('settings:system.actions.unsaved')}
@@ -407,35 +404,24 @@ interface NumberFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string
 }
 
-const NumberField = (() => {
-  // Forward ref so react-hook-form's `register` can attach.
-  const Comp = ({
-    id,
-    label,
-    hint,
-    error,
-    ...inputProps
-  }: NumberFieldProps) => {
-    const { t } = useTranslation()
-    return (
-      <div className="space-y-1.5">
-        <Label htmlFor={id}>{label}</Label>
-        <Input
-          id={id}
-          type="number"
-          inputMode="decimal"
-          aria-invalid={!!error || undefined}
-          className="font-mono tabular-nums"
-          {...inputProps}
-        />
-        {hint && !error && <p className="text-[11px] text-muted-foreground">{hint}</p>}
-        {error && <p className="text-xs text-destructive">{t(error)}</p>}
-      </div>
-    )
-  }
-  Comp.displayName = 'NumberField'
-  return Comp
-})()
+function NumberField({ id, label, hint, error, ...inputProps }: NumberFieldProps) {
+  const { t } = useTranslation()
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <Input
+        id={id}
+        type="number"
+        inputMode="decimal"
+        aria-invalid={!!error || undefined}
+        className="font-mono tabular-nums"
+        {...inputProps}
+      />
+      {hint && !error && <p className="text-[11px] text-muted-foreground">{hint}</p>}
+      {error && <p className="text-xs text-destructive">{t(error)}</p>}
+    </div>
+  )
+}
 
 function mapArrayErrors(
   errs: unknown,
