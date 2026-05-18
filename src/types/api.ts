@@ -581,4 +581,5 @@ export interface SystemSettings {
   referral_amount_sar: number;
   min_liquidation_amount_sar: number;
   social_media: SocialMediaLinks;
+  updated_at?: string;
 }

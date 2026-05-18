@@ -3,7 +3,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
-import { Loader2 } from 'lucide-react'
+import { Clock, Globe, Loader2 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,6 +12,8 @@ import { PhoneNumberListField } from '@/components/shared/phone-number-list-fiel
 import { PageHeader } from '@/components/shared/page-header'
 import { Can } from '@/components/permissions/can'
 import { PERMISSIONS, usePermission } from '@/lib/permissions'
+import { format } from '@/lib/format'
+import { cn } from '@/lib/utils'
 import {
   useSystemSettingsQuery,
   useUpdateSystemSettingsMutation,
@@ -205,29 +207,36 @@ export function SystemSettingsPage() {
 
   const isSaving = updateMutation.isPending
 
+  const updatedAtDescription = settings.updated_at ? (
+    <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+      <Clock className="size-3.5 shrink-0" aria-hidden />
+      {t('settings:system.last_updated', { date: format.dateTime(settings.updated_at) })}
+    </span>
+  ) : (
+    t('settings:system.description')
+  )
+
   return (
     <form className="space-y-6" noValidate onSubmit={handleSubmit(onSubmit)}>
       <PageHeader
         title={t('settings:system.title')}
-        description={t('settings:system.description')}
+        description={updatedAtDescription}
       />
 
+      {/* Financial */}
       <Card className="gap-0 py-0">
-        <CardContent className="space-y-4 px-5 py-5">
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">
-              {t('settings:system.sections.financial.title')}
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              {t('settings:system.sections.financial.description')}
-            </p>
-          </div>
+        <CardContent className="space-y-5 px-5 py-5">
+          <SectionHeading
+            title={t('settings:system.sections.financial.title')}
+            description={t('settings:system.sections.financial.description')}
+          />
           <div className="grid gap-4 sm:grid-cols-2">
             <NumberField
               id="dollar_to_riyal_rate"
               label={t('settings:system.fields.dollar_to_riyal_rate')}
               hint={t('settings:system.fields.dollar_to_riyal_rate_hint')}
               error={errors.dollar_to_riyal_rate?.message}
+              suffix="SAR"
               step="0.01"
               {...register('dollar_to_riyal_rate', NUMBER_REGISTER)}
             />
@@ -236,6 +245,7 @@ export function SystemSettingsPage() {
               label={t('settings:system.fields.order_commission_percentage')}
               hint={t('settings:system.fields.order_commission_percentage_hint')}
               error={errors.order_commission_percentage?.message}
+              suffix="%"
               step="0.1"
               {...register('order_commission_percentage', NUMBER_REGISTER)}
             />
@@ -244,6 +254,7 @@ export function SystemSettingsPage() {
               label={t('settings:system.fields.referral_amount_sar')}
               hint={t('settings:system.fields.referral_amount_sar_hint')}
               error={errors.referral_amount_sar?.message}
+              suffix="SAR"
               step="1"
               {...register('referral_amount_sar', NUMBER_REGISTER)}
             />
@@ -252,6 +263,7 @@ export function SystemSettingsPage() {
               label={t('settings:system.fields.min_liquidation_amount_sar')}
               hint={t('settings:system.fields.min_liquidation_amount_sar_hint')}
               error={errors.min_liquidation_amount_sar?.message}
+              suffix="SAR"
               step="1"
               {...register('min_liquidation_amount_sar', NUMBER_REGISTER)}
             />
@@ -259,16 +271,13 @@ export function SystemSettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Contact */}
       <Card className="gap-0 py-0">
-        <CardContent className="space-y-4 px-5 py-5">
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">
-              {t('settings:system.sections.contact.title')}
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              {t('settings:system.sections.contact.description')}
-            </p>
-          </div>
+        <CardContent className="space-y-5 px-5 py-5">
+          <SectionHeading
+            title={t('settings:system.sections.contact.title')}
+            description={t('settings:system.sections.contact.description')}
+          />
           <div className="grid gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="email">{t('settings:system.fields.email')}</Label>
@@ -332,16 +341,13 @@ export function SystemSettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Social media */}
       <Card className="gap-0 py-0">
-        <CardContent className="space-y-4 px-5 py-5">
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">
-              {t('settings:system.sections.social.title')}
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              {t('settings:system.sections.social.description')}
-            </p>
-          </div>
+        <CardContent className="space-y-5 px-5 py-5">
+          <SectionHeading
+            title={t('settings:system.sections.social.title')}
+            description={t('settings:system.sections.social.description')}
+          />
           <div className="grid gap-4 sm:grid-cols-2">
             {SOCIAL_FIELDS.map((key) => {
               const error = errors.social_media?.[key]?.message
@@ -350,14 +356,21 @@ export function SystemSettingsPage() {
                   <Label htmlFor={`social_${key}`}>
                     {t(`settings:system.fields.${key}`)}
                   </Label>
-                  <Input
-                    id={`social_${key}`}
-                    type="url"
-                    inputMode="url"
-                    placeholder="https://…"
-                    aria-invalid={!!error || undefined}
-                    {...register(`social_media.${key}` as const)}
-                  />
+                  <div className="relative">
+                    <Globe
+                      className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                      aria-hidden
+                    />
+                    <Input
+                      id={`social_${key}`}
+                      type="url"
+                      inputMode="url"
+                      placeholder="https://…"
+                      aria-invalid={!!error || undefined}
+                      className="ps-9"
+                      {...register(`social_media.${key}` as const)}
+                    />
+                  </div>
                   {error && (
                     <p className="text-xs text-destructive">{t(error)}</p>
                   )}
@@ -368,6 +381,7 @@ export function SystemSettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Sticky footer */}
       <div className="sticky bottom-0 z-(--z-sticky) -mx-1 flex flex-wrap items-center justify-end gap-2 rounded-xl border border-border bg-card px-4 py-3 shadow-rest">
         {isDirty && (
           <span className="me-auto text-xs text-muted-foreground">
@@ -394,26 +408,50 @@ export function SystemSettingsPage() {
   )
 }
 
+/* ------------------------------------------------------------------ */
+/*  Sub-components                                                     */
+/* ------------------------------------------------------------------ */
+
+function SectionHeading({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="border-b border-border pb-3">
+      <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+      <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+    </div>
+  )
+}
+
 interface NumberFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   id: string
   label: string
   hint?: string
   error?: string
+  suffix?: string
 }
 
-function NumberField({ id, label, hint, error, ...inputProps }: NumberFieldProps) {
+function NumberField({ id, label, hint, error, suffix, ...inputProps }: NumberFieldProps) {
   const { t } = useTranslation()
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id}>{label}</Label>
-      <Input
-        id={id}
-        type="number"
-        inputMode="decimal"
-        aria-invalid={!!error || undefined}
-        className="font-mono tabular-nums"
-        {...inputProps}
-      />
+      <div className="relative">
+        <Input
+          id={id}
+          type="number"
+          inputMode="decimal"
+          aria-invalid={!!error || undefined}
+          className={cn('font-mono tabular-nums', suffix && 'pe-12')}
+          {...inputProps}
+        />
+        {suffix && (
+          <span
+            className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground"
+            aria-hidden
+          >
+            {suffix}
+          </span>
+        )}
+      </div>
       {hint && !error && <p className="text-[11px] text-muted-foreground">{hint}</p>}
       {error && <p className="text-xs text-destructive">{t(error)}</p>}
     </div>

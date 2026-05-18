@@ -9,6 +9,7 @@
   "system": {
     "title": "System settings",
     "description": "Exchange rate, commissions, contact channels, and social links.",
+    "last_updated": "Last updated {{date}}",
     "sections": {
       "financial": {
         "title": "Financial",

@@ -44,6 +44,14 @@ export const format = {
     }).format(d)
   },
 
+  time(iso: string | Date): string {
+    const d = typeof iso === 'string' ? new Date(iso) : iso
+    return new Intl.DateTimeFormat(getLocale(), {
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(d)
+  },
+
   dateRange(from: string | Date, to: string | Date): string {
     const f = typeof from === 'string' ? new Date(from) : from
     const t = typeof to === 'string' ? new Date(to) : to

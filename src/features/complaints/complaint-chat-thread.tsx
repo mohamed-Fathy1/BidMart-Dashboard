@@ -291,7 +291,7 @@ function MessageRow({
         {!continuation && (
           <div
             className={cn(
-              'flex items-baseline gap-2 text-[11px]',
+              'flex justify-between pe-2 items-baseline gap-2 text-[11px]',
               isMe ? 'text-primary-foreground/80' : 'text-muted-foreground',
             )}
           >
@@ -304,7 +304,7 @@ function MessageRow({
               {senderLabel}
             </span>
             <span className="tabular-nums">
-              {format.dateTime(message.createdAt)}
+              {format.time(message.createdAt)}
             </span>
           </div>
         )}
