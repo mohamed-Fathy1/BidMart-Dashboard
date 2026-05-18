@@ -110,7 +110,7 @@ describe('useComplaintChat', () => {
         senderId: SELF_ADMIN_ID,
         messageType: 'TEXT',
         content: 'hello there',
-        imageUrl: null,
+        fileUrl: null,
         status: 'SENT',
         createdAt: new Date().toISOString(),
       })
@@ -141,7 +141,7 @@ describe('useComplaintChat', () => {
         senderId: 'u-1',
         messageType: 'TEXT',
         content: 'I need help',
-        imageUrl: null,
+        fileUrl: null,
         status: 'SENT',
         createdAt: '2026-05-14T12:00:00.000Z',
       })
@@ -172,7 +172,7 @@ describe('useComplaintChat', () => {
         senderId: 'u-99',
         messageType: 'TEXT',
         content: 'not for us',
-        imageUrl: null,
+        fileUrl: null,
         status: 'SENT',
         createdAt: '2026-05-14T12:00:00.000Z',
       })
@@ -216,7 +216,7 @@ describe('useComplaintChat', () => {
             senderId: 'u-1',
             messageType: 'TEXT',
             content: 'hi',
-            imageUrl: null,
+            fileUrl: null,
             status: 'DELIVERED',
             deliveredAt: null,
             readAt: null,
@@ -262,7 +262,7 @@ describe('useComplaintChat', () => {
         senderId: 'u-1',
         messageType: 'TEXT',
         content: 'still there?',
-        imageUrl: null,
+        fileUrl: null,
         status: 'SENT',
         createdAt: '2026-05-14T12:05:00.000Z',
       })
@@ -289,7 +289,7 @@ describe('useComplaintChat', () => {
             senderId: 'u-1',
             messageType: 'TEXT',
             content: 'hi',
-            imageUrl: null,
+            fileUrl: null,
             status: 'READ',
             deliveredAt: null,
             readAt: null,

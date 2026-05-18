@@ -9,7 +9,7 @@ function makeMessage(id: string, iso: string): ComplaintMessageAdmin {
     senderId: 'u-1',
     messageType: 'TEXT',
     content: id,
-    imageUrl: null,
+    fileUrl: null,
     status: 'SENT',
     deliveredAt: null,
     readAt: null,

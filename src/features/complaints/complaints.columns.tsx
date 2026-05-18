@@ -86,7 +86,7 @@ export function useComplaintColumns(): ColumnDef<ComplaintSummary>[] {
             )
           }
           const preview =
-            last.messageType === 'IMAGE'
+            last.messageType === 'MEDIA'
               ? t('complaints:columns.image_message')
               : last.content
           return (
