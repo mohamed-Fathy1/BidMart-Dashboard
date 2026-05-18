@@ -222,6 +222,11 @@
     "notification_required": "اكتب رسالة الإشعار.",
     "notification_too_long": "الحدّ الأقصى لرسالة الإشعار ٥٠٠ حرف."
   },
+  "realtime": {
+    "new_message_title": "رسالة جديدة",
+    "complaint_updated": "تحديث في الشكوى",
+    "view": "عرض"
+  },
   "types": {
     "title": "أنواع الشكاوى",
     "description": "الفئات التي يختارها المستخدمون عند تقديم الشكوى. مترجمة بكلا اللغتين.",

@@ -4,8 +4,14 @@ import { useTranslation } from 'react-i18next'
 import { Shell } from '@/components/layout/shell'
 import { useMeQuery } from '@/features/auth/auth.queries'
 import { useAuthStore } from '@/features/auth/auth.store'
+import { useComplaintsRealtime } from '@/features/complaints/use-complaints-realtime'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ShieldAlert } from 'lucide-react'
+
+function ComplaintsRealtimeBridge() {
+  useComplaintsRealtime()
+  return null
+}
 
 export const Route = createFileRoute('/_authed')({
   beforeLoad: () => {
@@ -43,6 +49,7 @@ function AuthedLayout() {
 
   return (
     <Shell>
+      <ComplaintsRealtimeBridge />
       <Outlet />
     </Shell>
   )

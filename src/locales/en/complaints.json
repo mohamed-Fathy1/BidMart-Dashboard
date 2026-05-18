@@ -218,6 +218,11 @@
     "notification_required": "Write a message to send.",
     "notification_too_long": "Notifications are limited to 500 characters."
   },
+  "realtime": {
+    "new_message_title": "New message",
+    "complaint_updated": "Complaint updated",
+    "view": "View"
+  },
   "types": {
     "title": "Complaint types",
     "description": "Categories users pick when submitting a complaint. Localized in both languages.",
