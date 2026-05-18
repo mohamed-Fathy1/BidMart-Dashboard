@@ -76,7 +76,7 @@ export function ComplaintComposer({
     }
     setUploading(true)
     try {
-      const url = await uploadFile(file, 'complaint_chat_attachment')
+      const url = await uploadFile(file, 'chat_media')
       setPendingImage({ url, name: file.name })
     } catch {
       toast.error(t('complaints:chat.send_failed'))

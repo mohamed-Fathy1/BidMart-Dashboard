@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ComplaintTypesListPage } from '@/features/complaints/complaint-types-list-page'
+import { SettingsComplaintTypesListPage } from '@/features/complaint-types/complaint-types-list-page'
 import { parseListSearchBase, readBoolean, type ListSearchBase } from '@/lib/list-search'
 
 export interface SettingsComplaintTypesSearch extends ListSearchBase {
@@ -15,5 +15,5 @@ export const Route = createFileRoute('/_authed/settings/complaint-types')({
 })
 
 function ComplaintTypesRoute() {
-  return <ComplaintTypesListPage />
+  return <SettingsComplaintTypesListPage />
 }

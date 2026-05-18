@@ -13,6 +13,7 @@ interface PhoneNumberListFieldProps {
   /** Form-level error (e.g. "add at least one"). */
   formError?: string
   className?: string
+  disabled?: boolean
 }
 
 const EMPTY_ENTRY: PhoneEntry = { country_code: '+966', number: '' }
@@ -23,6 +24,7 @@ export function PhoneNumberListField({
   errors,
   formError,
   className,
+  disabled,
 }: PhoneNumberListFieldProps) {
   const { t } = useTranslation()
 
@@ -61,6 +63,7 @@ export function PhoneNumberListField({
                     placeholder={t('settings:system.phone_field.country_code_placeholder')}
                     aria-invalid={!!rowErrors?.country_code || undefined}
                     className="font-mono tabular-nums"
+                    disabled={disabled}
                   />
                   {rowErrors?.country_code && (
                     <p className="mt-1 text-[11px] text-destructive">{rowErrors.country_code}</p>
@@ -76,6 +79,7 @@ export function PhoneNumberListField({
                     placeholder={t('settings:system.phone_field.number_placeholder')}
                     aria-invalid={!!rowErrors?.number || undefined}
                     className="font-mono tabular-nums"
+                    disabled={disabled}
                   />
                   {rowErrors?.number && (
                     <p className="mt-1 text-[11px] text-destructive">{rowErrors.number}</p>
@@ -88,6 +92,7 @@ export function PhoneNumberListField({
                   onClick={() => remove(index)}
                   aria-label={t('settings:system.phone_field.remove')}
                   className="mt-0.5 text-muted-foreground hover:text-destructive"
+                  disabled={disabled}
                 >
                   <Trash2 className="size-4" aria-hidden />
                 </Button>
@@ -97,7 +102,7 @@ export function PhoneNumberListField({
         </ul>
       )}
       {formError && <p className="text-xs text-destructive">{formError}</p>}
-      <Button type="button" variant="outline" size="sm" onClick={add}>
+      <Button type="button" variant="outline" size="sm" onClick={add} disabled={disabled}>
         <Plus className="size-4" aria-hidden />
         {t('settings:system.phone_field.add')}
       </Button>

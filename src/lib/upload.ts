@@ -23,11 +23,16 @@ interface UploadResponse {
 }
 
 export type UploadCase =
+  | 'profile_picture'
+  | 'store_logo'
+  | 'product_image'
+  | 'cr_document'
+  | 'live_show_thumbnail'
+  | 'chat_media'
+  | 'complaint_submission'
   | 'category_image'
   | 'country_image'
   | 'sub_category_image'
-  | 'product_image'
-  | 'complaint_chat_attachment'
 
 function fileExtensionForContentType(contentType: string): string {
   if (contentType === 'image/jpeg' || contentType === 'image/jpg') return 'jpg'

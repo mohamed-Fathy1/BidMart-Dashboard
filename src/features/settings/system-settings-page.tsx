@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -76,6 +76,8 @@ const schema = z.object({
 })
 
 type SettingsForm = z.infer<typeof schema>
+
+const NUMBER_REGISTER = { valueAsNumber: true }
 
 const SOCIAL_FIELDS: Array<keyof SocialMediaLinks> = [
   'twitter',
@@ -174,13 +176,6 @@ export function SystemSettingsPage() {
   const phoneNumbers = watch('phone_numbers')
   const whatsappNumbers = watch('whatsapp_numbers')
 
-  const numberRegister = useMemo(
-    () => ({
-      valueAsNumber: true,
-    }),
-    [],
-  )
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
@@ -234,7 +229,7 @@ export function SystemSettingsPage() {
               hint={t('settings:system.fields.dollar_to_riyal_rate_hint')}
               error={errors.dollar_to_riyal_rate?.message}
               step="0.01"
-              {...register('dollar_to_riyal_rate', numberRegister)}
+              {...register('dollar_to_riyal_rate', NUMBER_REGISTER)}
             />
             <NumberField
               id="order_commission_percentage"
@@ -242,7 +237,7 @@ export function SystemSettingsPage() {
               hint={t('settings:system.fields.order_commission_percentage_hint')}
               error={errors.order_commission_percentage?.message}
               step="0.1"
-              {...register('order_commission_percentage', numberRegister)}
+              {...register('order_commission_percentage', NUMBER_REGISTER)}
             />
             <NumberField
               id="referral_amount_sar"
@@ -250,7 +245,7 @@ export function SystemSettingsPage() {
               hint={t('settings:system.fields.referral_amount_sar_hint')}
               error={errors.referral_amount_sar?.message}
               step="1"
-              {...register('referral_amount_sar', numberRegister)}
+              {...register('referral_amount_sar', NUMBER_REGISTER)}
             />
             <NumberField
               id="min_liquidation_amount_sar"
@@ -258,7 +253,7 @@ export function SystemSettingsPage() {
               hint={t('settings:system.fields.min_liquidation_amount_sar_hint')}
               error={errors.min_liquidation_amount_sar?.message}
               step="1"
-              {...register('min_liquidation_amount_sar', numberRegister)}
+              {...register('min_liquidation_amount_sar', NUMBER_REGISTER)}
             />
           </div>
         </CardContent>
@@ -306,6 +301,7 @@ export function SystemSettingsPage() {
                       fieldState.error?.message ? t(fieldState.error.message) : undefined
                     }
                     errors={mapArrayErrors(errors.phone_numbers, t)}
+                    disabled={isSaving}
                   />
                 </div>
               )}
@@ -327,6 +323,7 @@ export function SystemSettingsPage() {
                       fieldState.error?.message ? t(fieldState.error.message) : undefined
                     }
                     errors={mapArrayErrors(errors.whatsapp_numbers, t)}
+                    disabled={isSaving}
                   />
                 </div>
               )}
@@ -423,15 +420,20 @@ function NumberField({ id, label, hint, error, ...inputProps }: NumberFieldProps
   )
 }
 
+function hasMessage(v: unknown): v is { message: string } {
+  return typeof v === 'object' && v !== null && typeof (v as Record<string, unknown>).message === 'string'
+}
+
 function mapArrayErrors(
   errs: unknown,
   t: (k: string) => string,
 ): Array<{ country_code?: string; number?: string } | undefined> | undefined {
   if (!Array.isArray(errs)) return undefined
   return errs.map((row) => {
-    if (!row) return undefined
-    const ccMsg = (row as { country_code?: { message?: string } }).country_code?.message
-    const numMsg = (row as { number?: { message?: string } }).number?.message
+    if (typeof row !== 'object' || row === null) return undefined
+    const r = row as Record<string, unknown>
+    const ccMsg = hasMessage(r.country_code) ? r.country_code.message : undefined
+    const numMsg = hasMessage(r.number) ? r.number.message : undefined
     return {
       country_code: ccMsg ? t(ccMsg) : undefined,
       number: numMsg ? t(numMsg) : undefined,

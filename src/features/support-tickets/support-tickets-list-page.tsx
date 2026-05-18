@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Eye } from 'lucide-react'
@@ -88,25 +87,17 @@ export function SupportTicketsListPage() {
 
   const columns = useSupportTicketColumns()
 
-  const statusOptions = useMemo(
-    () =>
-      STATUS_OPTIONS.map((status) => ({
-        value: status,
-        label: t(`supportTickets:status.${status}`),
-      })),
-    [t],
-  )
+  const statusOptions = STATUS_OPTIONS.map((status) => ({
+    value: status,
+    label: t(`supportTickets:status.${status}`),
+  }))
 
-  const typeOptions = useMemo(
-    () =>
-      TYPE_OPTIONS.map((type) => ({
-        value: type,
-        label: t(`supportTickets:message_type.${type}`),
-      })),
-    [t],
-  )
+  const typeOptions = TYPE_OPTIONS.map((type) => ({
+    value: type,
+    label: t(`supportTickets:message_type.${type}`),
+  }))
 
-  function getRowActions(_row: SupportTicketListItem): RowActionItem<SupportTicketListItem>[] {
+  function getRowActions(): RowActionItem<SupportTicketListItem>[] {
     return [
       {
         label: t('supportTickets:actions.view'),

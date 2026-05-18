@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useResourceMutation } from '@/lib/use-resource-mutation'
 import { Loader2, Save, Clock, Hash, Code2, Eye } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
@@ -69,16 +69,13 @@ function useContentQuery(type: ContentType) {
 
 function useUpdateContentMutation(type: ContentType) {
   const queryClient = useQueryClient()
-  const { t } = useTranslation()
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (payload: { content_en: string; content_ar: string }) =>
       updateGeneralInfo(type, payload),
+    successKey: 'settings:content.toasts.update_success',
+    errorKey: 'settings:content.errors.update_failed',
     onSuccess: (updated) => {
       queryClient.setQueryData(['general-info', type], updated)
-      toast.success(t('settings:content.toasts.update_success'))
-    },
-    onError: () => {
-      toast.error(t('settings:content.errors.update_failed'))
     },
   })
 }

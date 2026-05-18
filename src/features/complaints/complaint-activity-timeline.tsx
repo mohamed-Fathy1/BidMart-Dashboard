@@ -54,12 +54,8 @@ export function ComplaintActivityTimeline({
   return (
     <Card className="gap-0 rounded-xl border-border py-0">
       <CardContent className="px-6 py-4">
-        <ol className="relative space-y-3 ps-7">
-          <span
-            aria-hidden
-            className="absolute inset-y-2 inset-inline-start-[13px] w-px bg-border"
-          />
-          {activities.map((activity) => {
+        <ol className="space-y-0">
+          {activities.map((activity, index) => {
             const spec = ICON_BY_ACTION[activity.action] ?? DEFAULT_ICON
             const labelKey = `complaints:activity.action.${activity.action}`
             const fallback = activity.action.replace(/_/g, ' ')
@@ -67,18 +63,24 @@ export function ComplaintActivityTimeline({
               activity.actor_type === 'system'
                 ? t('complaints:activity.actor_system')
                 : t('complaints:activity.actor_admin')
+            const isLast = index === activities.length - 1
             return (
-              <li key={activity.id} className="relative">
-                <span
-                  className={cn(
-                    'absolute inset-inline-start-[-34px] inline-flex size-7 items-center justify-center rounded-full ring-1 ring-inset',
-                    spec.tone,
+              <li key={activity.id} className="flex gap-3">
+                <div className="flex shrink-0 flex-col items-center">
+                  <span
+                    className={cn(
+                      'inline-flex size-7 items-center justify-center rounded-full ring-1 ring-inset',
+                      spec.tone,
+                    )}
+                    aria-hidden
+                  >
+                    <spec.Icon className="size-3.5" />
+                  </span>
+                  {!isLast && (
+                    <span aria-hidden className="my-1.5 w-px flex-1 bg-border" />
                   )}
-                  aria-hidden
-                >
-                  <spec.Icon className="size-3.5" />
-                </span>
-                <div className="flex flex-col gap-0.5">
+                </div>
+                <div className={cn('flex min-w-0 flex-col gap-0.5 pt-0.5', !isLast && 'pb-4')}>
                   <p className="text-sm leading-snug text-foreground">
                     <span className="font-semibold">{actor}</span>{' '}
                     <span className="text-muted-foreground">

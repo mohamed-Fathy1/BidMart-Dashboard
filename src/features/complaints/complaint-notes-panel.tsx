@@ -77,9 +77,8 @@ export function ComplaintNotesPanel({
       </header>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
-          <Loader2 className="me-2 size-4 motion-safe:animate-spin" aria-hidden />
-          <span>{t('complaints:notes.title')}…</span>
+        <div className="flex items-center justify-center py-8 text-muted-foreground">
+          <Loader2 className="size-4 motion-safe:animate-spin" aria-hidden />
         </div>
       ) : isError ? (
         <Card className="gap-0 py-0">
