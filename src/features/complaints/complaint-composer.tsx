@@ -20,7 +20,7 @@ import type { ComplaintSocketStatus } from '@/features/complaints/complaint-sock
 
 interface ComplaintComposerProps {
   connectionStatus: ComplaintSocketStatus
-  onSend: (payload: { text?: string; imageUrl?: string }) => void | Promise<void>
+  onSend: (payload: { text?: string; fileUrl?: string }) => void | Promise<void>
   onTyping: (active: boolean) => void
 }
 
@@ -92,7 +92,7 @@ export function ComplaintComposer({
     const imagePayload = pendingImage?.url
     setSending(true)
     try {
-      await onSend({ text: textPayload, imageUrl: imagePayload })
+      await onSend({ text: textPayload, fileUrl: imagePayload })
       setText('')
       setPendingImage(null)
       onTyping(false)

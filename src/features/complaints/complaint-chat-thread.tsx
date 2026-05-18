@@ -26,7 +26,7 @@ interface ComplaintChatThreadProps {
   complainantName?: string | null
   connectionStatus: ComplaintSocketStatus
   typingActorIds: string[]
-  onSend: (payload: { text?: string; imageUrl?: string }) => void | Promise<void>
+  onSend: (payload: { text?: string; fileUrl?: string }) => void | Promise<void>
   onTyping: (active: boolean) => void
   onMarkRead: () => void
 }
@@ -309,9 +309,9 @@ function MessageRow({
           </div>
         )}
 
-        {message.messageType === 'IMAGE' && message.imageUrl ? (
+        {message.messageType === 'MEDIA' && message.fileUrl ? (
           <a
-            href={message.imageUrl}
+            href={message.fileUrl}
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
@@ -320,7 +320,7 @@ function MessageRow({
             )}
           >
             <img
-              src={message.imageUrl}
+              src={message.fileUrl}
               alt=""
               width={400}
               height={300}
@@ -332,7 +332,7 @@ function MessageRow({
 
         {message.content ? (
           <p className="text-pretty text-sm leading-relaxed">{message.content}</p>
-        ) : message.messageType === 'IMAGE' ? (
+        ) : message.messageType === 'MEDIA' ? (
           <span
             className={cn(
               'inline-flex items-center gap-1.5 text-xs',

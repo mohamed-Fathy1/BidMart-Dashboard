@@ -407,7 +407,7 @@ export type ComplaintChatClosedReason =
   | "manually_closed"
   | null;
 
-export type ComplaintMessageType = "TEXT" | "IMAGE";
+export type ComplaintMessageType = "TEXT" | "MEDIA";
 export type ComplaintMessageStatus = "SENT" | "DELIVERED" | "READ";
 export type ComplaintMessageSender = "USER" | "ADMIN";
 
@@ -466,7 +466,7 @@ export interface ComplaintMessageAdmin {
   senderId: string;
   messageType: ComplaintMessageType;
   content: string | null;
-  imageUrl: string | null;
+  fileUrl: string | null;
   status: ComplaintMessageStatus;
   deliveredAt: string | null;
   readAt: string | null;

@@ -24,7 +24,7 @@ interface UseComplaintChatOptions {
 
 interface SendPayload {
   text?: string
-  imageUrl?: string
+  fileUrl?: string
 }
 
 interface IncomingMessage {
@@ -32,9 +32,9 @@ interface IncomingMessage {
   complaintId: string
   sender: 'USER' | 'ADMIN'
   senderId: string
-  messageType: 'TEXT' | 'IMAGE'
+  messageType: 'TEXT' | 'MEDIA'
   content: string | null
-  imageUrl: string | null
+  fileUrl: string | null
   status: ComplaintMessageStatus
   createdAt: string
 }
@@ -84,7 +84,7 @@ export function useComplaintChat(
   const isTypingRef = useRef(false)
   const lastInvalidateRef = useRef(0)
   const lastSentRef = useRef<
-    Array<{ id: string; content: string | null; imageUrl: string | null; createdAt: number }>
+    Array<{ id: string; content: string | null; fileUrl: string | null; createdAt: number }>
   >([])
   const markReadSentRef = useRef(false)
   // Stable ref so listeners can read the latest `t` without re-binding on every render.
@@ -135,7 +135,7 @@ export function useComplaintChat(
           const idx = messages.findIndex((m) => {
             if (!m.id.startsWith('tmp-')) return false
             if (m.content !== data.content) return false
-            if ((m.imageUrl ?? null) !== (data.imageUrl ?? null)) return false
+            if ((m.fileUrl ?? null) !== (data.fileUrl ?? null)) return false
             return Math.abs(Date.parse(m.createdAt) - incomingTs) <= 5_000
           })
           const merged: ComplaintMessageAdmin = {
@@ -144,7 +144,7 @@ export function useComplaintChat(
             senderId: data.senderId,
             messageType: data.messageType,
             content: data.content,
-            imageUrl: data.imageUrl,
+            fileUrl: data.fileUrl,
             status: data.status,
             deliveredAt: null,
             readAt: null,
@@ -171,7 +171,7 @@ export function useComplaintChat(
             senderId: data.senderId,
             messageType: data.messageType,
             content: data.content,
-            imageUrl: data.imageUrl,
+            fileUrl: data.fileUrl,
             status: data.status,
             deliveredAt: null,
             readAt: null,
@@ -312,21 +312,21 @@ export function useComplaintChat(
   /* ----- outgoing actions ----- */
 
   const send = useCallback(
-    async ({ text, imageUrl }: SendPayload) => {
+    async ({ text, fileUrl }: SendPayload) => {
       const socket = getComplaintSocket()
       if (!socket) return
-      if (!text && !imageUrl) return
+      if (!text && !fileUrl) return
       const trimmed = text?.trim()
       const tmpId = `tmp-${crypto.randomUUID()}`
       const createdAt = new Date().toISOString()
-      const messageType: 'TEXT' | 'IMAGE' = imageUrl ? 'IMAGE' : 'TEXT'
+      const messageType: 'TEXT' | 'MEDIA' = fileUrl ? 'MEDIA' : 'TEXT'
       const optimistic: ComplaintMessageAdmin = {
         id: tmpId,
         sender: 'ADMIN',
         senderId: selfAdminId ?? 'me',
         messageType,
         content: trimmed && trimmed.length > 0 ? trimmed : null,
-        imageUrl: imageUrl ?? null,
+        fileUrl: fileUrl ?? null,
         status: 'SENT',
         deliveredAt: null,
         readAt: null,
@@ -342,7 +342,7 @@ export function useComplaintChat(
       lastSentRef.current.push({
         id: tmpId,
         content: optimistic.content,
-        imageUrl: optimistic.imageUrl,
+        fileUrl: optimistic.fileUrl,
         createdAt: Date.parse(createdAt),
       })
       // Emit. Server echoes via complaint:message:new which reconciles.
@@ -350,7 +350,7 @@ export function useComplaintChat(
         complaintId,
         messageType,
         ...(trimmed && trimmed.length > 0 ? { message: trimmed } : {}),
-        ...(imageUrl ? { imageUrl } : {}),
+        ...(fileUrl ? { fileUrl } : {}),
       })
       // Always stop typing on send.
       if (isTypingRef.current) {
