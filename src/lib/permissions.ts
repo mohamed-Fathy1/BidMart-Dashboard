@@ -80,5 +80,7 @@ export function can(permissions: string[], required: Permission): boolean {
 
 export function usePermission(permission: Permission): boolean {
   const permissions = useAuthStore((s) => s.permissions);
+  const isSuperAdmin = useAuthStore((s) => s.user?.isSuperAdmin);
+  if (isSuperAdmin) return true;
   return can(permissions, permission);
 }

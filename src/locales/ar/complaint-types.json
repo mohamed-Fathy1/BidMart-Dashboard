@@ -1,0 +1,60 @@
+{
+  "page_title": "أنواع الشكاوى",
+  "page_description": "إدارة تصنيفات الشكاوى المستخدمة عند رفع التذاكر",
+  "meta": {
+    "total": "{{count}} نوع"
+  },
+  "columns": {
+    "name": "الاسم",
+    "status": "الحالة",
+    "created_at": "تاريخ الإنشاء"
+  },
+  "filters": {
+    "status": "الحالة",
+    "search_placeholder": "البحث بالاسم (إنجليزي أو عربي)"
+  },
+  "active_options": {
+    "active": "نشط",
+    "inactive": "غير نشط"
+  },
+  "actions": {
+    "create": "إضافة نوع",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "activate": "تفعيل",
+    "deactivate": "تعطيل",
+    "create_success": "تم إنشاء نوع الشكوى",
+    "update_success": "تم تحديث نوع الشكوى",
+    "delete_success": "تم حذف نوع الشكوى"
+  },
+  "errors": {
+    "create_failed": "تعذر إنشاء نوع الشكوى",
+    "update_failed": "تعذر تحديث نوع الشكوى",
+    "delete_failed": "تعذر حذف نوع الشكوى",
+    "name_en_required": "أدخل الاسم بالإنجليزية.",
+    "name_ar_required": "أدخل الاسم بالعربية."
+  },
+  "form": {
+    "dialog_description": "الأسماء ثنائية اللغة تظهر للمستخدمين عند رفع شكوى.",
+    "create_title": "إضافة نوع شكوى",
+    "edit_title": "تعديل نوع الشكوى",
+    "name_en": "الاسم (إنجليزي)",
+    "name_en_placeholder": "Fraud or Scam",
+    "name_ar": "الاسم (عربي)",
+    "name_ar_placeholder": "احتيال أو نصب",
+    "is_active": "نشط",
+    "active_hint": "الأنواع غير النشطة مخفية عن المستخدمين عند رفع شكوى.",
+    "section_names": "الأسماء",
+    "section_visibility": "الظهور"
+  },
+  "delete_dialog": {
+    "title": "حذف {{name}}",
+    "description": "حذف {{name}}؟ هذا الإجراء دائم ولا يمكن التراجع عنه إذا كان النوع مستخدماً."
+  },
+  "empty": {
+    "no_data_title": "لا توجد أنواع شكاوى بعد",
+    "no_data_hint": "أضف أول نوع لتمكين المستخدمين من تصنيف شكاواهم.",
+    "no_results_title": "لا توجد أنواع مطابقة لهذه المرشحات",
+    "no_results_hint": "جرّب مسح البحث أو فلتر الحالة."
+  }
+}

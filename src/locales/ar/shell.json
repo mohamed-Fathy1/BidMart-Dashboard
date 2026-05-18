@@ -9,6 +9,7 @@
     "withdrawals": "عمليات السحب",
     "orders": "الطلبات",
     "complaints": "الشكاوى",
+    "complaint_types": "أنواع الشكاوى",
     "ratings": "التقييمات",
     "live_streams": "البث المباشر",
     "content": "المحتوى",
@@ -18,6 +19,8 @@
     "sub_categories": "التصنيفات الفرعية",
     "support_tickets": "تذاكر الدعم",
     "settings": "الإعدادات",
+    "settings_general": "عام",
+    "settings_content": "المحتوى",
     "notifications": "الإشعارات"
   },
   "topbar": {

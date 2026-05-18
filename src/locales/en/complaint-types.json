@@ -1,0 +1,60 @@
+{
+  "page_title": "Complaint Types",
+  "page_description": "Manage complaint categories used during ticket submission",
+  "meta": {
+    "total": "{{count}} types"
+  },
+  "columns": {
+    "name": "Name",
+    "status": "Status",
+    "created_at": "Created At"
+  },
+  "filters": {
+    "status": "Status",
+    "search_placeholder": "Search by name (EN or AR)"
+  },
+  "active_options": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "actions": {
+    "create": "Add Type",
+    "edit": "Edit",
+    "delete": "Delete",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "create_success": "Complaint type created",
+    "update_success": "Complaint type updated",
+    "delete_success": "Complaint type deleted"
+  },
+  "errors": {
+    "create_failed": "Could not create complaint type",
+    "update_failed": "Could not update complaint type",
+    "delete_failed": "Could not delete complaint type",
+    "name_en_required": "Enter the English name.",
+    "name_ar_required": "Enter the Arabic name."
+  },
+  "form": {
+    "dialog_description": "Bilingual names are shown to users when submitting a complaint.",
+    "create_title": "Add Complaint Type",
+    "edit_title": "Edit Complaint Type",
+    "name_en": "Name (English)",
+    "name_en_placeholder": "Fraud or Scam",
+    "name_ar": "Name (Arabic)",
+    "name_ar_placeholder": "احتيال أو نصب",
+    "is_active": "Active",
+    "active_hint": "Inactive types are hidden from users when submitting a complaint.",
+    "section_names": "Names",
+    "section_visibility": "Visibility"
+  },
+  "delete_dialog": {
+    "title": "Delete {{name}}",
+    "description": "Delete {{name}}? This is permanent and cannot be undone if the type is in use."
+  },
+  "empty": {
+    "no_data_title": "No complaint types yet",
+    "no_data_hint": "Add the first type to let users categorize their complaints.",
+    "no_results_title": "No types match these filters",
+    "no_results_hint": "Try clearing the search or status filter."
+  }
+}

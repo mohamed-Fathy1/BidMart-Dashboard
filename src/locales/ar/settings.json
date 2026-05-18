@@ -72,5 +72,41 @@
   "errors": {
     "load_failed": "تعذّر تحميل الإعدادات.",
     "update_failed": "تعذّر حفظ الإعدادات."
+  },
+  "content": {
+    "title": "المحتوى",
+    "description": "إدارة الصفحات الثابتة التي تظهر للمستخدمين — سياسة الخصوصية والشروط وعن التطبيق.",
+    "html_hint": "يقبل كل حقل تنسيق HTML. كل حفظ يزيد رقم الإصدار تلقائياً.",
+    "meta": {
+      "version": "الإصدار {{v}}",
+      "updated_at": "آخر حفظ {{date}}"
+    },
+    "types": {
+      "PRIVACY_POLICY": "سياسة الخصوصية",
+      "TERMS_AND_CONDITIONS": "الشروط والأحكام",
+      "ABOUT_US": "عن التطبيق"
+    },
+    "fields": {
+      "content_en": "الإنجليزية",
+      "content_en_placeholder": "<p>أدخل المحتوى بتنسيق HTML بالإنجليزية…</p>",
+      "content_ar": "العربية",
+      "content_ar_placeholder": "<p>أدخل المحتوى بتنسيق HTML بالعربية…</p>"
+    },
+    "view_toggle": {
+      "code": "كود",
+      "preview": "معاينة"
+    },
+    "actions": {
+      "save": "حفظ",
+      "saving": "جارٍ الحفظ…",
+      "unsaved": "تغييرات غير محفوظة"
+    },
+    "toasts": {
+      "update_success": "تم حفظ المحتوى."
+    },
+    "errors": {
+      "load_failed": "تعذّر تحميل المحتوى.",
+      "update_failed": "تعذّر حفظ المحتوى."
+    }
   }
 }

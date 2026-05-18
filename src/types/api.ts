@@ -417,6 +417,16 @@ export interface ComplaintTypeRef {
   name_ar: string;
 }
 
+/** Admin complaint type row — GET /admin/complaint-types (list + create/update). */
+export interface ComplaintType {
+  id: string;
+  name_en: string;
+  name_ar: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at?: string;
+}
+
 /** Localized complaint type (mobile GET /complaints/types). */
 export interface ComplaintTypeOption {
   id: string;

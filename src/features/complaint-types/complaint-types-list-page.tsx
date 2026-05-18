@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
+import { Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { getRouteApi } from '@tanstack/react-router'
@@ -9,7 +10,8 @@ import type { ComplaintType } from '@/types/api'
 import { useUrlListState } from '@/lib/use-url-list-state'
 import { useListPageData } from '@/lib/use-list-page-data'
 import { useConfirmTarget } from '@/lib/use-confirm-target'
-import type { SettingsComplaintTypesSearch } from '@/routes/_authed.settings.complaint-types'
+import type { ComplaintTypesSearch } from '@/routes/_authed.complaint-types'
+import { PageHeader } from '@/components/shared/page-header'
 import { FilterSelect } from '@/components/shared/filter-select'
 import { TableFiltersShell } from '@/components/shared/table-filters-shell'
 import { SearchInput } from '@/components/shared/search-input'
@@ -32,38 +34,40 @@ import {
 } from '@/features/complaint-types/complaint-types.queries'
 import { format } from '@/lib/format'
 
-const settingsRoute = getRouteApi('/_authed/settings/complaint-types')
+const complaintTypesRoute = getRouteApi('/_authed/complaint-types')
 
-const formSchema = z.object({
+const complaintTypeFormSchema = z.object({
   nameEn: z.string().trim().min(1, { message: 'complaint-types:errors.name_en_required' }),
   nameAr: z.string().trim().min(1, { message: 'complaint-types:errors.name_ar_required' }),
   isActive: z.boolean(),
 })
 
-type FormValues = z.infer<typeof formSchema>
+type ComplaintTypeFormValues = z.infer<typeof complaintTypeFormSchema>
 
 export function ComplaintTypesListPage() {
   const { t, i18n } = useTranslation()
   const { search, searchValue, pagination, setPagination, setSearch, setFilter } =
-    useUrlListState<SettingsComplaintTypesSearch>({ route: settingsRoute })
+    useUrlListState<ComplaintTypesSearch>({ route: complaintTypesRoute })
   const activeFilter =
     search.isActive === true ? 'true' : search.isActive === false ? 'false' : ''
 
   const canUpdate = usePermission(PERMISSIONS.complaints.updateType)
   const canDelete = usePermission(PERMISSIONS.complaints.deleteType)
 
+  /* ---------- dialogs ---------- */
   const [formOpen, setFormOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<ComplaintType | null>(null)
   const deleteFlow = useConfirmTarget<ComplaintType>()
 
+  /* ---------- form ---------- */
   const {
     register,
     control,
     handleSubmit: rhfHandleSubmit,
     reset,
     formState: { errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  } = useForm<ComplaintTypeFormValues>({
+    resolver: zodResolver(complaintTypeFormSchema),
     mode: 'onBlur',
     defaultValues: { nameEn: '', nameAr: '', isActive: true },
   })
@@ -85,6 +89,7 @@ export function ComplaintTypesListPage() {
     setEditTarget(null)
   }
 
+  /* ---------- data ---------- */
   const { data: response, isLoading } = useComplaintTypesQuery({
     search: searchValue.trim() || undefined,
     isActive: search.isActive,
@@ -106,6 +111,8 @@ export function ComplaintTypesListPage() {
   })
 
   const columns = useComplaintTypeColumns()
+
+  /* ---------- mutations ---------- */
   const createMutation = useCreateComplaintTypeMutation()
   const updateMutation = useUpdateComplaintTypeMutation()
   const deleteMutation = useDeleteComplaintTypeMutation()
@@ -118,6 +125,7 @@ export function ComplaintTypesListPage() {
       ? t(errors[firstErrorKey]!.message as string)
       : undefined
 
+  /* ---------- filter options ---------- */
   const activeOptions = useMemo(
     () => [
       { value: 'true', label: t('complaint-types:active_options.active') },
@@ -126,6 +134,7 @@ export function ComplaintTypesListPage() {
     [t],
   )
 
+  /* ---------- row actions ---------- */
   function getRowActions(row: ComplaintType): RowActionItem<ComplaintType>[] {
     const items: RowActionItem<ComplaintType>[] = []
 
@@ -159,7 +168,7 @@ export function ComplaintTypesListPage() {
     return items
   }
 
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = (values: ComplaintTypeFormValues) => {
     if (editTarget) {
       updateMutation.mutate(
         {
@@ -176,10 +185,12 @@ export function ComplaintTypesListPage() {
     }
   }
 
+  /* ---------- localised name for dialogs ---------- */
   function localName(ct: ComplaintType) {
     return i18n.language === 'ar' ? ct.name_ar : ct.name_en
   }
 
+  /* ---------- toolbar ---------- */
   const toolbar = (
     <TableFiltersShell
       meta={
@@ -206,24 +217,21 @@ export function ComplaintTypesListPage() {
     </TableFiltersShell>
   )
 
+  /* ---------- render ---------- */
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0 space-y-1">
-          <h2 className="text-lg font-semibold text-foreground">
-            {t('complaints:types.title')}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {t('complaints:types.description')}
-          </p>
-        </div>
-        <Can permission={PERMISSIONS.complaints.createType}>
-          <Button size="sm" onClick={openCreate} className="shrink-0">
-            <Plus className="size-4" />
-            {t('complaint-types:actions.create')}
-          </Button>
-        </Can>
-      </div>
+      <PageHeader
+        title={t('complaint-types:page_title')}
+        description={t('complaint-types:page_description')}
+        actions={
+          <Can permission={PERMISSIONS.complaints.createType}>
+            <Button size="sm" onClick={openCreate}>
+              <Plus className="size-4" />
+              {t('complaint-types:actions.create')}
+            </Button>
+          </Can>
+        }
+      />
 
       <DataTable
         columns={columns}
@@ -239,14 +247,8 @@ export function ComplaintTypesListPage() {
 
       <FormDialog
         open={formOpen}
-        onOpenChange={(open) => {
-          if (!open) closeForm()
-        }}
-        title={
-          editTarget
-            ? t('complaint-types:form.edit_title')
-            : t('complaint-types:form.create_title')
-        }
+        onOpenChange={(open) => { if (!open) closeForm() }}
+        title={editTarget ? t('complaint-types:form.edit_title') : t('complaint-types:form.create_title')}
         description={t('complaint-types:form.dialog_description')}
         isEdit={!!editTarget}
         isLoading={isSubmitting}

@@ -11,6 +11,9 @@ import {
   MessageCircleWarning,
   Inbox,
   Settings,
+  Tags,
+  SlidersHorizontal,
+  FileText,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { PERMISSIONS, type Permission } from '@/lib/permissions'
@@ -88,7 +91,36 @@ export const navSections: NavSection[] = [
     entries: [
       { kind: 'leaf', labelKey: 'shell:nav.roles', icon: Shield, to: '/roles', permission: PERMISSIONS.roles.view },
       { kind: 'leaf', labelKey: 'shell:nav.admins', icon: UserCog, to: '/admins', permission: PERMISSIONS.admins.view },
-      { kind: 'leaf', labelKey: 'shell:nav.settings', icon: Settings, to: '/settings', permission: PERMISSIONS.settings.view },
+      {
+        kind: 'group',
+        labelKey: 'shell:nav.settings',
+        icon: Settings,
+        defaultTo: '/settings',
+        matchPath: '/settings',
+        children: [
+          {
+            kind: 'leaf',
+            labelKey: 'shell:nav.settings_general',
+            icon: SlidersHorizontal,
+            to: '/settings',
+            permission: PERMISSIONS.settings.view,
+          },
+          {
+            kind: 'leaf',
+            labelKey: 'shell:nav.complaint_types',
+            icon: Tags,
+            to: '/settings/complaint-types',
+            permission: PERMISSIONS.complaints.view,
+          },
+          {
+            kind: 'leaf',
+            labelKey: 'shell:nav.settings_content',
+            icon: FileText,
+            to: '/settings/content',
+            permission: PERMISSIONS.settings.update,
+          },
+        ],
+      },
     ],
   },
 ]

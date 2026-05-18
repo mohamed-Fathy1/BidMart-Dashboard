@@ -72,5 +72,41 @@
   "errors": {
     "load_failed": "Failed to load settings.",
     "update_failed": "Failed to save settings."
+  },
+  "content": {
+    "title": "Content",
+    "description": "Manage the static pages shown to users — privacy policy, terms & conditions, and about us.",
+    "html_hint": "Each field accepts HTML. Changes are versioned — every save increments the version counter.",
+    "meta": {
+      "version": "Version {{v}}",
+      "updated_at": "Last saved {{date}}"
+    },
+    "types": {
+      "PRIVACY_POLICY": "Privacy Policy",
+      "TERMS_AND_CONDITIONS": "Terms & Conditions",
+      "ABOUT_US": "About Us"
+    },
+    "fields": {
+      "content_en": "English",
+      "content_en_placeholder": "<p>Enter HTML content in English…</p>",
+      "content_ar": "Arabic",
+      "content_ar_placeholder": "<p>أدخل المحتوى بتنسيق HTML بالعربية…</p>"
+    },
+    "view_toggle": {
+      "code": "Code",
+      "preview": "Preview"
+    },
+    "actions": {
+      "save": "Save",
+      "saving": "Saving…",
+      "unsaved": "Unsaved changes"
+    },
+    "toasts": {
+      "update_success": "Content saved."
+    },
+    "errors": {
+      "load_failed": "Failed to load content.",
+      "update_failed": "Failed to save content."
+    }
   }
 }

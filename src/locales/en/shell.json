@@ -9,6 +9,7 @@
     "withdrawals": "Withdrawals",
     "orders": "Orders",
     "complaints": "Complaints",
+    "complaint_types": "Complaint Types",
     "ratings": "Ratings",
     "live_streams": "Live Streams",
     "content": "Content",
@@ -18,6 +19,8 @@
     "sub_categories": "Sub-categories",
     "support_tickets": "Support Tickets",
     "settings": "Settings",
+    "settings_general": "General",
+    "settings_content": "Content",
     "notifications": "Notifications"
   },
   "topbar": {
