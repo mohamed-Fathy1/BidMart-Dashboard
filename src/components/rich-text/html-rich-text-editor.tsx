@@ -8,9 +8,8 @@ import {
   type Ref,
 } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { Editor } from '@tiptap/core'
 import Placeholder from '@tiptap/extension-placeholder'
-import { EditorContent, useEditor } from '@tiptap/react'
+import { EditorContent, useEditor, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import {
   Bold,
