@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useResourceMutation } from '@/lib/use-resource-mutation'
-import { Loader2, Save, Clock, Hash, Code2, Eye, Pencil } from 'lucide-react'
+import { Loader2, Save, Clock, Hash, Code2, Eye, Pencil, Info } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageHeader } from '@/components/shared/page-header'
 import { Can } from '@/components/permissions/can'
 import { PERMISSIONS, usePermission } from '@/lib/permissions'
@@ -29,11 +30,13 @@ import {
 
 const CONTENT_TYPES: ContentType[] = ['PRIVACY_POLICY', 'TERMS_AND_CONDITIONS', 'ABOUT_US']
 
+/** Preview iframe styles — values aligned with tokens.css */
 const PREVIEW_STYLES = `
   * { box-sizing: border-box; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    font-size: 14px; line-height: 1.75; color: #1c1c1e;
+    font-size: 14px; line-height: 1.75;
+    color: #1C1917; background: #FFFFFF;
     padding: 20px 24px; margin: 0;
   }
   h1 { font-size: 1.375rem; font-weight: 700; margin: 0 0 1rem; }
@@ -45,17 +48,28 @@ const PREVIEW_STYLES = `
   a  { color: #3660B5; text-decoration: underline; }
   strong { font-weight: 600; }
   blockquote {
-    border-inline-start: 3px solid #e5e5e5;
+    border-inline-start: 3px solid #E7E5E4;
     margin: 0 0 1rem; padding: 0.25rem 0 0.25rem 1rem;
-    color: #666;
+    color: #78716C;
   }
 `.trim()
 
-function buildSrcdoc(html: string, dir: 'ltr' | 'rtl' = 'ltr') {
+function buildSrcdoc(html: string, dir: 'ltr' | 'rtl', emptyLabel: string) {
+  const body =
+    html ||
+    `<p style="color:#78716C;font-style:italic">${escapeHtml(emptyLabel)}</p>`
   return `<!DOCTYPE html><html dir="${dir}" lang="${dir === 'rtl' ? 'ar' : 'en'}">
 <head><meta charset="utf-8"><style>${PREVIEW_STYLES}</style></head>
-<body>${html || '<p style="color:#aaa;font-style:italic">Nothing to preview yet.</p>'}</body>
+<body>${body}</body>
 </html>`
+}
+
+function escapeHtml(text: string) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
 }
 
 /* ------------------------------------------------------------------ */
@@ -88,13 +102,13 @@ function useUpdateContentMutation(type: ContentType) {
 /*  View-mode toggle                                                   */
 /* ------------------------------------------------------------------ */
 
-type ViewMode = 'editor' | 'code' | 'preview'
+type ViewMode = 'editor' | 'html' | 'preview'
 
-const VIEW_MODES: ViewMode[] = ['editor', 'code', 'preview']
+const VIEW_MODES: ViewMode[] = ['editor', 'html', 'preview']
 
 const VIEW_MODE_ICONS = {
   editor: Pencil,
-  code: Code2,
+  html: Code2,
   preview: Eye,
 } as const
 
@@ -107,9 +121,7 @@ function ViewToggle({
 }) {
   const { t } = useTranslation()
   return (
-    <div
-      className="inline-flex items-center rounded-md border border-border bg-muted/60 p-0.5"
-    >
+    <div className="inline-flex items-center rounded-md border border-border bg-muted/60 p-0.5">
       {VIEW_MODES.map((mode) => {
         const Icon = VIEW_MODE_ICONS[mode]
         return (
@@ -124,7 +136,7 @@ function ViewToggle({
                 : 'text-muted-foreground hover:text-foreground',
             )}
           >
-            <Icon className="size-3" />
+            <Icon className="size-3.5" />
             {t(`settings:content.view_toggle.${mode}`)}
           </button>
         )
@@ -142,28 +154,24 @@ function EditorColumn({
   value,
   placeholder,
   dir = 'ltr',
+  view,
+  emptyPreviewLabel,
   disabled = false,
+  editorRef,
   onChange,
 }: {
   label: string
   value: string
   placeholder: string
   dir?: 'ltr' | 'rtl'
+  view: ViewMode
+  emptyPreviewLabel: string
   disabled?: boolean
+  editorRef?: React.Ref<HtmlRichTextEditorHandle | null>
   onChange: (v: string) => void
 }) {
-  const [view, setView] = useState<ViewMode>('editor')
   const [previewHtml, setPreviewHtml] = useState(value)
   const timerRef = useRef<ReturnType<typeof setTimeout>>(null)
-  const richTextRef = useRef<HtmlRichTextEditorHandle>(null)
-
-  function handleViewChange(next: ViewMode) {
-    if (view === 'editor' && richTextRef.current) {
-      const html = richTextRef.current.getHtml()
-      if (html !== value) onChange(html)
-    }
-    setView(next)
-  }
 
   useEffect(() => {
     if (view === 'preview') {
@@ -180,15 +188,12 @@ function EditorColumn({
 
   useEffect(() => {
     setPreviewHtml(value)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
     <div className="flex min-w-0 flex-col gap-2">
-      <div className="flex items-center justify-between gap-2">
-        <Label className="text-sm font-medium">{label}</Label>
-        <ViewToggle value={view} onChange={handleViewChange} />
-      </div>
+      <Label className="text-sm font-medium">{label}</Label>
 
       {view === 'editor' ? (
         <HtmlRichTextEditor
@@ -197,22 +202,22 @@ function EditorColumn({
           dir={dir}
           placeholder={placeholder}
           disabled={disabled}
-          editorRef={richTextRef}
+          editorRef={editorRef}
         />
-      ) : view === 'code' ? (
+      ) : view === 'html' ? (
         <Textarea
           dir={dir}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           disabled={disabled}
-          className="min-h-[420px] resize-y font-mono text-xs leading-relaxed"
+          className="min-h-[420px] resize-y bg-background font-mono text-xs leading-relaxed"
           spellCheck={false}
         />
       ) : (
-        <div className="relative min-h-[420px] overflow-hidden rounded-md border border-border bg-white">
+        <div className="relative min-h-[420px] overflow-hidden rounded-md border border-border bg-card">
           <iframe
-            srcDoc={buildSrcdoc(previewHtml, dir)}
+            srcDoc={buildSrcdoc(previewHtml, dir, emptyPreviewLabel)}
             sandbox="allow-same-origin"
             title={`${label} preview`}
             className="h-full min-h-[420px] w-full border-0"
@@ -235,26 +240,67 @@ function ContentTab({ type }: { type: ContentType }) {
 
   const [contentEn, setContentEn] = useState('')
   const [contentAr, setContentAr] = useState('')
-  const [isDirty, setIsDirty] = useState(false)
+  const [savedSnapshot, setSavedSnapshot] = useState({ en: '', ar: '' })
+  const [view, setView] = useState<ViewMode>('editor')
+
+  const enEditorRef = useRef<HtmlRichTextEditorHandle>(null)
+  const arEditorRef = useRef<HtmlRichTextEditorHandle>(null)
 
   useEffect(() => {
-    if (data) {
-      setContentEn(data.content_en ?? '')
-      setContentAr(data.content_ar ?? '')
-      setIsDirty(false)
-    }
+    if (!data) return
+    const en = data.content_en ?? ''
+    const ar = data.content_ar ?? ''
+    setContentEn(en)
+    setContentAr(ar)
+    // TipTap normalizes HTML on mount — align baseline after editors hydrate.
+    const id = window.setTimeout(() => {
+      const normalizedEn = enEditorRef.current?.getHtml() ?? en
+      const normalizedAr = arEditorRef.current?.getHtml() ?? ar
+      setContentEn(normalizedEn)
+      setContentAr(normalizedAr)
+      setSavedSnapshot({ en: normalizedEn, ar: normalizedAr })
+    }, 50)
+    return () => window.clearTimeout(id)
   }, [data])
+
+  const isDirty = contentEn !== savedSnapshot.en || contentAr !== savedSnapshot.ar
+
+  function flushEditors() {
+    if (view !== 'editor') return
+    const enHtml = enEditorRef.current?.getHtml()
+    if (enHtml !== undefined && enHtml !== contentEn) setContentEn(enHtml)
+    const arHtml = arEditorRef.current?.getHtml()
+    if (arHtml !== undefined && arHtml !== contentAr) setContentAr(arHtml)
+  }
+
+  function handleViewChange(next: ViewMode) {
+    flushEditors()
+    setView(next)
+  }
 
   function handleChange(lang: 'en' | 'ar', value: string) {
     if (lang === 'en') setContentEn(value)
     else setContentAr(value)
-    setIsDirty(true)
   }
 
   function handleSave() {
+    let nextEn = contentEn
+    let nextAr = contentAr
+    if (view === 'editor') {
+      const enHtml = enEditorRef.current?.getHtml()
+      if (enHtml !== undefined) nextEn = enHtml
+      const arHtml = arEditorRef.current?.getHtml()
+      if (arHtml !== undefined) nextAr = arHtml
+    }
     mutation.mutate(
-      { content_en: contentEn, content_ar: contentAr },
-      { onSuccess: () => setIsDirty(false) },
+      { content_en: nextEn, content_ar: nextAr },
+      {
+        onSuccess: () => {
+          setContentEn(nextEn)
+          setContentAr(nextAr)
+          setSavedSnapshot({ en: nextEn, ar: nextAr })
+        },
+      },
     )
   }
 
@@ -274,20 +320,30 @@ function ContentTab({ type }: { type: ContentType }) {
     )
   }
 
+  const emptyPreviewLabel = t('settings:content.preview.empty')
+
   return (
     <div className="space-y-5">
-      {data && (
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
-          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Hash className="size-3.5 shrink-0" />
-            {t('settings:content.meta.version', { v: data.version })}
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Clock className="size-3.5 shrink-0" />
-            {t('settings:content.meta.updated_at', { date: format.dateTime(data.updated_at) })}
-          </span>
+      {!canUpdate && (
+        <div
+          className="flex items-start gap-2 rounded-md border border-border bg-muted/50 px-3 py-2.5 text-sm text-muted-foreground"
+          role="status"
+        >
+          <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
+          <p>{t('settings:read_only_hint')}</p>
         </div>
       )}
+
+      <CardHeader className="gap-1 px-0 pb-0">
+        <CardTitle className="text-base">{t(`settings:content.types.${type}`)}</CardTitle>
+        <CardDescription>{t(`settings:content.type_descriptions.${type}`)}</CardDescription>
+      </CardHeader>
+
+      {/* <p className="text-xs text-muted-foreground">{t('settings:content.editor_hint')}</p> */}
+
+      <div className="flex flex-wrap items-center justify-end gap-3">
+        <ViewToggle value={view} onChange={handleViewChange} />
+      </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <EditorColumn
@@ -295,7 +351,10 @@ function ContentTab({ type }: { type: ContentType }) {
           value={contentEn}
           placeholder={t('settings:content.fields.content_en_placeholder')}
           dir="ltr"
+          view={view}
+          emptyPreviewLabel={emptyPreviewLabel}
           disabled={!canUpdate}
+          editorRef={enEditorRef}
           onChange={(v) => handleChange('en', v)}
         />
         <EditorColumn
@@ -303,33 +362,58 @@ function ContentTab({ type }: { type: ContentType }) {
           value={contentAr}
           placeholder={t('settings:content.fields.content_ar_placeholder')}
           dir="rtl"
+          view={view}
+          emptyPreviewLabel={emptyPreviewLabel}
           disabled={!canUpdate}
+          editorRef={arEditorRef}
           onChange={(v) => handleChange('ar', v)}
         />
       </div>
 
-      <div className="flex items-center justify-between border-t border-border pt-4">
-        <p
-          className={cn(
-            'text-sm transition-opacity duration-(--duration-hover)',
-            isDirty ? 'text-amber-600 opacity-100' : 'opacity-0 select-none',
+      <div
+        className={cn(
+          'sticky bottom-0 z-10 -mx-6 flex flex-wrap items-center justify-between gap-3 border-t border-border bg-card px-6 py-4',
+          'mt-2',
+        )}
+      >
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+          {data && (
+            <>
+              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Hash className="size-3.5 shrink-0" aria-hidden />
+                {t('settings:content.meta.version', { v: data.version })}
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Clock className="size-3.5 shrink-0" aria-hidden />
+                {t('settings:content.meta.updated_at', { date: format.dateTime(data.updated_at) })}
+              </span>
+            </>
           )}
-          aria-live="polite"
-        >
-          {t('settings:content.actions.unsaved')}
-        </p>
-        <Can permission={PERMISSIONS.settings.update}>
-          <Button size="sm" onClick={handleSave} disabled={mutation.isPending || !isDirty}>
-            {mutation.isPending ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Save className="size-4" />
-            )}
-            {mutation.isPending
-              ? t('settings:content.actions.saving')
-              : t('settings:content.actions.save')}
-          </Button>
-        </Can>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          {isDirty ? (
+            <Badge
+              variant="outline"
+              className="border-amber-600/30 bg-amber-50 text-amber-800"
+              aria-live="polite"
+            >
+              {t('settings:content.actions.unsaved')}
+            </Badge>
+          ) : null}
+          <Can permission={PERMISSIONS.settings.update}>
+            <Button size="sm" onClick={handleSave} disabled={mutation.isPending || !isDirty}>
+              {mutation.isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Save className="size-4" />
+              )}
+              {mutation.isPending
+                ? t('settings:content.actions.saving')
+                : t('settings:content.actions.save')}
+            </Button>
+          </Can>
+        </div>
       </div>
     </div>
   )
@@ -349,19 +433,16 @@ export function ContentPage() {
         description={t('settings:content.description')}
       />
 
-      <Card>
-        <CardContent className="pt-6">
+      <Card className="py-0">
+        <CardContent className="py-5">
           <Tabs defaultValue="PRIVACY_POLICY">
-            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <TabsList>
-                {CONTENT_TYPES.map((type) => (
-                  <TabsTrigger key={type} value={type}>
-                    {t(`settings:content.types.${type}`)}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-              <p className="text-xs text-muted-foreground">{t('settings:content.html_hint')}</p>
-            </div>
+            <TabsList className="mb-6">
+              {CONTENT_TYPES.map((type) => (
+                <TabsTrigger key={type} value={type}>
+                  {t(`settings:content.types.${type}`)}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
             {CONTENT_TYPES.map((type) => (
               <TabsContent key={type} value={type}>

@@ -1,5 +1,14 @@
-import { useEffect, useImperativeHandle, useMemo, useRef, type ReactNode, type Ref } from 'react'
+import {
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type Ref,
+} from 'react'
 import { useTranslation } from 'react-i18next'
+import type { Editor } from '@tiptap/core'
 import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -16,7 +25,17 @@ import {
   Undo2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Popover,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import { Separator } from '@/components/ui/separator'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
 export interface HtmlRichTextEditorHandle {
@@ -43,21 +62,126 @@ function ToolbarButton({
   label: string
   active?: boolean
   disabled?: boolean
-  onClick: () => void
+  onClick?: () => void
   children: ReactNode
 }) {
   return (
-    <Button
-      type="button"
-      variant={active ? 'secondary' : 'ghost'}
-      size="icon-xs"
-      disabled={disabled}
-      aria-label={label}
-      aria-pressed={active}
-      onClick={onClick}
-    >
-      {children}
-    </Button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          disabled={disabled}
+          aria-label={label}
+          aria-pressed={active}
+          onClick={onClick}
+          className={cn(
+            active && 'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary',
+          )}
+        >
+          {children}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent side="bottom">{label}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+function LinkToolbarButton({
+  editor,
+  disabled,
+}: {
+  editor: Editor
+  disabled: boolean
+}) {
+  const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
+  const [url, setUrl] = useState('https://')
+
+  function handleOpen(next: boolean) {
+    if (next) {
+      const href = editor.getAttributes('link').href as string | undefined
+      setUrl(href ?? 'https://')
+    }
+    setOpen(next)
+  }
+
+  function applyLink() {
+    const trimmed = url.trim()
+    if (trimmed === '') {
+      editor.chain().focus().extendMarkRange('link').unsetLink().run()
+    } else {
+      editor.chain().focus().extendMarkRange('link').setLink({ href: trimmed }).run()
+    }
+    setOpen(false)
+  }
+
+  const active = editor.isActive('link')
+
+  return (
+    <Popover open={open} onOpenChange={handleOpen}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              disabled={disabled}
+              aria-label={t('settings:content.toolbar.link')}
+              aria-pressed={active}
+              className={cn(
+                active && 'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary',
+              )}
+            >
+              <Link2 className="size-4" />
+            </Button>
+          </PopoverTrigger>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">{t('settings:content.toolbar.link')}</TooltipContent>
+      </Tooltip>
+      <PopoverContent className="w-80" align="start">
+        <PopoverHeader>
+          <PopoverTitle>{t('settings:content.toolbar.link_dialog_title')}</PopoverTitle>
+        </PopoverHeader>
+        <div className="mt-3 space-y-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="rich-text-link-url">{t('settings:content.toolbar.link_url')}</Label>
+            <Input
+              id="rich-text-link-url"
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  applyLink()
+                }
+              }}
+            />
+          </div>
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setUrl('')
+                editor.chain().focus().extendMarkRange('link').unsetLink().run()
+                setOpen(false)
+              }}
+            >
+              {t('settings:content.toolbar.link_remove')}
+            </Button>
+            <Button type="button" size="sm" onClick={applyLink}>
+              {t('settings:content.toolbar.link_apply')}
+            </Button>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
   )
 }
 
@@ -73,6 +197,8 @@ export function HtmlRichTextEditor({
   const { t } = useTranslation()
   const onChangeRef = useRef(onChange)
   onChangeRef.current = onChange
+  /** Skip onUpdate while syncing props → editor (TipTap normalizes HTML on load). */
+  const suppressOnUpdateRef = useRef(true)
 
   const extensions = useMemo(
     () => [
@@ -98,11 +224,12 @@ export function HtmlRichTextEditor({
       content: value,
       editable: !disabled,
       immediatelyRender: false,
+      shouldRerenderOnTransaction: true,
       editorProps: {
         attributes: {
           dir,
           class: cn(
-            'min-h-[380px] px-3 py-2 text-sm leading-relaxed text-foreground outline-none',
+            'min-h-[360px] max-w-prose px-4 py-3 text-sm leading-relaxed text-foreground outline-none',
             'focus-visible:ring-0',
             '[&_h2]:mt-4 [&_h2]:mb-2 [&_h2]:text-base [&_h2]:font-semibold',
             '[&_h3]:mt-3 [&_h3]:mb-1.5 [&_h3]:text-sm [&_h3]:font-semibold',
@@ -116,6 +243,7 @@ export function HtmlRichTextEditor({
         },
       },
       onUpdate: ({ editor: ed }) => {
+        if (suppressOnUpdateRef.current) return
         onChangeRef.current(ed.getHTML())
       },
     },
@@ -128,10 +256,15 @@ export function HtmlRichTextEditor({
 
   useEffect(() => {
     if (!editor) return
+    suppressOnUpdateRef.current = true
     const current = editor.getHTML()
     if (value !== current) {
       editor.commands.setContent(value, { emitUpdate: false })
     }
+    const id = window.setTimeout(() => {
+      suppressOnUpdateRef.current = false
+    }, 0)
+    return () => window.clearTimeout(id)
   }, [value, editor])
 
   useEffect(() => {
@@ -150,31 +283,18 @@ export function HtmlRichTextEditor({
     )
   }
 
-  const ed = editor
-
-  function setLink() {
-    const previous = ed.getAttributes('link').href as string | undefined
-    const url = window.prompt(t('settings:content.toolbar.link_prompt'), previous ?? 'https://')
-    if (url === null) return
-    if (url === '') {
-      ed.chain().focus().extendMarkRange('link').unsetLink().run()
-      return
-    }
-    ed.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
-  }
-
   const toolbarDisabled = disabled
 
   return (
     <div
       className={cn(
-        'flex min-h-[420px] flex-col overflow-hidden rounded-md border border-border bg-background',
+        'flex min-h-[420px] flex-col overflow-hidden rounded-md border border-border bg-card',
         disabled && 'opacity-60',
         className,
       )}
     >
       <div
-        className="flex flex-wrap items-center gap-0.5 border-b border-border bg-muted/40 px-1.5 py-1"
+        className="flex flex-wrap items-center gap-1 border-b border-border bg-muted/40 px-2 py-1.5"
         role="toolbar"
         aria-label={t('settings:content.toolbar.label')}
       >
@@ -184,7 +304,7 @@ export function HtmlRichTextEditor({
           disabled={toolbarDisabled}
           onClick={() => editor.chain().focus().toggleBold().run()}
         >
-          <Bold className="size-3.5" />
+          <Bold className="size-4" />
         </ToolbarButton>
         <ToolbarButton
           label={t('settings:content.toolbar.italic')}
@@ -192,10 +312,10 @@ export function HtmlRichTextEditor({
           disabled={toolbarDisabled}
           onClick={() => editor.chain().focus().toggleItalic().run()}
         >
-          <Italic className="size-3.5" />
+          <Italic className="size-4" />
         </ToolbarButton>
 
-        <Separator orientation="vertical" className="mx-0.5 h-5" />
+        <Separator orientation="vertical" className="mx-0.5 h-6" />
 
         <ToolbarButton
           label={t('settings:content.toolbar.heading2')}
@@ -203,7 +323,7 @@ export function HtmlRichTextEditor({
           disabled={toolbarDisabled}
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         >
-          <Heading2 className="size-3.5" />
+          <Heading2 className="size-4" />
         </ToolbarButton>
         <ToolbarButton
           label={t('settings:content.toolbar.heading3')}
@@ -211,10 +331,10 @@ export function HtmlRichTextEditor({
           disabled={toolbarDisabled}
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
         >
-          <Heading3 className="size-3.5" />
+          <Heading3 className="size-4" />
         </ToolbarButton>
 
-        <Separator orientation="vertical" className="mx-0.5 h-5" />
+        <Separator orientation="vertical" className="mx-0.5 h-6" />
 
         <ToolbarButton
           label={t('settings:content.toolbar.bullet_list')}
@@ -222,7 +342,7 @@ export function HtmlRichTextEditor({
           disabled={toolbarDisabled}
           onClick={() => editor.chain().focus().toggleBulletList().run()}
         >
-          <List className="size-3.5" />
+          <List className="size-4" />
         </ToolbarButton>
         <ToolbarButton
           label={t('settings:content.toolbar.ordered_list')}
@@ -230,7 +350,7 @@ export function HtmlRichTextEditor({
           disabled={toolbarDisabled}
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
         >
-          <ListOrdered className="size-3.5" />
+          <ListOrdered className="size-4" />
         </ToolbarButton>
         <ToolbarButton
           label={t('settings:content.toolbar.blockquote')}
@@ -238,40 +358,34 @@ export function HtmlRichTextEditor({
           disabled={toolbarDisabled}
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
         >
-          <Quote className="size-3.5" />
-        </ToolbarButton>
-        <ToolbarButton
-          label={t('settings:content.toolbar.link')}
-          active={editor.isActive('link')}
-          disabled={toolbarDisabled}
-          onClick={setLink}
-        >
-          <Link2 className="size-3.5" />
+          <Quote className="size-4" />
         </ToolbarButton>
 
-        <Separator orientation="vertical" className="mx-0.5 h-5" />
+        <LinkToolbarButton editor={editor} disabled={toolbarDisabled} />
+
+        <Separator orientation="vertical" className="mx-0.5 h-6" />
 
         <ToolbarButton
           label={t('settings:content.toolbar.undo')}
           disabled={toolbarDisabled || !editor.can().undo()}
           onClick={() => editor.chain().focus().undo().run()}
         >
-          <Undo2 className="size-3.5" />
+          <Undo2 className="size-4" />
         </ToolbarButton>
         <ToolbarButton
           label={t('settings:content.toolbar.redo')}
           disabled={toolbarDisabled || !editor.can().redo()}
           onClick={() => editor.chain().focus().redo().run()}
         >
-          <Redo2 className="size-3.5" />
+          <Redo2 className="size-4" />
         </ToolbarButton>
       </div>
 
       <EditorContent
         editor={editor}
         className={cn(
-          'flex-1 overflow-y-auto',
-          '[&_.tiptap]:min-h-[380px]',
+          'flex-1 overflow-y-auto bg-background',
+          '[&_.tiptap]:mx-auto [&_.tiptap]:w-full',
           '[&_.ProseMirror-focused]:outline-none',
         )}
       />

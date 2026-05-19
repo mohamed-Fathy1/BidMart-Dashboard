@@ -80,7 +80,7 @@
   "content": {
     "title": "Content",
     "description": "Manage the static pages shown to users — privacy policy, terms & conditions, and about us.",
-    "html_hint": "Format content in the editor. Code view is available for advanced HTML edits. Every save increments the version counter.",
+    "editor_hint": "Use the toolbar to format text. Switch to HTML for advanced edits.",
     "meta": {
       "version": "Version {{v}}",
       "updated_at": "Last saved {{date}}"
@@ -90,6 +90,14 @@
       "TERMS_AND_CONDITIONS": "Terms & Conditions",
       "ABOUT_US": "About Us"
     },
+    "type_descriptions": {
+      "PRIVACY_POLICY": "Legal copy shown to users about data collection and use.",
+      "TERMS_AND_CONDITIONS": "Rules and obligations users accept when using the platform.",
+      "ABOUT_US": "Company overview and information shown on the about page."
+    },
+    "preview": {
+      "empty": "Nothing to preview yet."
+    },
     "fields": {
       "content_en": "English",
       "content_en_placeholder": "Write content in English…",
@@ -98,7 +106,7 @@
     },
     "view_toggle": {
       "editor": "Editor",
-      "code": "Code",
+      "html": "HTML",
       "preview": "Preview"
     },
     "toolbar": {
@@ -111,7 +119,10 @@
       "ordered_list": "Numbered list",
       "blockquote": "Quote",
       "link": "Link",
-      "link_prompt": "Enter URL (leave empty to remove link)",
+      "link_dialog_title": "Insert link",
+      "link_url": "URL",
+      "link_apply": "Apply",
+      "link_remove": "Remove link",
       "undo": "Undo",
       "redo": "Redo"
     },
