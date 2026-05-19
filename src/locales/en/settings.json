@@ -9,6 +9,7 @@
   "system": {
     "title": "System settings",
     "description": "Exchange rate, commissions, contact channels, and social links.",
+    "read_only_hint": "You have view-only access. Contact an administrator to change these settings.",
     "last_updated": "Last updated {{date}}",
     "sections": {
       "financial": {
@@ -30,9 +31,9 @@
       "order_commission_percentage": "Order commission",
       "order_commission_percentage_hint": "Percentage withheld from each completed order (0–100).",
       "referral_amount_sar": "Referral reward",
-      "referral_amount_sar_hint": "Amount in SAR credited per successful referral.",
+      "referral_amount_sar_hint": "Amount in SAR credited per successful referral (e.g. {{example}}).",
       "min_liquidation_amount_sar": "Minimum liquidation",
-      "min_liquidation_amount_sar_hint": "Minimum SAR balance a user can withdraw.",
+      "min_liquidation_amount_sar_hint": "Minimum SAR balance a user can withdraw (e.g. {{example}}).",
       "email": "Support email",
       "phone_numbers": "Phone numbers",
       "whatsapp_numbers": "WhatsApp numbers",
@@ -51,9 +52,11 @@
       "empty": "No numbers added yet."
     },
     "actions": {
+      "aria": "Form actions",
       "save": "Save changes",
       "saving": "Saving…",
       "reset": "Reset",
+      "retry": "Retry",
       "unsaved": "Unsaved changes"
     }
   },

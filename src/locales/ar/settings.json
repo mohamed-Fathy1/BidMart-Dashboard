@@ -9,6 +9,7 @@
   "system": {
     "title": "إعدادات النظام",
     "description": "سعر الصرف، العمولات، قنوات التواصل، وروابط وسائل التواصل.",
+    "read_only_hint": "لديك صلاحية عرض فقط. تواصل مع المسؤول لتعديل هذه الإعدادات.",
     "last_updated": "آخر تحديث {{date}}",
     "sections": {
       "financial": {
@@ -30,9 +31,9 @@
       "order_commission_percentage": "عمولة الطلبات",
       "order_commission_percentage_hint": "النسبة المحتجزة من كل طلب مكتمل (0–100).",
       "referral_amount_sar": "مكافأة الإحالة",
-      "referral_amount_sar_hint": "المبلغ بالريال السعودي لكل إحالة ناجحة.",
+      "referral_amount_sar_hint": "المبلغ بالريال السعودي لكل إحالة ناجحة (مثال: {{example}}).",
       "min_liquidation_amount_sar": "الحد الأدنى للسحب",
-      "min_liquidation_amount_sar_hint": "أقل رصيد يمكن للمستخدم سحبه.",
+      "min_liquidation_amount_sar_hint": "أقل رصيد يمكن للمستخدم سحبه (مثال: {{example}}).",
       "email": "البريد الإلكتروني للدعم",
       "phone_numbers": "أرقام الهاتف",
       "whatsapp_numbers": "أرقام واتساب",
@@ -51,9 +52,11 @@
       "empty": "لا توجد أرقام مضافة."
     },
     "actions": {
+      "aria": "إجراءات النموذج",
       "save": "حفظ التغييرات",
       "saving": "جارٍ الحفظ…",
       "reset": "إعادة تعيين",
+      "retry": "إعادة المحاولة",
       "unsaved": "تغييرات غير محفوظة"
     }
   },

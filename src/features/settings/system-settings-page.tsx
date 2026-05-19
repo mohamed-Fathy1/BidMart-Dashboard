@@ -1,16 +1,32 @@
-import { useEffect } from 'react'
+import { useEffect, type ComponentType } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
-import { Clock, Globe, Loader2 } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
+import {
+  AtSign,
+  Camera,
+  Clock,
+  Ghost,
+  Link,
+  Loader2,
+  Music2,
+  Share2,
+  Video,
+} from 'lucide-react'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { PhoneNumberListField } from '@/components/shared/phone-number-list-field'
 import { PageHeader } from '@/components/shared/page-header'
-import { Can } from '@/components/permissions/can'
 import { PERMISSIONS, usePermission } from '@/lib/permissions'
 import { format } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -90,6 +106,15 @@ const SOCIAL_FIELDS: Array<keyof SocialMediaLinks> = [
   'facebook',
 ]
 
+const SOCIAL_ICONS: Record<keyof SocialMediaLinks, ComponentType<{ className?: string }>> = {
+  twitter: AtSign,
+  tiktok: Music2,
+  snapchat: Ghost,
+  youtube: Video,
+  instagram: Camera,
+  facebook: Share2,
+}
+
 function toDefaults(settings: SystemSettings): SettingsForm {
   return {
     dollar_to_riyal_rate: settings.dollar_to_riyal_rate,
@@ -135,10 +160,52 @@ function buildPatch(
   return patch
 }
 
+function SystemSettingsSkeleton() {
+  return (
+    <div className="mx-auto w-full max-w-4xl space-y-6">
+      <div className="space-y-2">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-4 w-64" />
+      </div>
+      {[1, 2, 3].map((i) => (
+        <Card key={i}>
+          <CardHeader>
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-4 w-full max-w-md" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            {i === 2 && <Skeleton className="h-10 w-full max-w-md" />}
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )
+}
+
+function SystemSettingsError({ onRetry }: { onRetry: () => void }) {
+  const { t } = useTranslation()
+  return (
+    <div className="mx-auto w-full max-w-4xl">
+      <Card>
+        <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
+          <p className="text-sm text-muted-foreground">{t('settings:errors.load_failed')}</p>
+          <Button type="button" variant="outline" size="sm" onClick={onRetry}>
+            {t('settings:system.actions.retry')}
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
 export function SystemSettingsPage() {
   const { t } = useTranslation()
   const canUpdate = usePermission(PERMISSIONS.settings.update)
-  const { data: settings, isLoading, isError } = useSystemSettingsQuery()
+  const { data: settings, isLoading, isError, refetch } = useSystemSettingsQuery()
   const updateMutation = useUpdateSystemSettingsMutation()
 
   const {
@@ -179,25 +246,15 @@ export function SystemSettingsPage() {
   const whatsappNumbers = watch('whatsapp_numbers')
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-        <Loader2 className="me-2 size-4 motion-safe:animate-spin" aria-hidden />
-        <span>{t('settings:title')}…</span>
-      </div>
-    )
+    return <SystemSettingsSkeleton />
   }
 
   if (isError || !settings) {
-    return (
-      <Card className="gap-0 py-0">
-        <CardContent className="px-6 py-10 text-center text-sm text-muted-foreground">
-          {t('settings:errors.load_failed')}
-        </CardContent>
-      </Card>
-    )
+    return <SystemSettingsError onRetry={() => void refetch()} />
   }
 
   function onSubmit(values: SettingsForm) {
+    if (!canUpdate) return
     const patch = buildPatch(values, dirtyFields as Record<string, unknown>)
     if (Object.keys(patch).length === 0) return
     updateMutation.mutate(patch, {
@@ -206,6 +263,7 @@ export function SystemSettingsPage() {
   }
 
   const isSaving = updateMutation.isPending
+  const fieldsDisabled = !canUpdate || isSaving
 
   const updatedAtDescription = settings.updated_at ? (
     <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -217,19 +275,26 @@ export function SystemSettingsPage() {
   )
 
   return (
-    <form className="space-y-6" noValidate onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className="mx-auto w-full max-w-4xl space-y-6"
+      noValidate
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <PageHeader
         title={t('settings:system.title')}
         description={updatedAtDescription}
       />
 
-      {/* Financial */}
-      <Card className="gap-0 py-0">
-        <CardContent className="space-y-5 px-5 py-5">
-          <SectionHeading
-            title={t('settings:system.sections.financial.title')}
-            description={t('settings:system.sections.financial.description')}
-          />
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">
+            {t('settings:system.sections.financial.title')}
+          </CardTitle>
+          <CardDescription>
+            {t('settings:system.sections.financial.description')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           <div className="grid gap-4 sm:grid-cols-2">
             <NumberField
               id="dollar_to_riyal_rate"
@@ -238,6 +303,7 @@ export function SystemSettingsPage() {
               error={errors.dollar_to_riyal_rate?.message}
               suffix="SAR"
               step="0.01"
+              disabled={fieldsDisabled}
               {...register('dollar_to_riyal_rate', NUMBER_REGISTER)}
             />
             <NumberField
@@ -247,117 +313,130 @@ export function SystemSettingsPage() {
               error={errors.order_commission_percentage?.message}
               suffix="%"
               step="0.1"
+              disabled={fieldsDisabled}
               {...register('order_commission_percentage', NUMBER_REGISTER)}
             />
             <NumberField
               id="referral_amount_sar"
               label={t('settings:system.fields.referral_amount_sar')}
-              hint={t('settings:system.fields.referral_amount_sar_hint')}
+              hint={t('settings:system.fields.referral_amount_sar_hint', {
+                example: format.currency(1),
+              })}
               error={errors.referral_amount_sar?.message}
               suffix="SAR"
               step="1"
+              disabled={fieldsDisabled}
               {...register('referral_amount_sar', NUMBER_REGISTER)}
             />
             <NumberField
               id="min_liquidation_amount_sar"
               label={t('settings:system.fields.min_liquidation_amount_sar')}
-              hint={t('settings:system.fields.min_liquidation_amount_sar_hint')}
+              hint={t('settings:system.fields.min_liquidation_amount_sar_hint', {
+                example: format.currency(1),
+              })}
               error={errors.min_liquidation_amount_sar?.message}
               suffix="SAR"
               step="1"
+              disabled={fieldsDisabled}
               {...register('min_liquidation_amount_sar', NUMBER_REGISTER)}
             />
           </div>
         </CardContent>
       </Card>
 
-      {/* Contact */}
-      <Card className="gap-0 py-0">
-        <CardContent className="space-y-5 px-5 py-5">
-          <SectionHeading
-            title={t('settings:system.sections.contact.title')}
-            description={t('settings:system.sections.contact.description')}
-          />
-          <div className="grid gap-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="email">{t('settings:system.fields.email')}</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                aria-invalid={!!errors.email || undefined}
-                className="font-mono tabular-nums sm:max-w-md"
-                {...register('email')}
-              />
-              {errors.email?.message && (
-                <p className="text-xs text-destructive">{t(errors.email.message)}</p>
-              )}
-            </div>
-
-            <Controller
-              control={control}
-              name="phone_numbers"
-              render={({ field, fieldState }) => (
-                <div className="space-y-1.5">
-                  <Label>{t('settings:system.fields.phone_numbers')}</Label>
-                  <PhoneNumberListField
-                    value={phoneNumbers}
-                    onChange={(next: PhoneEntry[]) => {
-                      field.onChange(next)
-                      setValue('phone_numbers', next, { shouldDirty: true })
-                    }}
-                    formError={
-                      fieldState.error?.message ? t(fieldState.error.message) : undefined
-                    }
-                    errors={mapArrayErrors(errors.phone_numbers, t)}
-                    disabled={isSaving}
-                  />
-                </div>
-              )}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">
+            {t('settings:system.sections.contact.title')}
+          </CardTitle>
+          <CardDescription>
+            {t('settings:system.sections.contact.description')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="email">{t('settings:system.fields.email')}</Label>
+            <Input
+              id="email"
+              type="email"
+              autoComplete="email"
+              aria-invalid={!!errors.email || undefined}
+              className="font-mono tabular-nums sm:max-w-md"
+              disabled={fieldsDisabled}
+              {...register('email')}
             />
-
-            <Controller
-              control={control}
-              name="whatsapp_numbers"
-              render={({ field, fieldState }) => (
-                <div className="space-y-1.5">
-                  <Label>{t('settings:system.fields.whatsapp_numbers')}</Label>
-                  <PhoneNumberListField
-                    value={whatsappNumbers}
-                    onChange={(next: PhoneEntry[]) => {
-                      field.onChange(next)
-                      setValue('whatsapp_numbers', next, { shouldDirty: true })
-                    }}
-                    formError={
-                      fieldState.error?.message ? t(fieldState.error.message) : undefined
-                    }
-                    errors={mapArrayErrors(errors.whatsapp_numbers, t)}
-                    disabled={isSaving}
-                  />
-                </div>
-              )}
-            />
+            {errors.email?.message && (
+              <p className="text-xs text-destructive">{t(errors.email.message)}</p>
+            )}
           </div>
+
+          <Controller
+            control={control}
+            name="phone_numbers"
+            render={({ field, fieldState }) => (
+              <div className="space-y-1.5">
+                <Label>{t('settings:system.fields.phone_numbers')}</Label>
+                <PhoneNumberListField
+                  value={phoneNumbers}
+                  onChange={(next: PhoneEntry[]) => {
+                    field.onChange(next)
+                    setValue('phone_numbers', next, { shouldDirty: true })
+                  }}
+                  formError={
+                    fieldState.error?.message ? t(fieldState.error.message) : undefined
+                  }
+                  errors={mapArrayErrors(errors.phone_numbers, t)}
+                  disabled={fieldsDisabled}
+                />
+              </div>
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="whatsapp_numbers"
+            render={({ field, fieldState }) => (
+              <div className="space-y-1.5">
+                <Label>{t('settings:system.fields.whatsapp_numbers')}</Label>
+                <PhoneNumberListField
+                  value={whatsappNumbers}
+                  onChange={(next: PhoneEntry[]) => {
+                    field.onChange(next)
+                    setValue('whatsapp_numbers', next, { shouldDirty: true })
+                  }}
+                  formError={
+                    fieldState.error?.message ? t(fieldState.error.message) : undefined
+                  }
+                  errors={mapArrayErrors(errors.whatsapp_numbers, t)}
+                  disabled={fieldsDisabled}
+                />
+              </div>
+            )}
+          />
         </CardContent>
       </Card>
 
-      {/* Social media */}
-      <Card className="gap-0 py-0">
-        <CardContent className="space-y-5 px-5 py-5">
-          <SectionHeading
-            title={t('settings:system.sections.social.title')}
-            description={t('settings:system.sections.social.description')}
-          />
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">
+            {t('settings:system.sections.social.title')}
+          </CardTitle>
+          <CardDescription>
+            {t('settings:system.sections.social.description')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           <div className="grid gap-4 sm:grid-cols-2">
             {SOCIAL_FIELDS.map((key) => {
               const error = errors.social_media?.[key]?.message
+              const Icon = SOCIAL_ICONS[key] ?? Link
               return (
                 <div key={key} className="space-y-1.5">
                   <Label htmlFor={`social_${key}`}>
                     {t(`settings:system.fields.${key}`)}
                   </Label>
                   <div className="relative">
-                    <Globe
+                    <Icon
                       className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
                       aria-hidden
                     />
@@ -365,9 +444,11 @@ export function SystemSettingsPage() {
                       id={`social_${key}`}
                       type="url"
                       inputMode="url"
+                      dir="ltr"
                       placeholder="https://…"
                       aria-invalid={!!error || undefined}
                       className="ps-9"
+                      disabled={fieldsDisabled}
                       {...register(`social_media.${key}` as const)}
                     />
                   </div>
@@ -381,28 +462,48 @@ export function SystemSettingsPage() {
         </CardContent>
       </Card>
 
-      {/* Sticky footer */}
-      <div className="sticky bottom-0 z-(--z-sticky) -mx-1 flex flex-wrap items-center justify-end gap-2 rounded-xl border border-border bg-card px-4 py-3 shadow-rest">
-        {isDirty && (
-          <span className="me-auto text-xs text-muted-foreground">
-            {t('settings:system.actions.unsaved')}
-          </span>
+      <div
+        className="sticky bottom-0 z-(--z-sticky) flex flex-wrap items-center justify-end gap-2 rounded-xl border border-border bg-card px-4 py-3 shadow-rest"
+        role="region"
+        aria-label={t('settings:system.actions.aria')}
+      >
+        {!canUpdate ? (
+          <p className="me-auto text-xs text-muted-foreground">
+            {t('settings:system.read_only_hint')}
+          </p>
+        ) : (
+          <>
+            {isDirty && (
+              <p
+                className="me-auto text-xs text-muted-foreground"
+                aria-live="polite"
+              >
+                {t('settings:system.actions.unsaved')}
+              </p>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={!isDirty || isSaving}
+              onClick={() => reset(toDefaults(settings))}
+            >
+              {t('settings:system.actions.reset')}
+            </Button>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={!isDirty || !isValid || isSaving}
+            >
+              {isSaving && (
+                <Loader2 className="size-4 motion-safe:animate-spin" aria-hidden />
+              )}
+              {isSaving
+                ? t('settings:system.actions.saving')
+                : t('settings:system.actions.save')}
+            </Button>
+          </>
         )}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={!isDirty || isSaving}
-          onClick={() => settings && reset(toDefaults(settings))}
-        >
-          {t('settings:system.actions.reset')}
-        </Button>
-        <Can permission={PERMISSIONS.settings.update}>
-          <Button type="submit" size="sm" disabled={!isDirty || !isValid || isSaving || !canUpdate}>
-            {isSaving && <Loader2 className="size-4 motion-safe:animate-spin" aria-hidden />}
-            {isSaving ? t('settings:system.actions.saving') : t('settings:system.actions.save')}
-          </Button>
-        </Can>
       </div>
     </form>
   )
@@ -411,15 +512,6 @@ export function SystemSettingsPage() {
 /* ------------------------------------------------------------------ */
 /*  Sub-components                                                     */
 /* ------------------------------------------------------------------ */
-
-function SectionHeading({ title, description }: { title: string; description: string }) {
-  return (
-    <div className="border-b border-border pb-3">
-      <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-      <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
-    </div>
-  )
-}
 
 interface NumberFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   id: string
@@ -452,7 +544,7 @@ function NumberField({ id, label, hint, error, suffix, ...inputProps }: NumberFi
           </span>
         )}
       </div>
-      {hint && !error && <p className="text-[11px] text-muted-foreground">{hint}</p>}
+      {hint && !error && <p className="text-xs leading-relaxed text-muted-foreground">{hint}</p>}
       {error && <p className="text-xs text-destructive">{t(error)}</p>}
     </div>
   )
