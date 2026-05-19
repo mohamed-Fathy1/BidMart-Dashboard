@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useResourceMutation } from '@/lib/use-resource-mutation'
-import { Loader2, Save, Clock, Hash, Code2, Eye } from 'lucide-react'
+import { Loader2, Save, Clock, Hash, Code2, Eye, Pencil } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
@@ -10,9 +10,13 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { PageHeader } from '@/components/shared/page-header'
 import { Can } from '@/components/permissions/can'
-import { PERMISSIONS } from '@/lib/permissions'
+import { PERMISSIONS, usePermission } from '@/lib/permissions'
 import { format } from '@/lib/format'
 import { cn } from '@/lib/utils'
+import {
+  HtmlRichTextEditor,
+  type HtmlRichTextEditorHandle,
+} from '@/components/rich-text/html-rich-text-editor'
 import {
   getGeneralInfo,
   updateGeneralInfo,
@@ -84,7 +88,15 @@ function useUpdateContentMutation(type: ContentType) {
 /*  View-mode toggle                                                   */
 /* ------------------------------------------------------------------ */
 
-type ViewMode = 'code' | 'preview'
+type ViewMode = 'editor' | 'code' | 'preview'
+
+const VIEW_MODES: ViewMode[] = ['editor', 'code', 'preview']
+
+const VIEW_MODE_ICONS = {
+  editor: Pencil,
+  code: Code2,
+  preview: Eye,
+} as const
 
 function ViewToggle({
   value,
@@ -95,23 +107,28 @@ function ViewToggle({
 }) {
   const { t } = useTranslation()
   return (
-    <div className="inline-flex items-center rounded-md border border-border bg-muted/60 p-0.5">
-      {(['code', 'preview'] as const).map((mode) => (
-        <button
-          key={mode}
-          type="button"
-          onClick={() => onChange(mode)}
-          className={cn(
-            'inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium transition-[background-color,color] duration-(--duration-hover)',
-            value === mode
-              ? 'bg-card text-foreground shadow-rest'
-              : 'text-muted-foreground hover:text-foreground',
-          )}
-        >
-          {mode === 'code' ? <Code2 className="size-3" /> : <Eye className="size-3" />}
-          {t(`settings:content.view_toggle.${mode}`)}
-        </button>
-      ))}
+    <div
+      className="inline-flex items-center rounded-md border border-border bg-muted/60 p-0.5"
+    >
+      {VIEW_MODES.map((mode) => {
+        const Icon = VIEW_MODE_ICONS[mode]
+        return (
+          <button
+            key={mode}
+            type="button"
+            onClick={() => onChange(mode)}
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium transition-[background-color,color] duration-(--duration-hover)',
+              value === mode
+                ? 'bg-card text-foreground shadow-rest'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
+          >
+            <Icon className="size-3" />
+            {t(`settings:content.view_toggle.${mode}`)}
+          </button>
+        )
+      })}
     </div>
   )
 }
@@ -125,26 +142,35 @@ function EditorColumn({
   value,
   placeholder,
   dir = 'ltr',
+  disabled = false,
   onChange,
 }: {
   label: string
   value: string
   placeholder: string
   dir?: 'ltr' | 'rtl'
+  disabled?: boolean
   onChange: (v: string) => void
 }) {
-  const [view, setView] = useState<ViewMode>('code')
-  // debounced preview value — updates 350 ms after the user stops typing
+  const [view, setView] = useState<ViewMode>('editor')
   const [previewHtml, setPreviewHtml] = useState(value)
   const timerRef = useRef<ReturnType<typeof setTimeout>>(null)
+  const richTextRef = useRef<HtmlRichTextEditorHandle>(null)
+
+  function handleViewChange(next: ViewMode) {
+    if (view === 'editor' && richTextRef.current) {
+      const html = richTextRef.current.getHtml()
+      if (html !== value) onChange(html)
+    }
+    setView(next)
+  }
 
   useEffect(() => {
-    // when view switches to preview, sync immediately
     if (view === 'preview') {
       setPreviewHtml(value)
       return
     }
-    // while in code view, debounce so iframe doesn't re-render every keystroke
+    if (view === 'editor') return
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => setPreviewHtml(value), 350)
     return () => {
@@ -152,7 +178,6 @@ function EditorColumn({
     }
   }, [value, view])
 
-  // reset preview when external data reloads (e.g. after save)
   useEffect(() => {
     setPreviewHtml(value)
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -162,15 +187,25 @@ function EditorColumn({
     <div className="flex min-w-0 flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
         <Label className="text-sm font-medium">{label}</Label>
-        <ViewToggle value={view} onChange={setView} />
+        <ViewToggle value={view} onChange={handleViewChange} />
       </div>
 
-      {view === 'code' ? (
+      {view === 'editor' ? (
+        <HtmlRichTextEditor
+          value={value}
+          onChange={onChange}
+          dir={dir}
+          placeholder={placeholder}
+          disabled={disabled}
+          editorRef={richTextRef}
+        />
+      ) : view === 'code' ? (
         <Textarea
           dir={dir}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
+          disabled={disabled}
           className="min-h-[420px] resize-y font-mono text-xs leading-relaxed"
           spellCheck={false}
         />
@@ -180,8 +215,7 @@ function EditorColumn({
             srcDoc={buildSrcdoc(previewHtml, dir)}
             sandbox="allow-same-origin"
             title={`${label} preview`}
-            className="h-full min-h-[420px] w-full"
-            style={{ border: 'none' }}
+            className="h-full min-h-[420px] w-full border-0"
           />
         </div>
       )}
@@ -195,6 +229,7 @@ function EditorColumn({
 
 function ContentTab({ type }: { type: ContentType }) {
   const { t } = useTranslation()
+  const canUpdate = usePermission(PERMISSIONS.settings.update)
   const { data, isLoading, isError } = useContentQuery(type)
   const mutation = useUpdateContentMutation(type)
 
@@ -241,7 +276,6 @@ function ContentTab({ type }: { type: ContentType }) {
 
   return (
     <div className="space-y-5">
-      {/* Meta bar */}
       {data && (
         <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
           <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -255,13 +289,13 @@ function ContentTab({ type }: { type: ContentType }) {
         </div>
       )}
 
-      {/* Editors */}
       <div className="grid gap-4 lg:grid-cols-2">
         <EditorColumn
           label={t('settings:content.fields.content_en')}
           value={contentEn}
           placeholder={t('settings:content.fields.content_en_placeholder')}
           dir="ltr"
+          disabled={!canUpdate}
           onChange={(v) => handleChange('en', v)}
         />
         <EditorColumn
@@ -269,11 +303,11 @@ function ContentTab({ type }: { type: ContentType }) {
           value={contentAr}
           placeholder={t('settings:content.fields.content_ar_placeholder')}
           dir="rtl"
+          disabled={!canUpdate}
           onChange={(v) => handleChange('ar', v)}
         />
       </div>
 
-      {/* Footer */}
       <div className="flex items-center justify-between border-t border-border pt-4">
         <p
           className={cn(

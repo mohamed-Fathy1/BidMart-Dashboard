@@ -80,7 +80,7 @@
   "content": {
     "title": "Content",
     "description": "Manage the static pages shown to users — privacy policy, terms & conditions, and about us.",
-    "html_hint": "Each field accepts HTML. Changes are versioned — every save increments the version counter.",
+    "html_hint": "Format content in the editor. Code view is available for advanced HTML edits. Every save increments the version counter.",
     "meta": {
       "version": "Version {{v}}",
       "updated_at": "Last saved {{date}}"
@@ -92,13 +92,28 @@
     },
     "fields": {
       "content_en": "English",
-      "content_en_placeholder": "<p>Enter HTML content in English…</p>",
+      "content_en_placeholder": "Write content in English…",
       "content_ar": "Arabic",
-      "content_ar_placeholder": "<p>أدخل المحتوى بتنسيق HTML بالعربية…</p>"
+      "content_ar_placeholder": "اكتب المحتوى بالعربية…"
     },
     "view_toggle": {
+      "editor": "Editor",
       "code": "Code",
       "preview": "Preview"
+    },
+    "toolbar": {
+      "label": "Formatting toolbar",
+      "bold": "Bold",
+      "italic": "Italic",
+      "heading2": "Heading 2",
+      "heading3": "Heading 3",
+      "bullet_list": "Bullet list",
+      "ordered_list": "Numbered list",
+      "blockquote": "Quote",
+      "link": "Link",
+      "link_prompt": "Enter URL (leave empty to remove link)",
+      "undo": "Undo",
+      "redo": "Redo"
     },
     "actions": {
       "save": "Save",

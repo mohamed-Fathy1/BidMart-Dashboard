@@ -80,7 +80,7 @@
   "content": {
     "title": "المحتوى",
     "description": "إدارة الصفحات الثابتة التي تظهر للمستخدمين — سياسة الخصوصية والشروط وعن التطبيق.",
-    "html_hint": "يقبل كل حقل تنسيق HTML. كل حفظ يزيد رقم الإصدار تلقائياً.",
+    "html_hint": "نسّق المحتوى في المحرر. عرض الكود متاح لتعديل HTML المتقدم. كل حفظ يزيد رقم الإصدار تلقائياً.",
     "meta": {
       "version": "الإصدار {{v}}",
       "updated_at": "آخر حفظ {{date}}"
@@ -92,13 +92,28 @@
     },
     "fields": {
       "content_en": "الإنجليزية",
-      "content_en_placeholder": "<p>أدخل المحتوى بتنسيق HTML بالإنجليزية…</p>",
+      "content_en_placeholder": "اكتب المحتوى بالإنجليزية…",
       "content_ar": "العربية",
-      "content_ar_placeholder": "<p>أدخل المحتوى بتنسيق HTML بالعربية…</p>"
+      "content_ar_placeholder": "اكتب المحتوى بالعربية…"
     },
     "view_toggle": {
+      "editor": "محرر",
       "code": "كود",
       "preview": "معاينة"
+    },
+    "toolbar": {
+      "label": "شريط التنسيق",
+      "bold": "عريض",
+      "italic": "مائل",
+      "heading2": "عنوان 2",
+      "heading3": "عنوان 3",
+      "bullet_list": "قائمة نقطية",
+      "ordered_list": "قائمة مرقمة",
+      "blockquote": "اقتباس",
+      "link": "رابط",
+      "link_prompt": "أدخل الرابط (اتركه فارغاً لإزالة الرابط)",
+      "undo": "تراجع",
+      "redo": "إعادة"
     },
     "actions": {
       "save": "حفظ",

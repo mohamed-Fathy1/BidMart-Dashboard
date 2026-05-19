@@ -135,3 +135,12 @@
 [role="dialog"] textarea[data-slot="textarea"]:not(:disabled) {
   background-color: color-mix(in oklch, var(--color-muted) 55%, transparent);
 }
+
+/* TipTap placeholder (Admin content editor) */
+.tiptap p.is-editor-empty:first-child::before {
+  color: var(--color-muted-foreground);
+  content: attr(data-placeholder);
+  float: inline-start;
+  height: 0;
+  pointer-events: none;
+}
