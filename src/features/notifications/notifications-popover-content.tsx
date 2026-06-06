@@ -1,102 +1,79 @@
 import { useTranslation } from 'react-i18next'
 import { Bell } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { EmptyState } from '@/components/shared/empty-state'
 import { format } from '@/lib/format'
+import { NotificationsFeed } from './notifications-feed'
 import {
-  NOTIFICATIONS,
-  type NotificationItem,
-  type NotificationKind,
-} from './notifications.mock'
+  useAdminNotificationsFirstPageQuery,
+  useAdminUnreadCountQuery,
+  useMarkNotificationReadMutation,
+} from './notifications.queries'
 
-const TINT: Record<NotificationKind, string> = {
-  alert: 'bg-destructive/10 text-destructive',
-  pending: 'bg-amber-50 text-amber-700',
-  info: 'bg-primary/10 text-primary',
+interface NotificationsPopoverContentProps {
+  onNavigate?: () => void
 }
 
-export function NotificationsPopoverContent() {
+export function NotificationsPopoverContent({ onNavigate }: NotificationsPopoverContentProps) {
   const { t } = useTranslation()
+  const listQuery = useAdminNotificationsFirstPageQuery(10)
+  const countQuery = useAdminUnreadCountQuery()
+  const markRead = useMarkNotificationReadMutation()
 
-  if (NOTIFICATIONS.length === 0) {
-    return (
-      <>
-        <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <span className="text-sm font-semibold text-foreground">
-            {t('shell:topbar.notifications')}
-          </span>
-        </div>
-        <div className="flex flex-col items-center justify-center gap-2 px-4 py-10 text-center">
-          <Bell className="h-8 w-8 text-muted-foreground/40" />
-          <p className="text-sm font-medium text-foreground">
-            {t('shell:topbar.notifications_empty')}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {t('shell:topbar.notifications_empty_hint')}
-          </p>
-        </div>
-      </>
-    )
-  }
-
-  const unread = NOTIFICATIONS.length
+  const items = listQuery.data?.data ?? []
+  const unread = countQuery.data ?? 0
+  const loading = listQuery.isLoading
 
   return (
     <div className="flex flex-col">
-      <div className="flex items-start justify-between gap-3 border-b border-border px-4 py-3">
-        <div className="min-w-0">
-          <div className="text-sm font-semibold text-foreground">
-            {t('shell:topbar.notifications')}
-          </div>
-          <div className="mt-0.5 text-xs text-muted-foreground">
-            {t('shell:notifications.summary', {
-              unread: format.number(unread),
-              today: format.number(unread),
-            })}
-          </div>
+      <Header unread={unread} />
+      {!loading && items.length === 0 ? (
+        <EmptyState
+          icon={Bell}
+          title={t('notifications:empty.title')}
+          message={t('notifications:empty.hint')}
+          className="py-10"
+        />
+      ) : (
+        <div className="max-h-[420px] overflow-y-auto">
+          <NotificationsFeed
+            items={items}
+            variant="popover"
+            isLoading={loading}
+            onMarkRead={(id) => markRead.mutate(id)}
+            markingId={markRead.isPending ? (markRead.variables ?? null) : null}
+          />
         </div>
-      </div>
-      <ul className="max-h-[420px] divide-y divide-border overflow-y-auto">
-        {NOTIFICATIONS.map((n) => (
-          <NotificationRow key={n.id} item={n} />
-        ))}
-      </ul>
-      <div className="flex gap-2 border-t border-border px-3 py-2">
-        <Button variant="outline" size="sm" className="flex-1" disabled>
-          {t('shell:notifications.mark_all_read')}
-        </Button>
-        <Button variant="ghost" size="sm" className="flex-1" disabled>
-          {t('shell:notifications.view_all')}
+      )}
+      <div className="border-t border-border p-2">
+        <Button
+          asChild
+          variant="ghost"
+          size="sm"
+          className="w-full justify-center text-foreground"
+        >
+          <Link to="/notifications" onClick={onNavigate}>
+            {t('notifications:actions.view_all')}
+          </Link>
         </Button>
       </div>
     </div>
   )
 }
 
-function NotificationRow({ item }: { item: NotificationItem }) {
+function Header({ unread }: { unread: number }) {
   const { t } = useTranslation()
-  const Icon = item.icon
   return (
-    <li className="group/notif relative flex items-start gap-3 px-4 py-3">
-      <span
-        className={cn(
-          'inline-flex size-8 shrink-0 items-center justify-center rounded-md',
-          TINT[item.kind],
-        )}
-      >
-        <Icon className="size-4" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className="text-sm leading-snug font-medium text-foreground">
-          {t(item.titleKey)}
-        </div>
-        <div className="mt-0.5 text-xs leading-snug text-muted-foreground">
-          {t(item.subtitleKey)}
-        </div>
+    <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+      <div className="text-sm font-semibold text-foreground">
+        {t('notifications:popover.title')}
       </div>
-      <span className="shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground">
-        {item.when}
-      </span>
-    </li>
+      <div className="text-xs text-muted-foreground">
+        {unread > 0
+          ? t('notifications:popover.unread_count', { count: format.number(unread) })
+          : t('notifications:popover.all_read')}
+      </div>
+    </div>
   )
 }

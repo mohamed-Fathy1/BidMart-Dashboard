@@ -25,7 +25,7 @@ import {
   useCommandPaletteHotkey,
 } from '@/components/layout/command-palette'
 import { NotificationsPopoverContent } from '@/features/notifications/notifications-popover-content'
-import { NOTIFICATIONS } from '@/features/notifications/notifications.mock'
+import { useAdminUnreadCountQuery } from '@/features/notifications/notifications.queries'
 import { BrandLogo } from '@/components/shared/brand-logo'
 import { accountInitials, cn } from '@/lib/utils'
 import { useUIStore } from '@/features/ui/ui.store'
@@ -41,6 +41,8 @@ export function Topbar() {
   const user = useAuthStore((s) => s.user)
   const logout = useLogoutMutation()
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const unreadQuery = useAdminUnreadCountQuery()
+  const unreadCount = unreadQuery.data ?? 0
 
   useCommandPaletteHotkey(() => setPaletteOpen((v) => !v))
 
@@ -116,11 +118,13 @@ export function Topbar() {
                 className="relative"
               >
                 <Bell className="h-4 w-4" />
-                {NOTIFICATIONS.length > 0 && (
+                {unreadCount > 0 && (
                   <span
                     aria-hidden="true"
-                    className="absolute top-1.5 end-1.5 size-1.5 rounded-full bg-destructive"
-                  />
+                    className="absolute top-0.5 end-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 font-mono text-[10px] leading-none font-semibold tabular-nums text-destructive-foreground ring-2 ring-sidebar-background"
+                  >
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
                 )}
               </Button>
             </PopoverTrigger>

@@ -39,25 +39,25 @@
     "reject_success": "تم رفض السحب"
   },
   "approve_dialog": {
-    "title": "الموافقة على السحب",
-    "description": "صرف {{name}} من محفظة البائع الآن. هذه العملية نهائية.",
+    "title": "الموافقة على سحب {{name}}",
+    "description": "صرف {{amount}} من محفظته الآن. هذه العملية نهائية.",
     "confirm": "موافقة"
   },
   "adjust_dialog": {
-    "title": "تعديل السحب",
-    "description": "الموافقة على مبلغ جزئي، بحد أقصى رصيد البائع المتاح.",
+    "title": "تعديل سحب {{name}}",
+    "description": "الموافقة على مبلغ جزئي، بحد أقصى الرصيد المتاح.",
     "summary_requested": "المطلوب",
     "summary_available": "المتاح",
     "amount_label": "المبلغ المعدّل",
-    "notes_label": "ملاحظات (اختياري)",
-    "notes_placeholder": "سبب التعديل",
+    "notes_label": "ملاحظة للبائع (اختياري)",
+    "notes_placeholder": "اشرح سبب التعديل",
     "confirm": "تعديل وموافقة"
   },
   "reject_dialog": {
-    "title": "رفض السحب",
+    "title": "رفض سحب {{name}}",
     "description": "رفض الطلب. لن يتغير رصيد البائع. سيرى السبب ويمكنه إعادة الإرسال.",
-    "reason_label": "السبب",
-    "reason_placeholder": "سبب رفض الطلب",
+    "reason_label": "السبب (يظهر للبائع)",
+    "reason_placeholder": "اشرح للبائع سبب الرفض",
     "confirm": "رفض"
   },
   "sections": {

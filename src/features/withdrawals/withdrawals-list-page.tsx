@@ -15,10 +15,8 @@ import {
   DataTable,
   type RowActionItem,
 } from '@/components/data-table/data-table'
-import {
-  TargetedConfirmDialog,
-  TargetedReasonDialog,
-} from '@/components/shared/targeted-confirm-dialog'
+import { ConfirmDialog } from '@/components/shared/confirm-dialog'
+import { ReasonDialog } from '@/components/shared/reason-dialog'
 import { useWithdrawalColumns } from '@/features/withdrawals/withdrawals.columns'
 import {
   useWithdrawalsQuery,
@@ -160,29 +158,46 @@ export function WithdrawalsListPage() {
         }
       />
 
-      <TargetedConfirmDialog
-        flow={approveFlow}
-        i18nPrefix="withdrawals:approve_dialog"
-        getName={(r) => format.currency(Number(r.requestedAmount))}
+      <ConfirmDialog
+        open={approveFlow.isOpen}
+        onOpenChange={(open) => !open && approveFlow.close()}
+        title={t('withdrawals:approve_dialog.title', {
+          name: approveFlow.target?.sellerName ?? '',
+        })}
+        description={t('withdrawals:approve_dialog.description', {
+          amount: approveFlow.target
+            ? format.currency(Number(approveFlow.target.requestedAmount))
+            : '',
+        })}
         confirmLabel={t('withdrawals:approve_dialog.confirm')}
-        onConfirm={(target) =>
-          approveMutation.mutate(target.id, { onSettled: approveFlow.close })
-        }
+        onConfirm={() => {
+          if (!approveFlow.target) return
+          approveMutation.mutate(approveFlow.target.id, {
+            onSettled: approveFlow.close,
+          })
+        }}
         isLoading={approveMutation.isPending}
       />
 
-      <TargetedReasonDialog
-        flow={rejectFlow}
-        i18nPrefix="withdrawals:reject_dialog"
-        getName={(r) => r.sellerName}
+      <ReasonDialog
+        open={rejectFlow.isOpen}
+        onOpenChange={(open) => !open && rejectFlow.close()}
+        title={t('withdrawals:reject_dialog.title', {
+          name: rejectFlow.target?.sellerName ?? '',
+        })}
+        description={t('withdrawals:reject_dialog.description')}
+        reasonLabel={t('withdrawals:reject_dialog.reason_label')}
+        reasonPlaceholder={t('withdrawals:reject_dialog.reason_placeholder')}
         confirmLabel={t('withdrawals:reject_dialog.confirm')}
-        onConfirm={(target, reason) =>
+        onConfirm={(reason) => {
+          if (!rejectFlow.target) return
           rejectMutation.mutate(
-            { id: target.id, payload: { reason } },
+            { id: rejectFlow.target.id, payload: { reason } },
             { onSettled: rejectFlow.close },
           )
-        }
+        }}
         isLoading={rejectMutation.isPending}
+        maxLength={500}
         variant="destructive"
       />
     </div>

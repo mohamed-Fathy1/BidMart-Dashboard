@@ -75,6 +75,9 @@ export const PERMISSIONS = {
     approve: "admin:withdrawals:approve",
     reject: "admin:withdrawals:reject",
   },
+  notifications: {
+    broadcast: "admin:notifications:broadcast",
+  },
 } as const;
 
 // For each group K, collect the union of its values; then union across all groups.

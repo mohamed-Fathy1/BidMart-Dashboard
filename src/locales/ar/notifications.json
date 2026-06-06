@@ -1,0 +1,59 @@
+{
+  "page": {
+    "title": "الإشعارات",
+    "description": "الموافقات وأحداث الإشراف وطلبات التحقق عبر السوق."
+  },
+  "filters": {
+    "search_placeholder": "ابحث في العنوان أو النص…",
+    "type_label": "النوع",
+    "type_all": "جميع الأنواع",
+    "unread_only": "غير المقروءة فقط",
+    "clear": "مسح عوامل التصفية",
+    "total_count": "{{count}} إجمالاً",
+    "type": {
+      "NEW_SELLER_APPLICATION": "طلب بائع",
+      "VERIFICATION_REQUESTED": "طلب تحقق",
+      "SETTLEMENT_REQUESTED": "طلب تسوية",
+      "CONTACT_MESSAGE_RECEIVED": "رسالة تواصل",
+      "NEW_COMPLAINT": "شكوى جديدة",
+      "COMPLAINT_MESSAGE": "رد على شكوى",
+      "ACCOUNT_DELETION_REQUESTED": "طلب حذف حساب",
+      "GENERAL": "عام"
+    }
+  },
+  "groups": {
+    "today": "اليوم",
+    "yesterday": "أمس",
+    "earlier": "أقدم"
+  },
+  "actions": {
+    "open": "فتح",
+    "mark_read": "تحديد كمقروء",
+    "view_all": "عرض كل الإشعارات"
+  },
+  "popover": {
+    "title": "الإشعارات",
+    "unread_count": "{{count}} غير مقروء",
+    "all_read": "لا توجد إشعارات جديدة",
+    "loading": "جارٍ تحميل الإشعارات…"
+  },
+  "empty": {
+    "title": "أنت على اطلاع بكل شيء.",
+    "hint": "ستظهر هنا الموافقات وأحداث الإشراف وطلبات التحقق فور حدوثها.",
+    "filtered_title": "لا توجد إشعارات تطابق عوامل التصفية.",
+    "filtered_hint": "حاول مسح عوامل التصفية أو تبديل النوع."
+  },
+  "broadcast": {
+    "button": "اختبار البث",
+    "confirm_title": "إرسال بث تجريبي؟",
+    "confirm_body": "يدفع إشعارًا تجريبيًا إلى كل أجهزة المستخدمين المسجلة. استخدمه فقط للتحقق من سلامة تسليم FCM.",
+    "confirm_action": "إرسال البث",
+    "success": "تمت إضافة البث إلى قائمة الانتظار. ستتلقى الأجهزة الإشعار قريبًا.",
+    "error": "تعذر إضافة البث إلى قائمة الانتظار. حاول مرة أخرى."
+  },
+  "errors": {
+    "list_failed": "تعذر تحميل الإشعارات.",
+    "count_failed": "تعذر تحميل عدد الإشعارات.",
+    "mark_failed": "تعذر تحديد الإشعار كمقروء."
+  }
+}

@@ -329,9 +329,9 @@ export function WithdrawalDetailPage({ id }: WithdrawalDetailPageProps) {
       <ConfirmDialog
         open={approveOpen}
         onOpenChange={setApproveOpen}
-        title={t('withdrawals:approve_dialog.title')}
+        title={t('withdrawals:approve_dialog.title', { name: detail.sellerName })}
         description={t('withdrawals:approve_dialog.description', {
-          name: format.currency(Number(detail.requestedAmount)),
+          amount: format.currency(Number(detail.requestedAmount)),
         })}
         confirmLabel={t('withdrawals:approve_dialog.confirm')}
         onConfirm={() =>
@@ -345,7 +345,7 @@ export function WithdrawalDetailPage({ id }: WithdrawalDetailPageProps) {
       <ReasonDialog
         open={rejectOpen}
         onOpenChange={setRejectOpen}
-        title={t('withdrawals:reject_dialog.title')}
+        title={t('withdrawals:reject_dialog.title', { name: detail.sellerName })}
         description={t('withdrawals:reject_dialog.description')}
         reasonLabel={t('withdrawals:reject_dialog.reason_label')}
         reasonPlaceholder={t('withdrawals:reject_dialog.reason_placeholder')}
@@ -364,7 +364,7 @@ export function WithdrawalDetailPage({ id }: WithdrawalDetailPageProps) {
       <FormDialog
         open={adjustOpen}
         onOpenChange={setAdjustOpen}
-        title={t('withdrawals:adjust_dialog.title')}
+        title={t('withdrawals:adjust_dialog.title', { name: detail.sellerName })}
         description={t('withdrawals:adjust_dialog.description')}
         isLoading={adjustMutation.isPending}
         submitLabel={t('withdrawals:adjust_dialog.confirm')}

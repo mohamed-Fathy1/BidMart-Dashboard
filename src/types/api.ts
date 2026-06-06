@@ -641,6 +641,44 @@ export interface AdminWalletTxItem {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Admin Notifications                                                */
+/* ------------------------------------------------------------------ */
+
+/** Every notification type emitted by the backend that targets admins. */
+export type NotificationType =
+  | "NEW_SELLER_APPLICATION"
+  | "VERIFICATION_REQUESTED"
+  | "SETTLEMENT_REQUESTED"
+  | "CONTACT_MESSAGE_RECEIVED"
+  | "NEW_COMPLAINT"
+  | "COMPLAINT_MESSAGE"
+  | "ACCOUNT_DELETION_REQUESTED"
+  | "GENERAL";
+
+/** Deep-link target the dashboard can open from a notification row. */
+export type NotificationActionType =
+  | "SELLER"
+  | "USER"
+  | "SUPPORT"
+  | "SETTLEMENT"
+  | "COMPLAINT";
+
+/** Row from GET /admin/notifications — dual-language; no Accept-Language. */
+export interface AdminNotification {
+  id: string;
+  type: NotificationType;
+  title_en: string;
+  title_ar: string;
+  body_en: string;
+  body_ar: string;
+  is_read: boolean;
+  action_type: NotificationActionType | null;
+  action_id: string | null;
+  image_url: string | null;
+  created_at: string;
+}
+
+/* ------------------------------------------------------------------ */
 /*  Withdrawals / Settlements (admin)                                   */
 /* ------------------------------------------------------------------ */
 

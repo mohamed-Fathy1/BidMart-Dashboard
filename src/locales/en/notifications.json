@@ -1,0 +1,59 @@
+{
+  "page": {
+    "title": "Notifications",
+    "description": "Approvals, moderation events, and verification requests across the marketplace."
+  },
+  "filters": {
+    "search_placeholder": "Search title or body…",
+    "type_label": "Type",
+    "type_all": "All types",
+    "unread_only": "Unread only",
+    "clear": "Clear filters",
+    "total_count": "{{count}} total",
+    "type": {
+      "NEW_SELLER_APPLICATION": "Seller application",
+      "VERIFICATION_REQUESTED": "Verification request",
+      "SETTLEMENT_REQUESTED": "Settlement request",
+      "CONTACT_MESSAGE_RECEIVED": "Contact message",
+      "NEW_COMPLAINT": "New complaint",
+      "COMPLAINT_MESSAGE": "Complaint reply",
+      "ACCOUNT_DELETION_REQUESTED": "Account deletion",
+      "GENERAL": "General"
+    }
+  },
+  "groups": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "earlier": "Earlier"
+  },
+  "actions": {
+    "open": "Open",
+    "mark_read": "Mark read",
+    "view_all": "View all notifications"
+  },
+  "popover": {
+    "title": "Notifications",
+    "unread_count": "{{count}} unread",
+    "all_read": "All caught up",
+    "loading": "Loading notifications…"
+  },
+  "empty": {
+    "title": "You're all caught up.",
+    "hint": "Approvals, moderation events, and verification requests will surface here once they happen.",
+    "filtered_title": "No notifications match these filters.",
+    "filtered_hint": "Try clearing filters or switching the type."
+  },
+  "broadcast": {
+    "button": "Test broadcast",
+    "confirm_title": "Send a test broadcast?",
+    "confirm_body": "Pushes a test notification to every registered user device. Use only to verify FCM delivery is healthy.",
+    "confirm_action": "Send broadcast",
+    "success": "Broadcast queued. Devices will receive it shortly.",
+    "error": "Failed to queue the broadcast. Try again."
+  },
+  "errors": {
+    "list_failed": "Failed to load notifications.",
+    "count_failed": "Failed to load notification count.",
+    "mark_failed": "Failed to mark notification as read."
+  }
+}

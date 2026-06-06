@@ -39,25 +39,25 @@
     "reject_success": "Withdrawal rejected"
   },
   "approve_dialog": {
-    "title": "Approve withdrawal",
-    "description": "Pay {{name}} from the seller's wallet now. The payout is final.",
+    "title": "Approve {{name}}'s withdrawal",
+    "description": "Pay {{amount}} from their wallet now. The payout is final.",
     "confirm": "Approve"
   },
   "adjust_dialog": {
-    "title": "Adjust withdrawal",
-    "description": "Approve a partial amount, up to the seller's available balance.",
+    "title": "Adjust {{name}}'s withdrawal",
+    "description": "Approve a partial amount, up to the available balance.",
     "summary_requested": "Requested",
     "summary_available": "Available",
     "amount_label": "Adjusted amount",
-    "notes_label": "Notes (optional)",
-    "notes_placeholder": "Reason for the adjustment",
+    "notes_label": "Note for the seller (optional)",
+    "notes_placeholder": "Explain the adjustment",
     "confirm": "Adjust & approve"
   },
   "reject_dialog": {
-    "title": "Reject withdrawal",
-    "description": "Decline this request. The seller's balance is unchanged. They'll see your reason and can re-submit.",
-    "reason_label": "Reason",
-    "reason_placeholder": "Why this request is being rejected",
+    "title": "Reject {{name}}'s withdrawal",
+    "description": "Decline this request. Their balance is unchanged. They'll see your reason and can re-submit.",
+    "reason_label": "Reason (visible to the seller)",
+    "reason_placeholder": "Tell the seller why this is being rejected",
     "confirm": "Reject"
   },
   "sections": {

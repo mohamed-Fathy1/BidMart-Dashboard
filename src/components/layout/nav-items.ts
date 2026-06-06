@@ -17,6 +17,7 @@ import {
   Wallet,
   Banknote,
   Landmark,
+  Bell,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { PERMISSIONS, type Permission } from '@/lib/permissions'
@@ -53,6 +54,7 @@ export const navSections: NavSection[] = [
     id: 'pulse',
     entries: [
       { kind: 'leaf', labelKey: 'shell:nav.overview', icon: LayoutDashboard, to: '/overview' },
+      { kind: 'leaf', labelKey: 'shell:nav.notifications', icon: Bell, to: '/notifications' },
     ],
   },
   {

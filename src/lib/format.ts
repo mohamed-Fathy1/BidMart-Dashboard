@@ -71,6 +71,31 @@ export const format = {
    * raw string. Use this helper to split sign from absolute value for
    * coloring/formatting.
    */
+  /**
+   * Short relative time ("2m", "14m", "1h", "3d", "in 5m" for future dates).
+   * Picks the largest non-zero unit. Locale-aware via `Intl.RelativeTimeFormat`
+   * with `style: 'narrow'`.
+   */
+  relative(iso: string | Date): string {
+    const d = typeof iso === 'string' ? new Date(iso) : iso
+    const diffMs = d.getTime() - Date.now()
+    const abs = Math.abs(diffMs)
+    const minute = 60_000
+    const hour = 60 * minute
+    const day = 24 * hour
+    const rtf = new Intl.RelativeTimeFormat(getLocale(), { numeric: 'auto', style: 'narrow' })
+    if (abs < minute) {
+      return rtf.format(Math.round(diffMs / 1000), 'second')
+    }
+    if (abs < hour) {
+      return rtf.format(Math.round(diffMs / minute), 'minute')
+    }
+    if (abs < day) {
+      return rtf.format(Math.round(diffMs / hour), 'hour')
+    }
+    return rtf.format(Math.round(diffMs / day), 'day')
+  },
+
   signedMoney(raw: string): { sign: '+' | '−'; absolute: string } {
     if (!raw) return { sign: '+', absolute: '0.00' }
     const first = raw.charAt(0)
