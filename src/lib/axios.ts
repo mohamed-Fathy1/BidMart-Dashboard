@@ -46,8 +46,38 @@ export function extractApiErrorMessage(error: unknown): string | undefined {
     typeof (obj.data as { message?: string }).message === 'string'
       ? (obj.data as { message: string }).message
       : undefined
+  const fromErrorObject =
+    typeof obj.error === 'object' &&
+    obj.error !== null &&
+    typeof (obj.error as { message?: string }).message === 'string'
+      ? (obj.error as { message: string }).message
+      : undefined
   const msg = typeof obj.message === 'string' ? obj.message : undefined
-  return fromData ?? msg
+  return fromData ?? fromErrorObject ?? msg
+}
+
+/**
+ * Extract `error.code` from an `{ success: false, error: { code, ... } }` body.
+ * Stable, language-independent — use this to branch UI on specific failure modes
+ * (e.g. SETTLEMENT_ALREADY_ACTIONED → re-fetch; BANK_HAS_PENDING_SETTLEMENTS →
+ * show a specific hint). Falls back to undefined for non-envelope errors.
+ */
+export function extractApiErrorCode(error: unknown): string | undefined {
+  if (!axios.isAxiosError(error)) {
+    if (error && typeof error === 'object' && 'code' in error) {
+      const code = (error as { code: unknown }).code
+      if (typeof code === 'string' && code.trim()) return code
+    }
+    return undefined
+  }
+  const raw = error.response?.data as unknown
+  if (!raw || typeof raw !== 'object') return undefined
+  const obj = raw as Record<string, unknown>
+  if (typeof obj.error === 'object' && obj.error !== null) {
+    const code = (obj.error as { code?: unknown }).code
+    if (typeof code === 'string' && code.trim()) return code
+  }
+  return undefined
 }
 
 /**
@@ -86,7 +116,12 @@ api.interceptors.response.use(
       extractApiErrorMessage(error) ??
       (axios.isAxiosError(error) ? error.message : undefined) ??
       i18n.t('common:errors.unexpected')
-    return Promise.reject({ message, status: axios.isAxiosError(error) ? error.response?.status : 500 })
+    const code = extractApiErrorCode(error)
+    return Promise.reject({
+      message,
+      code,
+      status: axios.isAxiosError(error) ? error.response?.status : 500,
+    })
   },
 )
 

@@ -1,0 +1,49 @@
+{
+  "tab_title": "Wallet",
+  "stats": {
+    "balance": "Balance",
+    "holding": "Holding",
+    "available": "Available for settlement",
+    "available_hint": "available = balance − holding"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "subtitle": "Ledger of wallet movements, newest first",
+    "columns": {
+      "reference": "Reference",
+      "type": "Type",
+      "amount": "Amount",
+      "status": "Status",
+      "notes": "Notes",
+      "created_at": "Date"
+    },
+    "filters": {
+      "type": "Type",
+      "search_placeholder": "Search by reference",
+      "date_from": "From",
+      "date_to": "To"
+    }
+  },
+  "tx_status": {
+    "COMPLETED": "Completed",
+    "PROCESSING": "Processing"
+  },
+  "tx_type": {
+    "TOP_UP": "Top-up",
+    "ORDER_PAYMENT": "Order payment",
+    "ORDER_REFUND": "Order refund",
+    "SELLER_PAYOUT": "Seller payout",
+    "REFERRAL_CREDIT": "Referral credit",
+    "ADMIN_ADJUSTMENT": "Admin adjustment"
+  },
+  "errors": {
+    "load_failed": "Could not load wallet",
+    "not_found": "Wallet not found."
+  },
+  "empty": {
+    "no_data_title": "No transactions yet",
+    "no_data_hint": "Wallet activity will appear here as it happens.",
+    "no_results_title": "No transactions match these filters",
+    "no_results_hint": "Try clearing the search or date range."
+  }
+}

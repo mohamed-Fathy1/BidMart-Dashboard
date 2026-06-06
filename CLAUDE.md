@@ -144,14 +144,15 @@
 
 ## Color Rules
 
-- Primary brand `#3660B5` (Primary500) — primary button, active nav, focus ring; exposed as `--color-primary` / `--color-ring`
-- Primary hover `#6993E8` (Primary400) — primary button hover, soft accent surfaces; exposed as `--color-primary-hover` (`bg-primary-hover`)
-- Secondary brand `#551CCA` (Secondary500) — purple accent for charts, dual-tone highlights; opt-in via `--color-brand-secondary` (`bg-brand-secondary`). Lighter variant `#884FFD` (Secondary400) via `--color-brand-secondary-hover`
+- Primary brand `#6A23FD` (purple) — primary button, active nav, focus ring, status chips; exposed as `--color-primary` / `--color-ring`
+- Primary hover `#884FFD` — primary button hover, soft accent surfaces; exposed as `--color-primary-hover` (`bg-primary-hover`)
+- Secondary brand `#4378E2` (blue) — the second stop of the brand gradient; opt-in via `--color-brand-secondary` (`bg-brand-secondary`). Lighter variant `#6993E8` via `--color-brand-secondary-hover`
+- **Brand gradient** `linear-gradient(90deg, #4378E2 → #6A23FD)` — exposed as `--gradient-primary` and the `.bg-gradient-primary` utility. **Reserved for**: hero CTAs (login submit, primary form submit on auth/empty-state surfaces), the `<BrandLogo />` mark, and the auction hero on the auth shell. **Never on** cards, surfaces, dense table UIs, dropdown items, sidebar rows, or any small repeating element. Use `variant="gradient"` on `<Button>` paired with `rounded-full` for pill CTAs that match the brand
 - Do NOT remap `--color-secondary` (neutral `#F5F5F4`) — backs the shadcn `variant="secondary"` button as a grey surface
 - Semantic success — emerald (`bg-emerald-50/500/700`, `text-emerald-600/700`) reserved for active/approved/verified/enabled states and positive deltas. Never tinted with primary
 - Warm stone neutrals for everything else — canvas `#F5F3F0`, card `#FFFFFF`, sidebar `#FAFAF8`
 - Destructive `#DC2626` — block/reject/delete only
-- No gradients. No tertiary brand accents beyond the blue/purple pair above
+- No tertiary brand accents beyond the blue/purple pair above
 - Borders do structure, not shadows — universally `1px solid var(--color-border)`
 
 ## Shadow Rules
@@ -281,7 +282,7 @@ Duration/easing pairings:
 
 ## Anti-Slop Rules
 
-- No gradients on buttons or cards
+- No gradients on cards or repeating UI; the brand `--gradient-primary` is the only allowed gradient and lives on hero CTAs, the `<BrandLogo />`, and the auth hero only (see Color Rules)
 - No emoji in UI chrome
 - No glass-morphism / backdrop blur panels
 - No centered-hero-with-three-feature-cards layouts

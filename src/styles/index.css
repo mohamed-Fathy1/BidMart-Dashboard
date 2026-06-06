@@ -129,6 +129,16 @@
   }
 }
 
+/* Brand gradient utility — hero CTAs and the brand mark only. Dense UI uses
+   solid `bg-primary`. See CLAUDE.md Color Rules. */
+.bg-gradient-primary {
+  background-image: var(--gradient-primary);
+  background-size: 100% 100%;
+}
+.bg-gradient-primary:hover {
+  background-image: var(--gradient-primary-hover);
+}
+
 /* Inputs sit inset against the white dialog surface, not transparent.
    Specificity (0,2,1) beats `bg-transparent` (0,1,0) without !important. */
 [role="dialog"] input[data-slot="input"]:not(:disabled),

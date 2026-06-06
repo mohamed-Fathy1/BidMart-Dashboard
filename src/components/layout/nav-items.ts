@@ -14,6 +14,9 @@ import {
   Tags,
   SlidersHorizontal,
   FileText,
+  Wallet,
+  Banknote,
+  Landmark,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { PERMISSIONS, type Permission } from '@/lib/permissions'
@@ -83,6 +86,29 @@ export const navSections: NavSection[] = [
         ],
       },
       { kind: 'leaf', labelKey: 'shell:nav.countries', icon: Globe, to: '/countries', permission: PERMISSIONS.countries.view },
+      {
+        kind: 'group',
+        labelKey: 'shell:nav.finance',
+        icon: Wallet,
+        defaultTo: '/withdrawals',
+        matchPath: '/withdrawals',
+        children: [
+          {
+            kind: 'leaf',
+            labelKey: 'shell:nav.withdrawals',
+            icon: Banknote,
+            to: '/withdrawals',
+            permission: PERMISSIONS.withdrawals.view,
+          },
+          {
+            kind: 'leaf',
+            labelKey: 'shell:nav.banks',
+            icon: Landmark,
+            to: '/banks',
+            permission: PERMISSIONS.withdrawals.view,
+          },
+        ],
+      },
     ],
   },
   {

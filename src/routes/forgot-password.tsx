@@ -117,6 +117,7 @@ function EmailStep({ isPending, onSubmit }: EmailStepProps) {
             autoComplete="email"
             placeholder="you@bidmart.com"
             aria-invalid={!!form.formState.errors.email}
+            className="bg-card"
             {...form.register("email")}
           />
           {form.formState.errors.email?.message && (
@@ -126,7 +127,13 @@ function EmailStep({ isPending, onSubmit }: EmailStepProps) {
           )}
         </div>
 
-        <Button type="submit" className="w-full" disabled={isPending}>
+        <Button
+          type="submit"
+          variant="gradient"
+          size="lg"
+          className="w-full rounded-full"
+          disabled={isPending}
+        >
           {isPending
             ? t("common:states.loading")
             : t("common:auth.send_code")}
@@ -201,7 +208,7 @@ function ResetStep({
             inputMode="numeric"
             maxLength={6}
             placeholder="000000"
-            className="text-center font-mono text-lg tracking-[0.5em]"
+            className="bg-card text-center font-mono text-lg tracking-[0.5em]"
             aria-invalid={!!form.formState.errors.otp}
             {...form.register("otp")}
           />
@@ -220,6 +227,7 @@ function ResetStep({
             id="fp-new-pass"
             autoComplete="new-password"
             aria-invalid={!!form.formState.errors.newPassword}
+            className="bg-card"
             {...form.register("newPassword")}
           />
           {form.formState.errors.newPassword?.message && (
@@ -237,6 +245,7 @@ function ResetStep({
             id="fp-confirm-pass"
             autoComplete="new-password"
             aria-invalid={!!form.formState.errors.confirmPassword}
+            className="bg-card"
             {...form.register("confirmPassword")}
           />
           {form.formState.errors.confirmPassword?.message && (
@@ -246,7 +255,13 @@ function ResetStep({
           )}
         </div>
 
-        <Button type="submit" className="w-full" disabled={isPending}>
+        <Button
+          type="submit"
+          variant="gradient"
+          size="lg"
+          className="w-full rounded-full"
+          disabled={isPending}
+        >
           {isPending
             ? t("common:states.loading")
             : t("common:auth.reset_password_submit")}

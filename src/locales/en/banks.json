@@ -1,0 +1,62 @@
+{
+  "page_title": "Banks",
+  "page_description": "Manage banks sellers can pick when withdrawing",
+  "meta": {
+    "total_banks": "{{count}} banks"
+  },
+  "columns": {
+    "bank": "Bank",
+    "country": "Country",
+    "status": "Status",
+    "created_at": "Created At"
+  },
+  "filters": {
+    "search_placeholder": "Search by name (EN or AR)",
+    "status": "Status",
+    "country": "Country"
+  },
+  "status_options": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "actions": {
+    "create": "Add Bank",
+    "edit": "Edit",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "create_success": "Bank created",
+    "update_success": "Bank updated",
+    "toggle_success": "Bank status updated"
+  },
+  "errors": {
+    "create_failed": "Could not create bank",
+    "update_failed": "Could not update bank",
+    "toggle_failed": "Could not update bank status",
+    "name_en_required": "Enter the English name.",
+    "name_ar_required": "Enter the Arabic name.",
+    "name_min": "Name must be at least 2 characters.",
+    "name_max": "Name cannot exceed 100 characters.",
+    "country_required": "Pick a country.",
+    "name_duplicate": "A bank with this name already exists.",
+    "has_pending": "This bank has pending settlement requests and cannot be deactivated.",
+    "not_found": "Bank not found."
+  },
+  "form": {
+    "dialog_description": "Sellers pick this bank when submitting a withdrawal.",
+    "create_title": "Add Bank",
+    "edit_title": "Edit Bank",
+    "name_en": "Name (English)",
+    "name_en_placeholder": "Al Rajhi Bank",
+    "name_ar": "Name (Arabic)",
+    "name_ar_placeholder": "مصرف الراجحي",
+    "country": "Country",
+    "country_placeholder": "Select a country",
+    "country_hint": "Only sellers in this country will see this bank as a withdrawal option."
+  },
+  "empty": {
+    "no_data_title": "No banks yet",
+    "no_data_hint": "Add the first bank so sellers can pick it when withdrawing.",
+    "no_results_title": "No banks match these filters",
+    "no_results_hint": "Try clearing the search or status filter."
+  }
+}

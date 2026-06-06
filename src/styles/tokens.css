@@ -5,7 +5,7 @@
   --color-card-foreground: #1C1917;
   --color-border: #E7E5E4;
   --color-input: #E7E5E4;
-  --color-ring: #3660B5;
+  --color-ring: #6A23FD;
 
   /* Background & foreground */
   --color-background: #F5F3F0;
@@ -14,11 +14,17 @@
   --color-muted-foreground: #78716C;
 
   /* Accent */
-  --color-primary: #3660B5;
+  --color-primary: #6A23FD;
   --color-primary-foreground: #FFFFFF;
-  --color-primary-hover: #6993E8;
-  --color-brand-secondary: #551CCA;
-  --color-brand-secondary-hover: #884FFD;
+  --color-primary-hover: #884FFD;
+  --color-brand-secondary: #4378E2;
+  --color-brand-secondary-hover: #6993E8;
+
+  /* Brand gradient — reserved for hero CTAs and the brand mark. Direction
+     bridges the blue stop (start) into the purple stop (end); reads coherently
+     in both LTR and RTL because both stops live in the same family. */
+  --gradient-primary: linear-gradient(90deg, #4378E2 0%, #6A23FD 100%);
+  --gradient-primary-hover: linear-gradient(90deg, #5288F0 0%, #884FFD 100%);
   --color-secondary: #F5F5F4;
   --color-secondary-foreground: #1C1917;
   --color-accent: #F5F5F4;
@@ -105,9 +111,9 @@
   --sidebar-border: #E7E5E4;
   --sidebar-accent: #F5F5F4;
   --sidebar-accent-foreground: #1C1917;
-  --sidebar-primary: #3660B5;
+  --sidebar-primary: #6A23FD;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-ring: #3660B5;
+  --sidebar-ring: #6A23FD;
 
   /* ---------- Semantic type tokens (rem — scales with user font-size) ---------- */
 

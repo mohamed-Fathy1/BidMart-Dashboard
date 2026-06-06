@@ -67,6 +67,14 @@ export const PERMISSIONS = {
     view: "admin:settings:view",
     update: "admin:settings:update",
   },
+  wallets: {
+    view: "admin:wallets:view",
+  },
+  withdrawals: {
+    view: "admin:withdrawals:view",
+    approve: "admin:withdrawals:approve",
+    reject: "admin:withdrawals:reject",
+  },
 } as const;
 
 // For each group K, collect the union of its values; then union across all groups.

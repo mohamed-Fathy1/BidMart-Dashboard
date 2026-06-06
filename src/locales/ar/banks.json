@@ -1,0 +1,62 @@
+{
+  "page_title": "البنوك",
+  "page_description": "إدارة البنوك التي يمكن للبائعين اختيارها عند السحب",
+  "meta": {
+    "total_banks": "{{count}} بنك"
+  },
+  "columns": {
+    "bank": "البنك",
+    "country": "الدولة",
+    "status": "الحالة",
+    "created_at": "تاريخ الإنشاء"
+  },
+  "filters": {
+    "search_placeholder": "بحث بالاسم (إنجليزي أو عربي)",
+    "status": "الحالة",
+    "country": "الدولة"
+  },
+  "status_options": {
+    "active": "نشط",
+    "inactive": "غير نشط"
+  },
+  "actions": {
+    "create": "إضافة بنك",
+    "edit": "تعديل",
+    "activate": "تفعيل",
+    "deactivate": "تعطيل",
+    "create_success": "تم إنشاء البنك",
+    "update_success": "تم تحديث البنك",
+    "toggle_success": "تم تحديث حالة البنك"
+  },
+  "errors": {
+    "create_failed": "تعذّر إنشاء البنك",
+    "update_failed": "تعذّر تحديث البنك",
+    "toggle_failed": "تعذّر تحديث حالة البنك",
+    "name_en_required": "أدخل الاسم بالإنجليزية.",
+    "name_ar_required": "أدخل الاسم بالعربية.",
+    "name_min": "يجب ألا يقل الاسم عن حرفين.",
+    "name_max": "لا يمكن أن يتجاوز الاسم 100 حرف.",
+    "country_required": "اختر دولة.",
+    "name_duplicate": "يوجد بنك آخر بنفس الاسم.",
+    "has_pending": "لا يمكن تعطيل هذا البنك لوجود طلبات سحب معلّقة عليه.",
+    "not_found": "البنك غير موجود."
+  },
+  "form": {
+    "dialog_description": "يختار البائعون هذا البنك عند تقديم طلب سحب.",
+    "create_title": "إضافة بنك",
+    "edit_title": "تعديل البنك",
+    "name_en": "الاسم (إنجليزي)",
+    "name_en_placeholder": "Al Rajhi Bank",
+    "name_ar": "الاسم (عربي)",
+    "name_ar_placeholder": "مصرف الراجحي",
+    "country": "الدولة",
+    "country_placeholder": "اختر دولة",
+    "country_hint": "البائعون في هذه الدولة فقط سيرون هذا البنك كخيار للسحب."
+  },
+  "empty": {
+    "no_data_title": "لا توجد بنوك بعد",
+    "no_data_hint": "أضف أول بنك ليتمكن البائعون من اختياره عند السحب.",
+    "no_results_title": "لا توجد بنوك مطابقة للتصفية",
+    "no_results_hint": "حاول مسح البحث أو حالة التصفية."
+  }
+}

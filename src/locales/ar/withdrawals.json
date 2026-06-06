@@ -1,0 +1,109 @@
+{
+  "page_title": "عمليات السحب",
+  "page_description": "مراجعة طلبات سحب البائعين",
+  "detail_title": "طلب سحب",
+  "meta": {
+    "total_requests": "{{count}} طلب"
+  },
+  "columns": {
+    "seller": "البائع",
+    "amount": "المطلوب",
+    "status": "الحالة",
+    "submitted_at": "تاريخ التقديم",
+    "actioned_at": "تاريخ الإجراء"
+  },
+  "filters": {
+    "search_placeholder": "بحث باسم البائع أو الجوال",
+    "status": "الحالة",
+    "date_from": "من",
+    "date_to": "إلى"
+  },
+  "status_options": {
+    "NEW": "جديد",
+    "APPROVED": "تمت الموافقة",
+    "ADJUSTED": "تم التعديل",
+    "REJECTED": "مرفوض"
+  },
+  "actions": {
+    "view": "عرض التفاصيل",
+    "approve": "موافقة",
+    "adjust": "تعديل",
+    "reject": "رفض",
+    "reveal_iban": "إظهار الآيبان",
+    "hide_iban": "إخفاء الآيبان",
+    "copy_iban": "نسخ الآيبان",
+    "iban_copied": "تم نسخ الآيبان",
+    "back": "العودة للقائمة",
+    "approve_success": "تمت الموافقة على السحب",
+    "adjust_success": "تم تعديل السحب",
+    "reject_success": "تم رفض السحب"
+  },
+  "approve_dialog": {
+    "title": "الموافقة على السحب",
+    "description": "صرف {{name}} من محفظة البائع الآن. هذه العملية نهائية.",
+    "confirm": "موافقة"
+  },
+  "adjust_dialog": {
+    "title": "تعديل السحب",
+    "description": "الموافقة على مبلغ جزئي، بحد أقصى رصيد البائع المتاح.",
+    "summary_requested": "المطلوب",
+    "summary_available": "المتاح",
+    "amount_label": "المبلغ المعدّل",
+    "notes_label": "ملاحظات (اختياري)",
+    "notes_placeholder": "سبب التعديل",
+    "confirm": "تعديل وموافقة"
+  },
+  "reject_dialog": {
+    "title": "رفض السحب",
+    "description": "رفض الطلب. لن يتغير رصيد البائع. سيرى السبب ويمكنه إعادة الإرسال.",
+    "reason_label": "السبب",
+    "reason_placeholder": "سبب رفض الطلب",
+    "confirm": "رفض"
+  },
+  "sections": {
+    "snapshot": "اللقطة عند التقديم",
+    "destination": "البنك والوجهة",
+    "decision": "القرار",
+    "seller": "البائع"
+  },
+  "fields": {
+    "requested_amount": "المبلغ المطلوب",
+    "adjusted_amount": "المبلغ المعدّل",
+    "balance_snapshot": "الرصيد المتاح",
+    "holding_snapshot": "الرصيد المحجوز",
+    "full_balance_snapshot": "الرصيد الكامل",
+    "bank": "البنك",
+    "iban": "الآيبان",
+    "actioned_by": "الإجراء بواسطة",
+    "actioned_at": "تاريخ الإجراء",
+    "submitted_at": "تاريخ التقديم",
+    "admin_notes": "ملاحظات",
+    "seller_name": "الاسم",
+    "seller_phone": "الجوال",
+    "seller_email": "البريد"
+  },
+  "iban_hint": "إظهار الآيبان الكامل يتم تسجيله في سجل التدقيق.",
+  "iban_revealed_hint": "الآيبان الكامل ظاهر — آخر إظهار {{when}}.",
+  "errors": {
+    "approve_failed": "تعذّرت الموافقة",
+    "adjust_failed": "تعذّر التعديل",
+    "reject_failed": "تعذّر الرفض",
+    "reveal_failed": "تعذّر إظهار الآيبان",
+    "already_actioned": "تمت معالجة هذا الطلب مسبقاً.",
+    "exceeds_available": "المبلغ يتجاوز الرصيد المتاح.",
+    "below_min": "المبلغ أقل من الحد الأدنى للسحب.",
+    "not_found": "طلب السحب غير موجود.",
+    "reason_required": "أدخل السبب.",
+    "reason_max": "لا يمكن أن يتجاوز السبب 500 حرف.",
+    "amount_required": "أدخل المبلغ.",
+    "amount_positive": "يجب أن يكون المبلغ أكبر من صفر.",
+    "amount_two_decimals": "يجب ألا يتجاوز المبلغ منزلتين عشريتين.",
+    "notes_max": "لا يمكن أن تتجاوز الملاحظات 500 حرف."
+  },
+  "empty": {
+    "no_data_title": "لا توجد طلبات سحب",
+    "no_data_hint": "ستظهر هنا الطلبات المعلّقة والمعالجة.",
+    "no_results_title": "لا توجد طلبات مطابقة للتصفية",
+    "no_results_hint": "حاول مسح البحث أو حالة التصفية."
+  }
+}

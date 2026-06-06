@@ -1,0 +1,49 @@
+{
+  "tab_title": "المحفظة",
+  "stats": {
+    "balance": "الرصيد",
+    "holding": "الرصيد المحجوز",
+    "available": "المتاح للسحب",
+    "available_hint": "المتاح = الرصيد − المحجوز"
+  },
+  "transactions": {
+    "title": "العمليات",
+    "subtitle": "سجل حركات المحفظة، الأحدث أولاً",
+    "columns": {
+      "reference": "المرجع",
+      "type": "النوع",
+      "amount": "المبلغ",
+      "status": "الحالة",
+      "notes": "ملاحظات",
+      "created_at": "التاريخ"
+    },
+    "filters": {
+      "type": "النوع",
+      "search_placeholder": "بحث بالمرجع",
+      "date_from": "من",
+      "date_to": "إلى"
+    }
+  },
+  "tx_status": {
+    "COMPLETED": "مكتملة",
+    "PROCESSING": "قيد المعالجة"
+  },
+  "tx_type": {
+    "TOP_UP": "شحن",
+    "ORDER_PAYMENT": "دفع طلب",
+    "ORDER_REFUND": "استرداد طلب",
+    "SELLER_PAYOUT": "تحويل للبائع",
+    "REFERRAL_CREDIT": "رصيد إحالة",
+    "ADMIN_ADJUSTMENT": "تسوية إدارية"
+  },
+  "errors": {
+    "load_failed": "تعذّر تحميل المحفظة",
+    "not_found": "المحفظة غير موجودة."
+  },
+  "empty": {
+    "no_data_title": "لا توجد عمليات بعد",
+    "no_data_hint": "ستظهر هنا حركات المحفظة فور حدوثها.",
+    "no_results_title": "لا توجد عمليات مطابقة للتصفية",
+    "no_results_hint": "حاول مسح البحث أو نطاق التاريخ."
+  }
+}

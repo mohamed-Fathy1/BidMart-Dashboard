@@ -69,6 +69,7 @@ function LoginPage() {
             autoComplete="email"
             placeholder="you@bidmart.com"
             aria-invalid={!!errors.email}
+            className="bg-card"
             {...register("email")}
           />
           {errors.email?.message && (
@@ -95,6 +96,7 @@ function LoginPage() {
             autoComplete="current-password"
             placeholder={t("common:auth.password_placeholder")}
             aria-invalid={!!errors.password}
+            className="bg-card"
             {...register("password")}
           />
           {errors.password?.message && (
@@ -133,7 +135,13 @@ function LoginPage() {
           </div>
         )}
 
-        <Button type="submit" className="w-full" disabled={login.isPending}>
+        <Button
+          type="submit"
+          variant="gradient"
+          size="lg"
+          className="w-full rounded-full"
+          disabled={login.isPending}
+        >
           {login.isPending
             ? t("common:states.loading")
             : t("common:auth.sign_in")}

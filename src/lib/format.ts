@@ -62,4 +62,21 @@ export const format = {
     })
     return fmt.formatRange(f, t)
   },
+
+  /**
+   * Parse a pre-formatted signed money string from the wallet ledger
+   * (`amount` field). Server uses a leading `+` for credits and the
+   * typographic minus `−` (U+2212) for debits — NOT the ASCII hyphen.
+   * `parseFloat("−150.00")` returns `NaN`, so callers must not parse the
+   * raw string. Use this helper to split sign from absolute value for
+   * coloring/formatting.
+   */
+  signedMoney(raw: string): { sign: '+' | '−'; absolute: string } {
+    if (!raw) return { sign: '+', absolute: '0.00' }
+    const first = raw.charAt(0)
+    if (first === '+' || first === '−' || first === '-') {
+      return { sign: first === '+' ? '+' : '−', absolute: raw.slice(1) }
+    }
+    return { sign: '+', absolute: raw }
+  },
 }

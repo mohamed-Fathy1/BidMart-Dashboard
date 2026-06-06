@@ -583,3 +583,109 @@ export interface SystemSettings {
   social_media: SocialMediaLinks;
   updated_at?: string;
 }
+
+/* ------------------------------------------------------------------ */
+/*  Banks (admin)                                                       */
+/* ------------------------------------------------------------------ */
+
+export interface Bank {
+  id: string;
+  nameEn: string;
+  nameAr: string;
+  countryId: string;
+  /** Present only on list responses; create/update/toggle omit (relation not re-fetched). */
+  countryNameEn?: string;
+  countryNameAr?: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Wallet (admin)                                                      */
+/* ------------------------------------------------------------------ */
+
+export type WalletTxType =
+  | "TOP_UP"
+  | "ORDER_PAYMENT"
+  | "ORDER_REFUND"
+  | "SELLER_PAYOUT"
+  | "REFERRAL_CREDIT"
+  | "ADMIN_ADJUSTMENT";
+
+export type WalletTxStatus = "COMPLETED" | "PROCESSING";
+
+export interface AdminWalletDashboard {
+  /** Money strings — always 2 decimals (e.g. "450.00"). */
+  balance: string;
+  holdingBalance: string;
+  availableForSettlement: string;
+  currencyCode: string;
+  sellerName: string;
+  sellerPhone: string | null;
+  sellerEmail: string | null;
+}
+
+/**
+ * Wallet transaction ledger row.
+ * `amount` is a pre-formatted display string with a sign prefix:
+ * credits start with `+` (e.g. "+300.00"), debits start with U+2212 `−`
+ * (e.g. "−150.00"), NOT the ASCII hyphen `-`. Do not parseFloat directly.
+ */
+export interface AdminWalletTxItem {
+  id: string;
+  amount: string;
+  type: WalletTxType;
+  status: WalletTxStatus;
+  notes: string | null;
+  createdAt: string;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Withdrawals / Settlements (admin)                                   */
+/* ------------------------------------------------------------------ */
+
+export type SettlementRequestStatus =
+  | "NEW"
+  | "APPROVED"
+  | "REJECTED"
+  | "ADJUSTED";
+
+export interface SettlementListItem {
+  id: string;
+  sellerName: string;
+  sellerPhone: string;
+  /** Money string — e.g. "150.00". */
+  requestedAmount: string;
+  status: SettlementRequestStatus;
+  submittedAt: string;
+  actionedAt: string | null;
+}
+
+export interface SettlementDetail {
+  id: string;
+  submittedAt: string;
+  status: SettlementRequestStatus;
+  actionedAt: string | null;
+  actionedByName: string | null;
+
+  sellerName: string;
+  sellerPhone: string;
+  sellerEmail: string;
+  sellerId: string;
+
+  /** Money strings — always 2 decimals. */
+  requestedAmount: string;
+  /** Set only when status === 'ADJUSTED'. */
+  adjustedAmount: string | null;
+  /** Available balance snapshot (`full - holding`) at submission time. */
+  balanceSnapshot: string;
+  holdingSnapshot: string;
+  fullBalanceSnapshot: string;
+
+  bankNameEn: string;
+  bankNameAr: string;
+  /** First 4 + `*`×(len−8) + last 4. Server-masked. */
+  ibanMasked: string;
+
+  adminNotes: string | null;
+}

@@ -20,11 +20,13 @@ import { StatusBadge } from '@/components/shared/status-badge'
 import { ImagePreview } from '@/components/shared/image-preview'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DetailPageSkeleton } from '@/components/shared/detail-page-skeleton'
 import { ConfirmDialog } from '@/components/shared/confirm-dialog'
 import { ReasonDialog } from '@/components/shared/reason-dialog'
 import { Can } from '@/components/permissions/can'
-import { PERMISSIONS } from '@/lib/permissions'
+import { PERMISSIONS, usePermission } from '@/lib/permissions'
+import { WalletPanel } from '@/features/wallet/wallet-panel'
 import { format } from '@/lib/format'
 import { localizedName } from '@/lib/localized-name'
 import { providerAccountStatusForSellerBadge } from '@/features/providers/providers.api'
@@ -73,6 +75,8 @@ export function ProviderDetailPage({ storeId }: ProviderDetailPageProps) {
   const [verifyOpen, setVerifyOpen] = useState(false)
   const [blockOpen, setBlockOpen] = useState(false)
   const [unblockOpen, setUnblockOpen] = useState(false)
+
+  const canViewWallet = usePermission(PERMISSIONS.wallets.view)
 
   if (isLoading) {
     return <DetailPageSkeleton cards={2} />
@@ -196,6 +200,18 @@ export function ProviderDetailPage({ storeId }: ProviderDetailPageProps) {
         actions={actions}
       />
 
+      <Tabs defaultValue="overview" className="gap-6">
+        <TabsList>
+          <TabsTrigger value="overview">
+            {t('providers:detail.tabs.overview')}
+          </TabsTrigger>
+          <TabsTrigger value="wallet" disabled={!canViewWallet}>
+            {t('shell:nav.wallet_tab')}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-8">
+
       <Card className="overflow-hidden rounded-xl border-border">
         <CardContent className="flex flex-col gap-8 px-6 py-8 sm:flex-row sm:items-start sm:px-8">
           <div className="shrink-0">
@@ -302,6 +318,12 @@ export function ProviderDetailPage({ storeId }: ProviderDetailPageProps) {
           ) : null}
         </DetailCard>
       ) : null}
+        </TabsContent>
+
+        <TabsContent value="wallet">
+          {canViewWallet ? <WalletPanel sellerId={provider.owner.id} /> : null}
+        </TabsContent>
+      </Tabs>
 
       <ConfirmDialog
         open={approveOpen}

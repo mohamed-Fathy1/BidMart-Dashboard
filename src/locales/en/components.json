@@ -99,6 +99,14 @@
     "no_data_title": "No records yet",
     "no_data_hint": "Once records exist they'll appear here.",
     "no_results_title": "No results match these filters",
-    "no_results_hint": "Try clearing the search or filters."
+    "no_results_hint": "Try clearing the search or filters.",
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Previous",
+      "next": "Next",
+      "go_to_previous": "Go to previous page",
+      "go_to_next": "Go to next page",
+      "more_pages": "More pages"
+    }
   }
 }

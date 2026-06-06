@@ -1,0 +1,434 @@
+{
+  "info": {
+    "_postman_id": "bidmart-admin-wallet-bank-v1",
+    "name": "BidMart — Admin Wallet & Bank",
+    "description": "Admin-side Wallet, Settlements (Withdrawals), and Bank APIs.\n\nCompanion to docs/admin-wallet-bank-frontend.md.\n\n**Setup**\n1. Set `base_url` (default: http://localhost:8080/api/v1). Production: https://api.bidmartapp.com/api/v1\n2. Run **🔐 Auth → Admin Login** first — it auto-saves `admin_token` and logs the admin's permissions + super-admin flag (decoded from the JWT) to the Postman console.\n3. For **💰 Wallets**, set `seller_id` (a seller User UUID — get it from `GET /admin/providers`).\n4. For **🏦 Banks → Create**, set `country_id` (get it from `GET /admin/countries`). `bank_id` is auto-saved from Create.\n5. For **💸 Settlements**, run **List** first — it auto-saves the first row's `settlement_id`; all detail/action requests reuse it.\n\n**Seeded super admin:** admin@bidmart.com / Admin@1234\n\n**Notes**\n- All money fields are strings ('450.00').\n- Transaction `amount` is sign-prefixed; debits use U+2212 ('−150.00'), not ASCII '-'.\n- Action endpoints (approve/adjust/reject) are only valid on a `NEW` settlement; re-running returns 409 SETTLEMENT_ALREADY_ACTIONED — the tests accept 200/409/422 so re-runs don't show false failures.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url",       "value": "http://localhost:8080/api/v1", "type": "string" },
+    { "key": "admin_token",    "value": "", "type": "string" },
+    { "key": "seller_id",      "value": "", "type": "string" },
+    { "key": "country_id",     "value": "", "type": "string" },
+    { "key": "bank_id",        "value": "", "type": "string" },
+    { "key": "settlement_id",  "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('accessToken present', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.data.accessToken).to.be.a('string').and.not.empty;",
+                  "  pm.collectionVariables.set('admin_token', b.data.accessToken);",
+                  "  console.log('admin_token saved');",
+                  "  try {",
+                  "    const payload = JSON.parse(atob(b.data.accessToken.split('.')[1]));",
+                  "    console.log('is_super_admin:', payload.is_super_admin);",
+                  "    console.log('role:', payload.role);",
+                  "    console.log('permissions:', JSON.stringify(payload.permissions));",
+                  "  } catch (e) { console.log('could not decode JWT payload', e); }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@bidmart.com\",\n  \"password\": \"Admin@1234\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/admin/auth/login", "host": ["{{base_url}}"], "path": ["admin", "auth", "login"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏦 Banks",
+      "item": [
+        {
+          "name": "A1. List Banks",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('paginated', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.success).to.be.true;",
+                  "  pm.expect(b.data).to.be.an('array');",
+                  "  pm.expect(b.meta).to.have.property('total');",
+                  "  if (b.data.length && !pm.collectionVariables.get('bank_id')) {",
+                  "    pm.collectionVariables.set('bank_id', b.data[0].id);",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/admin/banks?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "banks"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "search", "value": "", "disabled": true },
+                { "key": "countryId", "value": "{{country_id}}", "disabled": true },
+                { "key": "isActive", "value": "true", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "A2. Create Bank",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('bank_id saved', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.data.id).to.be.a('string');",
+                  "  pm.expect(b.data.isActive).to.be.true;",
+                  "  pm.collectionVariables.set('bank_id', b.data.id);",
+                  "  console.log('bank_id:', b.data.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nameEn\": \"Postman Test Bank\",\n  \"nameAr\": \"بنك بوستمان للاختبار\",\n  \"countryId\": \"{{country_id}}\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/admin/banks", "host": ["{{base_url}}"], "path": ["admin", "banks"] }
+          }
+        },
+        {
+          "name": "A3. Update Bank",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nameEn\": \"Postman Test Bank (Updated)\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/admin/banks/{{bank_id}}", "host": ["{{base_url}}"], "path": ["admin", "banks", "{{bank_id}}"] }
+          }
+        },
+        {
+          "name": "A4. Toggle Bank Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 409 (pending settlements)', () => {",
+                  "  pm.expect([200, 409]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": { "raw": "{{base_url}}/admin/banks/{{bank_id}}/toggle-status", "host": ["{{base_url}}"], "path": ["admin", "banks", "{{bank_id}}", "toggle-status"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💰 Wallets",
+      "item": [
+        {
+          "name": "B1. Seller Wallet Dashboard",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('balances are strings', () => {",
+                  "  const d = pm.response.json().data;",
+                  "  pm.expect(d.balance).to.be.a('string');",
+                  "  pm.expect(d.availableForSettlement).to.be.a('string');",
+                  "  pm.expect(d.currencyCode).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": { "raw": "{{base_url}}/admin/wallets/{{seller_id}}", "host": ["{{base_url}}"], "path": ["admin", "wallets", "{{seller_id}}"] }
+          }
+        },
+        {
+          "name": "B2. Seller Transactions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('paginated array', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.data).to.be.an('array');",
+                  "  pm.expect(b.meta).to.have.property('total');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/admin/wallets/{{seller_id}}/transactions?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "wallets", "{{seller_id}}", "transactions"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "type", "value": "SELLER_PAYOUT", "disabled": true },
+                { "key": "dateFrom", "value": "2026-01-01", "disabled": true },
+                { "key": "dateTo", "value": "2026-12-31", "disabled": true },
+                { "key": "referenceNumber", "value": "", "disabled": true }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💸 Settlements",
+      "item": [
+        {
+          "name": "C1. List Settlements",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('settlement_id saved (first row)', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.data).to.be.an('array');",
+                  "  if (b.data.length) {",
+                  "    pm.collectionVariables.set('settlement_id', b.data[0].id);",
+                  "    console.log('settlement_id:', b.data[0].id, '| status:', b.data[0].status);",
+                  "  } else {",
+                  "    console.log('no settlements returned for this filter');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/admin/settlements?status=NEW&page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "settlements"],
+              "query": [
+                { "key": "status", "value": "NEW" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "search", "value": "", "disabled": true },
+                { "key": "dateFrom", "value": "2026-01-01", "disabled": true },
+                { "key": "dateTo", "value": "2026-12-31", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "C2. New Count (badge)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('count is a number', () => {",
+                  "  pm.expect(pm.response.json().data.count).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": { "raw": "{{base_url}}/admin/settlements/new-count", "host": ["{{base_url}}"], "path": ["admin", "settlements", "new-count"] }
+          }
+        },
+        {
+          "name": "C3. Settlement Detail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('IBAN is masked', () => {",
+                  "  const d = pm.response.json().data;",
+                  "  pm.expect(d.ibanMasked).to.be.a('string');",
+                  "  pm.expect(d.ibanMasked).to.include('*');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": { "raw": "{{base_url}}/admin/settlements/{{settlement_id}}", "host": ["{{base_url}}"], "path": ["admin", "settlements", "{{settlement_id}}"] }
+          }
+        },
+        {
+          "name": "C4. Reveal IBAN (audit-logged)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('full iban returned', () => {",
+                  "  pm.expect(pm.response.json().data.iban).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": { "raw": "{{base_url}}/admin/settlements/{{settlement_id}}/reveal-iban", "host": ["{{base_url}}"], "path": ["admin", "settlements", "{{settlement_id}}", "reveal-iban"] }
+          }
+        },
+        {
+          "name": "C5. Approve Settlement",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 / 409 (already actioned) / 422 (insufficient available)', () => {",
+                  "  pm.expect([200, 409, 422]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test('status APPROVED', () => pm.expect(pm.response.json().data.status).to.eql('APPROVED'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": { "raw": "{{base_url}}/admin/settlements/{{settlement_id}}/approve", "host": ["{{base_url}}"], "path": ["admin", "settlements", "{{settlement_id}}", "approve"] }
+          }
+        },
+        {
+          "name": "C6. Adjust & Approve",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 / 409 / 422', () => {",
+                  "  pm.expect([200, 409, 422]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test('status ADJUSTED', () => pm.expect(pm.response.json().data.status).to.eql('ADJUSTED'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adjustedAmount\": 120.00,\n  \"notes\": \"Partial payout per policy\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/admin/settlements/{{settlement_id}}/adjust", "host": ["{{base_url}}"], "path": ["admin", "settlements", "{{settlement_id}}", "adjust"] }
+          }
+        },
+        {
+          "name": "C7. Reject Settlement",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 / 409 (already actioned)', () => {",
+                  "  pm.expect([200, 409]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test('status REJECTED', () => pm.expect(pm.response.json().data.status).to.eql('REJECTED'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Invalid bank details\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/admin/settlements/{{settlement_id}}/reject", "host": ["{{base_url}}"], "path": ["admin", "settlements", "{{settlement_id}}", "reject"] }
+          }
+        }
+      ]
+    }
+  ]
+}

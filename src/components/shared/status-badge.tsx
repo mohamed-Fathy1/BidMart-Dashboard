@@ -87,6 +87,28 @@ interface SupportTicketTypeBadgeProps {
   className?: string
 }
 
+type SettlementStatusValue = 'NEW' | 'APPROVED' | 'REJECTED' | 'ADJUSTED'
+
+interface SettlementBadgeProps {
+  type: 'settlement'
+  status: SettlementStatusValue
+  className?: string
+}
+
+type WalletTxTypeValue =
+  | 'TOP_UP'
+  | 'ORDER_PAYMENT'
+  | 'ORDER_REFUND'
+  | 'SELLER_PAYOUT'
+  | 'REFERRAL_CREDIT'
+  | 'ADMIN_ADJUSTMENT'
+
+interface WalletTxBadgeProps {
+  type: 'walletTx'
+  status: WalletTxTypeValue
+  className?: string
+}
+
 type StatusBadgeProps =
   | AccountBadgeProps
   | SellerBadgeProps
@@ -99,6 +121,8 @@ type StatusBadgeProps =
   | ComplaintBadgeProps
   | SupportTicketBadgeProps
   | SupportTicketTypeBadgeProps
+  | SettlementBadgeProps
+  | WalletTxBadgeProps
 
 interface StatusStyle {
   badge: string
@@ -186,6 +210,22 @@ const supportTicketTypeStyles: Record<SupportTicketTypeValue, StatusStyle> = {
   OTHER:         neutral,
 }
 
+const settlementStyles: Record<SettlementStatusValue, StatusStyle> = {
+  NEW:      warning,
+  APPROVED: positive,
+  REJECTED: danger,
+  ADJUSTED: info,
+}
+
+const walletTxStyles: Record<WalletTxTypeValue, StatusStyle> = {
+  TOP_UP:           positive,
+  ORDER_PAYMENT:    info,
+  ORDER_REFUND:     accent,
+  SELLER_PAYOUT:    neutral,
+  REFERRAL_CREDIT:  accent,
+  ADMIN_ADJUSTMENT: warning,
+}
+
 const fallbackStyle: StatusStyle = neutral
 
 function getStyle(status: string, type: StatusBadgeProps['type']): StatusStyle {
@@ -210,6 +250,10 @@ function getStyle(status: string, type: StatusBadgeProps['type']): StatusStyle {
       return supportTicketStyles[status as SupportTicketStatusValue] ?? fallbackStyle
     case 'supportTicketType':
       return supportTicketTypeStyles[status as SupportTicketTypeValue] ?? fallbackStyle
+    case 'settlement':
+      return settlementStyles[status as SettlementStatusValue] ?? fallbackStyle
+    case 'walletTx':
+      return walletTxStyles[status as WalletTxTypeValue] ?? fallbackStyle
     case 'account':
     default:
       return accountStyles[status as AccountStatus] ?? fallbackStyle
@@ -236,6 +280,12 @@ function getI18nKey(status: string, type: StatusBadgeProps['type']): string {
   }
   if (type === 'supportTicketType') {
     return `supportTickets:message_type.${status}`
+  }
+  if (type === 'settlement') {
+    return `withdrawals:status_options.${status}`
+  }
+  if (type === 'walletTx') {
+    return `wallet:tx_type.${status}`
   }
   return `components:status.${status}`
 }

@@ -14,6 +14,7 @@ import {
   type NavSection,
 } from '@/components/layout/nav-items'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { NavLeafBadge } from '@/components/layout/nav-badge'
 
 function NavLink({ item, collapsed }: { item: NavLeaf; collapsed: boolean }) {
   const { t } = useTranslation()
@@ -86,6 +87,7 @@ function NavLink({ item, collapsed }: { item: NavLeaf; collapsed: boolean }) {
             >
               {t(item.labelKey)}
             </span>
+            {!collapsed && <NavLeafBadge to={item.to} />}
           </Link>
         </div>
       </TooltipTrigger>
@@ -135,6 +137,7 @@ function NavChildLink({ item }: { item: NavLeaf }) {
         style={{ marginInlineStart: '-12px' }}
       />
       <span className="relative z-[1] whitespace-nowrap">{t(item.labelKey)}</span>
+      <NavLeafBadge to={item.to} />
     </Link>
   )
 }

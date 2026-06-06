@@ -1,0 +1,109 @@
+{
+  "page_title": "Withdrawals",
+  "page_description": "Review seller withdrawal requests",
+  "detail_title": "Withdrawal request",
+  "meta": {
+    "total_requests": "{{count}} requests"
+  },
+  "columns": {
+    "seller": "Seller",
+    "amount": "Requested",
+    "status": "Status",
+    "submitted_at": "Submitted",
+    "actioned_at": "Actioned"
+  },
+  "filters": {
+    "search_placeholder": "Search by seller name or phone",
+    "status": "Status",
+    "date_from": "From",
+    "date_to": "To"
+  },
+  "status_options": {
+    "NEW": "New",
+    "APPROVED": "Approved",
+    "ADJUSTED": "Adjusted",
+    "REJECTED": "Rejected"
+  },
+  "actions": {
+    "view": "View detail",
+    "approve": "Approve",
+    "adjust": "Adjust",
+    "reject": "Reject",
+    "reveal_iban": "Reveal IBAN",
+    "hide_iban": "Hide IBAN",
+    "copy_iban": "Copy IBAN",
+    "iban_copied": "IBAN copied",
+    "back": "Back to list",
+    "approve_success": "Withdrawal approved",
+    "adjust_success": "Withdrawal adjusted",
+    "reject_success": "Withdrawal rejected"
+  },
+  "approve_dialog": {
+    "title": "Approve withdrawal",
+    "description": "Pay {{name}} from the seller's wallet now. The payout is final.",
+    "confirm": "Approve"
+  },
+  "adjust_dialog": {
+    "title": "Adjust withdrawal",
+    "description": "Approve a partial amount, up to the seller's available balance.",
+    "summary_requested": "Requested",
+    "summary_available": "Available",
+    "amount_label": "Adjusted amount",
+    "notes_label": "Notes (optional)",
+    "notes_placeholder": "Reason for the adjustment",
+    "confirm": "Adjust & approve"
+  },
+  "reject_dialog": {
+    "title": "Reject withdrawal",
+    "description": "Decline this request. The seller's balance is unchanged. They'll see your reason and can re-submit.",
+    "reason_label": "Reason",
+    "reason_placeholder": "Why this request is being rejected",
+    "confirm": "Reject"
+  },
+  "sections": {
+    "snapshot": "Snapshot at submission",
+    "destination": "Bank & destination",
+    "decision": "Decision",
+    "seller": "Seller"
+  },
+  "fields": {
+    "requested_amount": "Requested amount",
+    "adjusted_amount": "Adjusted amount",
+    "balance_snapshot": "Available balance",
+    "holding_snapshot": "Holding balance",
+    "full_balance_snapshot": "Full balance",
+    "bank": "Bank",
+    "iban": "IBAN",
+    "actioned_by": "Actioned by",
+    "actioned_at": "Actioned at",
+    "submitted_at": "Submitted at",
+    "admin_notes": "Notes",
+    "seller_name": "Name",
+    "seller_phone": "Phone",
+    "seller_email": "Email"
+  },
+  "iban_hint": "Revealing the full IBAN is audit-logged.",
+  "iban_revealed_hint": "Full IBAN visible — last revealed {{when}}.",
+  "errors": {
+    "approve_failed": "Could not approve",
+    "adjust_failed": "Could not adjust",
+    "reject_failed": "Could not reject",
+    "reveal_failed": "Could not reveal IBAN",
+    "already_actioned": "This request has already been processed.",
+    "exceeds_available": "Amount exceeds available balance.",
+    "below_min": "Amount is below the minimum settlement amount.",
+    "not_found": "Withdrawal request not found.",
+    "reason_required": "Enter a reason.",
+    "reason_max": "Reason cannot exceed 500 characters.",
+    "amount_required": "Enter an amount.",
+    "amount_positive": "Amount must be greater than zero.",
+    "amount_two_decimals": "Amount must have at most 2 decimals.",
+    "notes_max": "Notes cannot exceed 500 characters."
+  },
+  "empty": {
+    "no_data_title": "No withdrawal requests",
+    "no_data_hint": "Pending and processed requests will appear here.",
+    "no_results_title": "No requests match these filters",
+    "no_results_hint": "Try clearing the search or status filter."
+  }
+}

@@ -26,6 +26,7 @@ import {
 } from '@/components/layout/command-palette'
 import { NotificationsPopoverContent } from '@/features/notifications/notifications-popover-content'
 import { NOTIFICATIONS } from '@/features/notifications/notifications.mock'
+import { BrandLogo } from '@/components/shared/brand-logo'
 import { accountInitials, cn } from '@/lib/utils'
 import { useUIStore } from '@/features/ui/ui.store'
 import { useAuthStore } from '@/features/auth/auth.store'
@@ -55,9 +56,7 @@ export function Topbar() {
           transition: 'width var(--duration-layout) var(--ease-sidebar)',
         }}
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-primary text-xs font-bold text-primary-foreground">
-          B
-        </span>
+        <BrandLogo className="h-8 w-8 shrink-0" gradientId="bidmart-topbar-gradient" />
         <span
           className={cn(
             'text-base font-semibold tracking-tight text-foreground whitespace-nowrap',

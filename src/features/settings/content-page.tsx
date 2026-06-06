@@ -45,7 +45,7 @@ const PREVIEW_STYLES = `
   p  { margin: 0 0 0.875rem; }
   ul, ol { padding-inline-start: 1.5rem; margin: 0 0 0.875rem; }
   li { margin-bottom: 0.3rem; }
-  a  { color: #3660B5; text-decoration: underline; }
+  a  { color: #6A23FD; text-decoration: underline; }
   strong { font-weight: 600; }
   blockquote {
     border-inline-start: 3px solid #E7E5E4;

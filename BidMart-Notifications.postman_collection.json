@@ -1,0 +1,318 @@
+{
+  "info": {
+    "_postman_id": "bidmart-notifications-v1",
+    "name": "BidMart — Notifications",
+    "description": "All notification APIs — user (buyer/seller) bell + admin bell.\n\nCompanion to docs/notifications.md and docs/admin-notifications.md.\n\n**Setup**\n1. Set `base_url` (default: http://localhost:8080/api/v1). Production: https://api.bidmartapp.com/api/v1\n2. Run **🔐 Auth → Admin Login** for the admin requests (auto-saves `admin_token`).\n3. Run **🔐 Auth → User Login** for the user requests — set `user_phone` / `user_password` / `device_id` first (auto-saves `user_token`).\n4. **🔔 User Notifications → List** auto-saves the first row's `notification_id`; mark-read reuses it.\n5. **🛡️ Admin Notifications → List** auto-saves the first row's `admin_notification_id`; mark-read reuses it.\n\n**Seeded super admin:** admin@bidmart.com / Admin@1234\n\n**Notes**\n- All responses are wrapped: `{ success, data, meta }`. List endpoints put rows in `data` and paging in `meta`.\n- **User** notifications resolve a single `title`/`body` via the `Accept-Language` header (`ar` | `en`, default `en`).\n- **Admin** notifications return BOTH languages (`title_en`/`title_ar`, `body_en`/`body_ar`) and do NOT use `Accept-Language`.\n- `action_type` + `action_id` drive deep-linking. Admin targets: SELLER→/admin/providers/:storeId, SETTLEMENT→/admin/settlements/:id, SUPPORT→/admin/support-tickets/:id, USER→/admin/users/:userId, COMPLAINT→complaint detail.\n- Mark-read returns 200 `{ read: true }`; it 400s if the id isn't yours. To get an admin notification to read, trigger one first (e.g. submit a contact message or a settlement request).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url",               "value": "http://localhost:8080/api/v1", "type": "string" },
+    { "key": "admin_token",            "value": "", "type": "string" },
+    { "key": "user_token",             "value": "", "type": "string" },
+    { "key": "user_phone",             "value": "+966500112233", "type": "string" },
+    { "key": "user_password",          "value": "Str0ng@Pass", "type": "string" },
+    { "key": "device_id",              "value": "postman-device-uuid", "type": "string" },
+    { "key": "notification_id",        "value": "", "type": "string" },
+    { "key": "admin_notification_id",  "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('admin_token saved', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.data.accessToken).to.be.a('string').and.not.empty;",
+                  "  pm.collectionVariables.set('admin_token', b.data.accessToken);",
+                  "  try {",
+                  "    const payload = JSON.parse(atob(b.data.accessToken.split('.')[1]));",
+                  "    console.log('is_super_admin:', payload.is_super_admin, '| role:', payload.role);",
+                  "  } catch (e) { console.log('could not decode JWT', e); }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@bidmart.com\",\n  \"password\": \"Admin@1234\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/admin/auth/login", "host": ["{{base_url}}"], "path": ["admin", "auth", "login"] }
+          }
+        },
+        {
+          "name": "User Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('user_token saved', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.data.accessToken).to.be.a('string').and.not.empty;",
+                  "  pm.collectionVariables.set('user_token', b.data.accessToken);",
+                  "  console.log('user role:', b.data.user && b.data.user.role);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{user_phone}}\",\n  \"password\": \"{{user_password}}\",\n  \"deviceId\": \"{{device_id}}\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔔 User Notifications",
+      "item": [
+        {
+          "name": "U1. List My Notifications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('paginated, single-language items', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.success).to.be.true;",
+                  "  pm.expect(b.data).to.be.an('array');",
+                  "  pm.expect(b.meta).to.have.property('total');",
+                  "  if (b.data.length) {",
+                  "    const n = b.data[0];",
+                  "    pm.expect(n).to.have.property('title');",
+                  "    pm.expect(n).to.have.property('body');",
+                  "    pm.expect(n).to.have.property('action_type');",
+                  "    pm.collectionVariables.set('notification_id', n.id);",
+                  "    console.log('notification_id:', n.id);",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{user_token}}" },
+              { "key": "Accept-Language", "value": "en" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications/my?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "my"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "type", "value": "ORDER_PLACED", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "U2. Unread Count",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('count is a number', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.data.count).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{user_token}}" }],
+            "url": { "raw": "{{base_url}}/notifications/unread-count", "host": ["{{base_url}}"], "path": ["notifications", "unread-count"] }
+          }
+        },
+        {
+          "name": "U3. Mark One Read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 400 (no/invalid id)', () => pm.expect([200, 400]).to.include(pm.response.code));",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test('read: true', () => pm.expect(pm.response.json().data.read).to.be.true);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{user_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/notifications/{{notification_id}}/read",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "{{notification_id}}", "read"]
+            }
+          }
+        },
+        {
+          "name": "U4. Mark All Read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('read: true', () => pm.expect(pm.response.json().data.read).to.be.true);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{user_token}}" }],
+            "url": { "raw": "{{base_url}}/notifications/read-all", "host": ["{{base_url}}"], "path": ["notifications", "read-all"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🛡️ Admin Notifications",
+      "item": [
+        {
+          "name": "A1. List My Notifications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('paginated, dual-language items', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.success).to.be.true;",
+                  "  pm.expect(b.data).to.be.an('array');",
+                  "  pm.expect(b.meta).to.have.property('total');",
+                  "  if (b.data.length) {",
+                  "    const n = b.data[0];",
+                  "    pm.expect(n).to.have.property('title_en');",
+                  "    pm.expect(n).to.have.property('title_ar');",
+                  "    pm.expect(n).to.have.property('action_type');",
+                  "    pm.collectionVariables.set('admin_notification_id', n.id);",
+                  "    console.log('admin_notification_id:', n.id, '| action:', n.action_type, n.action_id);",
+                  "  } else {",
+                  "    console.log('No admin notifications yet — trigger one (e.g. submit a contact message).');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/admin/notifications?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "notifications"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "type", "value": "NEW_SELLER_APPLICATION", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "A2. Unread Count",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('count is a number', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.data.count).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": { "raw": "{{base_url}}/admin/notifications/unread-count", "host": ["{{base_url}}"], "path": ["admin", "notifications", "unread-count"] }
+          }
+        },
+        {
+          "name": "A3. Mark One Read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 400 (no/invalid id)', () => pm.expect([200, 400]).to.include(pm.response.code));",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test('read: true', () => pm.expect(pm.response.json().data.read).to.be.true);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/admin/notifications/{{admin_notification_id}}/read",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "notifications", "{{admin_notification_id}}", "read"]
+            }
+          }
+        },
+        {
+          "name": "A4. Test Broadcast (push to all users)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('queued: true', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.data.queued).to.be.true;",
+                  "  pm.expect(b.data.message).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "description": "Requires the BROADCAST_NOTIFICATION permission (super admin has it). Queues a test GENERAL push to every registered user.",
+            "url": { "raw": "{{base_url}}/admin/notifications/test-broadcast", "host": ["{{base_url}}"], "path": ["admin", "notifications", "test-broadcast"] }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -79,6 +79,9 @@
   },
   "detail": {
     "page_title": "Provider Details",
+    "tabs": {
+      "overview": "Overview"
+    },
     "store_info": "Store",
     "store_logo": "Logo",
     "status": "Store status",

@@ -79,6 +79,9 @@
   },
   "detail": {
     "page_title": "تفاصيل مقدم الخدمة",
+    "tabs": {
+      "overview": "نظرة عامة"
+    },
     "store_info": "المتجر",
     "store_logo": "الشعار",
     "status": "حالة المتجر",
