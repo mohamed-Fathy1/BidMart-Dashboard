@@ -49,11 +49,14 @@
     "otp_resent": "OTP has been resent to your email",
     "password_reset_success": "Password has been reset successfully",
     "hero": {
-      "tagline": "Live auctions, real bidders",
-      "subtitle": "Manage the BidMart marketplace from one console.",
-      "live": "Bidding live",
-      "bid_amount": "25 SAR",
-      "bid_now": "Bid now"
+      "tagline": "Run the marketplace, end to end",
+      "subtitle": "Approvals, moderation, and operations from one console.",
+      "queue_eyebrow": "Live moderation",
+      "queue_title": "Sellers awaiting verification",
+      "queue_count": "12 stores in the review queue",
+      "row_status_pending": "Pending",
+      "kpi_label": "Active auctions",
+      "kpi_delta": "+12% this week"
     }
   },
   "errors": {

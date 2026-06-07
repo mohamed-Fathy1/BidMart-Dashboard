@@ -26,7 +26,7 @@
       }
     },
     "fields": {
-      "dollar_to_riyal_rate": "سعر صرف الدولار → الريال",
+      "dollar_to_riyal_rate": "سعر صرف الدولار ← الريال",
       "dollar_to_riyal_rate_hint": "يُستخدم في عمليات التحويل داخل التطبيق.",
       "order_commission_percentage": "عمولة الطلبات",
       "order_commission_percentage_hint": "النسبة المحتجزة من كل طلب مكتمل (0–100).",

@@ -66,6 +66,23 @@
     "decision": "Decision",
     "seller": "Seller"
   },
+  "hero": {
+    "requested": "Requested amount",
+    "paid": "Payout amount",
+    "within": "Within available balance",
+    "available": "{{amount}} available",
+    "exceeds": "Exceeds available balance",
+    "exceeds_by": "Short by {{amount}}",
+    "paid_in_full": "Paid in full",
+    "adjusted": "Adjusted payout",
+    "adjusted_from": "Reduced from {{amount}}",
+    "rejected": "Request rejected",
+    "submitted_relative": "Submitted {{relative}}"
+  },
+  "decision": {
+    "awaiting": "Awaiting your decision",
+    "awaiting_hint": "Approve, adjust, or reject above. The seller is notified once you act."
+  },
   "fields": {
     "requested_amount": "Requested amount",
     "adjusted_amount": "Adjusted amount",

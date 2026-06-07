@@ -7,13 +7,16 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import {
   AlertCircle,
+  AlertTriangle,
   CheckCircle,
   Copy,
   Eye,
   EyeOff,
+  Hourglass,
   Pencil,
   XCircle,
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { PageHeader } from '@/components/shared/page-header'
 import { DetailCard } from '@/components/shared/detail-card'
 import { DetailField } from '@/components/shared/detail-field'
@@ -23,12 +26,11 @@ import { ConfirmDialog } from '@/components/shared/confirm-dialog'
 import { ReasonDialog } from '@/components/shared/reason-dialog'
 import { FormDialog } from '@/components/shared/form-dialog'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Can } from '@/components/permissions/can'
-import { PERMISSIONS } from '@/lib/permissions'
+import { PERMISSIONS, usePermission } from '@/lib/permissions'
 import { format } from '@/lib/format'
 import {
   useAdjustSettlementMutation,
@@ -56,6 +58,31 @@ const adjustFormSchema = z.object({
 })
 type AdjustFormValues = z.infer<typeof adjustFormSchema>
 
+type HeroTone = 'positive' | 'warning' | 'info' | 'danger'
+
+const HERO_TONE_STYLES: Record<HeroTone, { rail: string; chip: string; iconText: string }> = {
+  positive: {
+    rail: 'border-s-emerald-500',
+    chip: 'bg-emerald-50 ring-emerald-200/70 text-emerald-900',
+    iconText: 'text-emerald-600',
+  },
+  warning: {
+    rail: 'border-s-amber-500',
+    chip: 'bg-amber-50 ring-amber-200/70 text-amber-900',
+    iconText: 'text-amber-600',
+  },
+  info: {
+    rail: 'border-s-blue-500',
+    chip: 'bg-blue-50 ring-blue-200/70 text-blue-900',
+    iconText: 'text-blue-600',
+  },
+  danger: {
+    rail: 'border-s-red-500',
+    chip: 'bg-red-50 ring-red-200/70 text-red-900',
+    iconText: 'text-red-600',
+  },
+}
+
 export function WithdrawalDetailPage({ id }: WithdrawalDetailPageProps) {
   const { t, i18n } = useTranslation()
   const isAr = i18n.language === 'ar'
@@ -79,6 +106,9 @@ export function WithdrawalDetailPage({ id }: WithdrawalDetailPageProps) {
     mode: 'onBlur',
     defaultValues: { adjustedAmount: undefined as unknown as number, notes: '' },
   })
+
+  const canApprove = usePermission(PERMISSIONS.withdrawals.approve)
+  const canReject = usePermission(PERMISSIONS.withdrawals.reject)
 
   if (isLoading) return <DetailPageSkeleton cards={3} hero={false} />
   if (isError || !detail) {
@@ -146,40 +176,47 @@ export function WithdrawalDetailPage({ id }: WithdrawalDetailPageProps) {
     </div>
   )
 
-  const actions = (
+  // Approve + Adjust are both "ways to pay" — group them as one cluster.
+  // Reject is the opposite intent — set apart with a divider so the action row
+  // reads as [pay options] | [decline] rather than three peer buttons.
+  const actions = isPending ? (
     <>
-      {isPending && (
+      {canApprove && (
         <>
-          <Can permission={PERMISSIONS.withdrawals.approve}>
-            <Button
-              size="sm"
-              onClick={() => setApproveOpen(true)}
-              className="bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-500/50"
-            >
-              <CheckCircle className="size-4" />
-              {t('withdrawals:actions.approve')}
-            </Button>
-          </Can>
-          <Can permission={PERMISSIONS.withdrawals.approve}>
-            <Button size="sm" variant="outline" onClick={openAdjust}>
-              <Pencil className="size-4" />
-              {t('withdrawals:actions.adjust')}
-            </Button>
-          </Can>
-          <Can permission={PERMISSIONS.withdrawals.reject}>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={() => setRejectOpen(true)}
-            >
-              <XCircle className="size-4" />
-              {t('withdrawals:actions.reject')}
-            </Button>
-          </Can>
+          <Button
+            size="sm"
+            onClick={() => setApproveOpen(true)}
+            className="bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-500/50"
+          >
+            <CheckCircle className="size-4" />
+            {t('withdrawals:actions.approve')}
+          </Button>
+          <Button size="sm" variant="outline" onClick={openAdjust}>
+            <Pencil className="size-4" />
+            {t('withdrawals:actions.adjust')}
+          </Button>
+        </>
+      )}
+      {canReject && (
+        <>
+          {canApprove && (
+            <span
+              aria-hidden
+              className="mx-1 inline-block h-5 w-px self-center bg-border/70"
+            />
+          )}
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={() => setRejectOpen(true)}
+          >
+            <XCircle className="size-4" />
+            {t('withdrawals:actions.reject')}
+          </Button>
         </>
       )}
     </>
-  )
+  ) : null
 
   const adjustFirstErrorKey = (['adjustedAmount', 'notes'] as const).find(
     (k) => adjustForm.formState.errors[k]?.message,
@@ -189,6 +226,79 @@ export function WithdrawalDetailPage({ id }: WithdrawalDetailPageProps) {
     typeof adjustForm.formState.errors[adjustFirstErrorKey]?.message === 'string'
       ? t(adjustForm.formState.errors[adjustFirstErrorKey]!.message as string)
       : undefined
+
+  const requestedNum = Number(detail.requestedAmount)
+  const availableNum = Number(detail.balanceSnapshot)
+  const adjustedNum = detail.adjustedAmount ? Number(detail.adjustedAmount) : null
+  const exceedsAvailable = isPending && requestedNum > availableNum
+  const heroAmount = format.currency(
+    detail.status === 'ADJUSTED' && adjustedNum !== null ? adjustedNum : requestedNum,
+  )
+  const heroAmountLabel =
+    detail.status === 'APPROVED' || detail.status === 'ADJUSTED'
+      ? t('withdrawals:hero.paid')
+      : t('withdrawals:hero.requested')
+  const submittedRelative = t('withdrawals:hero.submitted_relative', {
+    relative: format.relative(detail.submittedAt),
+  })
+
+  // `detailIsNumeric` controls font-mono on the chip's secondary line: numeric
+  // for currency strings (NEW/ADJUSTED variants), unset for absolute datetimes.
+  const heroSignal: {
+    tone: HeroTone
+    title: string
+    detail: string
+    detailIsNumeric: boolean
+    icon: typeof CheckCircle
+  } =
+    detail.status === 'NEW'
+      ? exceedsAvailable
+        ? {
+            tone: 'warning',
+            title: t('withdrawals:hero.exceeds'),
+            detail: t('withdrawals:hero.exceeds_by', {
+              amount: format.currency(requestedNum - availableNum),
+            }),
+            detailIsNumeric: true,
+            icon: AlertTriangle,
+          }
+        : {
+            tone: 'positive',
+            title: t('withdrawals:hero.within'),
+            detail: t('withdrawals:hero.available', {
+              amount: format.currency(availableNum),
+            }),
+            detailIsNumeric: true,
+            icon: CheckCircle,
+          }
+      : detail.status === 'APPROVED'
+        ? {
+            tone: 'positive',
+            title: t('withdrawals:hero.paid_in_full'),
+            detail: detail.actionedAt ? format.dateTime(detail.actionedAt) : '',
+            detailIsNumeric: false,
+            icon: CheckCircle,
+          }
+        : detail.status === 'ADJUSTED'
+          ? {
+              tone: 'info',
+              title: t('withdrawals:hero.adjusted'),
+              detail: t('withdrawals:hero.adjusted_from', {
+                amount: format.currency(requestedNum),
+              }),
+              detailIsNumeric: true,
+              icon: Pencil,
+            }
+          : {
+              tone: 'danger',
+              title: t('withdrawals:hero.rejected'),
+              detail: detail.actionedAt ? format.dateTime(detail.actionedAt) : '',
+              detailIsNumeric: false,
+              icon: XCircle,
+            }
+
+  const tone = HERO_TONE_STYLES[heroSignal.tone]
+  const HeroIcon = heroSignal.icon
 
   return (
     <div className="space-y-6">
@@ -200,25 +310,77 @@ export function WithdrawalDetailPage({ id }: WithdrawalDetailPageProps) {
         actions={actions}
       />
 
+      <Card className={cn('overflow-hidden border-s-4', tone.rail)}>
+        <CardContent className="flex flex-col gap-5 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
+          <div className="min-w-0 space-y-1.5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              {heroAmountLabel}
+            </p>
+            <p
+              className={cn(
+                'font-mono text-4xl font-semibold tabular-nums leading-none text-foreground',
+                detail.status === 'REJECTED' && 'line-through decoration-2 decoration-red-300/80',
+              )}
+              dir="ltr"
+            >
+              {heroAmount}
+            </p>
+            <p className="text-xs text-muted-foreground">{submittedRelative}</p>
+          </div>
+          <div className={cn('flex shrink-0 items-start gap-3 rounded-lg px-4 py-3 ring-1', tone.chip)}>
+            <HeroIcon className={cn('mt-0.5 size-4 shrink-0', tone.iconText)} aria-hidden />
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium leading-tight">{heroSignal.title}</p>
+              {heroSignal.detail && (
+                <p
+                  className={cn(
+                    'text-xs opacity-80',
+                    heroSignal.detailIsNumeric && 'font-mono tabular-nums',
+                  )}
+                  dir="ltr"
+                >
+                  {heroSignal.detail}
+                </p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-6 lg:grid-cols-2">
         <DetailCard title={t('withdrawals:sections.snapshot')} columns={2}>
           <DetailField
-            label={t('withdrawals:fields.requested_amount')}
-            value={format.currency(Number(detail.requestedAmount))}
-            mono
+            label={t('withdrawals:fields.balance_snapshot')}
+            value={
+              <span
+                className={cn(
+                  'font-mono tabular-nums',
+                  exceedsAvailable ? 'text-red-700' : 'text-emerald-700',
+                )}
+              >
+                {format.currency(availableNum)}
+              </span>
+            }
           />
-          {detail.status === 'ADJUSTED' && detail.adjustedAmount && (
+          <DetailField
+            label={t('withdrawals:fields.requested_amount')}
+            value={
+              <span className="font-mono font-medium tabular-nums text-foreground">
+                {format.currency(requestedNum)}
+              </span>
+            }
+          />
+          {detail.status === 'ADJUSTED' && adjustedNum !== null && (
             <DetailField
               label={t('withdrawals:fields.adjusted_amount')}
-              value={format.currency(Number(detail.adjustedAmount))}
-              mono
+              value={
+                <span className="font-mono font-medium tabular-nums text-blue-700">
+                  {format.currency(adjustedNum)}
+                </span>
+              }
+              span={2}
             />
           )}
-          <DetailField
-            label={t('withdrawals:fields.balance_snapshot')}
-            value={format.currency(Number(detail.balanceSnapshot))}
-            mono
-          />
           <DetailField
             label={t('withdrawals:fields.holding_snapshot')}
             value={format.currency(Number(detail.holdingSnapshot))}
@@ -227,11 +389,6 @@ export function WithdrawalDetailPage({ id }: WithdrawalDetailPageProps) {
           <DetailField
             label={t('withdrawals:fields.full_balance_snapshot')}
             value={format.currency(Number(detail.fullBalanceSnapshot))}
-            mono
-          />
-          <DetailField
-            label={t('withdrawals:fields.submitted_at')}
-            value={format.dateTime(detail.submittedAt)}
             mono
           />
         </DetailCard>
@@ -284,26 +441,54 @@ export function WithdrawalDetailPage({ id }: WithdrawalDetailPageProps) {
           </div>
         </DetailCard>
 
-        <DetailCard
-          title={t('withdrawals:sections.decision')}
-          columns={2}
-          className="lg:col-span-1"
-        >
-          <DetailField
-            label={t('withdrawals:fields.actioned_by')}
-            value={detail.actionedByName}
-          />
-          <DetailField
-            label={t('withdrawals:fields.actioned_at')}
-            value={detail.actionedAt ? format.dateTime(detail.actionedAt) : null}
-            mono
-          />
-          <DetailField
-            label={t('withdrawals:fields.admin_notes')}
-            value={detail.adminNotes}
-            span={2}
-          />
-        </DetailCard>
+        {isPending ? (
+          <Card className="lg:col-span-1">
+            <CardHeader>
+              <CardTitle className="text-[length:var(--type-h3-size)] font-[number:var(--type-h3-weight)]">
+                {t('withdrawals:sections.decision')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-start gap-3">
+                <span
+                  aria-hidden
+                  className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-amber-50 ring-1 ring-amber-200/70"
+                >
+                  <Hourglass className="size-4 text-amber-600" />
+                </span>
+                <div className="min-w-0 space-y-1">
+                  <p className="text-sm font-medium text-foreground">
+                    {t('withdrawals:decision.awaiting')}
+                  </p>
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    {t('withdrawals:decision.awaiting_hint')}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <DetailCard
+            title={t('withdrawals:sections.decision')}
+            columns={2}
+            className="lg:col-span-1"
+          >
+            <DetailField
+              label={t('withdrawals:fields.actioned_by')}
+              value={detail.actionedByName}
+            />
+            <DetailField
+              label={t('withdrawals:fields.actioned_at')}
+              value={detail.actionedAt ? format.dateTime(detail.actionedAt) : null}
+              mono
+            />
+            <DetailField
+              label={t('withdrawals:fields.admin_notes')}
+              value={detail.adminNotes}
+              span={2}
+            />
+          </DetailCard>
+        )}
 
         <DetailCard title={t('withdrawals:sections.seller')} columns={2}>
           <DetailField

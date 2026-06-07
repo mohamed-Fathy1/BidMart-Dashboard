@@ -66,6 +66,23 @@
     "decision": "القرار",
     "seller": "البائع"
   },
+  "hero": {
+    "requested": "المبلغ المطلوب",
+    "paid": "المبلغ المصروف",
+    "within": "ضمن الرصيد المتاح",
+    "available": "متاح {{amount}}",
+    "exceeds": "يتجاوز الرصيد المتاح",
+    "exceeds_by": "العجز {{amount}}",
+    "paid_in_full": "تم الدفع بالكامل",
+    "adjusted": "دفعة معدّلة",
+    "adjusted_from": "خُفّض من {{amount}}",
+    "rejected": "الطلب مرفوض",
+    "submitted_relative": "قُدِّم {{relative}}"
+  },
+  "decision": {
+    "awaiting": "بانتظار قرارك",
+    "awaiting_hint": "وافق أو عدّل أو ارفض من الأعلى. يتم إخطار البائع فور إجراء الفعل."
+  },
   "fields": {
     "requested_amount": "المبلغ المطلوب",
     "adjusted_amount": "المبلغ المعدّل",

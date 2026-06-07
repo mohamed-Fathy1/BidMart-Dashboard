@@ -1,9 +1,8 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Coins, Gavel } from "lucide-react";
+import { Check, ShieldCheck, TrendingUp } from "lucide-react";
 import { LangSwitcher } from "./lang-switcher";
 import { BrandWordmark } from "@/components/shared/brand-logo";
-import { cn } from "@/lib/utils";
 
 interface AuthShellProps {
   children: ReactNode;
@@ -33,7 +32,7 @@ export function AuthShell({ children }: AuthShellProps) {
           style={{ backgroundColor: "#F5F2FF" }}
         >
           <ContourBackground />
-          <AuctionHero />
+          <AdminConsoleHero />
         </aside>
       </div>
     </div>
@@ -69,23 +68,23 @@ function ContourBackground() {
   );
 }
 
-function AuctionHero() {
+function AdminConsoleHero() {
   const { t } = useTranslation();
 
   return (
     <div className="relative flex h-full w-full items-center justify-center px-10">
       <div className="relative w-full max-w-md">
-        <FloatingCoin className="-top-6 -start-8" />
-        <FloatingCoin className="-top-2 end-2" size="sm" />
-        <FloatingCoin className="bottom-4 -end-6" />
-        <FloatingCoin className="-bottom-8 start-10" size="sm" />
+        <KpiTile
+          label={t("common:auth.hero.kpi_label")}
+          value="248"
+          delta={t("common:auth.hero.kpi_delta")}
+        />
 
-        <SecondaryCard />
-        <LiveBiddingCard
-          eyebrow={t("common:auth.hero.live")}
-          bidAmount={t("common:auth.hero.bid_amount")}
-          bidLabel={t("common:auth.hero.bid_now")}
-          timer="00:14"
+        <QueueCard
+          eyebrow={t("common:auth.hero.queue_eyebrow")}
+          title={t("common:auth.hero.queue_title")}
+          countLabel={t("common:auth.hero.queue_count")}
+          pendingLabel={t("common:auth.hero.row_status_pending")}
         />
 
         <div className="mt-10 space-y-2 text-center">
@@ -101,93 +100,133 @@ function AuctionHero() {
   );
 }
 
-interface LiveBiddingCardProps {
+interface QueueCardProps {
   eyebrow: string;
-  bidAmount: string;
-  bidLabel: string;
-  timer: string;
+  title: string;
+  countLabel: string;
+  pendingLabel: string;
 }
 
-function LiveBiddingCard({
-  eyebrow,
-  bidAmount,
-  bidLabel,
-  timer,
-}: LiveBiddingCardProps) {
+const QUEUE_ROWS = [
+  { initial: "A", name: "Atlas Auctions", cr: "CR-1042 998", color: "#4378E2" },
+  { initial: "V", name: "Verde Motors", cr: "CR-7783 220", color: "#6A23FD" },
+  { initial: "S", name: "Saif Electronics", cr: "CR-3398 514", color: "#884FFD" },
+];
+
+function QueueCard({ eyebrow, title, countLabel, pendingLabel }: QueueCardProps) {
   return (
     <div className="relative rounded-2xl bg-card p-5 shadow-[var(--shadow-floating)]">
       <span className="bg-gradient-primary absolute inset-x-5 top-0 h-1 rounded-b-full" />
 
-      <div className="flex items-center justify-between">
-        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
-          <span className="inline-block size-1.5 rounded-full bg-primary" />
-          {eyebrow}
-        </span>
-        <div className="flex -space-x-2">
-          {["#E9D5FF", "#C7D2FE", "#FBCFE8"].map((c) => (
-            <span
-              key={c}
-              className="inline-block size-6 rounded-full border-2 border-card"
-              style={{ backgroundColor: c }}
-            />
-          ))}
+      <div className="flex items-start justify-between">
+        <div className="space-y-1">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-primary">
+            <ShieldCheck className="size-3.5" />
+            {eyebrow}
+          </span>
+          <h3 className="text-sm font-semibold text-foreground">{title}</h3>
         </div>
-      </div>
-
-      <div className="mt-4 flex items-baseline gap-2">
-        <span className="font-mono text-3xl font-semibold tracking-tight text-foreground tabular-nums">
-          {bidAmount}
+        <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-primary/10 px-2 font-mono text-xs font-semibold text-primary tabular-nums">
+          12
         </span>
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-3">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 font-mono text-xs font-medium text-foreground tabular-nums">
-          <span className="inline-block size-1.5 rounded-full bg-destructive" />
-          {timer}
-        </span>
-        <span className="bg-gradient-primary inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold text-primary-foreground shadow-rest">
-          <Gavel className="size-3.5" />
-          {bidLabel}
-        </span>
-      </div>
+      <ul className="mt-4 space-y-2">
+        {QUEUE_ROWS.map((row) => (
+          <QueueRow key={row.cr} {...row} pendingLabel={pendingLabel} />
+        ))}
+      </ul>
+
+      <p className="mt-3 text-[11px] text-muted-foreground">{countLabel}</p>
     </div>
   );
 }
 
-function SecondaryCard() {
+interface QueueRowProps {
+  initial: string;
+  name: string;
+  cr: string;
+  color: string;
+  pendingLabel: string;
+}
+
+function QueueRow({ initial, name, cr, color, pendingLabel }: QueueRowProps) {
+  return (
+    <li className="flex items-center gap-2.5 rounded-lg border border-border bg-muted/40 p-2">
+      <span
+        className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-xs font-semibold text-white"
+        style={{ backgroundColor: color }}
+      >
+        {initial}
+      </span>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <span className="truncate text-xs font-medium text-foreground">
+          {name}
+        </span>
+        <span className="font-mono text-[10px] text-muted-foreground tabular-nums">
+          {cr}
+        </span>
+      </div>
+      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700">
+        <span className="size-1.5 rounded-full bg-amber-500" />
+        {pendingLabel}
+      </span>
+      <span className="bg-gradient-primary inline-flex size-7 shrink-0 items-center justify-center rounded-full text-primary-foreground shadow-rest">
+        <Check className="size-3.5" />
+      </span>
+    </li>
+  );
+}
+
+interface KpiTileProps {
+  label: string;
+  value: string;
+  delta: string;
+}
+
+function KpiTile({ label, value, delta }: KpiTileProps) {
   return (
     <div
-      className="absolute -bottom-10 -end-6 w-44 -rotate-6 rounded-2xl bg-card p-3 shadow-[var(--shadow-rest)]"
+      className="absolute -top-12 -end-2 w-44 rotate-3 rounded-xl bg-card p-3 shadow-[var(--shadow-rest)]"
       aria-hidden
     >
-      <div className="aspect-[4/3] w-full rounded-lg bg-muted" />
-      <div className="mt-2.5 space-y-1.5">
-        <div className="h-2 w-3/4 rounded-full bg-border" />
-        <div className="h-2 w-1/2 rounded-full bg-border" />
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+          {label}
+        </span>
+        <TrendingUp className="size-3.5 text-emerald-600" />
       </div>
+      <div className="mt-0.5 font-mono text-2xl font-semibold text-foreground tabular-nums">
+        {value}
+      </div>
+      <div className="text-[10px] font-semibold text-emerald-700">{delta}</div>
+      <Sparkline />
     </div>
   );
 }
 
-interface FloatingCoinProps {
-  className?: string;
-  size?: "sm" | "md";
-}
-
-function FloatingCoin({ className, size = "md" }: FloatingCoinProps) {
-  const dims = size === "sm" ? "size-7" : "size-10";
-  const icon = size === "sm" ? "size-3.5" : "size-5";
+function Sparkline() {
   return (
-    <span
-      className={cn(
-        "bg-gradient-primary absolute inline-flex items-center justify-center rounded-full text-primary-foreground shadow-rest",
-        dims,
-        className,
-      )}
+    <svg
+      viewBox="0 0 100 24"
+      preserveAspectRatio="none"
+      className="mt-1.5 h-6 w-full"
       aria-hidden
     >
-      <Coins className={icon} />
-    </span>
+      <defs>
+        <linearGradient id="bm-spark" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0" stopColor="#4378E2" />
+          <stop offset="1" stopColor="#6A23FD" />
+        </linearGradient>
+      </defs>
+      <polyline
+        fill="none"
+        stroke="url(#bm-spark)"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        points="0,20 12,16 24,18 36,12 48,14 60,8 72,10 84,5 100,3"
+      />
+    </svg>
   );
 }
-

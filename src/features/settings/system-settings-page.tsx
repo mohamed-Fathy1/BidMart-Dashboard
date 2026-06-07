@@ -444,7 +444,6 @@ export function SystemSettingsPage() {
                       id={`social_${key}`}
                       type="url"
                       inputMode="url"
-                      dir="ltr"
                       placeholder="https://…"
                       aria-invalid={!!error || undefined}
                       className="ps-9"
