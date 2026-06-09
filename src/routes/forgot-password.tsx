@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthShell } from "@/components/layout/auth-shell";
 import { PasswordInput } from "@/components/shared/password-input";
+import { onFormEnterKeyDown } from "@/lib/form-enter-submit";
 
 export const Route = createFileRoute("/forgot-password")({
   component: ForgotPasswordPage,
@@ -106,6 +107,7 @@ function EmailStep({ isPending, onSubmit }: EmailStepProps) {
 
       <form
         onSubmit={form.handleSubmit(onSubmit)}
+        onKeyDown={onFormEnterKeyDown}
         className="space-y-4"
         noValidate
       >
@@ -185,6 +187,7 @@ function ResetStep({
 
       <form
         onSubmit={form.handleSubmit(onSubmit)}
+        onKeyDown={onFormEnterKeyDown}
         className="space-y-4"
         noValidate
       >

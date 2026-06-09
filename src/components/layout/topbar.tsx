@@ -41,6 +41,7 @@ export function Topbar() {
   const user = useAuthStore((s) => s.user)
   const logout = useLogoutMutation()
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
   const unreadQuery = useAdminUnreadCountQuery()
   const unreadCount = unreadQuery.data ?? 0
 
@@ -109,7 +110,7 @@ export function Topbar() {
           <LangSwitcher />
           <Separator orientation="vertical" className="mx-1 h-5" />
 
-          <Popover>
+          <Popover open={notificationsOpen} onOpenChange={setNotificationsOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
@@ -129,7 +130,9 @@ export function Topbar() {
               </Button>
             </PopoverTrigger>
             <PopoverContent align="end" className="w-96 overflow-hidden p-0">
-              <NotificationsPopoverContent />
+              <NotificationsPopoverContent
+                onNavigate={() => setNotificationsOpen(false)}
+              />
             </PopoverContent>
           </Popover>
 

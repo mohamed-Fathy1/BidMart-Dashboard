@@ -18,6 +18,7 @@ import {
   Banknote,
   Landmark,
   Bell,
+  Radio,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { PERMISSIONS, type Permission } from '@/lib/permissions'
@@ -146,6 +147,13 @@ export const navSections: NavSection[] = [
             icon: FileText,
             to: '/settings/content',
             permission: PERMISSIONS.settings.update,
+          },
+          {
+            kind: 'leaf',
+            labelKey: 'shell:nav.live_show_settings',
+            icon: Radio,
+            to: '/settings/live-shows',
+            permission: PERMISSIONS.shows.view,
           },
         ],
       },

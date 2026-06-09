@@ -49,14 +49,14 @@
     "otp_resent": "OTP has been resent to your email",
     "password_reset_success": "Password has been reset successfully",
     "hero": {
-      "tagline": "Run the marketplace, end to end",
-      "subtitle": "Approvals, moderation, and operations from one console.",
-      "queue_eyebrow": "Live moderation",
-      "queue_title": "Sellers awaiting verification",
-      "queue_count": "12 stores in the review queue",
-      "row_status_pending": "Pending",
-      "kpi_label": "Active auctions",
-      "kpi_delta": "+12% this week"
+      "tagline": "Every signal. One console.",
+      "subtitle": "Approvals, moderation, payouts, and the live auction floor — watched from one operator surface.",
+      "console_eyebrow": "Operations · Live",
+      "metric": {
+        "auctions_label": "Active auctions",
+        "sellers_label": "Sellers in review",
+        "buyers_label": "Buyers online"
+      }
     }
   },
   "errors": {

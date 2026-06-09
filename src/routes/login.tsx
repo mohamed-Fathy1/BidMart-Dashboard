@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PasswordInput } from "@/components/shared/password-input";
 import { AuthShell } from "@/components/layout/auth-shell";
+import { onFormEnterKeyDown } from "@/lib/form-enter-submit";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -58,6 +59,7 @@ function LoginPage() {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
+        onKeyDown={onFormEnterKeyDown}
         className="space-y-4"
         noValidate
       >

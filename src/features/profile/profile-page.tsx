@@ -20,6 +20,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuthStore } from "@/features/auth/auth.store";
 import { useUpdateAdminProfileMutation } from "@/features/auth/auth.queries";
 import { accountInitials } from "@/lib/utils";
+import { onFormEnterKeyDown } from "@/lib/form-enter-submit";
 
 const profileFormSchema = z.object({
   fullName: z
@@ -134,6 +135,7 @@ export function ProfilePage() {
               className="space-y-6"
               noValidate
               onSubmit={handleSubmit(onSubmit)}
+              onKeyDown={onFormEnterKeyDown}
             >
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-2 sm:col-span-1">

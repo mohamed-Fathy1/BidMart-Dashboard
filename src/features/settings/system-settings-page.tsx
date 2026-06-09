@@ -29,6 +29,7 @@ import { PhoneNumberListField } from '@/components/shared/phone-number-list-fiel
 import { PageHeader } from '@/components/shared/page-header'
 import { PERMISSIONS, usePermission } from '@/lib/permissions'
 import { format } from '@/lib/format'
+import { onFormEnterKeyDown } from '@/lib/form-enter-submit'
 import { cn } from '@/lib/utils'
 import {
   useSystemSettingsQuery,
@@ -279,6 +280,7 @@ export function SystemSettingsPage() {
       className="mx-auto w-full max-w-4xl space-y-6"
       noValidate
       onSubmit={handleSubmit(onSubmit)}
+      onKeyDown={onFormEnterKeyDown}
     >
       <PageHeader
         title={t('settings:system.title')}

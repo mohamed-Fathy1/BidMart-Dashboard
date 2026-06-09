@@ -24,6 +24,7 @@
     "settings": "Settings",
     "settings_general": "General",
     "settings_content": "Content",
+    "live_show_settings": "Live show duration",
     "notifications": "Notifications"
   },
   "topbar": {

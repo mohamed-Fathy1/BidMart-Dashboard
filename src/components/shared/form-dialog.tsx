@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { onFormEnterKeyDown } from '@/lib/form-enter-submit'
 
 const SIZE_CLASSES = {
   sm: 'sm:max-w-md',
@@ -107,6 +108,7 @@ export function FormDialog({
             e.preventDefault()
             onSubmit(e)
           }}
+          onKeyDown={onFormEnterKeyDown}
           className="grid min-h-0"
         >
           {errorMessage && (

@@ -67,6 +67,10 @@ export const PERMISSIONS = {
     view: "admin:settings:view",
     update: "admin:settings:update",
   },
+  shows: {
+    view: "admin:shows:view",
+    update: "admin:shows:update",
+  },
   wallets: {
     view: "admin:wallets:view",
   },
