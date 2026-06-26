@@ -61,14 +61,14 @@ export function Topbar() {
         size="icon"
         onClick={toggleMobileNav}
         aria-label={t('shell:sidebar.open_menu')}
-        className="ms-2 shrink-0 lg:hidden"
+        className="ms-1 shrink-0 lg:hidden"
       >
         <Menu className="h-5 w-5" />
       </Button>
 
       {/* Brand — width syncs with the sidebar on desktop; intrinsic on mobile */}
       <div
-        className="flex h-full shrink-0 items-center gap-2 overflow-hidden ps-2 pe-4 lg:ps-4"
+        className="flex h-full shrink-0 items-center gap-2 overflow-hidden ps-2 pe-2 lg:ps-4 lg:pe-4"
         style={{
           width: isDesktop
             ? collapsed
@@ -81,7 +81,9 @@ export function Topbar() {
         <BrandLogo className="h-8 w-8 shrink-0" gradientId="bidmart-topbar-gradient" />
         <span
           className={cn(
-            'text-base font-semibold tracking-tight text-foreground whitespace-nowrap',
+            // Hidden on phones to keep the action cluster from overflowing the
+            // viewport; the logo mark still identifies the app. Shown from sm up.
+            'hidden text-base font-semibold tracking-tight text-foreground whitespace-nowrap sm:inline',
             'transition-opacity duration-[var(--duration-layout)] ease-[var(--ease-sidebar)]',
             collapsed ? 'opacity-0' : 'opacity-100',
           )}
@@ -90,7 +92,7 @@ export function Topbar() {
         </span>
       </div>
 
-      <div className="flex flex-1 items-center gap-2 px-3 sm:gap-4 sm:px-6">
+      <div className="flex flex-1 items-center gap-2 px-2 sm:gap-4 sm:px-6">
         <div className="min-w-0 flex-1">
           <div className="hidden sm:block">
             <BreadcrumbTrail />

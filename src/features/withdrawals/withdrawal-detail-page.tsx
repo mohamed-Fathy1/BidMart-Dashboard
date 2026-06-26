@@ -570,7 +570,7 @@ export function WithdrawalDetailPage({ id }: WithdrawalDetailPageProps) {
         })}
       >
         <div className="space-y-4">
-          <dl className="grid grid-cols-2 gap-3 rounded-lg border border-border bg-muted/40 px-4 py-3">
+          <dl className="grid grid-cols-1 gap-3 rounded-lg border border-border bg-muted/40 px-4 py-3 sm:grid-cols-2">
             <div className="space-y-0.5">
               <dt className="text-xs text-muted-foreground">
                 {t('withdrawals:adjust_dialog.summary_requested')}

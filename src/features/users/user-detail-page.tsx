@@ -337,13 +337,13 @@ function UserHeroCard({ user }: { user: AdminUserDetail }) {
             ) : null}
           </div>
         </div>
-        <div className="grid grid-cols-3 overflow-hidden rounded-md border border-border bg-muted/30">
+        <div className="grid grid-cols-1 overflow-hidden rounded-md border border-border bg-muted/30 sm:grid-cols-3">
           {stats.map((s, i) => (
             <div
               key={s.key}
               className={cn(
                 'min-w-0 px-4 py-3 sm:px-5',
-                i > 0 && 'border-s border-border',
+                i > 0 && 'border-t border-border sm:border-t-0 sm:border-s',
               )}
             >
               <div className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
