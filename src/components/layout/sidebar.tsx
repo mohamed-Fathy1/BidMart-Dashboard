@@ -3,6 +3,7 @@ import { Link, useMatchRoute, useNavigate, useRouterState } from '@tanstack/reac
 import { ChevronsLeft, ChevronsRight, ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
+import { useIsDesktop } from '@/lib/use-media-query'
 import { can, usePermission, type Permission } from '@/lib/permissions'
 import { useAuthStore } from '@/features/auth/auth.store'
 import { useUIStore } from '@/features/ui/ui.store'
@@ -362,19 +363,48 @@ function Section({ section, collapsed, isFirst }: { section: NavSection; collaps
 }
 
 export function Sidebar() {
-  const { t } = useTranslation()
-  const collapsed = useUIStore((s) => s.sidebarCollapsed)
+  const { t, i18n } = useTranslation()
+  const collapsedPref = useUIStore((s) => s.sidebarCollapsed)
   const toggleSidebar = useUIStore((s) => s.toggleSidebar)
+  const mobileNavOpen = useUIStore((s) => s.mobileNavOpen)
+  const closeMobileNav = useUIStore((s) => s.closeMobileNav)
+  const isDesktop = useIsDesktop()
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
+
+  // On mobile the drawer always shows the full-width, expanded rail; the
+  // persisted collapse preference only applies to the desktop sidebar.
+  const collapsed = isDesktop ? collapsedPref : false
+  const isRtl = i18n.dir() === 'rtl'
+
+  // Close the drawer on every navigation (mobile only — harmless on desktop).
+  useEffect(() => {
+    closeMobileNav()
+  }, [pathname, closeMobileNav])
+
+  const offCanvas = !isDesktop && !mobileNavOpen
+  const drawerTransform = offCanvas
+    ? isRtl
+      ? 'translateX(100%)'
+      : 'translateX(-100%)'
+    : 'translateX(0)'
 
   return (
     <aside
-      className="fixed inset-inline-start-0 z-30 overflow-hidden bg-sidebar-background"
+      className={cn(
+        'fixed inset-inline-start-0 z-30 overflow-hidden bg-sidebar-background',
+        // Mobile drawer floats above the canvas with a hairline edge + lift;
+        // the desktop rail separates by background color only (no shadow).
+        'border-e border-border shadow-[var(--shadow-floating)] lg:border-0 lg:shadow-none',
+      )}
       style={{
         top: 'var(--topbar-height)',
         bottom: 0,
-        width: collapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)',
-        transition: 'width var(--duration-layout) var(--ease-sidebar)',
+        width: isDesktop && collapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)',
+        transform: drawerTransform,
+        transition:
+          'width var(--duration-layout) var(--ease-sidebar), transform var(--duration-layout) var(--ease-sidebar)',
       }}
+      inert={offCanvas}
     >
       <div
         className="flex h-full flex-col"
@@ -391,7 +421,7 @@ export function Sidebar() {
           ))}
         </nav>
 
-        <div className="border-t border-border/50 p-3">
+        <div className="hidden border-t border-border/50 p-3 lg:block">
           <button
             onClick={toggleSidebar}
             className={cn(

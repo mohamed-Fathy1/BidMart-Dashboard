@@ -44,7 +44,9 @@
   },
   "sidebar": {
     "collapse": "Collapse sidebar",
-    "expand": "Expand sidebar"
+    "expand": "Expand sidebar",
+    "open_menu": "Open navigation menu",
+    "close_menu": "Close navigation menu"
   },
   "notifications": {
     "summary": "{{unread}} unread · {{today}} today",

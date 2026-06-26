@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Bell, LogOut, Search, User } from 'lucide-react'
+import { Bell, LogOut, Menu, Search, User } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -28,6 +28,7 @@ import { NotificationsPopoverContent } from '@/features/notifications/notificati
 import { useAdminUnreadCountQuery } from '@/features/notifications/notifications.queries'
 import { BrandLogo } from '@/components/shared/brand-logo'
 import { accountInitials, cn } from '@/lib/utils'
+import { useIsDesktop } from '@/lib/use-media-query'
 import { useUIStore } from '@/features/ui/ui.store'
 import { useAuthStore } from '@/features/auth/auth.store'
 import { useLogoutMutation } from '@/features/auth/auth.queries'
@@ -37,7 +38,12 @@ const IS_MAC =
 
 export function Topbar() {
   const { t } = useTranslation()
-  const collapsed = useUIStore((s) => s.sidebarCollapsed)
+  const collapsedPref = useUIStore((s) => s.sidebarCollapsed)
+  const toggleMobileNav = useUIStore((s) => s.toggleMobileNav)
+  const isDesktop = useIsDesktop()
+  // On mobile the rail is a drawer (always full-width when open), so the
+  // collapse preference only drives brand width on desktop.
+  const collapsed = isDesktop ? collapsedPref : false
   const user = useAuthStore((s) => s.user)
   const logout = useLogoutMutation()
   const [paletteOpen, setPaletteOpen] = useState(false)
@@ -49,13 +55,26 @@ export function Topbar() {
 
   return (
     <header className="z-40 flex h-[var(--topbar-height)] shrink-0 items-center bg-sidebar-background">
-      {/* Brand — width syncs with sidebar */}
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onClick={toggleMobileNav}
+        aria-label={t('shell:sidebar.open_menu')}
+        className="ms-2 shrink-0 lg:hidden"
+      >
+        <Menu className="h-5 w-5" />
+      </Button>
+
+      {/* Brand — width syncs with the sidebar on desktop; intrinsic on mobile */}
       <div
-        className="flex h-full shrink-0 items-center gap-2 overflow-hidden px-4"
+        className="flex h-full shrink-0 items-center gap-2 overflow-hidden ps-2 pe-4 lg:ps-4"
         style={{
-          width: collapsed
-            ? 'var(--sidebar-collapsed-width)'
-            : 'var(--sidebar-width)',
+          width: isDesktop
+            ? collapsed
+              ? 'var(--sidebar-collapsed-width)'
+              : 'var(--sidebar-width)'
+            : 'auto',
           transition: 'width var(--duration-layout) var(--ease-sidebar)',
         }}
       >
@@ -71,9 +90,11 @@ export function Topbar() {
         </span>
       </div>
 
-      <div className="flex flex-1 items-center gap-4 px-6">
+      <div className="flex flex-1 items-center gap-2 px-3 sm:gap-4 sm:px-6">
         <div className="min-w-0 flex-1">
-          <BreadcrumbTrail />
+          <div className="hidden sm:block">
+            <BreadcrumbTrail />
+          </div>
         </div>
 
         <button
@@ -129,7 +150,7 @@ export function Topbar() {
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-96 overflow-hidden p-0">
+            <PopoverContent align="end" className="w-96 max-w-[calc(100vw-1rem)] overflow-hidden p-0">
               <NotificationsPopoverContent
                 onNavigate={() => setNotificationsOpen(false)}
               />

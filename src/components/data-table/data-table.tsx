@@ -512,8 +512,8 @@ export function DataTable<TData, TValue>({
       </div>
 
       {pagination && onPaginationChange && (pageCount ?? 0) > 0 && (
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             {totalRecords !== undefined && (
               <span className="text-sm text-muted-foreground whitespace-nowrap">
                 {t('common:labels.showing')}{' '}

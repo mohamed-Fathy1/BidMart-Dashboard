@@ -44,7 +44,9 @@
   },
   "sidebar": {
     "collapse": "طي القائمة",
-    "expand": "توسيع القائمة"
+    "expand": "توسيع القائمة",
+    "open_menu": "فتح قائمة التنقل",
+    "close_menu": "إغلاق قائمة التنقل"
   },
   "notifications": {
     "summary": "{{unread}} غير مقروء · {{today}} اليوم",
