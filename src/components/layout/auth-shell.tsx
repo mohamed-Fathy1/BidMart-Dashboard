@@ -20,7 +20,7 @@ export function AuthShell({ children }: AuthShellProps) {
         <section className="flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-20">
           <div className="mx-auto w-full max-w-sm space-y-8">
             <BrandWordmark
-              logoClassName="h-9 w-9"
+              logoClassName="h-12 w-12"
               textClassName="text-sm font-semibold tracking-tight"
             />
             {children}
