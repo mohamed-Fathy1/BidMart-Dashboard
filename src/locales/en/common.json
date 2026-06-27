@@ -65,7 +65,8 @@
     "network": "Network connection error",
     "boundary_title": "Something went wrong",
     "boundary_hint": "An unexpected error interrupted this page. Try reloading.",
-    "reload": "Reload page"
+    "reload": "Reload page",
+    "unsupported_image_type": "Unsupported image type."
   },
   "labels": {
     "actions": "Actions",

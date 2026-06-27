@@ -41,11 +41,10 @@
     "results_count_other": "{{count}} tickets"
   },
   "empty": {
-    "title": "No tickets yet",
-    "description": "When users send messages from the app, they will appear here.",
-    "filtered_title": "No matches",
-    "filtered_description": "Try adjusting the filters or clearing them.",
-    "clear_filters": "Clear filters"
+    "no_data_title": "No tickets yet",
+    "no_data_hint": "When users send messages from the app, they will appear here.",
+    "no_results_title": "No matches",
+    "no_results_hint": "Try adjusting the filters or clearing them."
   },
   "actions": {
     "view": "View ticket",

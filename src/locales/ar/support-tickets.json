@@ -45,11 +45,10 @@
     "results_count_other": "{{count}} تذكرة"
   },
   "empty": {
-    "title": "لا توجد تذاكر بعد",
-    "description": "ستظهر هنا فور إرسال المستخدمين رسائلهم من التطبيق.",
-    "filtered_title": "لا توجد نتائج",
-    "filtered_description": "جرّب تعديل الفلاتر أو مسحها.",
-    "clear_filters": "مسح الفلاتر"
+    "no_data_title": "لا توجد تذاكر بعد",
+    "no_data_hint": "ستظهر هنا فور إرسال المستخدمين رسائلهم من التطبيق.",
+    "no_results_title": "لا توجد نتائج",
+    "no_results_hint": "جرّب تعديل الفلاتر أو مسحها."
   },
   "actions": {
     "view": "عرض التذكرة",
