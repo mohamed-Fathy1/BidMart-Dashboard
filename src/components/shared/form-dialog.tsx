@@ -80,7 +80,16 @@ export function FormDialog({
       onOpenChange(next)
     }}>
       <DialogContent
-        className={cn('gap-0 p-0', SIZE_CLASSES[size], contentClassName)}
+        className={cn(
+          // Bound the whole dialog to the visible viewport (dvh accounts for
+          // mobile browser UI bars) and lay it out as a flex column so the
+          // header + footer stay pinned and only the body scrolls. Without the
+          // cap a form taller than the screen is centered and clips its title
+          // and actions off both ends.
+          'flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden p-0',
+          SIZE_CLASSES[size],
+          contentClassName,
+        )}
         onOpenAutoFocus={(e) => {
           if (!suppressInitialFocus) return
           e.preventDefault()
@@ -93,7 +102,7 @@ export function FormDialog({
           }
         }}
       >
-        <DialogHeader className="border-b border-border/60 px-6 py-5 pe-12">
+        <DialogHeader className="shrink-0 border-b border-border/60 px-6 py-5 pe-12">
           <DialogTitle className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 focus-visible:ring-offset-card">
             {title}
           </DialogTitle>
@@ -109,25 +118,25 @@ export function FormDialog({
             onSubmit(e)
           }}
           onKeyDown={onFormEnterKeyDown}
-          className="grid min-h-0"
+          className="flex min-h-0 flex-1 flex-col"
         >
           {errorMessage && (
             <div
               role="alert"
-              className="border-b border-destructive/30 bg-destructive/5 px-6 py-3 text-sm text-destructive"
+              className="shrink-0 border-b border-destructive/30 bg-destructive/5 px-6 py-3 text-sm text-destructive"
             >
               {errorMessage}
             </div>
           )}
           <div
             className={cn(
-              'max-h-[min(70vh,580px)] overflow-y-auto px-6 py-5 [scrollbar-gutter:stable]',
+              'min-h-0 flex-1 overflow-y-auto px-6 py-5 [scrollbar-gutter:stable]',
               bodyClassName,
             )}
           >
             {children}
           </div>
-          <DialogFooter className="border-t border-border bg-muted/60 px-6 py-4">
+          <DialogFooter className="shrink-0 border-t border-border bg-muted/60 px-6 py-4">
             <Button
               type="button"
               variant="outline"
