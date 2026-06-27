@@ -100,7 +100,9 @@ export function ComplaintChatThread({
   const closedReason = deriveChatClosedReason(status, conversationClosed)
   const dateFormatter = useMemo(
     () =>
-      new Intl.DateTimeFormat(i18n.language === 'ar' ? 'ar-SA' : 'en-US', {
+      // Force the Gregorian calendar in Arabic (ar-SA defaults to Hijri) so
+      // chat day separators match the app-wide date convention in lib/format.
+      new Intl.DateTimeFormat(i18n.language === 'ar' ? 'ar-SA-u-ca-gregory' : 'en-US', {
         weekday: 'long',
         day: 'numeric',
         month: 'long',

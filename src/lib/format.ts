@@ -4,6 +4,19 @@ function getLocale(): string {
   return i18n.language === 'ar' ? 'ar-SA' : 'en-SA'
 }
 
+/**
+ * Locale for date/time formatting. `ar-SA` defaults to the Islamic
+ * (Umm al-Qura) calendar, which renders dates as Hijri (e.g. "٧ ذو الحجة
+ * ١٤٤٧ هـ"). We force the Gregorian calendar via the `-u-ca-gregory`
+ * extension so Arabic dates show Gregorian months in Arabic ("٧ فبراير
+ * ٢٠٢٦") — same calendar as English, just localized names/digits.
+ * The extension is ignored by `Intl.NumberFormat`, so number formatting
+ * keeps using `getLocale()`.
+ */
+function getDateLocale(): string {
+  return i18n.language === 'ar' ? 'ar-SA-u-ca-gregory' : 'en-SA'
+}
+
 export const format = {
   currency(value: number, options?: { currency?: string }): string {
     return new Intl.NumberFormat(getLocale(), {
@@ -26,7 +39,7 @@ export const format = {
 
   date(iso: string | Date): string {
     const d = typeof iso === 'string' ? new Date(iso) : iso
-    return new Intl.DateTimeFormat(getLocale(), {
+    return new Intl.DateTimeFormat(getDateLocale(), {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -35,7 +48,7 @@ export const format = {
 
   dateTime(iso: string | Date): string {
     const d = typeof iso === 'string' ? new Date(iso) : iso
-    return new Intl.DateTimeFormat(getLocale(), {
+    return new Intl.DateTimeFormat(getDateLocale(), {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -46,7 +59,7 @@ export const format = {
 
   time(iso: string | Date): string {
     const d = typeof iso === 'string' ? new Date(iso) : iso
-    return new Intl.DateTimeFormat(getLocale(), {
+    return new Intl.DateTimeFormat(getDateLocale(), {
       hour: '2-digit',
       minute: '2-digit',
     }).format(d)
@@ -55,7 +68,7 @@ export const format = {
   dateRange(from: string | Date, to: string | Date): string {
     const f = typeof from === 'string' ? new Date(from) : from
     const t = typeof to === 'string' ? new Date(to) : to
-    const fmt = new Intl.DateTimeFormat(getLocale(), {
+    const fmt = new Intl.DateTimeFormat(getDateLocale(), {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
