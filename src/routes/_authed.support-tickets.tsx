@@ -2,7 +2,7 @@ import { Outlet, createFileRoute, useMatchRoute } from '@tanstack/react-router'
 import { PERMISSIONS, usePermission } from '@/lib/permissions'
 import { SupportTicketsListPage } from '@/features/support-tickets/support-tickets-list-page'
 import { PermissionDenied } from '@/routes/_authed'
-import { parseListSearchBase, readEnum, type ListSearchBase } from '@/lib/list-search'
+import { parseListSearchBase, readEnum, readIsoDate, type ListSearchBase } from '@/lib/list-search'
 import type {
   SupportTicketMessageType,
   SupportTicketStatus,
@@ -21,12 +21,6 @@ const TYPE_VALUES: readonly SupportTicketMessageType[] = [
   'ADVERTISEMENT',
   'OTHER',
 ]
-
-const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/
-
-function readIsoDate(raw: unknown): string | undefined {
-  return typeof raw === 'string' && ISO_DATE_REGEX.test(raw) ? raw : undefined
-}
 
 export interface SupportTicketsSearch extends ListSearchBase {
   status?: SupportTicketStatus

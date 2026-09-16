@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { AxiosRequestConfig } from 'axios'
+import type { AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios'
 import { toast } from 'sonner'
 import { env } from '@/lib/env'
 import { i18n } from '@/lib/i18n'
@@ -10,14 +10,16 @@ export const api = axios.create({
   timeout: 30_000,
 })
 
-api.interceptors.request.use((config) => {
+function attachAuthHeaders(config: InternalAxiosRequestConfig): InternalAxiosRequestConfig {
   const token = useAuthStore.getState().token
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
   config.headers['Accept-Language'] = i18n.language
   return config
-})
+}
+
+api.interceptors.request.use(attachAuthHeaders)
 
 /** Unauthenticated admin auth mutations — don't force redirect on incorrect credentials etc. */
 const PUBLIC_ADMIN_AUTH_RELATIVE_PATHS = [
@@ -97,6 +99,19 @@ export function extractErrorMessage(error: unknown): string | undefined {
   return undefined
 }
 
+/** The plain `{ message, code, status }` object every non-auth failure rejects with. */
+function toPlainRejection(error: unknown): { message: string; code?: string; status?: number } {
+  const message =
+    extractApiErrorMessage(error) ??
+    (axios.isAxiosError(error) ? error.message : undefined) ??
+    i18n.t('common:errors.unexpected')
+  return {
+    message,
+    code: extractApiErrorCode(error),
+    status: axios.isAxiosError(error) ? error.response?.status : 500,
+  }
+}
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -112,16 +127,61 @@ api.interceptors.response.use(
         return Promise.reject(error)
       }
     }
-    const message =
-      extractApiErrorMessage(error) ??
-      (axios.isAxiosError(error) ? error.message : undefined) ??
-      i18n.t('common:errors.unexpected')
-    const code = extractApiErrorCode(error)
-    return Promise.reject({
-      message,
-      code,
-      status: axios.isAxiosError(error) ? error.response?.status : 500,
-    })
+    return Promise.reject(toPlainRejection(error))
+  },
+)
+
+/**
+ * Instance for endpoints that answer with a file body (`responseType: 'blob'`).
+ * Same auth headers as `api`; its own response interceptor decodes a Blob error
+ * body back to the JSON envelope so callers still get `{ message, code, status }`.
+ */
+export const fileApi = axios.create({
+  baseURL: env.VITE_API_URL,
+  timeout: 120_000,
+})
+
+fileApi.interceptors.request.use(attachAuthHeaders)
+
+function readBlobText(blob: Blob): Promise<string> {
+  if (typeof blob.text === 'function') return blob.text()
+  // jsdom's Blob has no `text()`; FileReader covers it.
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result ?? ''))
+    reader.onerror = () => reject(reader.error)
+    reader.readAsText(blob)
+  })
+}
+
+async function decodeBlobErrorBody(error: unknown): Promise<void> {
+  if (!axios.isAxiosError(error)) return
+  const body = error.response?.data
+  if (!(body instanceof Blob)) return
+  try {
+    error.response!.data = JSON.parse(await readBlobText(body))
+  } catch {
+    error.response!.data = undefined
+  }
+}
+
+fileApi.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    await decodeBlobErrorBody(error)
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status
+      if (status === 401) {
+        useAuthStore.getState().clearSession()
+        window.location.href = '/login'
+        return Promise.reject(error)
+      }
+      if (status === 403) {
+        toast.error(i18n.t('common:errors.permission_denied'))
+        return Promise.reject(error)
+      }
+    }
+    return Promise.reject(toPlainRejection(error))
   },
 )
 

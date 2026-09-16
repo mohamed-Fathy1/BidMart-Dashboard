@@ -42,6 +42,15 @@ navSections.forEach((s) => s.entries.forEach((e) => visit(e, [])))
 PATH_TO_CRUMBS['/profile'] = [
   { labelKey: 'shell:topbar.my_profile', to: '/profile' },
 ]
+// Statistics tabs live under /overview; the layout's own crumb is special-cased in buildCrumbs.
+PATH_TO_CRUMBS['/overview/business-activity'] = [
+  { labelKey: 'shell:nav.overview', to: '/overview' },
+  { labelKey: 'overview:tabs.business_activity', to: '/overview/business-activity' },
+]
+PATH_TO_CRUMBS['/overview/financial-overview'] = [
+  { labelKey: 'shell:nav.overview', to: '/overview' },
+  { labelKey: 'overview:tabs.financial_overview', to: '/overview/financial-overview' },
+]
 
 function isProbablyId(seg: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}/i.test(seg) || /^\d+$/.test(seg)

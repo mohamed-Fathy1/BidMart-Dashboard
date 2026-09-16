@@ -39,14 +39,15 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const permissions = useAuthStore((s) => s.permissions)
+  const isSuperAdmin = useAuthStore((s) => s.user?.isSuperAdmin)
   const logout = useLogoutMutation()
 
   const visible = useMemo(
     () =>
       ALL_NAV_LEAVES.filter(
-        (l) => !l.permission || can(permissions, l.permission),
+        (l) => !l.permission || isSuperAdmin || can(permissions, l.permission),
       ),
-    [permissions],
+    [permissions, isSuperAdmin],
   )
 
   function go(to: string) {

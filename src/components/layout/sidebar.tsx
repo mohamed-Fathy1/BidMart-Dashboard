@@ -340,9 +340,11 @@ function FilteredGroup({ group, collapsed }: { group: NavGroup; collapsed: boole
 
 function useVisibleChildren(children: NavLeaf[]): NavLeaf[] {
   const permissions = useAuthStore((s) => s.permissions)
+  const isSuperAdmin = useAuthStore((s) => s.user?.isSuperAdmin)
   return useMemo(
-    () => children.filter((c) => !c.permission || can(permissions, c.permission)),
-    [children, permissions],
+    () =>
+      children.filter((c) => !c.permission || isSuperAdmin || can(permissions, c.permission)),
+    [children, permissions, isSuperAdmin],
   )
 }
 

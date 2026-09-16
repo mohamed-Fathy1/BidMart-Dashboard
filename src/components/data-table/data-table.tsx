@@ -181,6 +181,11 @@ interface DataTableProps<TData, TValue> {
    * `no_data_title`, `no_data_hint`, `no_results_title`, `no_results_hint`.
    */
   emptyKeyPrefix?: string
+  /**
+   * Rendered inside the table card, between the rows and the pagination bar.
+   * Use it for a totals row that must stay attached to the table it sums.
+   */
+  footer?: ReactNode
 }
 
 const defaultPageSizeOptions = [10, 25, 50]
@@ -207,6 +212,7 @@ export function DataTable<TData, TValue>({
   hasActiveFilters = false,
   onClearFilters,
   emptyKeyPrefix = 'components:data_table',
+  footer,
 }: DataTableProps<TData, TValue>) {
   const { t } = useTranslation()
 
@@ -509,6 +515,7 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
+        {footer && <div className="border-t border-border bg-muted/30">{footer}</div>}
       </div>
 
       {pagination && onPaginationChange && (pageCount ?? 0) > 0 && (

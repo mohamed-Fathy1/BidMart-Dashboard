@@ -11,8 +11,23 @@ export interface ListSearchBase {
 
 export const DEFAULT_LIMIT = 10
 
-function readString(raw: unknown): string | undefined {
+/** Read a non-empty string search param; blank values are dropped from the URL. */
+export function readString(raw: unknown): string | undefined {
   return typeof raw === 'string' && raw.trim().length > 0 ? raw : undefined
+}
+
+const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/
+
+/** Read a `YYYY-MM-DD` search param; anything else is dropped. */
+export function readIsoDate(raw: unknown): string | undefined {
+  return typeof raw === 'string' && ISO_DATE_REGEX.test(raw) ? raw : undefined
+}
+
+/** Read an integer search param constrained to `[min, max]`. */
+export function readIntInRange(raw: unknown, min: number, max: number): number | undefined {
+  const n = typeof raw === 'number' ? raw : typeof raw === 'string' ? Number(raw) : NaN
+  if (!Number.isInteger(n) || n < min || n > max) return undefined
+  return n
 }
 
 function readNumber(raw: unknown): number | undefined {

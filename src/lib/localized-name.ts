@@ -59,3 +59,17 @@ export function useLocalizedName() {
   const { i18n } = useTranslation()
   return (record: BilingualName | null | undefined) => localizedName(record, i18n)
 }
+
+/**
+ * Pick one of a bilingual pair returned as two sibling fields (`nameEn` /
+ * `nameAr`, `categoryNameEn` / `categoryNameAr`). Falls back to the other
+ * language when the preferred one is empty, and to `''` when both are.
+ */
+export function localizedPair(
+  en: string | null | undefined,
+  ar: string | null | undefined,
+  i18n: Pick<I18nInstance, 'language'>,
+): string {
+  const arabic = i18n.language === 'ar'
+  return (arabic ? ar : en) || (arabic ? en : ar) || ''
+}

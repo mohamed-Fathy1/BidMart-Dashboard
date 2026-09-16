@@ -34,3 +34,32 @@ describe('unwrap', () => {
     expect(unwrap(42 as unknown as number)).toBe(42)
   })
 })
+
+describe('unwrapPaginatedWithMeta', () => {
+  it('keeps the report extras on meta', async () => {
+    const { unwrapPaginatedWithMeta } = await import('./api')
+    const body = {
+      success: true,
+      data: [{ id: 1 }],
+      meta: {
+        page: 1,
+        limit: 20,
+        total: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPrevPage: false,
+        dateRange: { startDate: '2026-08-10', endDate: '2026-09-08' },
+        totals: { totalOrderValue: 10 },
+      },
+    }
+    const out = unwrapPaginatedWithMeta(body)
+    expect(out.data).toEqual([{ id: 1 }])
+    expect(out.meta.dateRange.endDate).toBe('2026-09-08')
+    expect(out.meta.totals.totalOrderValue).toBe(10)
+  })
+
+  it('throws when meta is missing', async () => {
+    const { unwrapPaginatedWithMeta } = await import('./api')
+    expect(() => unwrapPaginatedWithMeta({ success: true, data: [] })).toThrow(/meta/)
+  })
+})

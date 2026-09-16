@@ -108,5 +108,45 @@
       "go_to_next": "Go to next page",
       "more_pages": "More pages"
     }
+  },
+  "period_filter": {
+    "label": "Period",
+    "anchor": "Anchor date",
+    "previous": "Previous period",
+    "next": "Next period",
+    "DAILY": "Day",
+    "WEEKLY": "Week",
+    "MONTHLY": "Month",
+    "QUARTERLY": "Quarter",
+    "YEARLY": "Year",
+    "errors": {
+      "date_in_future": "Pick a date up to today.",
+      "date_invalid": "Enter a valid date."
+    }
+  },
+  "date_range": {
+    "label": "Date range",
+    "from": "From",
+    "to": "To",
+    "preset": "Preset",
+    "custom": "Custom",
+    "presets": {
+      "last_7_days": "Last 7 days",
+      "last_30_days": "Last 30 days",
+      "last_90_days": "Last 90 days",
+      "this_month": "This month",
+      "last_month": "Last month"
+    },
+    "errors": {
+      "from_after_to": "From must be on or before To.",
+      "to_in_future": "To cannot be in the future."
+    }
+  },
+  "ranked_list": {
+    "empty": "Nothing to rank yet.",
+    "rank": "Rank {{rank}}"
+  },
+  "timeline": {
+    "empty": "No events yet."
   }
 }

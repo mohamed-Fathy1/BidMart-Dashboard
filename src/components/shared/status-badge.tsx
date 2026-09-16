@@ -109,6 +109,32 @@ interface WalletTxBadgeProps {
   className?: string
 }
 
+/** Orders & Sales report groups (exhaustive partition of every order). */
+type OrderGroupValue = 'COMPLETED' | 'CANCELLED' | 'IN_PROGRESS' | 'REFUNDED'
+
+interface OrderGroupBadgeProps {
+  type: 'orderGroup'
+  status: OrderGroupValue
+  className?: string
+}
+
+/** Financial Report fulfilment buckets (paid orders only). */
+type FinancialBucketValue = 'COMPLETED' | 'IN_DELIVERY' | 'IN_PROGRESS'
+
+interface FinancialBucketBadgeProps {
+  type: 'financialBucket'
+  status: FinancialBucketValue
+  className?: string
+}
+
+type ShowStatusValue = 'SCHEDULED' | 'LIVE' | 'ENDED'
+
+interface ShowBadgeProps {
+  type: 'show'
+  status: ShowStatusValue
+  className?: string
+}
+
 type StatusBadgeProps =
   | AccountBadgeProps
   | SellerBadgeProps
@@ -123,6 +149,9 @@ type StatusBadgeProps =
   | SupportTicketTypeBadgeProps
   | SettlementBadgeProps
   | WalletTxBadgeProps
+  | OrderGroupBadgeProps
+  | FinancialBucketBadgeProps
+  | ShowBadgeProps
 
 interface StatusStyle {
   badge: string
@@ -226,6 +255,25 @@ const walletTxStyles: Record<WalletTxTypeValue, StatusStyle> = {
   ADMIN_ADJUSTMENT: warning,
 }
 
+const orderGroupStyles: Record<OrderGroupValue, StatusStyle> = {
+  COMPLETED:   positive,
+  CANCELLED:   neutral,
+  IN_PROGRESS: info,
+  REFUNDED:    warning,
+}
+
+const financialBucketStyles: Record<FinancialBucketValue, StatusStyle> = {
+  COMPLETED:   positive,
+  IN_DELIVERY: info,
+  IN_PROGRESS: warning,
+}
+
+const showStyles: Record<ShowStatusValue, StatusStyle> = {
+  SCHEDULED: info,
+  LIVE:      positive,
+  ENDED:     neutral,
+}
+
 const fallbackStyle: StatusStyle = neutral
 
 function getStyle(status: string, type: StatusBadgeProps['type']): StatusStyle {
@@ -254,6 +302,12 @@ function getStyle(status: string, type: StatusBadgeProps['type']): StatusStyle {
       return settlementStyles[status as SettlementStatusValue] ?? fallbackStyle
     case 'walletTx':
       return walletTxStyles[status as WalletTxTypeValue] ?? fallbackStyle
+    case 'orderGroup':
+      return orderGroupStyles[status as OrderGroupValue] ?? fallbackStyle
+    case 'financialBucket':
+      return financialBucketStyles[status as FinancialBucketValue] ?? fallbackStyle
+    case 'show':
+      return showStyles[status as ShowStatusValue] ?? fallbackStyle
     case 'account':
     default:
       return accountStyles[status as AccountStatus] ?? fallbackStyle
@@ -286,6 +340,15 @@ function getI18nKey(status: string, type: StatusBadgeProps['type']): string {
   }
   if (type === 'walletTx') {
     return `wallet:tx_type.${status}`
+  }
+  if (type === 'orderGroup') {
+    return `reports:order_group.${status}`
+  }
+  if (type === 'financialBucket') {
+    return `reports:financial_bucket.${status}`
+  }
+  if (type === 'show') {
+    return `reports:show_status.${status}`
   }
   return `components:status.${status}`
 }

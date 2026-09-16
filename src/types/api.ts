@@ -727,3 +727,387 @@ export interface SettlementDetail {
 
   adminNotes: string | null;
 }
+
+/* ------------------------------------------------------------------ */
+/*  Admin reports (Sprint 8)                                           */
+/* ------------------------------------------------------------------ */
+
+/** Contract A (statistics): the calendar unit containing the anchor date. */
+export type StatisticsPeriod = "DAILY" | "WEEKLY" | "MONTHLY" | "QUARTERLY" | "YEARLY";
+
+/** The window the server actually used, echoed on every reporting response. */
+export interface ReportDateRange {
+  startDate: string;
+  endDate: string;
+}
+
+export type RecentActivityType = "ORDER" | "LIVE_SHOW" | "NEW_USER";
+
+export interface RecentActivityItem {
+  type: RecentActivityType;
+  /** Order id, show id or user id depending on `type`. */
+  id: string;
+  title: string;
+  subtitle: string | null;
+  /** Order total on `ORDER` rows, null otherwise. */
+  amount: number | null;
+  occurredAt: string;
+}
+
+export interface StatisticsOverview {
+  period: StatisticsPeriod;
+  dateRange: ReportDateRange;
+  newUsers: number;
+  /** Snapshot of sellers approved and active right now; ignores the window. */
+  activeSellers: number;
+  listedProducts: number;
+  sales: {
+    totalRevenue: number;
+    totalOrders: number;
+    platformCommission: number;
+  };
+  engagement: {
+    views: number;
+    savedItems: number;
+    comments: number;
+    shares: number;
+    /** Already a percentage (28.9 means 28.9%). */
+    engagementRate: number;
+  };
+  recentActivity: RecentActivityItem[];
+}
+
+export interface TopCategory {
+  categoryId: string;
+  nameEn: string;
+  nameAr: string;
+  revenue: number;
+  orderCount: number;
+}
+
+export interface TopSeller {
+  /** A users.id, not a store id. */
+  sellerId: string;
+  username: string;
+  fullName: string | null;
+  profilePicture: string | null;
+  revenue: number;
+  orderCount: number;
+}
+
+export interface StatisticsBusinessActivity {
+  period: StatisticsPeriod;
+  dateRange: ReportDateRange;
+  liveShows: number;
+  completedDeals: number;
+  totalSales: number;
+  topCategories: TopCategory[];
+  topSellers: TopSeller[];
+}
+
+export interface CountValue {
+  count: number;
+  value: number;
+}
+
+export interface MonthlyFinancialRow {
+  /** `YYYY-MM`. */
+  month: string;
+  grossSales: number;
+  commission: number;
+  tax: number;
+  shipping: number;
+  refunds: number;
+  platformRevenue: number;
+  /** `platformRevenue - refunds`; can be negative. */
+  net: number;
+}
+
+export interface StatisticsFinancialOverview {
+  period: StatisticsPeriod;
+  dateRange: ReportDateRange;
+  totalCommissionRevenue: number;
+  totalSales: number;
+  totalTaxCollected: number;
+  totalShippingCollected: number;
+  pendingPayment: CountValue;
+  delivered: CountValue;
+  refunds: CountValue;
+  /** Always exactly 12 rows, oldest first, ending with the month of `dateRange.endDate`. */
+  monthlyReports: MonthlyFinancialRow[];
+}
+
+export type OrderStatus =
+  | "AWAITING_PAYMENT"
+  | "PENDING_CONFIRMATION"
+  | "PREPARING_PACKAGE"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "CANCELLED"
+  | "REFUND_REQUESTED"
+  | "REFUNDED_FULL"
+  | "REFUNDED_PARTIAL"
+  | "REFUND_REJECTED"
+  | "PAYOUT_COMPLETE";
+
+/** Financial Report buckets: a fulfilment view of paid orders only. */
+export type FinancialReportStatus = "COMPLETED" | "IN_DELIVERY" | "IN_PROGRESS";
+
+/** Orders & Sales groups: an exhaustive partition of every order created in the window. */
+export type OrderReportGroup = "COMPLETED" | "CANCELLED" | "IN_PROGRESS" | "REFUNDED";
+
+export type LivestreamSortBy = "DATE" | "SALES" | "VIEWS";
+
+export type ShowStatus = "SCHEDULED" | "LIVE" | "ENDED";
+
+export type OrderHistoryStep =
+  | "CREATED"
+  | "PAID"
+  | "PROCESSING"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "CANCELLED"
+  | "REFUND_REQUESTED"
+  | "REFUNDED";
+
+export type OrderSaleType = "AUCTION" | "FIXED_PRICE";
+
+export type OrderRefundStatus =
+  | "PENDING"
+  | "ACCEPTED_FULL"
+  | "ACCEPTED_PARTIAL"
+  | "REJECTED";
+
+/** Paging plus the window the server resolved. Every report list carries this. */
+export interface ReportMeta extends PaginationMeta {
+  dateRange: ReportDateRange;
+}
+
+export interface FinancialReportTotals {
+  totalStoreProfit: number;
+  totalTaxCollected: number;
+  totalPlatformProfit: number;
+  totalOrderValue: number;
+  /** Row count of the whole filtered set; equals `meta.total`. */
+  totalCompletedOrders: number;
+}
+
+export interface FinancialReportMeta extends ReportMeta {
+  /** Covers the whole filtered set, never the page. */
+  totals: FinancialReportTotals;
+}
+
+export interface FinancialReportRow {
+  orderId: string;
+  orderNumber: string;
+  orderDate: string;
+  customerName: string;
+  storeName: string;
+  storeProfit: number;
+  taxValue: number;
+  platformProfit: number;
+  shippingFee: number;
+  orderTotal: number;
+  currencyCode: string;
+  status: OrderStatus;
+}
+
+export interface RatingsStarBreakdown {
+  oneStar: number;
+  twoStar: number;
+  threeStar: number;
+  fourStar: number;
+  fiveStar: number;
+}
+
+export interface RatingsReportSummary {
+  /** Null when no review matches the filters. Never 0. */
+  platformAverageRating: number | null;
+  totalReviews: number;
+  starBreakdown: RatingsStarBreakdown;
+}
+
+export interface RatingsReportMeta extends ReportMeta {
+  summary: RatingsReportSummary;
+}
+
+export interface RatingsReviewRow {
+  ratingId: string;
+  reviewerUsername: string;
+  reviewerFullName: string | null;
+  sellerId: string;
+  sellerName: string;
+  productTitle: string | null;
+  categoryNameEn: string | null;
+  categoryNameAr: string | null;
+  rating: number;
+  review: string | null;
+  createdAt: string;
+}
+
+export interface RatingsSellerRow {
+  sellerId: string;
+  sellerName: string;
+  username: string;
+  profilePicture: string | null;
+  /** Null when the seller has no reviews in the window. */
+  averageRating: number | null;
+  reviewCount: number;
+}
+
+export interface OrdersReportSummary {
+  completed: number;
+  cancelled: number;
+  inProgress: number;
+  refunded: number;
+  /** Every order created in the window; the four groups sum to this. */
+  totalOrders: number;
+  /** Average over counted sales only; 0 when there are none. */
+  averageOrderValue: number;
+}
+
+export interface OrdersReportMeta extends ReportMeta {
+  summary: OrdersReportSummary;
+}
+
+export interface OrderReportRow {
+  orderId: string;
+  orderNumber: string;
+  buyerName: string;
+  sellerName: string;
+  status: OrderStatus;
+  /** Server English label; the UI translates `status` instead. */
+  statusLabel: string;
+  group: OrderReportGroup;
+  /** When the order entered its current status. */
+  statusDate: string;
+  total: number;
+  currencyCode: string;
+  createdAt: string;
+}
+
+export interface LivestreamTopShow {
+  showId: string;
+  title: string;
+  hostName: string;
+  sales: number;
+  views: number;
+}
+
+export interface LivestreamsReportSummary {
+  totalShows: number;
+  totalViews: number;
+  /** An estimate over finalised analytics only. */
+  totalWatchMinutes: number;
+  /** Null when no show aired in the window. */
+  topShow: LivestreamTopShow | null;
+}
+
+export interface LivestreamsReportMeta extends ReportMeta {
+  summary: LivestreamsReportSummary;
+}
+
+export interface LivestreamReportRow {
+  showId: string;
+  title: string;
+  hostId: string;
+  hostName: string;
+  status: ShowStatus;
+  broadcastDate: string;
+  /** Start to end in whole minutes; start to now while LIVE. */
+  durationMinutes: number;
+  views: number;
+  peakViewers: number;
+  comments: number;
+  ordersCount: number;
+  sales: number;
+}
+
+export interface OrderDrilldownCustomer {
+  id: string;
+  username: string;
+  fullName: string | null;
+  email: string | null;
+  phoneNumber: string | null;
+  profilePicture: string | null;
+}
+
+export interface OrderDrilldownStore {
+  sellerId: string;
+  username: string;
+  /** The seller's full name falling back to username; there is no separate store name. */
+  storeName: string;
+  profilePicture: string | null;
+  productId: string;
+  productTitle: string;
+  productImage: string | null;
+  quantity: number;
+  unitPrice: number;
+  /** Goods value before discount (equals `money.subtotal`). */
+  amount: number;
+}
+
+export interface OrderDrilldownMoney {
+  subtotal: number;
+  discountAmount: number;
+  shippingFee: number;
+  taxAmount: number;
+  commissionAmount: number;
+  total: number;
+  sellerNet: number;
+  currencyCode: string;
+}
+
+export interface OrderRefund {
+  status: OrderRefundStatus;
+  /** Null while no amount has been agreed. */
+  refundAmount: number | null;
+  requestedAt: string;
+  /** Null while pending. */
+  resolvedAt: string | null;
+}
+
+export interface OrderHistoryEntry {
+  step: OrderHistoryStep;
+  /** Server English label; the UI translates `step` instead. */
+  label: string;
+  at: string;
+}
+
+export interface OrderDrilldown {
+  orderId: string;
+  orderNumber: string;
+  status: OrderStatus;
+  /** Server English label; the UI translates `status` instead. */
+  statusLabel: string;
+  saleType: OrderSaleType;
+  createdAt: string;
+  paidAt: string | null;
+  customer: OrderDrilldownCustomer;
+  store: OrderDrilldownStore;
+  money: OrderDrilldownMoney;
+  /** Null when no refund was ever requested. */
+  refund: OrderRefund | null;
+  /** The order's real history in order; steps without a timestamp are absent. */
+  statusHistory: OrderHistoryEntry[];
+}
+
+/** A paginated list whose `meta` carries report extras (`dateRange`, `totals`, `summary`). */
+export interface PaginatedWithMeta<TRow, TMeta extends PaginationMeta> {
+  data: TRow[];
+  meta: TMeta;
+}
+
+/**
+ * Like `unwrapPaginated`, but keeps the report's extra `meta` keys typed.
+ * Throws if `meta` is missing.
+ */
+export function unwrapPaginatedWithMeta<TRow, TMeta extends PaginationMeta>(
+  body: { success?: boolean; data: TRow[]; meta?: TMeta },
+): PaginatedWithMeta<TRow, TMeta> {
+  const { data, meta } = body;
+  if (!meta) {
+    throw new Error("unwrapPaginatedWithMeta: response has no `meta` — endpoint not paginated?");
+  }
+  return { data, meta };
+}

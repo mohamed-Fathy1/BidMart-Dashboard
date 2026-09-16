@@ -118,6 +118,22 @@ export function useUrlListState<TSearch extends BaseSearch>(
     [navigate],
   )
 
+  /**
+   * Patch a single non-filter key without touching the page. Use it for UI
+   * state that rides on the URL (an open detail sheet, a tab) so paging holds.
+   */
+  const setParam = useCallback(
+    <K extends keyof TSearch>(key: K, value: TSearch[K] | undefined | '') => {
+      void navigate({
+        search: (prev) => ({
+          ...prev,
+          [key]: value === '' || value === undefined ? undefined : value,
+        }),
+      })
+    },
+    [navigate],
+  )
+
   return {
     /** The full typed search object (incl. per-feature filters). */
     search,
@@ -127,5 +143,6 @@ export function useUrlListState<TSearch extends BaseSearch>(
     setPagination,
     setSearch,
     setFilter,
+    setParam,
   }
 }

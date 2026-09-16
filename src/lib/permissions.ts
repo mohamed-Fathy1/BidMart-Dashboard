@@ -82,6 +82,9 @@ export const PERMISSIONS = {
   notifications: {
     broadcast: "admin:notifications:broadcast",
   },
+  reports: {
+    view: "admin:reports:view",
+  },
 } as const;
 
 // For each group K, collect the union of its values; then union across all groups.

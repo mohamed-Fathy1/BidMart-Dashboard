@@ -83,3 +83,30 @@ describe('axios sanity', () => {
     expect(axios.isAxiosError(new Error('x'))).toBe(false)
   })
 })
+
+describe('fileApi', () => {
+  it('decodes a Blob error body so `code` and `message` survive the rejection', async () => {
+    const { fileApi } = await import('./axios')
+    const body = JSON.stringify({
+      success: false,
+      error: { code: 'REPORT_EXPORT_TOO_LARGE', message: 'Export too large' },
+    })
+    const blob = new Blob([body], { type: 'application/json' })
+    const err = new AxiosError('Request failed', '400', undefined, undefined, {
+      data: blob,
+      status: 400,
+      statusText: 'Bad Request',
+      headers: {},
+      config: { headers: new AxiosHeaders() },
+    })
+    const rejected = fileApi.interceptors.response as unknown as {
+      handlers: Array<{ rejected: (e: unknown) => Promise<unknown> }>
+    }
+    const onRejected = rejected.handlers[0]!.rejected
+    await expect(onRejected(err)).rejects.toEqual({
+      message: 'Export too large',
+      code: 'REPORT_EXPORT_TOO_LARGE',
+      status: 400,
+    })
+  })
+})

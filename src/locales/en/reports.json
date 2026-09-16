@@ -1,0 +1,283 @@
+{
+  "common": {
+    "none": "—",
+    "retry": "Retry",
+    "load_failed": "Could not load this report.",
+    "view_customer": "View customer",
+    "view_seller": "View seller"
+  },
+  "range": {
+    "showing": "Showing {{range}}",
+    "default_hint": "Last 30 days including today"
+  },
+  "errors": {
+    "REPORT_DATE_IN_FUTURE": "The date is in the future. Pick a date up to today.",
+    "REPORT_EXPORT_TOO_LARGE": "This export is too large. Narrow the filters and try again.",
+    "ORDER_NOT_FOUND": "Order not found."
+  },
+  "financial_bucket": {
+    "COMPLETED": "Completed",
+    "IN_DELIVERY": "In delivery",
+    "IN_PROGRESS": "In progress"
+  },
+  "order_group": {
+    "COMPLETED": "Completed",
+    "CANCELLED": "Cancelled",
+    "IN_PROGRESS": "In progress",
+    "REFUNDED": "Refunded"
+  },
+  "show_status": {
+    "SCHEDULED": "Scheduled",
+    "LIVE": "Live",
+    "ENDED": "Ended"
+  },
+  "order_status": {
+    "AWAITING_PAYMENT": "Awaiting payment",
+    "PENDING_CONFIRMATION": "Pending confirmation",
+    "PREPARING_PACKAGE": "Preparing package",
+    "SHIPPED": "Shipped",
+    "DELIVERED": "Delivered",
+    "CANCELLED": "Cancelled",
+    "REFUND_REQUESTED": "Refund requested",
+    "REFUNDED_FULL": "Refunded in full",
+    "REFUNDED_PARTIAL": "Refunded in part",
+    "REFUND_REJECTED": "Refund rejected",
+    "PAYOUT_COMPLETE": "Payout complete"
+  },
+  "history_step": {
+    "CREATED": "Created",
+    "PAID": "Paid",
+    "PROCESSING": "Processing",
+    "SHIPPED": "Shipped",
+    "DELIVERED": "Delivered",
+    "CANCELLED": "Cancelled",
+    "REFUND_REQUESTED": "Refund requested",
+    "REFUNDED": "Refunded"
+  },
+  "sale_type": {
+    "AUCTION": "Auction",
+    "FIXED_PRICE": "Fixed price"
+  },
+  "refund_status": {
+    "PENDING": "Pending",
+    "ACCEPTED_FULL": "Accepted in full",
+    "ACCEPTED_PARTIAL": "Accepted in part",
+    "REJECTED": "Rejected"
+  },
+  "order_detail": {
+    "title": "Order {{number}}",
+    "description": "Live detail. It can differ from the row that opened it.",
+    "loading": "Loading order…",
+    "not_found": "Order not found",
+    "not_found_hint": "It may have been deleted, or the id is wrong.",
+    "close": "Close",
+    "sections": {
+      "customer": "Customer",
+      "store": "Store and product",
+      "money": "Money",
+      "refund": "Refund",
+      "history": "History"
+    },
+    "fields": {
+      "username": "Username",
+      "email": "Email",
+      "phone": "Phone",
+      "sale_type": "Sale type",
+      "created_at": "Created",
+      "paid_at": "Paid",
+      "never_paid": "Never paid",
+      "product": "Product",
+      "quantity": "Quantity",
+      "unit_price": "Unit price",
+      "goods": "Goods",
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "shipping": "Shipping",
+      "tax": "Tax",
+      "commission": "Commission",
+      "total": "Total",
+      "seller_net": "Seller net",
+      "refund_status": "Status",
+      "refund_amount": "Amount",
+      "refund_not_agreed": "Not agreed yet",
+      "requested_at": "Requested",
+      "resolved_at": "Resolved",
+      "unresolved": "Pending"
+    },
+    "no_refund": "No refund was requested.",
+    "history_empty": "No history yet."
+  },
+  "financial": {
+    "title": "Financial Report",
+    "description": "Every paid order in the range, at the amounts charged at checkout.",
+    "meta_one": "{{count}} order",
+    "meta_other": "{{count}} orders",
+    "filters": {
+      "store": "Store name",
+      "customer": "Customer name",
+      "status": "Status",
+      "all_statuses": "All statuses"
+    },
+    "columns": {
+      "order_number": "Order",
+      "date": "Date",
+      "customer": "Customer",
+      "store": "Store",
+      "store_profit": "Store profit",
+      "tax": "Tax",
+      "platform_profit": "Platform profit",
+      "shipping": "Shipping",
+      "order_total": "Order total",
+      "status": "Status"
+    },
+    "totals": {
+      "title": "Totals",
+      "caption_one": "Totals for the {{count}} filtered order",
+      "caption_other": "Totals for all {{count}} filtered orders",
+      "store_profit": "Store profit",
+      "tax": "Tax",
+      "platform_profit": "Platform profit",
+      "order_value": "Order value",
+      "orders": "Orders"
+    },
+    "export": {
+      "button": "Export",
+      "xlsx": "Excel (.xlsx)",
+      "pdf": "PDF",
+      "busy": "Preparing file…",
+      "started": "Download started.",
+      "failed": "Export failed."
+    },
+    "empty": {
+      "no_data_title": "No paid orders in this range",
+      "no_data_hint": "Orders appear here once a payment lands.",
+      "no_results_title": "No orders match these filters",
+      "no_results_hint": "Clear a filter or widen the range."
+    }
+  },
+  "ratings": {
+    "title": "Ratings & Reviews",
+    "description": "Every review in the range, and each seller's average.",
+    "tabs": {
+      "reviews": "Reviews",
+      "sellers": "Sellers"
+    },
+    "meta_reviews_one": "{{count}} review",
+    "meta_reviews_other": "{{count}} reviews",
+    "meta_sellers_one": "{{count}} seller",
+    "meta_sellers_other": "{{count}} sellers",
+    "filters": {
+      "seller": "Seller name",
+      "rating": "Rating",
+      "all_ratings": "All ratings",
+      "stars_one": "{{count}} star",
+      "stars_other": "{{count}} stars",
+      "category": "Category",
+      "all_categories": "All categories"
+    },
+    "summary": {
+      "average": "Average rating",
+      "out_of": "/ 5",
+      "no_ratings": "No ratings yet",
+      "total_reviews": "Reviews",
+      "breakdown": "Star breakdown",
+      "caption": "Average of the reviews matching these filters"
+    },
+    "columns": {
+      "reviewer": "Reviewer",
+      "seller": "Seller",
+      "product": "Product",
+      "category": "Category",
+      "rating": "Rating",
+      "review": "Review",
+      "date": "Date",
+      "average": "Average rating",
+      "reviews": "Reviews"
+    },
+    "empty_reviews": {
+      "no_data_title": "No reviews in this range",
+      "no_data_hint": "Reviews appear here once buyers rate an order.",
+      "no_results_title": "No reviews match these filters",
+      "no_results_hint": "Clear a filter or widen the range."
+    },
+    "empty_sellers": {
+      "no_data_title": "No sellers yet",
+      "no_data_hint": "Sellers appear here once a store is approved.",
+      "no_results_title": "No sellers match these filters",
+      "no_results_hint": "Clear the search or widen the range."
+    }
+  },
+  "orders": {
+    "title": "Orders & Sales",
+    "description": "Every order created in the range, grouped by outcome.",
+    "meta_one": "{{count}} order",
+    "meta_other": "{{count}} orders",
+    "tiles": {
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "in_progress": "In progress",
+      "refunded": "Refunded",
+      "total_orders": "Total orders",
+      "average_order_value": "Average order value",
+      "average_hint": "Paid orders only",
+      "filter_hint": "Select a tile to filter the list. The tiles always describe the whole window.",
+      "clear": "Show all"
+    },
+    "columns": {
+      "order_number": "Order",
+      "buyer": "Buyer",
+      "seller": "Seller",
+      "status": "Status",
+      "status_date": "Status since",
+      "total": "Total",
+      "created": "Created"
+    },
+    "empty": {
+      "no_data_title": "No orders in this range",
+      "no_data_hint": "Orders appear here once buyers check out.",
+      "no_results_title": "No orders in this group",
+      "no_results_hint": "Pick another group or widen the range."
+    }
+  },
+  "livestreams": {
+    "title": "Livestreams & Engagement",
+    "description": "Per-broadcast performance in the range.",
+    "meta_one": "{{count}} show",
+    "meta_other": "{{count}} shows",
+    "sort": {
+      "label": "Sort by",
+      "DATE": "Date",
+      "SALES": "Sales",
+      "VIEWS": "Views"
+    },
+    "summary": {
+      "shows": "Shows",
+      "views": "Views",
+      "watch_time": "Watch time",
+      "watch_time_hint": "Estimate",
+      "top_show": "Top show",
+      "top_show_hint": "Highest sales in the window",
+      "no_shows": "No shows",
+      "host": "Host",
+      "sales": "Sales"
+    },
+    "columns": {
+      "show": "Show",
+      "host": "Host",
+      "status": "Status",
+      "broadcast": "Broadcast",
+      "duration": "Duration",
+      "views": "Views",
+      "peak": "Peak viewers",
+      "comments": "Comments",
+      "orders": "Orders",
+      "sales": "Sales"
+    },
+    "empty": {
+      "no_data_title": "No shows aired in this range",
+      "no_data_hint": "Shows appear here once a seller goes live.",
+      "no_results_title": "No shows in this range",
+      "no_results_hint": "Widen the range."
+    }
+  }
+}

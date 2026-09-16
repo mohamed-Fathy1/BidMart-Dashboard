@@ -1,6 +1,8 @@
 {
   "nav": {
-    "overview": "Overview",
+    "overview": "Statistics",
+    "reports": "Reports",
+    "financial_report": "Financial Report",
     "users": "Users",
     "moderators": "Moderators",
     "admins": "Admins",
@@ -72,89 +74,6 @@
       "daily_digest": {
         "title": "Daily digest ready",
         "subtitle": "128 actions · 412 events · 1.2k logs"
-      }
-    }
-  },
-  "overview": {
-    "title": "Overview",
-    "subtitle": "Welcome back. Pick a section from the sidebar to manage the marketplace.",
-    "coming_soon": "Dashboard widgets are coming soon.",
-    "last_refreshed": "Last 30 days · last refreshed just now",
-    "actions": {
-      "last_30_days": "Last 30 days",
-      "export": "Export"
-    },
-    "kpi": {
-      "total_users": "Total users",
-      "live_auctions": "Live auctions",
-      "pending_withdrawals": "Pending withdrawals",
-      "gmv_30d": "GMV (30d)",
-      "detail": {
-        "vs_prev_30d": "vs prev. 30d",
-        "right_now": "right now",
-        "awaiting_review": "awaiting review"
-      }
-    },
-    "chart": {
-      "title": "GMV trend",
-      "subtitle": "Daily gross merchandise value · all categories",
-      "range": {
-        "7d": "7d",
-        "30d": "30d",
-        "90d": "90d",
-        "1y": "1y"
-      },
-      "breakdown": {
-        "watches": "Watches",
-        "antiques": "Antiques",
-        "jewelry": "Jewelry",
-        "other": "Other"
-      }
-    },
-    "action_queue": {
-      "title": "Action queue",
-      "subtitle": "Items waiting on you",
-      "coming_soon": "Coming soon",
-      "items": {
-        "withdrawals": {
-          "label": "Withdrawals to review",
-          "sub": "SAR 9,021"
-        },
-        "providers": {
-          "label": "Provider applications",
-          "sub": "2 high-value"
-        },
-        "complaints": {
-          "label": "Open complaints",
-          "sub": "3 high priority"
-        },
-        "streams": {
-          "label": "Live streams to monitor",
-          "sub": "2,588 viewers"
-        }
-      }
-    },
-    "recent_activity": {
-      "title": "Recent activity",
-      "subtitle": "Latest admin actions across the platform",
-      "view_audit_log": "View audit log",
-      "actions": {
-        "approved_withdrawal": "approved withdrawal",
-        "verified_provider": "verified provider",
-        "suspended_user": "suspended user",
-        "flagged_withdrawal": "flagged withdrawal",
-        "ended_stream": "ended live stream"
-      }
-    },
-    "top_providers": {
-      "title": "Top providers · 30 days",
-      "subtitle": "Ranked by GMV contribution",
-      "categories": {
-        "jewelry": "Jewelry",
-        "antiques": "Antiques",
-        "collectibles": "Collectibles",
-        "automotive": "Automotive",
-        "watches": "Watches"
       }
     }
   }

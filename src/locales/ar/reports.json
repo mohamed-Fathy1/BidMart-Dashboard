@@ -1,0 +1,311 @@
+{
+  "common": {
+    "none": "—",
+    "retry": "إعادة المحاولة",
+    "load_failed": "تعذر تحميل هذا التقرير.",
+    "view_customer": "عرض العميل",
+    "view_seller": "عرض البائع"
+  },
+  "range": {
+    "showing": "عرض {{range}}",
+    "default_hint": "آخر 30 يومًا بما فيها اليوم"
+  },
+  "errors": {
+    "REPORT_DATE_IN_FUTURE": "التاريخ في المستقبل. اختر تاريخًا حتى اليوم.",
+    "REPORT_EXPORT_TOO_LARGE": "هذا التصدير كبير جدًا. ضيّق عوامل التصفية وحاول مرة أخرى.",
+    "ORDER_NOT_FOUND": "الطلب غير موجود."
+  },
+  "financial_bucket": {
+    "COMPLETED": "مكتمل",
+    "IN_DELIVERY": "قيد التوصيل",
+    "IN_PROGRESS": "قيد التنفيذ"
+  },
+  "order_group": {
+    "COMPLETED": "مكتمل",
+    "CANCELLED": "ملغى",
+    "IN_PROGRESS": "قيد التنفيذ",
+    "REFUNDED": "مسترد"
+  },
+  "show_status": {
+    "SCHEDULED": "مجدول",
+    "LIVE": "مباشر",
+    "ENDED": "منتهٍ"
+  },
+  "order_status": {
+    "AWAITING_PAYMENT": "بانتظار الدفع",
+    "PENDING_CONFIRMATION": "بانتظار التأكيد",
+    "PREPARING_PACKAGE": "جارٍ تجهيز الطرد",
+    "SHIPPED": "تم الشحن",
+    "DELIVERED": "تم التوصيل",
+    "CANCELLED": "ملغى",
+    "REFUND_REQUESTED": "طُلب الاسترداد",
+    "REFUNDED_FULL": "مسترد بالكامل",
+    "REFUNDED_PARTIAL": "مسترد جزئيًا",
+    "REFUND_REJECTED": "رُفض الاسترداد",
+    "PAYOUT_COMPLETE": "اكتمل الدفع للبائع"
+  },
+  "history_step": {
+    "CREATED": "أُنشئ",
+    "PAID": "دُفع",
+    "PROCESSING": "قيد المعالجة",
+    "SHIPPED": "شُحن",
+    "DELIVERED": "وُصّل",
+    "CANCELLED": "أُلغي",
+    "REFUND_REQUESTED": "طُلب الاسترداد",
+    "REFUNDED": "استُرد"
+  },
+  "sale_type": {
+    "AUCTION": "مزاد",
+    "FIXED_PRICE": "سعر ثابت"
+  },
+  "refund_status": {
+    "PENDING": "قيد الانتظار",
+    "ACCEPTED_FULL": "مقبول بالكامل",
+    "ACCEPTED_PARTIAL": "مقبول جزئيًا",
+    "REJECTED": "مرفوض"
+  },
+  "order_detail": {
+    "title": "الطلب {{number}}",
+    "description": "تفاصيل حية. قد تختلف عن الصف الذي فتحها.",
+    "loading": "جارٍ تحميل الطلب…",
+    "not_found": "الطلب غير موجود",
+    "not_found_hint": "ربما حُذف، أو أن المعرّف غير صحيح.",
+    "close": "إغلاق",
+    "sections": {
+      "customer": "العميل",
+      "store": "المتجر والمنتج",
+      "money": "المبالغ",
+      "refund": "الاسترداد",
+      "history": "السجل"
+    },
+    "fields": {
+      "username": "اسم المستخدم",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "sale_type": "نوع البيع",
+      "created_at": "أُنشئ",
+      "paid_at": "دُفع",
+      "never_paid": "لم يُدفع",
+      "product": "المنتج",
+      "quantity": "الكمية",
+      "unit_price": "سعر الوحدة",
+      "goods": "البضاعة",
+      "subtotal": "المجموع الفرعي",
+      "discount": "الخصم",
+      "shipping": "الشحن",
+      "tax": "الضريبة",
+      "commission": "العمولة",
+      "total": "الإجمالي",
+      "seller_net": "صافي البائع",
+      "refund_status": "الحالة",
+      "refund_amount": "المبلغ",
+      "refund_not_agreed": "لم يُتفق عليه بعد",
+      "requested_at": "طُلب",
+      "resolved_at": "حُسم",
+      "unresolved": "قيد الانتظار"
+    },
+    "no_refund": "لم يُطلب أي استرداد.",
+    "history_empty": "لا يوجد سجل بعد."
+  },
+  "financial": {
+    "title": "التقرير المالي",
+    "description": "كل طلب مدفوع في النطاق، بالمبالغ التي حُصّلت عند الدفع.",
+    "meta_zero": "{{count}} طلب",
+    "meta_one": "طلب واحد",
+    "meta_two": "طلبان",
+    "meta_few": "{{count}} طلبات",
+    "meta_many": "{{count}} طلبًا",
+    "meta_other": "{{count}} طلب",
+    "filters": {
+      "store": "اسم المتجر",
+      "customer": "اسم العميل",
+      "status": "الحالة",
+      "all_statuses": "كل الحالات"
+    },
+    "columns": {
+      "order_number": "الطلب",
+      "date": "التاريخ",
+      "customer": "العميل",
+      "store": "المتجر",
+      "store_profit": "ربح المتجر",
+      "tax": "الضريبة",
+      "platform_profit": "ربح المنصة",
+      "shipping": "الشحن",
+      "order_total": "إجمالي الطلب",
+      "status": "الحالة"
+    },
+    "totals": {
+      "title": "الإجماليات",
+      "caption_zero": "إجماليات {{count}} طلب مطابق",
+      "caption_one": "إجماليات الطلب المطابق الوحيد",
+      "caption_two": "إجماليات الطلبين المطابقين",
+      "caption_few": "إجماليات كل الطلبات المطابقة ({{count}})",
+      "caption_many": "إجماليات كل الطلبات المطابقة ({{count}})",
+      "caption_other": "إجماليات كل الطلبات المطابقة ({{count}})",
+      "store_profit": "ربح المتجر",
+      "tax": "الضريبة",
+      "platform_profit": "ربح المنصة",
+      "order_value": "قيمة الطلبات",
+      "orders": "الطلبات"
+    },
+    "export": {
+      "button": "تصدير",
+      "xlsx": "Excel (.xlsx)",
+      "pdf": "PDF",
+      "busy": "جارٍ تجهيز الملف…",
+      "started": "بدأ التنزيل.",
+      "failed": "فشل التصدير."
+    },
+    "empty": {
+      "no_data_title": "لا توجد طلبات مدفوعة في هذا النطاق",
+      "no_data_hint": "تظهر الطلبات هنا بعد إتمام الدفع.",
+      "no_results_title": "لا توجد طلبات مطابقة لعوامل التصفية",
+      "no_results_hint": "امسح أحد عوامل التصفية أو وسّع النطاق."
+    }
+  },
+  "ratings": {
+    "title": "التقييمات والمراجعات",
+    "description": "كل مراجعة في النطاق، ومتوسط تقييم كل بائع.",
+    "tabs": {
+      "reviews": "المراجعات",
+      "sellers": "البائعون"
+    },
+    "meta_reviews_zero": "{{count}} مراجعة",
+    "meta_reviews_one": "مراجعة واحدة",
+    "meta_reviews_two": "مراجعتان",
+    "meta_reviews_few": "{{count}} مراجعات",
+    "meta_reviews_many": "{{count}} مراجعة",
+    "meta_reviews_other": "{{count}} مراجعة",
+    "meta_sellers_zero": "{{count}} بائع",
+    "meta_sellers_one": "بائع واحد",
+    "meta_sellers_two": "بائعان",
+    "meta_sellers_few": "{{count}} بائعين",
+    "meta_sellers_many": "{{count}} بائعًا",
+    "meta_sellers_other": "{{count}} بائع",
+    "filters": {
+      "seller": "اسم البائع",
+      "rating": "التقييم",
+      "all_ratings": "كل التقييمات",
+      "stars_zero": "{{count}} نجمة",
+      "stars_one": "نجمة واحدة",
+      "stars_two": "نجمتان",
+      "stars_few": "{{count}} نجوم",
+      "stars_many": "{{count}} نجمة",
+      "stars_other": "{{count}} نجمة",
+      "category": "التصنيف",
+      "all_categories": "كل التصنيفات"
+    },
+    "summary": {
+      "average": "متوسط التقييم",
+      "out_of": "/ 5",
+      "no_ratings": "لا توجد تقييمات بعد",
+      "total_reviews": "المراجعات",
+      "breakdown": "توزيع النجوم",
+      "caption": "متوسط المراجعات المطابقة لعوامل التصفية"
+    },
+    "columns": {
+      "reviewer": "المراجع",
+      "seller": "البائع",
+      "product": "المنتج",
+      "category": "التصنيف",
+      "rating": "التقييم",
+      "review": "المراجعة",
+      "date": "التاريخ",
+      "average": "متوسط التقييم",
+      "reviews": "المراجعات"
+    },
+    "empty_reviews": {
+      "no_data_title": "لا توجد مراجعات في هذا النطاق",
+      "no_data_hint": "تظهر المراجعات هنا بعد أن يقيّم المشترون طلبًا.",
+      "no_results_title": "لا توجد مراجعات مطابقة لعوامل التصفية",
+      "no_results_hint": "امسح أحد عوامل التصفية أو وسّع النطاق."
+    },
+    "empty_sellers": {
+      "no_data_title": "لا يوجد بائعون بعد",
+      "no_data_hint": "يظهر البائعون هنا بعد اعتماد متجر.",
+      "no_results_title": "لا يوجد بائعون مطابقون لعوامل التصفية",
+      "no_results_hint": "امسح البحث أو وسّع النطاق."
+    }
+  },
+  "orders": {
+    "title": "الطلبات والمبيعات",
+    "description": "كل طلب أُنشئ في النطاق، مجمّعًا حسب النتيجة.",
+    "meta_zero": "{{count}} طلب",
+    "meta_one": "طلب واحد",
+    "meta_two": "طلبان",
+    "meta_few": "{{count}} طلبات",
+    "meta_many": "{{count}} طلبًا",
+    "meta_other": "{{count}} طلب",
+    "tiles": {
+      "completed": "مكتملة",
+      "cancelled": "ملغاة",
+      "in_progress": "قيد التنفيذ",
+      "refunded": "مستردة",
+      "total_orders": "إجمالي الطلبات",
+      "average_order_value": "متوسط قيمة الطلب",
+      "average_hint": "الطلبات المدفوعة فقط",
+      "filter_hint": "اختر بطاقة لتصفية القائمة. تصف البطاقات دائمًا الفترة كاملة.",
+      "clear": "عرض الكل"
+    },
+    "columns": {
+      "order_number": "الطلب",
+      "buyer": "المشتري",
+      "seller": "البائع",
+      "status": "الحالة",
+      "status_date": "الحالة منذ",
+      "total": "الإجمالي",
+      "created": "أُنشئ"
+    },
+    "empty": {
+      "no_data_title": "لا توجد طلبات في هذا النطاق",
+      "no_data_hint": "تظهر الطلبات هنا بعد أن يتم المشترون الشراء.",
+      "no_results_title": "لا توجد طلبات في هذه المجموعة",
+      "no_results_hint": "اختر مجموعة أخرى أو وسّع النطاق."
+    }
+  },
+  "livestreams": {
+    "title": "البث المباشر والتفاعل",
+    "description": "أداء كل بث في النطاق.",
+    "meta_zero": "{{count}} بث",
+    "meta_one": "بث واحد",
+    "meta_two": "بثّان",
+    "meta_few": "{{count}} بثوث",
+    "meta_many": "{{count}} بثًا",
+    "meta_other": "{{count}} بث",
+    "sort": {
+      "label": "ترتيب حسب",
+      "DATE": "التاريخ",
+      "SALES": "المبيعات",
+      "VIEWS": "المشاهدات"
+    },
+    "summary": {
+      "shows": "البثوث",
+      "views": "المشاهدات",
+      "watch_time": "وقت المشاهدة",
+      "watch_time_hint": "تقدير",
+      "top_show": "أفضل بث",
+      "top_show_hint": "الأعلى مبيعًا في الفترة",
+      "no_shows": "لا توجد بثوث",
+      "host": "المضيف",
+      "sales": "المبيعات"
+    },
+    "columns": {
+      "show": "البث",
+      "host": "المضيف",
+      "status": "الحالة",
+      "broadcast": "موعد البث",
+      "duration": "المدة",
+      "views": "المشاهدات",
+      "peak": "ذروة المشاهدين",
+      "comments": "التعليقات",
+      "orders": "الطلبات",
+      "sales": "المبيعات"
+    },
+    "empty": {
+      "no_data_title": "لم يُبث أي عرض في هذا النطاق",
+      "no_data_hint": "تظهر البثوث هنا بعد أن يبدأ بائع بثًا مباشرًا.",
+      "no_results_title": "لا توجد بثوث في هذا النطاق",
+      "no_results_hint": "وسّع النطاق."
+    }
+  }
+}

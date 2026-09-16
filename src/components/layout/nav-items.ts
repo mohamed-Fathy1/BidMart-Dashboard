@@ -19,6 +19,11 @@ import {
   Landmark,
   Bell,
   Radio,
+  BarChart3,
+  Receipt,
+  Star,
+  ShoppingBag,
+  Video,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { PERMISSIONS, type Permission } from '@/lib/permissions'
@@ -54,7 +59,50 @@ export const navSections: NavSection[] = [
   {
     id: 'pulse',
     entries: [
-      { kind: 'leaf', labelKey: 'shell:nav.overview', icon: LayoutDashboard, to: '/overview' },
+      {
+        kind: 'leaf',
+        labelKey: 'shell:nav.overview',
+        icon: LayoutDashboard,
+        to: '/overview',
+        permission: PERMISSIONS.reports.view,
+      },
+      {
+        kind: 'group',
+        labelKey: 'shell:nav.reports',
+        icon: BarChart3,
+        defaultTo: '/reports/financial',
+        matchPath: '/reports',
+        children: [
+          {
+            kind: 'leaf',
+            labelKey: 'shell:nav.financial_report',
+            icon: Receipt,
+            to: '/reports/financial',
+            permission: PERMISSIONS.reports.view,
+          },
+          {
+            kind: 'leaf',
+            labelKey: 'shell:nav.ratings',
+            icon: Star,
+            to: '/reports/ratings',
+            permission: PERMISSIONS.reports.view,
+          },
+          {
+            kind: 'leaf',
+            labelKey: 'shell:nav.orders',
+            icon: ShoppingBag,
+            to: '/reports/orders',
+            permission: PERMISSIONS.reports.view,
+          },
+          {
+            kind: 'leaf',
+            labelKey: 'shell:nav.live_streams',
+            icon: Video,
+            to: '/reports/livestreams',
+            permission: PERMISSIONS.reports.view,
+          },
+        ],
+      },
       { kind: 'leaf', labelKey: 'shell:nav.notifications', icon: Bell, to: '/notifications' },
     ],
   },

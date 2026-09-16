@@ -37,6 +37,47 @@ export const format = {
     }).format(value)
   },
 
+  /**
+   * Format a value that is already a percentage (28.9 means 28.9%), one
+   * decimal. `percent()` expects a ratio; the reporting API sends percentages.
+   */
+  percentValue(value: number): string {
+    return new Intl.NumberFormat(getLocale(), {
+      style: 'percent',
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    }).format(value / 100)
+  },
+
+  /** Compact notation for big counts and money in tight tiles ("1.2K", "3.4M"). */
+  compactNumber(value: number): string {
+    return new Intl.NumberFormat(getLocale(), {
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    }).format(value)
+  },
+
+  /** Whole minutes as "1 hr 18 min" (or just "42 min" under an hour). */
+  duration(minutes: number): string {
+    const total = Math.max(0, Math.round(minutes))
+    const hours = Math.floor(total / 60)
+    const mins = total % 60
+    const locale = getLocale()
+    const fmtHours = new Intl.NumberFormat(locale, {
+      style: 'unit',
+      unit: 'hour',
+      unitDisplay: 'short',
+    })
+    const fmtMinutes = new Intl.NumberFormat(locale, {
+      style: 'unit',
+      unit: 'minute',
+      unitDisplay: 'short',
+    })
+    if (hours === 0) return fmtMinutes.format(mins)
+    if (mins === 0) return fmtHours.format(hours)
+    return `${fmtHours.format(hours)} ${fmtMinutes.format(mins)}`
+  },
+
   date(iso: string | Date): string {
     const d = typeof iso === 'string' ? new Date(iso) : iso
     return new Intl.DateTimeFormat(getDateLocale(), {

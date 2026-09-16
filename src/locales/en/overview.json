@@ -1,0 +1,86 @@
+{
+  "title": "Statistics",
+  "description": "Platform health for the selected period.",
+  "tabs": {
+    "general": "General Overview",
+    "business_activity": "Business Activity",
+    "financial_overview": "Financial Overview"
+  },
+  "window": {
+    "showing": "Showing {{range}}",
+    "loading": "Resolving the window…"
+  },
+  "general": {
+    "new_users": "New users",
+    "active_sellers": "Active sellers",
+    "active_sellers_hint": "Right now, not the period",
+    "listed_products": "Listed products",
+    "total_revenue": "Total revenue",
+    "orders": "Orders",
+    "platform_commission": "Platform commission",
+    "engagement": {
+      "title": "Engagement",
+      "rate": "Engagement rate",
+      "rate_hint": "Saved items, comments and shares per view",
+      "views": "Views",
+      "saved": "Saved items",
+      "comments": "Comments",
+      "shares": "Shares",
+      "shares_hint": "Share intent"
+    },
+    "recent_activity": {
+      "title": "Recent activity",
+      "subtitle": "Newest 10 events in the window",
+      "empty": "No activity in this window.",
+      "type": {
+        "ORDER": "Order",
+        "LIVE_SHOW": "Live show",
+        "NEW_USER": "New user"
+      }
+    }
+  },
+  "business": {
+    "live_shows": "Live shows",
+    "completed_deals": "Completed deals",
+    "total_sales": "Total sales",
+    "top_categories": "Top categories",
+    "top_categories_hint": "Top 5 by revenue",
+    "top_sellers": "Top sellers",
+    "top_sellers_hint": "Top 5 by revenue",
+    "orders_count_one": "{{count}} order",
+    "orders_count_other": "{{count}} orders",
+    "empty": "Nothing sold in this window."
+  },
+  "financial": {
+    "commission_revenue": "Commission revenue",
+    "total_sales": "Total sales",
+    "tax_collected": "Tax collected",
+    "shipping_collected": "Shipping collected",
+    "pending_payment": "Pending payment",
+    "pending_payment_hint": "Unpaid orders created in the window",
+    "delivered": "Delivered",
+    "delivered_hint": "Orders delivered in the window",
+    "refunds": "Refunds",
+    "refunds_hint": "Refunds accepted in the window",
+    "orders_count_one": "{{count}} order",
+    "orders_count_other": "{{count}} orders",
+    "monthly": {
+      "title": "Last 12 months",
+      "hint": "Ends with the window's month. The period length does not change it.",
+      "month": "Month",
+      "gross_sales": "Gross sales",
+      "commission": "Commission",
+      "tax": "Tax",
+      "shipping": "Shipping",
+      "refunds": "Refunds",
+      "platform_revenue": "Platform revenue",
+      "net": "Net",
+      "chart_label": "Gross sales, platform revenue and net by month"
+    }
+  },
+  "errors": {
+    "load_failed": "Could not load statistics.",
+    "retry": "Retry",
+    "REPORT_DATE_IN_FUTURE": "Pick a date up to today."
+  }
+}

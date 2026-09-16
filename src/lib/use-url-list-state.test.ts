@@ -98,4 +98,18 @@ describe('useUrlListState', () => {
       renderHook(() => useUrlListState<FooSearch>({})),
     ).toThrow(/pass `route`/)
   })
+
+  it('setParam patches one key and leaves the page alone', () => {
+    const stub = makeStub({ page: 4, status: 'active' })
+    const { result } = renderHook(() =>
+      useUrlListState<FooSearch & { order?: string }>({
+        search: stub.search,
+        navigate: stub.navigate,
+      }),
+    )
+    act(() => result.current.setParam('order', 'abc'))
+    expect(stub.search).toEqual({ page: 4, status: 'active', order: 'abc' })
+    act(() => result.current.setParam('order', undefined))
+    expect(stub.search).toEqual({ page: 4, status: 'active', order: undefined })
+  })
 })
