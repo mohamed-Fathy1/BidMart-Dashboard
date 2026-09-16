@@ -32,9 +32,9 @@ export const Route = createFileRoute('/_authed/complaints')({
 
 function ComplaintsRoute() {
   const allowed = usePermission(PERMISSIONS.complaints.view)
+  const matchRoute = useMatchRoute()
   if (!allowed) return <PermissionDenied />
 
-  const matchRoute = useMatchRoute()
   const detailMatch = matchRoute({ to: '/complaints/$complaintId' })
 
   return detailMatch ? <Outlet /> : <ComplaintsListPage />

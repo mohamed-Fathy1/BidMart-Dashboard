@@ -26,9 +26,9 @@ export const Route = createFileRoute('/_authed/users')({
 
 function UsersRoute() {
   const allowed = usePermission(PERMISSIONS.users.view)
+  const matchRoute = useMatchRoute()
   if (!allowed) return <PermissionDenied />
 
-  const matchRoute = useMatchRoute()
   const detailMatch = matchRoute({ to: '/users/$userId' })
 
   return detailMatch ? <Outlet /> : <UsersListPage />

@@ -26,9 +26,9 @@ export const Route = createFileRoute('/_authed/providers')({
 
 function ProvidersRoute() {
   const allowed = usePermission(PERMISSIONS.providers.view)
+  const matchRoute = useMatchRoute()
   if (!allowed) return <PermissionDenied />
 
-  const matchRoute = useMatchRoute()
   const detailMatch = matchRoute({ to: '/providers/$storeId' })
 
   return detailMatch ? <Outlet /> : <ProvidersListPage />

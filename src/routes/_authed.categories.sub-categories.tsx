@@ -19,10 +19,9 @@ export const Route = createFileRoute('/_authed/categories/sub-categories')({
 
 function SubCategoriesHubRoute() {
   const allowed = usePermission(PERMISSIONS.subCategories.view)
-  if (!allowed) return <PermissionDenied />
-
   const { parent } = Route.useSearch()
   const navigate = Route.useNavigate()
+  if (!allowed) return <PermissionDenied />
 
   return (
     <SubCategoriesListPage

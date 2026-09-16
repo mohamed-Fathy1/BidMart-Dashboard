@@ -14,8 +14,8 @@ export const Route = createFileRoute('/_authed/categories/$categoryId/sub-catego
 
 function SubCategoriesNestedRoute() {
   const allowed = usePermission(PERMISSIONS.subCategories.view)
+  const { categoryId } = Route.useParams()
   if (!allowed) return <PermissionDenied />
 
-  const { categoryId } = Route.useParams()
   return <SubCategoriesListPage variant="under-category" categoryId={categoryId} />
 }

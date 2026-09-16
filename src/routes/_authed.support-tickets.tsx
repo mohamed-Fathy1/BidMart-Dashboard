@@ -48,9 +48,9 @@ export const Route = createFileRoute('/_authed/support-tickets')({
 
 function SupportTicketsRoute() {
   const allowed = usePermission(PERMISSIONS.contactMessages.view)
+  const matchRoute = useMatchRoute()
   if (!allowed) return <PermissionDenied />
 
-  const matchRoute = useMatchRoute()
   const detailMatch = matchRoute({ to: '/support-tickets/$ticketId' })
 
   return detailMatch ? <Outlet /> : <SupportTicketsListPage />

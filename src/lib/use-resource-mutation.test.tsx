@@ -58,7 +58,7 @@ describe('useResourceMutation', () => {
     await act(async () => {
       await result.current.mutateAsync()
     })
-    expect(toast.success).toHaveBeenCalledWith('admins:actions.create_success')
+    expect(toast.success).toHaveBeenCalledWith('admins:actions.create_success', expect.any(Object))
   })
 
   it('toasts the server message when present, falling back to the i18n key', async () => {
@@ -80,7 +80,7 @@ describe('useResourceMutation', () => {
         // expected
       }
     })
-    expect(toast.error).toHaveBeenCalledWith('Email already taken')
+    expect(toast.error).toHaveBeenCalledWith('Email already taken', expect.any(Object))
   })
 
   it('falls back to the i18n errorKey when there is no server message', async () => {
@@ -102,7 +102,7 @@ describe('useResourceMutation', () => {
         // expected
       }
     })
-    expect(toast.error).toHaveBeenCalledWith('admins:errors.generic')
+    expect(toast.error).toHaveBeenCalledWith('admins:errors.generic', expect.any(Object))
   })
 
   it('runs the consumer onSuccess callback after the toast + invalidate', async () => {
