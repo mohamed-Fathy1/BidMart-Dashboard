@@ -3,13 +3,17 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { type ColumnDef, type RowSelectionState } from '@tanstack/react-table'
 import {
-  PlusIcon,
+  CheckCircle2,
+  CircleDot,
   DownloadIcon,
+  InboxIcon,
+  PlusIcon,
+  Send,
+  StickyNote,
   BanIcon,
   ShieldAlertIcon,
   TrashIcon,
   CheckCircleIcon,
-  InboxIcon,
   EyeIcon,
   PencilIcon,
 } from 'lucide-react'
@@ -19,8 +23,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { DataTable, type RowActionItem } from '@/components/data-table/data-table'
 import { format } from '@/lib/format'
+import { rangeValidationError } from '@/lib/report-range'
+import { DEFAULT_STATISTICS_PERIOD } from '@/lib/report-period'
 
 import { StatusBadge } from '@/components/shared/status-badge'
 import { SearchInput } from '@/components/shared/search-input'
@@ -36,6 +43,12 @@ import { StatCard } from '@/components/shared/stat-card'
 import { PasswordInput } from '@/components/shared/password-input'
 import { OtpInput } from '@/components/shared/otp-input'
 import { ImagePreview } from '@/components/shared/image-preview'
+import { SectionTabs } from '@/components/shared/section-tabs'
+import { PeriodFilter, type PeriodFilterValue } from '@/components/shared/period-filter'
+import { ReportDateRangeFilter } from '@/components/shared/report-date-range-filter'
+import { ProportionBar } from '@/components/shared/proportion-bar'
+import { RankedList } from '@/components/shared/ranked-list'
+import { Timeline, type TimelineItem } from '@/components/shared/timeline'
 
 export const Route = createFileRoute('/_authed/components')({
   component: ComponentsShowcasePage,
@@ -275,6 +288,56 @@ function getUserActions(user: MockUser): RowActionItem<MockUser>[] {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Demo data for reporting primitives                                 */
+/* ------------------------------------------------------------------ */
+
+interface DemoSeller {
+  id: string
+  name: string
+  sales: number
+  orders: number
+}
+
+const DEMO_SELLERS: DemoSeller[] = [
+  { id: '1', name: 'Ahmed Ali', sales: 94320, orders: 156 },
+  { id: '2', name: 'Sara Mohammed', sales: 52100.75, orders: 89 },
+  { id: '3', name: 'Khalid Ibrahim', sales: 18750.5, orders: 42 },
+  { id: '4', name: 'Noura Hassan', sales: 450, orders: 3 },
+]
+
+const DEMO_EVENTS: TimelineItem[] = [
+  {
+    id: '1',
+    icon: CircleDot,
+    tone: 'info',
+    title: 'Investigation started',
+    at: '2026-09-01T09:15:00.000Z',
+  },
+  {
+    id: '2',
+    icon: StickyNote,
+    tone: 'warning',
+    title: 'Note added',
+    subtitle: 'Requested invoice copy',
+    at: '2026-09-02T14:30:00.000Z',
+  },
+  {
+    id: '3',
+    icon: Send,
+    tone: 'accent',
+    title: 'Notification sent',
+    at: '2026-09-03T10:05:00.000Z',
+  },
+  {
+    id: '4',
+    icon: CheckCircle2,
+    tone: 'positive',
+    title: 'Complaint resolved',
+    at: '2026-09-04T16:45:00.000Z',
+  },
+]
+
+/* ------------------------------------------------------------------ */
 /*  Showcase sections                                                  */
 /* ------------------------------------------------------------------ */
 
@@ -326,6 +389,13 @@ function ComponentsShowcasePage() {
 
   // Table pagination state
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
+
+  // Reporting primitives state
+  const [periodDemo, setPeriodDemo] = useState<PeriodFilterValue>({
+    period: DEFAULT_STATISTICS_PERIOD,
+  })
+  const [rangeDemo, setRangeDemo] = useState<{ from?: string; to?: string }>({})
+  const rangeError = rangeValidationError(rangeDemo.from, rangeDemo.to)
 
   return (
     <div className="space-y-8">
@@ -402,6 +472,89 @@ function ComponentsShowcasePage() {
         <StatCard label="Active Sellers" value="342" delta={{ value: 3.2, positive: true }} />
         <StatCard label="Pending Reviews" value="18" />
         <StatCard label="Banned Accounts" value="7" delta={{ value: 2.1, positive: false }} />
+        <StatCard
+          label="Refund Rate"
+          value={format.percentValue(2.4)}
+          hint="Across all counted sales"
+        />
+      </div>
+
+      {/* ---- Section Tabs ---- */}
+      <SectionTitle>Section Tabs</SectionTitle>
+
+      <SectionTabs
+        ariaLabel="Demo sections"
+        tabs={[
+          { to: '/components', label: 'Categories', active: false },
+          { to: '/components', label: 'Sub-categories', active: true },
+        ]}
+      />
+
+      {/* ---- Period Filter ---- */}
+      <SectionTitle>Period Filter</SectionTitle>
+
+      <SubSection label="Interactive">
+        <PeriodFilter period={periodDemo.period} date={periodDemo.date} onChange={setPeriodDemo} />
+        <p className="text-xs text-muted-foreground">
+          Selected: {periodDemo.period} / {periodDemo.date ?? 'today'}
+        </p>
+      </SubSection>
+
+      <SubSection label="With error">
+        <PeriodFilter period="MONTHLY" onChange={() => {}} error="Pick a date up to today." />
+      </SubSection>
+
+      {/* ---- Date Range Filter ---- */}
+      <SectionTitle>Date Range Filter</SectionTitle>
+
+      <ReportDateRangeFilter
+        from={rangeDemo.from}
+        to={rangeDemo.to}
+        onChange={setRangeDemo}
+        error={
+          rangeError ? t(`components:date_range.errors.${rangeError}`) : undefined
+        }
+      />
+      <p className="text-xs text-muted-foreground">
+        From: {rangeDemo.from || '—'} / To: {rangeDemo.to || '—'}
+      </p>
+
+      {/* ---- Proportion Bar ---- */}
+      <SectionTitle>Proportion Bar</SectionTitle>
+
+      <div className="max-w-sm space-y-3">
+        <ProportionBar value={68} max={100} />
+        <ProportionBar value={34} max={100} tone="muted" />
+        <ProportionBar value={12} max={100} tone="destructive" />
+      </div>
+
+      {/* ---- Ranked List ---- */}
+      <SectionTitle>Ranked List</SectionTitle>
+
+      <div className="max-w-lg rounded-lg border border-border bg-card p-2 shadow-rest">
+        <RankedList
+          items={DEMO_SELLERS}
+          getKey={(seller) => seller.id}
+          metric={(seller) => seller.sales}
+          primary={(seller) => seller.name}
+          leading={(seller) => (
+            <Avatar className="size-8">
+              <AvatarFallback>{seller.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+          )}
+          value={(seller) => format.currency(seller.sales)}
+          count={(seller) => format.number(seller.orders)}
+          onSelect={(seller) => toast.info(`Selected: ${seller.name}`)}
+          emptyLabel="Nothing to rank yet."
+          ariaLabel="Top sellers"
+        />
+      </div>
+
+      {/* ---- Timeline ---- */}
+      <SectionTitle>Timeline</SectionTitle>
+
+      <div className="max-w-lg rounded-lg border border-border bg-card px-6 py-4 shadow-rest">
+        <Timeline items={DEMO_EVENTS} emptyLabel="No events yet." />
       </div>
 
       {/* ---- Search Input ---- */}

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { TrendingUpIcon, TrendingDownIcon } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { format } from '@/lib/format'
@@ -5,7 +6,8 @@ import { cn } from '@/lib/utils'
 
 interface StatCardProps {
   label: string
-  value: string | number
+  value: ReactNode
+  hint?: ReactNode
   delta?: {
     value: number
     positive: boolean
@@ -13,7 +15,7 @@ interface StatCardProps {
   className?: string
 }
 
-export function StatCard({ label, value, delta, className }: StatCardProps) {
+export function StatCard({ label, value, hint, delta, className }: StatCardProps) {
   return (
     <Card data-slot="stat-card" className={cn('py-4', className)}>
       <CardContent className="px-5">
@@ -38,6 +40,7 @@ export function StatCard({ label, value, delta, className }: StatCardProps) {
             </span>
           )}
         </div>
+        {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
       </CardContent>
     </Card>
   )

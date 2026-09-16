@@ -10,30 +10,29 @@ import {
 import type { LucideIcon } from 'lucide-react'
 import type { ComplaintActivityItem } from '@/types/api'
 import { Card, CardContent } from '@/components/ui/card'
-import { format } from '@/lib/format'
-import { cn } from '@/lib/utils'
+import { Timeline, type TimelineItem, type TimelineTone } from '@/components/shared/timeline'
 
 interface ComplaintActivityTimelineProps {
   activities: ComplaintActivityItem[]
 }
 
 interface IconSpec {
-  Icon: LucideIcon
-  tone: string
+  icon: LucideIcon
+  tone: TimelineTone
 }
 
 const ICON_BY_ACTION: Record<string, IconSpec> = {
-  started_investigation: { Icon: CircleDot, tone: 'text-blue-700 bg-blue-50 ring-blue-200/70' },
-  resolved: { Icon: CheckCircle2, tone: 'text-emerald-700 bg-emerald-50 ring-emerald-200/70' },
-  rejected: { Icon: XCircle, tone: 'text-red-700 bg-red-50 ring-red-200/70' },
-  added_note: { Icon: StickyNote, tone: 'text-amber-700 bg-amber-50 ring-amber-200/70' },
-  sent_notification: { Icon: Send, tone: 'text-primary bg-primary/10 ring-primary/20' },
-  closed_conversation: { Icon: MessageSquare, tone: 'text-stone-700 bg-stone-100 ring-stone-200/70' },
+  started_investigation: { icon: CircleDot, tone: 'info' },
+  resolved: { icon: CheckCircle2, tone: 'positive' },
+  rejected: { icon: XCircle, tone: 'danger' },
+  added_note: { icon: StickyNote, tone: 'warning' },
+  sent_notification: { icon: Send, tone: 'accent' },
+  closed_conversation: { icon: MessageSquare, tone: 'neutral' },
 }
 
 const DEFAULT_ICON: IconSpec = {
-  Icon: CircleDot,
-  tone: 'text-muted-foreground bg-muted ring-border',
+  icon: CircleDot,
+  tone: 'neutral',
 }
 
 export function ComplaintActivityTimeline({
@@ -51,50 +50,34 @@ export function ComplaintActivityTimeline({
     )
   }
 
+  const items: TimelineItem[] = activities.map((activity) => {
+    const spec = ICON_BY_ACTION[activity.action] ?? DEFAULT_ICON
+    const labelKey = `complaints:activity.action.${activity.action}`
+    const fallback = activity.action.replace(/_/g, ' ')
+    const actor =
+      activity.actor_type === 'system'
+        ? t('complaints:activity.actor_system')
+        : t('complaints:activity.actor_admin')
+    return {
+      id: activity.id,
+      icon: spec.icon,
+      tone: spec.tone,
+      title: (
+        <>
+          <span className="font-semibold">{actor}</span>{' '}
+          <span className="text-muted-foreground">
+            {t(labelKey, { defaultValue: fallback })}
+          </span>
+        </>
+      ),
+      at: activity.created_at,
+    }
+  })
+
   return (
     <Card className="gap-0 rounded-xl border-border py-0">
       <CardContent className="px-6 py-4">
-        <ol className="space-y-0">
-          {activities.map((activity, index) => {
-            const spec = ICON_BY_ACTION[activity.action] ?? DEFAULT_ICON
-            const labelKey = `complaints:activity.action.${activity.action}`
-            const fallback = activity.action.replace(/_/g, ' ')
-            const actor =
-              activity.actor_type === 'system'
-                ? t('complaints:activity.actor_system')
-                : t('complaints:activity.actor_admin')
-            const isLast = index === activities.length - 1
-            return (
-              <li key={activity.id} className="flex gap-3">
-                <div className="flex shrink-0 flex-col items-center">
-                  <span
-                    className={cn(
-                      'inline-flex size-7 items-center justify-center rounded-full ring-1 ring-inset',
-                      spec.tone,
-                    )}
-                    aria-hidden
-                  >
-                    <spec.Icon className="size-3.5" />
-                  </span>
-                  {!isLast && (
-                    <span aria-hidden className="my-1.5 w-px flex-1 bg-border" />
-                  )}
-                </div>
-                <div className={cn('flex min-w-0 flex-col gap-0.5 pt-0.5', !isLast && 'pb-4')}>
-                  <p className="text-sm leading-snug text-foreground">
-                    <span className="font-semibold">{actor}</span>{' '}
-                    <span className="text-muted-foreground">
-                      {t(labelKey, { defaultValue: fallback })}
-                    </span>
-                  </p>
-                  <p className="font-mono text-[11px] tabular-nums text-muted-foreground">
-                    {format.dateTime(activity.created_at)}
-                  </p>
-                </div>
-              </li>
-            )
-          })}
-        </ol>
+        <Timeline items={items} emptyLabel={t('complaints:activity.empty')} />
       </CardContent>
     </Card>
   )
