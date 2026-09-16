@@ -135,6 +135,26 @@ interface ShowBadgeProps {
   className?: string
 }
 
+/** Order drilldown lifecycle (live order detail statuses). */
+type OrderStatusValue =
+  | 'AWAITING_PAYMENT'
+  | 'PENDING_CONFIRMATION'
+  | 'PREPARING_PACKAGE'
+  | 'SHIPPED'
+  | 'DELIVERED'
+  | 'CANCELLED'
+  | 'REFUND_REQUESTED'
+  | 'REFUNDED_FULL'
+  | 'REFUNDED_PARTIAL'
+  | 'REFUND_REJECTED'
+  | 'PAYOUT_COMPLETE'
+
+interface OrderStatusBadgeProps {
+  type: 'orderStatus'
+  status: OrderStatusValue
+  className?: string
+}
+
 type StatusBadgeProps =
   | AccountBadgeProps
   | SellerBadgeProps
@@ -152,6 +172,7 @@ type StatusBadgeProps =
   | OrderGroupBadgeProps
   | FinancialBucketBadgeProps
   | ShowBadgeProps
+  | OrderStatusBadgeProps
 
 interface StatusStyle {
   badge: string
@@ -274,6 +295,20 @@ const showStyles: Record<ShowStatusValue, StatusStyle> = {
   ENDED:     neutral,
 }
 
+const orderStatusStyles: Record<OrderStatusValue, StatusStyle> = {
+  AWAITING_PAYMENT:     warning,
+  PENDING_CONFIRMATION: warning,
+  PREPARING_PACKAGE:    info,
+  SHIPPED:              info,
+  DELIVERED:            positive,
+  CANCELLED:            neutral,
+  REFUND_REQUESTED:     warning,
+  REFUNDED_FULL:        accent,
+  REFUNDED_PARTIAL:     accent,
+  REFUND_REJECTED:      danger,
+  PAYOUT_COMPLETE:      positive,
+}
+
 const fallbackStyle: StatusStyle = neutral
 
 function getStyle(status: string, type: StatusBadgeProps['type']): StatusStyle {
@@ -308,6 +343,8 @@ function getStyle(status: string, type: StatusBadgeProps['type']): StatusStyle {
       return financialBucketStyles[status as FinancialBucketValue] ?? fallbackStyle
     case 'show':
       return showStyles[status as ShowStatusValue] ?? fallbackStyle
+    case 'orderStatus':
+      return orderStatusStyles[status as OrderStatusValue] ?? fallbackStyle
     case 'account':
     default:
       return accountStyles[status as AccountStatus] ?? fallbackStyle
@@ -349,6 +386,9 @@ function getI18nKey(status: string, type: StatusBadgeProps['type']): string {
   }
   if (type === 'show') {
     return `reports:show_status.${status}`
+  }
+  if (type === 'orderStatus') {
+    return `reports:order_status.${status}`
   }
   return `components:status.${status}`
 }

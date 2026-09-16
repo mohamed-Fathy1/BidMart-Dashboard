@@ -65,7 +65,7 @@
     "REJECTED": "مرفوض"
   },
   "order_detail": {
-    "title": "الطلب {{number}}",
+    "title": "الطلب <number>{{number}}</number>",
     "description": "تفاصيل حية. قد تختلف عن الصف الذي فتحها.",
     "loading": "جارٍ تحميل الطلب…",
     "not_found": "الطلب غير موجود",
@@ -79,6 +79,7 @@
       "history": "السجل"
     },
     "fields": {
+      "full_name": "الاسم الكامل",
       "username": "اسم المستخدم",
       "email": "البريد الإلكتروني",
       "phone": "الهاتف",

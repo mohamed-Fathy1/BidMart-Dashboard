@@ -65,7 +65,7 @@
     "REJECTED": "Rejected"
   },
   "order_detail": {
-    "title": "Order {{number}}",
+    "title": "Order <number>{{number}}</number>",
     "description": "Live detail. It can differ from the row that opened it.",
     "loading": "Loading order…",
     "not_found": "Order not found",
@@ -79,6 +79,7 @@
       "history": "History"
     },
     "fields": {
+      "full_name": "Full name",
       "username": "Username",
       "email": "Email",
       "phone": "Phone",

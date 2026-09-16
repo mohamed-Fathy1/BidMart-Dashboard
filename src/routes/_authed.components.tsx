@@ -49,6 +49,8 @@ import { ReportDateRangeFilter } from '@/components/shared/report-date-range-fil
 import { ProportionBar } from '@/components/shared/proportion-bar'
 import { RankedList } from '@/components/shared/ranked-list'
 import { Timeline, type TimelineItem } from '@/components/shared/timeline'
+import { LazyMonthlyFinancialChart } from '@/features/overview/lazy-monthly-financial-chart'
+import type { MonthlyFinancialRow } from '@/types/api'
 
 export const Route = createFileRoute('/_authed/components')({
   component: ComponentsShowcasePage,
@@ -337,6 +339,21 @@ const DEMO_EVENTS: TimelineItem[] = [
   },
 ]
 
+const MOCK_MONTHLY_FINANCIALS: MonthlyFinancialRow[] = [
+  { month: '2025-10', grossSales: 412_000, commission: 41_200, tax: 61_800, shipping: 8_400, refunds: 9_800, platformRevenue: 41_200, net: 31_400 },
+  { month: '2025-11', grossSales: 388_500, commission: 38_850, tax: 58_275, shipping: 7_900, refunds: 6_200, platformRevenue: 38_850, net: 32_650 },
+  { month: '2025-12', grossSales: 521_400, commission: 52_140, tax: 78_210, shipping: 10_600, refunds: 12_900, platformRevenue: 52_140, net: 39_240 },
+  { month: '2026-01', grossSales: 466_900, commission: 46_690, tax: 70_035, shipping: 9_500, refunds: 7_400, platformRevenue: 46_690, net: 39_290 },
+  { month: '2026-02', grossSales: 402_300, commission: 40_230, tax: 60_345, shipping: 8_200, refunds: 11_600, platformRevenue: 40_230, net: 28_630 },
+  { month: '2026-03', grossSales: 448_700, commission: 44_870, tax: 67_305, shipping: 9_100, refunds: 5_900, platformRevenue: 44_870, net: 38_970 },
+  { month: '2026-04', grossSales: 509_200, commission: 50_920, tax: 76_380, shipping: 10_300, refunds: 18_400, platformRevenue: 50_920, net: 32_520 },
+  { month: '2026-05', grossSales: 473_800, commission: 47_380, tax: 71_070, shipping: 9_700, refunds: 8_100, platformRevenue: 47_380, net: 39_280 },
+  { month: '2026-06', grossSales: 431_600, commission: 43_160, tax: 64_740, shipping: 8_800, refunds: 21_700, platformRevenue: 43_160, net: 21_460 },
+  { month: '2026-07', grossSales: 456_100, commission: 45_610, tax: 68_415, shipping: 9_300, refunds: 52_400, platformRevenue: 45_610, net: -6_790 },
+  { month: '2026-08', grossSales: 489_900, commission: 48_990, tax: 73_485, shipping: 9_900, refunds: 14_300, platformRevenue: 48_990, net: 34_690 },
+  { month: '2026-09', grossSales: 442_500, commission: 44_250, tax: 66_375, shipping: 9_000, refunds: 10_500, platformRevenue: 44_250, net: 33_750 },
+]
+
 /* ------------------------------------------------------------------ */
 /*  Showcase sections                                                  */
 /* ------------------------------------------------------------------ */
@@ -463,6 +480,27 @@ function ComponentsShowcasePage() {
           <StatusBadge status="upgraded_to_seller" type="accountType" />
         </div>
       </SubSection>
+
+      <SubSection label="Order Status">
+        <div className="flex flex-wrap gap-2">
+          <StatusBadge status="AWAITING_PAYMENT" type="orderStatus" />
+          <StatusBadge status="PENDING_CONFIRMATION" type="orderStatus" />
+          <StatusBadge status="PREPARING_PACKAGE" type="orderStatus" />
+          <StatusBadge status="SHIPPED" type="orderStatus" />
+          <StatusBadge status="DELIVERED" type="orderStatus" />
+          <StatusBadge status="CANCELLED" type="orderStatus" />
+          <StatusBadge status="REFUND_REQUESTED" type="orderStatus" />
+          <StatusBadge status="REFUNDED_FULL" type="orderStatus" />
+          <StatusBadge status="REFUNDED_PARTIAL" type="orderStatus" />
+          <StatusBadge status="REFUND_REJECTED" type="orderStatus" />
+          <StatusBadge status="PAYOUT_COMPLETE" type="orderStatus" />
+        </div>
+      </SubSection>
+
+      {/* ---- Monthly Financial Chart ---- */}
+      <SectionTitle>Monthly Financial Chart</SectionTitle>
+
+      <LazyMonthlyFinancialChart rows={MOCK_MONTHLY_FINANCIALS} />
 
       {/* ---- Stat Cards ---- */}
       <SectionTitle>Stat Cards</SectionTitle>
