@@ -38,6 +38,13 @@
   --color-popover: #FFFFFF;
   --color-popover-foreground: #1C1917;
 
+  /* Charts: series colours in order of use (primary, brand blue, ink, destructive, muted) */
+  --chart-1: var(--color-primary);
+  --chart-2: var(--color-brand-secondary);
+  --chart-3: var(--color-foreground);
+  --chart-4: var(--color-destructive);
+  --chart-5: var(--color-muted-foreground);
+
   /* Typography */
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-arabic: 'IBM Plex Sans Arabic', system-ui, sans-serif;
