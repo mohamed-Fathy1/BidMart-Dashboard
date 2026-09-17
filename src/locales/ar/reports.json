@@ -7,7 +7,7 @@
     "view_seller": "عرض البائع"
   },
   "range": {
-    "showing": "عرض {{range}}",
+    "showing": "عرض <range>{{range}}</range>",
     "default_hint": "آخر 30 يومًا بما فيها اليوم"
   },
   "errors": {

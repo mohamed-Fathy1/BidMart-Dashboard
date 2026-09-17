@@ -1,10 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useTranslation } from 'react-i18next'
-import { Receipt } from 'lucide-react'
-import { EmptyState } from '@/components/shared/empty-state'
 import { readEnum, readIsoDate, readString, parseListSearchBase } from '@/lib/list-search'
 import { readRangeSearch } from '@/lib/report-range'
 import { FINANCIAL_REPORT_STATUSES } from '@/features/reports/financial-report-status'
+import { FinancialReportPage } from '@/features/reports/financial-report-page'
 import type { FinancialReportStatus } from '@/types/api'
 
 /** No `q`: this report has two named searches instead of one free-text box. */
@@ -33,10 +31,5 @@ export const Route = createFileRoute('/_authed/reports/financial')({
       order: readString(search.order),
     }
   },
-  component: FinancialReportRoute,
+  component: FinancialReportPage,
 })
-
-function FinancialReportRoute() {
-  const { t } = useTranslation()
-  return <EmptyState icon={Receipt} title={t('reports:financial.title')} />
-}
