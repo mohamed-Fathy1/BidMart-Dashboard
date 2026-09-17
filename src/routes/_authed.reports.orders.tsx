@@ -1,10 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useTranslation } from 'react-i18next'
-import { ShoppingBag } from 'lucide-react'
-import { EmptyState } from '@/components/shared/empty-state'
 import { parseListSearchBase, readEnum, readIsoDate, readString } from '@/lib/list-search'
 import { readRangeSearch } from '@/lib/report-range'
 import type { OrderReportGroup } from '@/types/api'
+import { OrdersReportPage } from '@/features/reports/orders-report-page'
 
 export const ORDER_REPORT_GROUPS: readonly OrderReportGroup[] = [
   'COMPLETED',
@@ -34,10 +32,5 @@ export const Route = createFileRoute('/_authed/reports/orders')({
       order: readString(search.order),
     }
   },
-  component: OrdersReportRoute,
+  component: OrdersReportPage,
 })
-
-function OrdersReportRoute() {
-  const { t } = useTranslation()
-  return <EmptyState icon={ShoppingBag} title={t('reports:orders.title')} />
-}
