@@ -1,5 +1,5 @@
 import { getRouteApi } from '@tanstack/react-router'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import type { LivestreamReportRow, LivestreamSortBy } from '@/types/api'
 import type { LivestreamsReportParams } from '@/features/reports/reports.api'
 import { useUrlListState } from '@/lib/use-url-list-state'
@@ -72,9 +72,11 @@ export function LivestreamsReportPage() {
   const columns = useLivestreamsReportColumns()
 
   const description = response?.meta.dateRange ? (
-    <span className="font-medium text-foreground">
-      {t('reports:range.showing', { range: resolvedRangeLabel(response.meta.dateRange) })}
-    </span>
+    <Trans
+      i18nKey="reports:range.showing"
+      values={{ range: resolvedRangeLabel(response.meta.dateRange) }}
+      components={{ range: <span className="font-medium text-foreground" /> }}
+    />
   ) : (
     t('reports:livestreams.description')
   )

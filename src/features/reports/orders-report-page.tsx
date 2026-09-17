@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { getRouteApi } from '@tanstack/react-router'
 import type { OrdersReportParams } from '@/features/reports/reports.api'
 import { useOrdersReportQuery } from '@/features/reports/reports.queries'
@@ -74,11 +74,11 @@ export function OrdersReportPage() {
         title={t('reports:orders.title')}
         description={
           response?.meta?.dateRange ? (
-            <span className="font-medium text-foreground">
-              {t('reports:range.showing', {
-                range: resolvedRangeLabel(response.meta.dateRange),
-              })}
-            </span>
+            <Trans
+              i18nKey="reports:range.showing"
+              values={{ range: resolvedRangeLabel(response.meta.dateRange) }}
+              components={{ range: <span className="font-medium text-foreground" /> }}
+            />
           ) : (
             t('reports:orders.description')
           )

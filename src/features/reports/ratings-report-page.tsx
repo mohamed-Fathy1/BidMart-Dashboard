@@ -1,5 +1,5 @@
 import { getRouteApi } from '@tanstack/react-router'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DataTable } from '@/components/data-table/data-table'
 import { PageHeader } from '@/components/shared/page-header'
@@ -127,9 +127,11 @@ export function RatingsReportPage() {
         title={t('reports:ratings.title')}
         description={
           activeMeta?.dateRange ? (
-            <span className="font-medium text-foreground">
-              {t('reports:range.showing', { range: resolvedRangeLabel(activeMeta.dateRange) })}
-            </span>
+            <Trans
+              i18nKey="reports:range.showing"
+              values={{ range: resolvedRangeLabel(activeMeta.dateRange) }}
+              components={{ range: <span className="font-medium text-foreground" /> }}
+            />
           ) : (
             t('reports:ratings.description')
           )
