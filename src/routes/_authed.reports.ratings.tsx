@@ -1,7 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useTranslation } from 'react-i18next'
-import { Star } from 'lucide-react'
-import { EmptyState } from '@/components/shared/empty-state'
 import {
   parseListSearchBase,
   readEnum,
@@ -10,6 +7,7 @@ import {
   readString,
 } from '@/lib/list-search'
 import { readRangeSearch } from '@/lib/report-range'
+import { RatingsReportPage } from '@/features/reports/ratings-report-page'
 
 export const RATINGS_TABS = ['reviews', 'sellers'] as const
 export type RatingsTab = (typeof RATINGS_TABS)[number]
@@ -44,10 +42,5 @@ export const Route = createFileRoute('/_authed/reports/ratings')({
       ...readRangeSearch(readIsoDate(search.startDate), readIsoDate(search.endDate)),
     }
   },
-  component: RatingsReportRoute,
+  component: RatingsReportPage,
 })
-
-function RatingsReportRoute() {
-  const { t } = useTranslation()
-  return <EmptyState icon={Star} title={t('reports:ratings.title')} />
-}
