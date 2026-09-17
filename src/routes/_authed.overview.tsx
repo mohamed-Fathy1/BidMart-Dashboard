@@ -1,9 +1,12 @@
-import { Outlet, createFileRoute } from '@tanstack/react-router'
+import { Outlet, createFileRoute, useRouterState } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { PERMISSIONS, usePermission } from '@/lib/permissions'
 import { readEnum, readIsoDate } from '@/lib/list-search'
 import { DEFAULT_STATISTICS_PERIOD, STATISTICS_PERIODS } from '@/lib/report-period'
 import { PageHeader } from '@/components/shared/page-header'
+import { PeriodFilter } from '@/components/shared/period-filter'
+import { SectionTabs } from '@/components/shared/section-tabs'
+import { useStatisticsWindow } from '@/features/overview/use-statistics-window'
 import { PermissionDenied } from '@/routes/_authed'
 import type { StatisticsPeriod } from '@/types/api'
 
@@ -32,11 +35,58 @@ export const Route = createFileRoute('/_authed/overview')({
 function StatisticsLayoutRoute() {
   const { t } = useTranslation()
   const allowed = usePermission(PERMISSIONS.reports.view)
+  const navigate = Route.useNavigate()
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const { period, date, anchorError } = useStatisticsWindow()
+
   if (!allowed) return <PermissionDenied />
+
+  const isGeneral = pathname === '/overview' || pathname === '/overview/'
 
   return (
     <div className="space-y-6">
       <PageHeader title={t('overview:title')} description={t('overview:description')} />
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <SectionTabs
+          ariaLabel={t('overview:title')}
+          tabs={[
+            {
+              to: '/overview',
+              label: t('overview:tabs.general'),
+              active: isGeneral,
+              search: true,
+            },
+            {
+              to: '/overview/business-activity',
+              label: t('overview:tabs.business_activity'),
+              active: pathname.startsWith('/overview/business-activity'),
+              search: true,
+            },
+            {
+              to: '/overview/financial-overview',
+              label: t('overview:tabs.financial_overview'),
+              active: pathname.startsWith('/overview/financial-overview'),
+              search: true,
+            },
+          ]}
+        />
+
+        <PeriodFilter
+          period={period}
+          date={date}
+          error={anchorError}
+          onChange={(next) =>
+            navigate({
+              search: {
+                period: next.period === DEFAULT_STATISTICS_PERIOD ? undefined : next.period,
+                date: next.date,
+              },
+            })
+          }
+        />
+      </div>
+
       <Outlet />
     </div>
   )

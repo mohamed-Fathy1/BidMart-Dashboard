@@ -7,7 +7,7 @@
     "financial_overview": "النظرة المالية"
   },
   "window": {
-    "showing": "عرض {{range}}",
+    "showing": "عرض <range>{{range}}</range>",
     "loading": "جارٍ تحديد الفترة…"
   },
   "general": {
