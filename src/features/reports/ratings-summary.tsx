@@ -30,7 +30,7 @@ export function RatingsSummary({ summary }: RatingsSummaryProps) {
       <CardContent>
         <div className="grid gap-6 sm:grid-cols-[auto_1fr]">
           <div className="flex flex-col justify-center">
-            {platformAverageRating === null ? (
+            {platformAverageRating == null ? (
               <span className="text-lg text-muted-foreground">
                 {t('reports:ratings.summary.no_ratings')}
               </span>

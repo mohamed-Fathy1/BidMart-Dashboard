@@ -38,7 +38,7 @@ export function useRatingsSellersColumns(): ColumnDef<RatingsSellerRow>[] {
         header: t('reports:ratings.columns.average'),
         cell: ({ row }) => {
           const { averageRating } = row.original
-          if (averageRating === null) {
+          if (averageRating == null) {
             return (
               <span className="text-sm text-muted-foreground">{t('reports:ratings.summary.no_ratings')}</span>
             )
