@@ -37,8 +37,8 @@
     "type_placeholder": "Type",
     "date_from_label": "From",
     "date_to_label": "To",
-    "results_count_one": "{{count}} ticket",
-    "results_count_other": "{{count}} tickets"
+    "results_count_one": "{{count, number}} ticket",
+    "results_count_other": "{{count, number}} tickets"
   },
   "empty": {
     "no_data_title": "No tickets yet",

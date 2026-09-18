@@ -47,8 +47,8 @@
     "top_categories_hint": "Top 5 by revenue",
     "top_sellers": "Top sellers",
     "top_sellers_hint": "Top 5 by revenue",
-    "orders_count_one": "{{count}} order",
-    "orders_count_other": "{{count}} orders",
+    "orders_count_one": "{{count, number}} order",
+    "orders_count_other": "{{count, number}} orders",
     "empty": "Nothing sold in this window."
   },
   "financial": {
@@ -62,8 +62,8 @@
     "delivered_hint": "Orders delivered in the window",
     "refunds": "Refunds",
     "refunds_hint": "Refunds accepted in the window",
-    "orders_count_one": "{{count}} order",
-    "orders_count_other": "{{count}} orders",
+    "orders_count_one": "{{count, number}} order",
+    "orders_count_other": "{{count, number}} orders",
     "monthly": {
       "title": "Last 12 months",
       "hint": "Ends with the window's month. The period length does not change it.",

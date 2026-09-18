@@ -3,7 +3,7 @@
   "page_description": "Review seller withdrawal requests",
   "detail_title": "Withdrawal request",
   "meta": {
-    "total_requests": "{{count}} requests"
+    "total_requests": "{{count, number}} requests"
   },
   "columns": {
     "seller": "Seller",

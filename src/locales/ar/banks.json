@@ -2,7 +2,7 @@
   "page_title": "البنوك",
   "page_description": "إدارة البنوك التي يمكن للبائعين اختيارها عند السحب",
   "meta": {
-    "total_banks": "{{count}} بنك"
+    "total_banks": "{{count, number}} بنك"
   },
   "columns": {
     "bank": "البنك",

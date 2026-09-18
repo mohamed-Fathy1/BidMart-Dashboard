@@ -2,7 +2,7 @@
   "page_title": "Countries",
   "page_description": "Manage supported countries",
   "meta": {
-    "total_countries": "{{count}} countries"
+    "total_countries": "{{count, number}} countries"
   },
   "columns": {
     "country": "Country",

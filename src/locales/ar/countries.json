@@ -2,7 +2,7 @@
   "page_title": "الدول",
   "page_description": "إدارة الدول المدعومة",
   "meta": {
-    "total_countries": "{{count}} دولة"
+    "total_countries": "{{count, number}} دولة"
   },
   "columns": {
     "country": "الدولة",

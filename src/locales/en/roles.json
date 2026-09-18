@@ -2,7 +2,7 @@
   "page_title": "Roles",
   "page_description": "Manage admin roles and permissions",
   "meta": {
-    "total_roles": "{{count}} roles"
+    "total_roles": "{{count, number}} roles"
   },
   "search_placeholder": "Search by English or Arabic name",
   "columns": {

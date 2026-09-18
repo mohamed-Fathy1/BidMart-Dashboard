@@ -9,7 +9,7 @@
     "type_all": "All types",
     "unread_only": "Unread only",
     "clear": "Clear filters",
-    "total_count": "{{count}} total",
+    "total_count": "{{count, number}} total",
     "type": {
       "NEW_SELLER_APPLICATION": "Seller application",
       "VERIFICATION_REQUESTED": "Verification request",
@@ -33,7 +33,7 @@
   },
   "popover": {
     "title": "Notifications",
-    "unread_count": "{{count}} unread",
+    "unread_count": "{{count, number}} unread",
     "all_read": "All caught up",
     "loading": "Loading notifications…"
   },

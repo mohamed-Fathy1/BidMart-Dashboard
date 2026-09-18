@@ -40,9 +40,9 @@
     "results_count_zero": "لا توجد تذاكر",
     "results_count_one": "تذكرة واحدة",
     "results_count_two": "تذكرتان",
-    "results_count_few": "{{count}} تذاكر",
-    "results_count_many": "{{count}} تذكرة",
-    "results_count_other": "{{count}} تذكرة"
+    "results_count_few": "{{count, number}} تذاكر",
+    "results_count_many": "{{count, number}} تذكرة",
+    "results_count_other": "{{count, number}} تذكرة"
   },
   "empty": {
     "no_data_title": "لا توجد تذاكر بعد",

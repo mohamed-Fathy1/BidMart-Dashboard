@@ -2,7 +2,7 @@
   "page_title": "Admins",
   "page_description": "Manage administrator accounts, roles, and access",
   "meta": {
-    "total_accounts": "{{count}} administrators"
+    "total_accounts": "{{count, number}} administrators"
   },
   "search_placeholder": "Search by name or email",
   "status": {

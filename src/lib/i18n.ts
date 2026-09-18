@@ -1,6 +1,8 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
+import { numberLocale } from '@/lib/locale'
+
 import arCommon from '@/locales/ar/common.json'
 import arComponents from '@/locales/ar/components.json'
 import arShell from '@/locales/ar/shell.json'
@@ -67,6 +69,18 @@ i18n.use(initReactI18next).init({
   ns: ['common', 'components', 'shell', 'users', 'countries', 'categories', 'providers', 'roles', 'admins', 'profile', 'complaints', 'supportTickets', 'settings', 'complaint-types', 'banks', 'withdrawals', 'wallet', 'notifications', 'shows', 'overview', 'reports'],
   interpolation: { escapeValue: false },
 })
+
+/**
+ * Override i18next's built-in `number` formatter so `{{count, number}}` uses the
+ * same locale rule as `format.number`. The built-in resolves the bare language
+ * (`ar`), which yields Latin digits; `numberLocale` maps it to `ar-SA` so a count
+ * inside a sentence matches every other number on the page.
+ */
+i18n.services.formatter?.add('number', (value, lng) =>
+  typeof value === 'number'
+    ? new Intl.NumberFormat(numberLocale(lng ?? 'en')).format(value)
+    : String(value),
+)
 
 setDocumentDirection(i18n.language)
 

@@ -3,7 +3,7 @@
   "page_description": "مراجعة طلبات سحب البائعين",
   "detail_title": "طلب سحب",
   "meta": {
-    "total_requests": "{{count}} طلب"
+    "total_requests": "{{count, number}} طلب"
   },
   "columns": {
     "seller": "البائع",

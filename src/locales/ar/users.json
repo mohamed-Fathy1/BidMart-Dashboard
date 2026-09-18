@@ -2,7 +2,7 @@
   "page_title": "المستخدمين",
   "page_description": "إدارة المستخدمين والبائعين المسجلين",
   "meta": {
-    "total_accounts": "{{count}} حسابًا"
+    "total_accounts": "{{count, number}} حسابًا"
   },
   "columns": {
     "account_name": "اسم الحساب",

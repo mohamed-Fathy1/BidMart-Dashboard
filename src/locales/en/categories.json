@@ -7,7 +7,7 @@
     "sub_categories": "Sub-categories"
   },
   "meta": {
-    "total": "{{count}} categories"
+    "total": "{{count, number}} categories"
   },
   "filters": {
     "search_placeholder": "Search by English or Arabic name"
@@ -78,7 +78,7 @@
     "page_title": "Sub-categories",
     "page_description": "Sub-categories of {{category}}",
     "meta": {
-      "total": "{{count}} sub-categories"
+      "total": "{{count, number}} sub-categories"
     },
     "list_hint": "Only sub-categories for this parent category appear below.",
     "filters": {

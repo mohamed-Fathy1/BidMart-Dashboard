@@ -7,7 +7,7 @@
     "sub_categories": "التصنيفات الفرعية"
   },
   "meta": {
-    "total": "{{count}} تصنيف"
+    "total": "{{count, number}} تصنيف"
   },
   "filters": {
     "search_placeholder": "البحث بالاسم الإنجليزي أو العربي"
@@ -78,7 +78,7 @@
     "page_title": "التصنيفات الفرعية",
     "page_description": "التصنيفات الفرعية لـ {{category}}",
     "meta": {
-      "total": "{{count}} تصنيف فرعي"
+      "total": "{{count, number}} تصنيف فرعي"
     },
     "list_hint": "تُعرض أدناه فقط التصنيفات الفرعية لهذا التصنيف الأب.",
     "filters": {

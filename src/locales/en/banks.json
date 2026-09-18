@@ -2,7 +2,7 @@
   "page_title": "Banks",
   "page_description": "Manage banks sellers can pick when withdrawing",
   "meta": {
-    "total_banks": "{{count}} banks"
+    "total_banks": "{{count, number}} banks"
   },
   "columns": {
     "bank": "Bank",

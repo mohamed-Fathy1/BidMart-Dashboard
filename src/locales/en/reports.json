@@ -111,8 +111,8 @@
   "financial": {
     "title": "Financial Report",
     "description": "Every paid order in the range, at the amounts charged at checkout.",
-    "meta_one": "{{count}} order",
-    "meta_other": "{{count}} orders",
+    "meta_one": "{{count, number}} order",
+    "meta_other": "{{count, number}} orders",
     "filters": {
       "store": "Store name",
       "customer": "Customer name",
@@ -133,8 +133,8 @@
     },
     "totals": {
       "title": "Totals",
-      "caption_one": "Totals for the {{count}} filtered order",
-      "caption_other": "Totals for all {{count}} filtered orders",
+      "caption_one": "Totals for the {{count, number}} filtered order",
+      "caption_other": "Totals for all {{count, number}} filtered orders",
       "store_profit": "Store profit",
       "tax": "Tax",
       "platform_profit": "Platform profit",
@@ -163,16 +163,16 @@
       "reviews": "Reviews",
       "sellers": "Sellers"
     },
-    "meta_reviews_one": "{{count}} review",
-    "meta_reviews_other": "{{count}} reviews",
-    "meta_sellers_one": "{{count}} seller",
-    "meta_sellers_other": "{{count}} sellers",
+    "meta_reviews_one": "{{count, number}} review",
+    "meta_reviews_other": "{{count, number}} reviews",
+    "meta_sellers_one": "{{count, number}} seller",
+    "meta_sellers_other": "{{count, number}} sellers",
     "filters": {
       "seller": "Seller name",
       "rating": "Rating",
       "all_ratings": "All ratings",
-      "stars_one": "{{count}} star",
-      "stars_other": "{{count}} stars",
+      "stars_one": "{{count, number}} star",
+      "stars_other": "{{count, number}} stars",
       "category": "Category",
       "all_categories": "All categories"
     },
@@ -211,8 +211,8 @@
   "orders": {
     "title": "Orders & Sales",
     "description": "Every order created in the range, grouped by outcome.",
-    "meta_one": "{{count}} order",
-    "meta_other": "{{count}} orders",
+    "meta_one": "{{count, number}} order",
+    "meta_other": "{{count, number}} orders",
     "tiles": {
       "completed": "Completed",
       "cancelled": "Cancelled",
@@ -243,8 +243,8 @@
   "livestreams": {
     "title": "Livestreams & Engagement",
     "description": "Per-broadcast performance in the range.",
-    "meta_one": "{{count}} show",
-    "meta_other": "{{count}} shows",
+    "meta_one": "{{count, number}} show",
+    "meta_other": "{{count, number}} shows",
     "sort": {
       "label": "Sort by",
       "DATE": "Date",

@@ -2,7 +2,7 @@
   "page_title": "أنواع الشكاوى",
   "page_description": "إدارة تصنيفات الشكاوى المستخدمة عند رفع التذاكر",
   "meta": {
-    "total": "{{count}} نوع"
+    "total": "{{count, number}} نوع"
   },
   "columns": {
     "name": "الاسم",

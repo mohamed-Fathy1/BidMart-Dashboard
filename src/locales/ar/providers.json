@@ -2,7 +2,7 @@
   "page_title": "مقدمو الخدمة",
   "page_description": "متاجر البائعين والتحقق والإشراف",
   "meta": {
-    "total_stores": "{{count}} متجرًا"
+    "total_stores": "{{count, number}} متجرًا"
   },
   "empty": {
     "no_data_title": "لا توجد طلبات بائعين بعد",

@@ -2,7 +2,7 @@
   "page_title": "Providers",
   "page_description": "Seller stores, verification, and moderation",
   "meta": {
-    "total_stores": "{{count}} stores"
+    "total_stores": "{{count, number}} stores"
   },
   "empty": {
     "no_data_title": "No provider applications yet",

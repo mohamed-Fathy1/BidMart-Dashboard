@@ -94,7 +94,7 @@
     "select_row": "Select row",
     "row_actions": "Row actions",
     "row_actions_for": "Actions for {{name}}",
-    "selected": "{{count}} selected",
+    "selected": "{{count, number}} selected",
     "empty_hint": "Try adjusting your filters or search.",
     "no_data_title": "No records yet",
     "no_data_hint": "Once records exist they'll appear here.",

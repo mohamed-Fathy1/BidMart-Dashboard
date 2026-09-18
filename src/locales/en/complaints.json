@@ -14,8 +14,8 @@
     "all_statuses": "All",
     "all_types": "All types",
     "loading_counts": "Loading…",
-    "results_count_one": "{{count}} complaint",
-    "results_count_other": "{{count}} complaints"
+    "results_count_one": "{{count, number}} complaint",
+    "results_count_other": "{{count, number}} complaints"
   },
   "wait": {
     "just_now": "just now",
@@ -48,7 +48,7 @@
     "waiting": "Waiting",
     "no_messages": "No messages yet",
     "image_message": "[Image]",
-    "unread_label": "{{count}} unread"
+    "unread_label": "{{count, number}} unread"
   },
   "actions": {
     "view": "View details",

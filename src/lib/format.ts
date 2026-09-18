@@ -1,20 +1,12 @@
 import { i18n } from '@/lib/i18n'
+import { dateLocale, numberLocale } from '@/lib/locale'
 
 function getLocale(): string {
-  return i18n.language === 'ar' ? 'ar-SA' : 'en-SA'
+  return numberLocale(i18n.language)
 }
 
-/**
- * Locale for date/time formatting. `ar-SA` defaults to the Islamic
- * (Umm al-Qura) calendar, which renders dates as Hijri (e.g. "٧ ذو الحجة
- * ١٤٤٧ هـ"). We force the Gregorian calendar via the `-u-ca-gregory`
- * extension so Arabic dates show Gregorian months in Arabic ("٧ فبراير
- * ٢٠٢٦") — same calendar as English, just localized names/digits.
- * The extension is ignored by `Intl.NumberFormat`, so number formatting
- * keeps using `getLocale()`.
- */
 function getDateLocale(): string {
-  return i18n.language === 'ar' ? 'ar-SA-u-ca-gregory' : 'en-SA'
+  return dateLocale(i18n.language)
 }
 
 export const format = {

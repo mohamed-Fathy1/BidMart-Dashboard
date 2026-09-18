@@ -2,7 +2,7 @@
   "page_title": "المديرون",
   "page_description": "إدارة حسابات المشرفين والأدوار والصلاحيات",
   "meta": {
-    "total_accounts": "{{count}} مسؤول"
+    "total_accounts": "{{count, number}} مسؤول"
   },
   "search_placeholder": "بحث بالاسم أو البريد",
   "status": {

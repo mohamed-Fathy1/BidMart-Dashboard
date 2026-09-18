@@ -2,7 +2,7 @@
   "page_title": "Complaint Types",
   "page_description": "Manage complaint categories used during ticket submission",
   "meta": {
-    "total": "{{count}} types"
+    "total": "{{count, number}} types"
   },
   "columns": {
     "name": "Name",

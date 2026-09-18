@@ -17,9 +17,9 @@
     "results_count_zero": "لا توجد شكاوى",
     "results_count_one": "شكوى واحدة",
     "results_count_two": "شكويان",
-    "results_count_few": "{{count}} شكاوى",
-    "results_count_many": "{{count}} شكوى",
-    "results_count_other": "{{count}} شكوى"
+    "results_count_few": "{{count, number}} شكاوى",
+    "results_count_many": "{{count, number}} شكوى",
+    "results_count_other": "{{count, number}} شكوى"
   },
   "wait": {
     "just_now": "الآن",
@@ -52,7 +52,7 @@
     "waiting": "الانتظار",
     "no_messages": "لا توجد رسائل بعد",
     "image_message": "[صورة]",
-    "unread_label": "{{count}} غير مقروءة"
+    "unread_label": "{{count, number}} غير مقروءة"
   },
   "actions": {
     "view": "عرض التفاصيل",
