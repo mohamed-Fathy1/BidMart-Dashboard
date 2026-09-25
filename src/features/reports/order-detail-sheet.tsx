@@ -182,7 +182,6 @@ function OrderDetailSheetBody({ data }: OrderDetailSheetBodyProps) {
 
   return (
     <div className="space-y-4 px-4 pb-6">
-      {/* ---- Customer ---- */}
       <DetailCard
         title={t('reports:order_detail.sections.customer')}
         columns={2}
@@ -202,7 +201,6 @@ function OrderDetailSheetBody({ data }: OrderDetailSheetBodyProps) {
         <DetailField label={t('reports:order_detail.fields.phone')} value={data.customer.phoneNumber} mono />
       </DetailCard>
 
-      {/* ---- Store and product ---- */}
       <DetailCard
         title={t('reports:order_detail.sections.store')}
         columns={2}
@@ -245,7 +243,6 @@ function OrderDetailSheetBody({ data }: OrderDetailSheetBodyProps) {
         <DetailField label={t('reports:order_detail.fields.goods')} value={money(data.store.amount)} mono />
       </DetailCard>
 
-      {/* ---- Money ---- */}
       <DetailCard title={t('reports:order_detail.sections.money')} columns={2}>
         <DetailField label={t('reports:order_detail.fields.subtotal')} value={money(data.money.subtotal)} mono />
         <DetailField label={t('reports:order_detail.fields.discount')} value={money(data.money.discountAmount)} mono />
@@ -260,7 +257,6 @@ function OrderDetailSheetBody({ data }: OrderDetailSheetBodyProps) {
         <DetailField label={t('reports:order_detail.fields.seller_net')} value={money(data.money.sellerNet)} mono />
       </DetailCard>
 
-      {/* ---- Refund ---- */}
       <DetailCard title={t('reports:order_detail.sections.refund')} columns={2}>
         {data.refund === null ? (
           <p className="text-sm text-muted-foreground sm:col-span-2">
@@ -301,7 +297,6 @@ function OrderDetailSheetBody({ data }: OrderDetailSheetBodyProps) {
         )}
       </DetailCard>
 
-      {/* ---- History ---- */}
       <Card>
         <CardHeader>
           <CardTitle className="text-[length:var(--type-h3-size)] font-[number:var(--type-h3-weight)]">
