@@ -226,17 +226,6 @@
     "meta_few": "{{count, number}} طلبات",
     "meta_many": "{{count, number}} طلبًا",
     "meta_other": "{{count, number}} طلب",
-    "tiles": {
-      "completed": "مكتملة",
-      "cancelled": "ملغاة",
-      "in_progress": "قيد التنفيذ",
-      "refunded": "مستردة",
-      "total_orders": "إجمالي الطلبات",
-      "average_order_value": "متوسط قيمة الطلب",
-      "average_hint": "الطلبات المدفوعة فقط",
-      "filter_hint": "اختر بطاقة لتصفية القائمة. تصف البطاقات دائمًا الفترة كاملة.",
-      "clear": "عرض الكل"
-    },
     "columns": {
       "order_number": "الطلب",
       "buyer": "المشتري",
@@ -251,6 +240,16 @@
       "no_data_hint": "تظهر الطلبات هنا بعد أن يتم المشترون الشراء.",
       "no_results_title": "لا توجد طلبات في هذه المجموعة",
       "no_results_hint": "اختر مجموعة أخرى أو وسّع النطاق."
+    },
+    "groups": {
+      "label": "حالة الطلب",
+      "all": "الكل",
+      "completed": "مكتملة",
+      "cancelled": "ملغاة",
+      "in_progress": "قيد التنفيذ",
+      "refunded": "مستردة",
+      "average_order_value": "متوسط قيمة الطلب",
+      "average_hint": "الطلبات المدفوعة فقط"
     }
   },
   "livestreams": {

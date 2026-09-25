@@ -202,17 +202,6 @@
     "description": "Every order created in the range, grouped by outcome.",
     "meta_one": "{{count, number}} order",
     "meta_other": "{{count, number}} orders",
-    "tiles": {
-      "completed": "Completed",
-      "cancelled": "Cancelled",
-      "in_progress": "In progress",
-      "refunded": "Refunded",
-      "total_orders": "Total orders",
-      "average_order_value": "Average order value",
-      "average_hint": "Paid orders only",
-      "filter_hint": "Select a tile to filter the list. The tiles always describe the whole window.",
-      "clear": "Show all"
-    },
     "columns": {
       "order_number": "Order",
       "buyer": "Buyer",
@@ -227,6 +216,16 @@
       "no_data_hint": "Orders appear here once buyers check out.",
       "no_results_title": "No orders in this group",
       "no_results_hint": "Pick another group or widen the range."
+    },
+    "groups": {
+      "label": "Order status",
+      "all": "All",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "in_progress": "In progress",
+      "refunded": "Refunded",
+      "average_order_value": "Average order value",
+      "average_hint": "Paid orders only"
     }
   },
   "livestreams": {

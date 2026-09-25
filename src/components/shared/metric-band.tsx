@@ -30,8 +30,7 @@ const COLUMNS: Record<MetricBandProps['columns'], string> = {
  * The 1px gap over a border-coloured backdrop draws the rules, so they stay
  * correct however the grid wraps.
  */
-/** The band surface, for callers that render their own cells (e.g. toggles). */
-export function metricBandClass(columns: MetricBandProps['columns']) {
+function metricBandClass(columns: MetricBandProps['columns']) {
   return cn(
     'grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border shadow-rest',
     COLUMNS[columns],

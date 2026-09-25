@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { getRouteApi } from '@tanstack/react-router'
 import type { OrdersReportParams } from '@/features/reports/reports.api'
 import { useOrdersReportQuery } from '@/features/reports/reports.queries'
-import { OrdersGroupTiles } from '@/features/reports/orders-group-tiles'
+import { OrdersGroupFilter } from '@/features/reports/orders-group-filter'
 import { useOrdersReportColumns } from '@/features/reports/orders-report.columns'
 import { OrderDetailSheet } from '@/features/reports/order-detail-sheet'
 import { DataTable } from '@/components/data-table/data-table'
@@ -75,23 +75,25 @@ export function OrdersReportPage() {
         />
       </TableFiltersShell>
 
-      <OrdersGroupTiles
-        summary={response?.meta?.summary}
-        isLoading={isLoading}
-        activeGroup={search.group}
-        onGroupChange={(g) => setFilter('group', g)}
-      />
+      <div className="space-y-3">
+        <OrdersGroupFilter
+          summary={response?.meta?.summary}
+          isLoading={isLoading}
+          activeGroup={search.group}
+          onGroupChange={(g) => setFilter('group', g)}
+        />
 
-      <DataTable
-        columns={columns}
-        data={rows}
-        {...tableProps}
-        pageSizeOptions={REPORT_PAGE_SIZES}
-        getRowId={(row) => row.orderId}
-        rowLabel={(row) => row.orderNumber}
-        onRowClick={(row) => setParam('order', row.orderId)}
-        emptyKeyPrefix="reports:orders.empty"
-      />
+        <DataTable
+          columns={columns}
+          data={rows}
+          {...tableProps}
+          pageSizeOptions={REPORT_PAGE_SIZES}
+          getRowId={(row) => row.orderId}
+          rowLabel={(row) => row.orderNumber}
+          onRowClick={(row) => setParam('order', row.orderId)}
+          emptyKeyPrefix="reports:orders.empty"
+        />
+      </div>
 
       <OrderDetailSheet
         orderId={search.order}
