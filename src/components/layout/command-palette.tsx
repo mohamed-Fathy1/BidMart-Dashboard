@@ -13,26 +13,12 @@ import {
 } from '@/components/ui/command'
 import { useLogoutMutation } from '@/features/auth/auth.queries'
 import { usePermissionCheck } from '@/lib/permissions'
-import {
-  navSections,
-  type NavLeaf,
-} from '@/components/layout/nav-items'
+import { navLeaves } from '@/components/layout/nav-items'
 
 interface CommandPaletteProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
-
-const ALL_NAV_LEAVES: NavLeaf[] = (() => {
-  const out: NavLeaf[] = []
-  navSections.forEach((section) => {
-    section.entries.forEach((entry) => {
-      if (entry.kind === 'leaf') out.push(entry)
-      else entry.children.forEach((c) => out.push(c))
-    })
-  })
-  return out
-})()
 
 export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const { t } = useTranslation()
@@ -40,7 +26,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const check = usePermissionCheck()
   const logout = useLogoutMutation()
 
-  const visible = ALL_NAV_LEAVES.filter((leaf) => check(leaf.permission))
+  const visible = navLeaves.filter((leaf) => check(leaf.permission))
 
   function go(to: string) {
     onOpenChange(false)

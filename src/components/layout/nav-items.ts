@@ -209,18 +209,16 @@ export const navSections: NavSection[] = [
   },
 ]
 
+/** Every page in the sidebar, in sidebar order. */
+export const navLeaves: NavLeaf[] = navSections.flatMap((section) =>
+  section.entries.flatMap((entry) => (entry.kind === 'leaf' ? [entry] : entry.children)),
+)
+
 /**
- * The first sidebar page the admin can open, in sidebar order. Used as the
- * landing page after login so an admin without Overview access does not land
- * on a permission error. `/profile` is open to every admin.
+ * The first sidebar page the admin can open. Used as the landing page after
+ * login so an admin without Overview access does not land on a permission
+ * error. `/profile` is open to every admin.
  */
 export function firstPermittedPath(check: (permission?: Permission) => boolean): string {
-  for (const section of navSections) {
-    for (const entry of section.entries) {
-      const leaves = entry.kind === 'leaf' ? [entry] : entry.children
-      const leaf = leaves.find((candidate) => check(candidate.permission))
-      if (leaf) return leaf.to
-    }
-  }
-  return '/profile'
+  return navLeaves.find((leaf) => check(leaf.permission))?.to ?? '/profile'
 }
