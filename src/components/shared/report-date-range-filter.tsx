@@ -2,6 +2,7 @@ import { useId, useState } from 'react'
 import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import {
+  DEFAULT_RANGE_PRESET,
   presetForRange,
   presetToRange,
   rangeValidationError,
@@ -42,18 +43,15 @@ export function ReportDateRangeFilter({
 }: ReportDateRangeFilterProps) {
   const { t } = useTranslation()
   const errorId = useId()
-  const [draft, setDraft] = useState<{ from: string; to: string }>({
-    from: from ?? '',
-    to: to ?? '',
-  })
+  const today = todayIso()
+  const [draft, setDraft] = useState(() => shownRange(from, to, today))
   const [synced, setSynced] = useState<{ from?: string; to?: string }>({ from, to })
 
   if (from !== synced.from || to !== synced.to) {
     setSynced({ from, to })
-    setDraft({ from: from ?? '', to: to ?? '' })
+    setDraft(shownRange(from, to, today))
   }
 
-  const today = todayIso()
   const matchedPreset = presetForRange(from, to, today)
   const rangeError = rangeValidationError(from, to, today)
   const error = rangeError ? t(`components:date_range.errors.${rangeError}`) : undefined
@@ -136,4 +134,13 @@ export function ReportDateRangeFilter({
       )}
     </div>
   )
+}
+
+/**
+ * What the two date fields show. With no range in the URL the server applies
+ * the default preset, so the fields show those dates rather than two blanks.
+ */
+function shownRange(from: string | undefined, to: string | undefined, today: string) {
+  if (!from && !to) return presetToRange(DEFAULT_RANGE_PRESET, today)
+  return { from: from ?? '', to: to ?? '' }
 }
