@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useMatchRoute, useNavigate, useRouterState } from '@tanstack/react-router'
 import { ChevronsLeft, ChevronsRight, ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { useIsDesktop } from '@/lib/use-media-query'
-import { can, usePermission, type Permission } from '@/lib/permissions'
-import { useAuthStore } from '@/features/auth/auth.store'
+import { usePermissionCheck } from '@/lib/permissions'
 import { useUIStore } from '@/features/ui/ui.store'
 import {
   navSections,
@@ -304,48 +303,17 @@ function NavGroupItem({
 }
 
 function FilteredEntry({ entry, collapsed }: { entry: NavEntry; collapsed: boolean }) {
+  const check = usePermissionCheck()
   if (entry.kind === 'leaf') {
-    return entry.permission ? (
-      <PermissionLeaf item={entry} permission={entry.permission} collapsed={collapsed} />
-    ) : (
-      <NavLink item={entry} collapsed={collapsed} />
-    )
+    return check(entry.permission) ? <NavLink item={entry} collapsed={collapsed} /> : null
   }
-  return <FilteredGroup group={entry} collapsed={collapsed} />
-}
-
-function PermissionLeaf({
-  item,
-  permission,
-  collapsed,
-}: {
-  item: NavLeaf
-  permission: Permission
-  collapsed: boolean
-}) {
-  const ok = usePermission(permission)
-  if (!ok) return null
-  return <NavLink item={item} collapsed={collapsed} />
-}
-
-function FilteredGroup({ group, collapsed }: { group: NavGroup; collapsed: boolean }) {
-  const visibleChildren = useVisibleChildren(group.children)
+  const visibleChildren = entry.children.filter((child) => check(child.permission))
   if (visibleChildren.length === 0) return null
   if (visibleChildren.length === 1) {
     const only = visibleChildren[0]!
     return <NavLink item={only} collapsed={collapsed} />
   }
-  return <NavGroupItem group={group} visibleChildren={visibleChildren} collapsed={collapsed} />
-}
-
-function useVisibleChildren(children: NavLeaf[]): NavLeaf[] {
-  const permissions = useAuthStore((s) => s.permissions)
-  const isSuperAdmin = useAuthStore((s) => s.user?.isSuperAdmin)
-  return useMemo(
-    () =>
-      children.filter((c) => !c.permission || isSuperAdmin || can(permissions, c.permission)),
-    [children, permissions, isSuperAdmin],
-  )
+  return <NavGroupItem group={entry} visibleChildren={visibleChildren} collapsed={collapsed} />
 }
 
 function Section({ section, collapsed, isFirst }: { section: NavSection; collapsed: boolean; isFirst: boolean }) {

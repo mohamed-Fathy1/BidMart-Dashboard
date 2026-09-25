@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { LogOut, User } from 'lucide-react'
@@ -11,9 +11,8 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command'
-import { useAuthStore } from '@/features/auth/auth.store'
 import { useLogoutMutation } from '@/features/auth/auth.queries'
-import { can } from '@/lib/permissions'
+import { usePermissionCheck } from '@/lib/permissions'
 import {
   navSections,
   type NavLeaf,
@@ -38,17 +37,10 @@ const ALL_NAV_LEAVES: NavLeaf[] = (() => {
 export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const permissions = useAuthStore((s) => s.permissions)
-  const isSuperAdmin = useAuthStore((s) => s.user?.isSuperAdmin)
+  const check = usePermissionCheck()
   const logout = useLogoutMutation()
 
-  const visible = useMemo(
-    () =>
-      ALL_NAV_LEAVES.filter(
-        (l) => !l.permission || isSuperAdmin || can(permissions, l.permission),
-      ),
-    [permissions, isSuperAdmin],
-  )
+  const visible = ALL_NAV_LEAVES.filter((leaf) => check(leaf.permission))
 
   function go(to: string) {
     onOpenChange(false)

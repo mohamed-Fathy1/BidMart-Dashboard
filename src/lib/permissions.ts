@@ -104,9 +104,13 @@ export function permissionCheck(
   return (permission) => !permission || !!isSuperAdmin || can(permissions, permission);
 }
 
-export function usePermission(permission: Permission): boolean {
+/** The signed-in admin's grant test, for filtering many gated items at once. */
+export function usePermissionCheck(): (permission?: Permission) => boolean {
   const permissions = useAuthStore((s) => s.permissions);
   const isSuperAdmin = useAuthStore((s) => s.user?.isSuperAdmin);
-  if (isSuperAdmin) return true;
-  return can(permissions, permission);
+  return permissionCheck(permissions, isSuperAdmin);
+}
+
+export function usePermission(permission: Permission): boolean {
+  return usePermissionCheck()(permission);
 }
