@@ -26,7 +26,6 @@ import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { DataTable, type RowActionItem } from '@/components/data-table/data-table'
 import { format } from '@/lib/format'
-import { rangeValidationError } from '@/lib/report-range'
 import { DEFAULT_STATISTICS_PERIOD, type StatisticsQuery } from '@/lib/report-period'
 
 import { StatusBadge } from '@/components/shared/status-badge'
@@ -412,7 +411,6 @@ function ComponentsShowcasePage() {
     period: DEFAULT_STATISTICS_PERIOD,
   })
   const [rangeDemo, setRangeDemo] = useState<{ from?: string; to?: string }>({})
-  const rangeError = rangeValidationError(rangeDemo.from, rangeDemo.to)
 
   return (
     <div className="space-y-8">
@@ -553,9 +551,6 @@ function ComponentsShowcasePage() {
         from={rangeDemo.from}
         to={rangeDemo.to}
         onChange={setRangeDemo}
-        error={
-          rangeError ? t(`components:date_range.errors.${rangeError}`) : undefined
-        }
       />
       <p className="text-xs text-muted-foreground">
         From: {rangeDemo.from || '—'} / To: {rangeDemo.to || '—'}
