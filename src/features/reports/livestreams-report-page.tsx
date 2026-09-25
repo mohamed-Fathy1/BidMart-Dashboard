@@ -1,6 +1,6 @@
 import { getRouteApi } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import type { LivestreamReportRow, LivestreamSortBy } from '@/types/api'
+import type { LivestreamReportRow } from '@/types/api'
 import type { LivestreamsReportParams } from '@/features/reports/reports.api'
 import { useUrlListState } from '@/lib/use-url-list-state'
 import { useListPageData } from '@/lib/use-list-page-data'
@@ -20,7 +20,8 @@ import { DataTable } from '@/components/data-table/data-table'
 import { useLivestreamsReportQuery } from '@/features/reports/reports.queries'
 import { useLivestreamsReportColumns } from '@/features/reports/livestreams-report.columns'
 import { LivestreamsSummary } from '@/features/reports/livestreams-summary'
-import { LIVESTREAM_SORT_OPTIONS } from '@/routes/_authed.reports.livestreams'
+import { LIVESTREAM_SORT_OPTIONS } from '@/features/reports/report-options'
+import { readEnum } from '@/lib/list-search'
 import type { LivestreamsReportSearch } from '@/routes/_authed.reports.livestreams'
 
 const livestreamsRoute = getRouteApi('/_authed/reports/livestreams')
@@ -88,7 +89,7 @@ export function LivestreamsReportPage() {
         <Select
           value={search.sortBy ?? 'DATE'}
           onValueChange={(value) =>
-            setFilter('sortBy', value === 'DATE' ? undefined : (value as LivestreamSortBy))
+            setFilter('sortBy', value === 'DATE' ? undefined : readEnum(value, LIVESTREAM_SORT_OPTIONS))
           }
         >
           <SelectTrigger

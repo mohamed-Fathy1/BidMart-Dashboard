@@ -18,7 +18,9 @@ import { useRatingsReviewsColumns } from '@/features/reports/ratings-reviews.col
 import { useRatingsSellersColumns } from '@/features/reports/ratings-sellers.columns'
 import { RatingsSummary } from '@/features/reports/ratings-summary'
 import type { RatingsReviewsParams, RatingsSellersParams } from '@/features/reports/reports.api'
-import type { RatingsReportSearch, RatingsTab } from '@/routes/_authed.reports.ratings'
+import { RATINGS_TABS } from '@/features/reports/report-options'
+import { readEnum } from '@/lib/list-search'
+import type { RatingsReportSearch } from '@/routes/_authed.reports.ratings'
 
 const ratingsRoute = getRouteApi('/_authed/reports/ratings')
 
@@ -127,7 +129,11 @@ export function RatingsReportPage() {
       <Tabs
         value={search.tab}
         onValueChange={(tab) =>
-          setFilters({ tab: tab as RatingsTab, rating: undefined, categoryId: undefined })
+          setFilters({
+            tab: readEnum(tab, RATINGS_TABS),
+            rating: undefined,
+            categoryId: undefined,
+          })
         }
         className="gap-6"
       >

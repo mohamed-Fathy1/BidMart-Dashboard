@@ -8,7 +8,7 @@ import {
   presetToRange,
   rangeParamsFor,
   rangeValidationError,
-  readRangeSearch,
+  parseReportSearchBase,
 } from './report-range'
 
 const TODAY = '2026-09-16'
@@ -77,12 +77,22 @@ describe('rangeParamsFor', () => {
   })
 })
 
-describe('readRangeSearch', () => {
+describe('parseReportSearchBase', () => {
+  it('reads paging and a complete date pair', () => {
+    expect(
+      parseReportSearchBase({ page: '2', limit: 50, startDate: '2026-09-01', endDate: '2026-09-16' }),
+    ).toEqual({ page: 2, limit: 50, startDate: '2026-09-01', endDate: '2026-09-16' })
+  })
   it('drops a half pair at the URL boundary', () => {
-    expect(readRangeSearch('2026-09-01', undefined)).toEqual({})
-    expect(readRangeSearch('2026-09-01', '2026-09-16')).toEqual({
-      startDate: '2026-09-01',
-      endDate: '2026-09-16',
+    expect(parseReportSearchBase({ startDate: '2026-09-01' })).toEqual({
+      page: undefined,
+      limit: undefined,
+    })
+  })
+  it('drops a malformed date, and with it the pair', () => {
+    expect(parseReportSearchBase({ startDate: '2026-9-1', endDate: '2026-09-16' })).toEqual({
+      page: undefined,
+      limit: undefined,
     })
   })
 })

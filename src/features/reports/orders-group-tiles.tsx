@@ -4,6 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { StatCard } from '@/components/shared/stat-card'
 import { cn } from '@/lib/utils'
 import { format } from '@/lib/format'
+import { ORDER_REPORT_GROUPS } from '@/features/reports/report-options'
 import type { OrdersReportSummary, OrderReportGroup } from '@/types/api'
 
 interface OrdersGroupTilesProps {
@@ -13,12 +14,12 @@ interface OrdersGroupTilesProps {
   onGroupChange: (group: OrderReportGroup | undefined) => void
 }
 
-const TILES: { group: OrderReportGroup; key: keyof OrdersReportSummary; labelKey: string }[] = [
-  { group: 'COMPLETED', key: 'completed', labelKey: 'completed' },
-  { group: 'CANCELLED', key: 'cancelled', labelKey: 'cancelled' },
-  { group: 'IN_PROGRESS', key: 'inProgress', labelKey: 'in_progress' },
-  { group: 'REFUNDED', key: 'refunded', labelKey: 'refunded' },
-]
+const SUMMARY_KEY: Record<OrderReportGroup, keyof OrdersReportSummary> = {
+  COMPLETED: 'completed',
+  CANCELLED: 'cancelled',
+  IN_PROGRESS: 'inProgress',
+  REFUNDED: 'refunded',
+}
 
 export function OrdersGroupTiles({
   summary,
@@ -40,7 +41,7 @@ export function OrdersGroupTiles({
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
-          {TILES.map(({ group, key, labelKey }) => {
+          {ORDER_REPORT_GROUPS.map((group) => {
             const pressed = activeGroup === group
             return (
               <button
@@ -58,10 +59,10 @@ export function OrdersGroupTiles({
                 )}
               >
                 <p className="text-xs font-medium text-muted-foreground">
-                  {t(`reports:orders.tiles.${labelKey}`)}
+                  {t(`reports:orders.tiles.${group.toLowerCase()}`)}
                 </p>
                 <p className="mt-1.5 text-2xl font-semibold font-mono tabular-nums">
-                  {format.number(summary[key])}
+                  {format.number(summary[SUMMARY_KEY[group]])}
                 </p>
               </button>
             )

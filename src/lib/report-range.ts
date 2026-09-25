@@ -1,3 +1,4 @@
+import { parseListSearchBase, readIsoDate } from '@/lib/list-search'
 import { parseIsoDateUtc, todayIso, toIsoDateUtc } from '@/lib/report-period'
 
 /**
@@ -99,14 +100,25 @@ export function rangeParamsFor(
   return { startDate: from, endDate: to }
 }
 
+/** The search params every report route shares. */
+export interface ReportSearchBase {
+  page?: number
+  limit?: number
+  startDate?: string
+  endDate?: string
+}
+
 /**
- * Read a `startDate` / `endDate` pair from search params, enforcing
+ * Parse the shared report search params. The date pair is enforced
  * both-or-neither at the URL boundary so a half pair never reaches a query.
  */
-export function readRangeSearch(
-  startDate: string | undefined,
-  endDate: string | undefined,
-): { startDate?: string; endDate?: string } {
-  if (isCompleteRange(startDate, endDate)) return { startDate, endDate }
-  return {}
+export function parseReportSearchBase(search: Record<string, unknown>): ReportSearchBase {
+  const { page, limit } = parseListSearchBase(search)
+  const startDate = readIsoDate(search.startDate)
+  const endDate = readIsoDate(search.endDate)
+  return {
+    page,
+    limit,
+    ...(isCompleteRange(startDate, endDate) ? { startDate, endDate } : {}),
+  }
 }
