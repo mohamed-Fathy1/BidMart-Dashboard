@@ -28,7 +28,7 @@
     },
     "recent_activity": {
       "title": "النشاط الأخير",
-      "subtitle": "أحدث 10 أحداث في الفترة",
+      "subtitle": "أحدث ١٠ أحداث في الفترة",
       "empty": "لا يوجد نشاط في هذه الفترة.",
       "type": {
         "ORDER": "طلب",
@@ -42,9 +42,9 @@
     "completed_deals": "الصفقات المكتملة",
     "total_sales": "إجمالي المبيعات",
     "top_categories": "أعلى التصنيفات",
-    "top_categories_hint": "أعلى 5 حسب الإيرادات",
+    "top_categories_hint": "أعلى ٥ حسب الإيرادات",
     "top_sellers": "أعلى البائعين",
-    "top_sellers_hint": "أعلى 5 حسب الإيرادات",
+    "top_sellers_hint": "أعلى ٥ حسب الإيرادات",
     "orders_count_zero": "{{count, number}} طلب",
     "orders_count_one": "طلب واحد",
     "orders_count_two": "طلبان",
@@ -68,7 +68,7 @@
     "orders_count_many": "{{count, number}} طلبًا",
     "orders_count_other": "{{count, number}} طلب",
     "monthly": {
-      "title": "آخر 12 شهرًا",
+      "title": "آخر ١٢ شهرًا",
       "hint": "تنتهي بشهر الفترة المحددة. طول الفترة لا يغيرها.",
       "month": "الشهر",
       "gross_sales": "إجمالي المبيعات",
