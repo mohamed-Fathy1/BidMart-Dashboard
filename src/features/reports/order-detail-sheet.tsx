@@ -27,6 +27,7 @@ import { DetailField } from '@/components/shared/detail-field'
 import { EmptyState } from '@/components/shared/empty-state'
 import { StatusBadge } from '@/components/shared/status-badge'
 import { Timeline, type TimelineItem, type TimelineTone } from '@/components/shared/timeline'
+import type { ApiRejection } from '@/lib/axios'
 import { format } from '@/lib/format'
 import { i18n } from '@/lib/i18n'
 import { useOrderDrilldownQuery } from '@/features/reports/reports.queries'
@@ -35,13 +36,6 @@ import type { OrderDrilldown, OrderHistoryStep } from '@/types/api'
 interface OrderDetailSheetProps {
   orderId: string | undefined
   onClose: () => void
-}
-
-/** The Axios layer rejects with this plain object, not an `Error` instance. */
-interface DrilldownRequestError {
-  message: string
-  code?: string
-  status?: number
 }
 
 const HISTORY_STEP_META: Record<OrderHistoryStep, { icon: LucideIcon; tone: TimelineTone }> = {
@@ -59,7 +53,7 @@ export function OrderDetailSheet({ orderId, onClose }: OrderDetailSheetProps) {
   const { t } = useTranslation()
   const { data, isPending, error, refetch } = useOrderDrilldownQuery(orderId)
 
-  const requestError = error as DrilldownRequestError | null
+  const requestError = error as ApiRejection | null
   const notFound =
     requestError?.code === 'ORDER_NOT_FOUND' || requestError?.status === 404
 

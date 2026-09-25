@@ -99,8 +99,14 @@ export function extractErrorMessage(error: unknown): string | undefined {
   return undefined
 }
 
-/** The plain `{ message, code, status }` object every non-auth failure rejects with. */
-function toPlainRejection(error: unknown): { message: string; code?: string; status?: number } {
+/** The plain object every non-auth failure rejects with, instead of an `Error`. */
+export interface ApiRejection {
+  message: string
+  code?: string
+  status?: number
+}
+
+function toPlainRejection(error: unknown): ApiRejection {
   const message =
     extractApiErrorMessage(error) ??
     (axios.isAxiosError(error) ? error.message : undefined) ??

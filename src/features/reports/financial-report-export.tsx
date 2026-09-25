@@ -15,16 +15,12 @@ import {
   type FinancialExportFormat,
   type FinancialReportFilters,
 } from '@/features/reports/reports.api'
+import type { ApiRejection } from '@/lib/axios'
 import { saveBlob } from '@/lib/download'
 
 interface FinancialReportExportProps {
   filters: FinancialReportFilters
   disabled?: boolean
-}
-
-interface ExportRejection {
-  message?: string
-  code?: string
 }
 
 /**
@@ -35,7 +31,7 @@ interface ExportRejection {
 export function FinancialReportExport({ filters, disabled = false }: FinancialReportExportProps) {
   const { t } = useTranslation()
 
-  const exportMutation = useMutation<ExportedFile, ExportRejection, FinancialExportFormat>({
+  const exportMutation = useMutation<ExportedFile, ApiRejection, FinancialExportFormat>({
     mutationFn: (format) => exportFinancialReport(filters, format),
     onSuccess: ({ blob, filename }) => {
       saveBlob(blob, filename)
