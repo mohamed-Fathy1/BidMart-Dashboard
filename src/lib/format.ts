@@ -18,6 +18,37 @@ export const format = {
     }).format(value)
   },
 
+  /**
+   * `currency()` split into the code and the amount, so a headline figure can
+   * set the code smaller than the digits. `symbolFirst` follows the locale:
+   * "SAR 1,504.80" in English, "١٬٥٠٤٫٨٠ ر.س." in Arabic.
+   */
+  currencyParts(
+    value: number,
+    options?: { currency?: string },
+  ): { symbol: string; amount: string; symbolFirst: boolean } {
+    const parts = new Intl.NumberFormat(getLocale(), {
+      style: 'currency',
+      currency: options?.currency ?? 'SAR',
+      minimumFractionDigits: 2,
+    }).formatToParts(value)
+    const symbolIndex = parts.findIndex((part) => part.type === 'currency')
+    const firstDigit = parts.findIndex((part) => part.type === 'integer')
+    const amount = parts
+      .filter((part) => part.type !== 'currency' && !(part.type === 'literal' && /^[\s\u200e\u200f\u061c]*$/.test(part.value)))
+      .map((part) => part.value)
+      .join('')
+    return { symbol: parts[symbolIndex]?.value ?? '', amount, symbolFirst: symbolIndex < firstDigit }
+  },
+
+  /** Short axis figures: 1.2K, 3.4M. */
+  compactNumber(value: number): string {
+    return new Intl.NumberFormat(getLocale(), {
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    }).format(value)
+  },
+
   number(value: number): string {
     return new Intl.NumberFormat(getLocale()).format(value)
   },

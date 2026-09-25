@@ -272,6 +272,7 @@ Duration/easing pairings:
 - Never render raw numbers or ISO date strings
 - Always use `lib/format.ts`: `format.currency()`, `format.number()`, `format.date()`, `format.dateTime()`
 - Financial columns use `font-mono tabular-nums`
+- Headline figures (metric bands, stat cards) use `MetricValue` (`components/shared/metric-value.tsx`): sans, proportional digits, currency code set smaller via `format.currencyParts`. Group related figures in one `MetricBand`, not a card each
 
 ## Component Authoring Checklist
 
@@ -287,7 +288,7 @@ Duration/easing pairings:
 - No emoji in UI chrome
 - No glass-morphism / backdrop blur panels
 - No centered-hero-with-three-feature-cards layouts
-- Numeric data is `font-mono tabular-nums`, always
+- Numbers in tables and columns are `font-mono tabular-nums`; headline figures use `MetricValue` (sans, proportional)
 - Empty states: one line of copy, one action, no illustration
 - Never `text-left`/`text-right` — use `text-start`/`text-end`
 - Never `pl-*`/`pr-*` — use `ps-*`/`pe-*`

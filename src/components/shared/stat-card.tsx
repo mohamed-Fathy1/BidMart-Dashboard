@@ -21,7 +21,7 @@ export function StatCard({ label, value, hint, delta, className }: StatCardProps
       <CardContent className="px-5">
         <p className="text-xs font-medium text-muted-foreground">{label}</p>
         <div className="mt-1.5 flex items-end justify-between gap-2">
-          <span className="text-2xl font-semibold tracking-tight font-mono tabular-nums text-foreground">
+          <span className="text-[1.625rem] leading-none font-semibold tracking-[-0.02em] text-foreground">
             {value}
           </span>
           {delta && (

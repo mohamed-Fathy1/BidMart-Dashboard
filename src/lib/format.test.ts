@@ -45,3 +45,12 @@ describe('format.month', () => {
     expect(format.month('2026-9')).toBe('2026-9')
   })
 })
+
+describe('format.currencyParts', () => {
+  it('splits the code from the amount, code first in English', () => {
+    expect(format.currencyParts(11536.71)).toEqual({ symbol: 'SAR', amount: '11,536.71', symbolFirst: true })
+  })
+  it('keeps the sign with the amount', () => {
+    expect(format.currencyParts(-800)).toEqual({ symbol: 'SAR', amount: '-800.00', symbolFirst: true })
+  })
+})
