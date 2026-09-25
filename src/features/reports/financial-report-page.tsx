@@ -28,9 +28,8 @@ function compact<T extends Record<string, unknown>>(params: T): T {
 
 export function FinancialReportPage() {
   const { t } = useTranslation()
-  const navigate = financialRoute.useNavigate()
 
-  const { search, pagination, setPagination, setFilter, setParam } =
+  const { search, pagination, setPagination, setFilter, setFilters, setParam } =
     useUrlListState<FinancialReportSearch>({
       route: financialRoute,
       defaultLimit: 20,
@@ -63,16 +62,12 @@ export function FinancialReportPage() {
       search.storeName || search.customerName || search.status || search.startDate,
     ),
     clearFilters: () =>
-      navigate({
-        search: (prev) => ({
-          ...prev,
-          storeName: undefined,
-          customerName: undefined,
-          status: undefined,
-          startDate: undefined,
-          endDate: undefined,
-          page: undefined,
-        }),
+      setFilters({
+        storeName: undefined,
+        customerName: undefined,
+        status: undefined,
+        startDate: undefined,
+        endDate: undefined,
       }),
   })
 
@@ -125,17 +120,7 @@ export function FinancialReportPage() {
         <ReportDateRangeFilter
           from={search.startDate}
           to={search.endDate}
-          onChange={(next) =>
-            navigate({
-              search: (prev) => ({
-                ...prev,
-                startDate: next.from,
-                endDate: next.to,
-                page: undefined,
-              }),
-            })
-          }
-          error={rangeError ? t(`components:date_range.errors.${rangeError}`) : undefined}
+          onChange={(next) => setFilters({ startDate: next.from, endDate: next.to })}
         />
       </TableFiltersShell>
 

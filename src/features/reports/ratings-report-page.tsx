@@ -32,10 +32,11 @@ export function RatingsReportPage() {
   const { t, i18n } = useTranslation()
   const navigate = ratingsRoute.useNavigate()
 
-  const { search, pagination, setPagination, setFilter } = useUrlListState<RatingsReportSearch>({
-    route: ratingsRoute,
-    defaultLimit: 20,
-  })
+  const { search, pagination, setPagination, setFilter, setFilters } =
+    useUrlListState<RatingsReportSearch>({
+      route: ratingsRoute,
+      defaultLimit: 20,
+    })
 
   const rangeError = rangeValidationError(search.startDate, search.endDate)
   const range = rangeParamsFor(search.startDate, search.endDate)
@@ -80,13 +81,14 @@ export function RatingsReportPage() {
     pagination,
     setPagination,
     hasActiveFilters: !!(search.sellerName || search.rating || search.categoryId || search.startDate || search.endDate),
-    clearFilters: () => {
-      setFilter('sellerName', undefined)
-      setFilter('rating', undefined)
-      setFilter('categoryId', undefined)
-      setFilter('startDate', undefined)
-      setFilter('endDate', undefined)
-    },
+    clearFilters: () =>
+      setFilters({
+        sellerName: undefined,
+        rating: undefined,
+        categoryId: undefined,
+        startDate: undefined,
+        endDate: undefined,
+      }),
   })
 
   const {
@@ -98,11 +100,8 @@ export function RatingsReportPage() {
     pagination,
     setPagination,
     hasActiveFilters: !!(search.sellerName || search.startDate || search.endDate),
-    clearFilters: () => {
-      setFilter('sellerName', undefined)
-      setFilter('startDate', undefined)
-      setFilter('endDate', undefined)
-    },
+    clearFilters: () =>
+      setFilters({ sellerName: undefined, startDate: undefined, endDate: undefined }),
   })
 
   const reviewsColumns = useRatingsReviewsColumns()
@@ -139,15 +138,7 @@ export function RatingsReportPage() {
       <Tabs
         value={search.tab}
         onValueChange={(tab) =>
-          navigate({
-            search: (prev) => ({
-              ...prev,
-              tab: tab as RatingsTab,
-              rating: undefined,
-              categoryId: undefined,
-              page: undefined,
-            }),
-          })
+          setFilters({ tab: tab as RatingsTab, rating: undefined, categoryId: undefined })
         }
         className="gap-6"
       >
@@ -190,17 +181,7 @@ export function RatingsReportPage() {
           <ReportDateRangeFilter
             from={search.startDate}
             to={search.endDate}
-            onChange={(next) =>
-              navigate({
-                search: (prev) => ({
-                  ...prev,
-                  startDate: next.from,
-                  endDate: next.to,
-                  page: undefined,
-                }),
-              })
-            }
-            error={rangeError ? t(`components:date_range.errors.${rangeError}`) : undefined}
+            onChange={(next) => setFilters({ startDate: next.from, endDate: next.to })}
           />
         </TableFiltersShell>
 

@@ -31,13 +31,13 @@ function compact<T extends Record<string, unknown>>(obj: T): Partial<T> {
 
 export function LivestreamsReportPage() {
   const { t } = useTranslation()
-  const navigate = livestreamsRoute.useNavigate()
 
   const {
     search,
     pagination,
     setPagination,
     setFilter,
+    setFilters,
   } = useUrlListState<LivestreamsReportSearch>({
     route: livestreamsRoute,
     defaultLimit: 20,
@@ -63,10 +63,7 @@ export function LivestreamsReportPage() {
     pagination,
     setPagination,
     hasActiveFilters: !!search.startDate,
-    clearFilters: () => {
-      setFilter('startDate', undefined)
-      setFilter('endDate', undefined)
-    },
+    clearFilters: () => setFilters({ startDate: undefined, endDate: undefined }),
   })
 
   const columns = useLivestreamsReportColumns()
@@ -94,17 +91,7 @@ export function LivestreamsReportPage() {
         <ReportDateRangeFilter
           from={search.startDate}
           to={search.endDate}
-          onChange={({ from, to }) => {
-            void navigate({
-              search: (prev: LivestreamsReportSearch) => ({
-                ...prev,
-                startDate: from,
-                endDate: to,
-                page: undefined,
-              }),
-            })
-          }}
-          error={rangeError ? t(`components:date_range.errors.${rangeError}`) : undefined}
+          onChange={(next) => setFilters({ startDate: next.from, endDate: next.to })}
         />
 
         <Select

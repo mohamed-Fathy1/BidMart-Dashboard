@@ -70,6 +70,16 @@ describe('useUrlListState', () => {
     expect(stub.search.page).toBeUndefined()
   })
 
+  it('setFilters applies every key in one navigation and resets the page', () => {
+    const stub = makeStub({ page: 3, q: 'old', status: 'active' })
+    const { result } = renderHook(() =>
+      useUrlListState<FooSearch>({ search: stub.search, navigate: stub.navigate }),
+    )
+    act(() => result.current.setFilters({ q: 'new', status: undefined }))
+    expect(stub.navigate).toHaveBeenCalledOnce()
+    expect(stub.search).toEqual({ q: 'new', status: undefined, page: undefined })
+  })
+
   it('setFilter with empty / undefined clears the filter from the URL', () => {
     const stub = makeStub({ status: 'active' })
     const { result } = renderHook(() =>

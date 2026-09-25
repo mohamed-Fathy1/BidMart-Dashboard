@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import {
   presetForRange,
   presetToRange,
+  rangeValidationError,
   RANGE_PRESETS,
   type RangePreset,
 } from '@/lib/report-range'
@@ -28,6 +29,7 @@ interface ReportDateRangeFilterProps {
   from?: string
   to?: string
   onChange(next: ReportDateRangeValue): void
+  /** Overrides the built-in validation message. Only the components demo passes it. */
   error?: string
   className?: string
 }
@@ -38,7 +40,7 @@ export function ReportDateRangeFilter({
   from,
   to,
   onChange,
-  error,
+  error: errorOverride,
   className,
 }: ReportDateRangeFilterProps) {
   const { t } = useTranslation()
@@ -56,6 +58,9 @@ export function ReportDateRangeFilter({
 
   const today = todayIso()
   const matchedPreset = presetForRange(from, to, today)
+  const rangeError = rangeValidationError(from, to, today)
+  const error =
+    errorOverride ?? (rangeError ? t(`components:date_range.errors.${rangeError}`) : undefined)
 
   function commit(next: { from: string; to: string }) {
     if (!next.from && !next.to) onChange({})

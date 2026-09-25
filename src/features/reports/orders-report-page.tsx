@@ -29,9 +29,8 @@ function compact<T extends Record<string, unknown>>(obj: T): T {
 
 export function OrdersReportPage() {
   const { t } = useTranslation()
-  const navigate = ordersReportRoute.useNavigate()
 
-  const { search, pagination, setPagination, setFilter, setParam } =
+  const { search, pagination, setPagination, setFilter, setFilters, setParam } =
     useUrlListState<OrdersReportSearch>({
       route: ordersReportRoute,
       defaultLimit: 20,
@@ -59,11 +58,8 @@ export function OrdersReportPage() {
     pagination,
     setPagination,
     hasActiveFilters,
-    clearFilters: () => {
-      setFilter('group', undefined)
-      setFilter('startDate', undefined)
-      setFilter('endDate', undefined)
-    },
+    clearFilters: () =>
+      setFilters({ group: undefined, startDate: undefined, endDate: undefined }),
   })
 
   const columns = useOrdersReportColumns()
@@ -91,17 +87,7 @@ export function OrdersReportPage() {
         <ReportDateRangeFilter
           from={search.startDate}
           to={search.endDate}
-          onChange={(next) =>
-            navigate({
-              search: (prev) => ({
-                ...prev,
-                startDate: next.from,
-                endDate: next.to,
-                page: undefined,
-              }),
-            })
-          }
-          error={rangeError ? t(`components:date_range.errors.${rangeError}`) : undefined}
+          onChange={(next) => setFilters({ startDate: next.from, endDate: next.to })}
         />
       </TableFiltersShell>
 

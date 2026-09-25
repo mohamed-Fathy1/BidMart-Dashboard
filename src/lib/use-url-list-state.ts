@@ -118,6 +118,16 @@ export function useUrlListState<TSearch extends BaseSearch>(
     [navigate],
   )
 
+  /** Apply several filter changes in one navigation and reset the page. */
+  const setFilters = useCallback(
+    (patch: Partial<TSearch>) => {
+      void navigate({
+        search: (prev) => ({ ...prev, ...patch, page: undefined }),
+      })
+    },
+    [navigate],
+  )
+
   /**
    * Patch a single non-filter key without touching the page. Use it for UI
    * state that rides on the URL (an open detail sheet, a tab) so paging holds.
@@ -143,6 +153,7 @@ export function useUrlListState<TSearch extends BaseSearch>(
     setPagination,
     setSearch,
     setFilter,
+    setFilters,
     setParam,
   }
 }
