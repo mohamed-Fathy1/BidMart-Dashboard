@@ -56,7 +56,9 @@
   },
   "sale_type": {
     "AUCTION": "Auction",
-    "FIXED_PRICE": "Fixed price"
+    "BUY_NOW": "Buy now",
+    "OFFER": "Accepted offer",
+    "GIVEAWAY": "Giveaway"
   },
   "refund_status": {
     "PENDING": "Pending",

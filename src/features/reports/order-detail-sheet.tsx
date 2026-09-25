@@ -134,7 +134,7 @@ export function OrderDetailSheet({ orderId, onClose }: OrderDetailSheetProps) {
                   {t('reports:order_detail.fields.sale_type')}
                   <span className="text-foreground">
                     {' '}
-                    {t(`reports:sale_type.${data.saleType}`)}
+                    {t(`reports:sale_type.${data.saleType}`, { defaultValue: data.saleType })}
                   </span>
                 </span>
                 <span>
@@ -276,7 +276,9 @@ function OrderDetailSheetBody({ data }: OrderDetailSheetBodyProps) {
           <>
             <DetailField
               label={t('reports:order_detail.fields.refund_status')}
-              value={t(`reports:refund_status.${data.refund.status}`)}
+              value={t(`reports:refund_status.${data.refund.status}`, {
+                defaultValue: data.refund.status,
+              })}
             />
             <DetailField
               label={t('reports:order_detail.fields.refund_amount')}

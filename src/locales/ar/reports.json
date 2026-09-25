@@ -56,7 +56,9 @@
   },
   "sale_type": {
     "AUCTION": "مزاد",
-    "FIXED_PRICE": "سعر ثابت"
+    "BUY_NOW": "شراء فوري",
+    "OFFER": "عرض مقبول",
+    "GIVEAWAY": "هدية"
   },
   "refund_status": {
     "PENDING": "قيد الانتظار",

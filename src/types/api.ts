@@ -870,7 +870,7 @@ export type OrderHistoryStep =
   | "REFUND_REQUESTED"
   | "REFUNDED";
 
-export type OrderSaleType = "AUCTION" | "FIXED_PRICE";
+export type OrderSaleType = "AUCTION" | "BUY_NOW" | "OFFER" | "GIVEAWAY";
 
 export type OrderRefundStatus =
   | "PENDING"
