@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import type { ColumnDef } from '@tanstack/react-table'
 import { StatusBadge } from '@/components/shared/status-badge'
 import { financialBucketFor } from '@/features/reports/financial-report-status'
+import { DateCell, OrderNumberCell, TruncatedTextCell } from '@/features/reports/report-cells'
 import { format } from '@/lib/format'
 import type { FinancialReportRow } from '@/types/api'
 
@@ -31,47 +32,22 @@ export function useFinancialReportColumns(): ColumnDef<FinancialReportRow>[] {
       {
         accessorKey: 'orderNumber',
         header: t('reports:financial.columns.order_number'),
-        cell: ({ getValue }) => {
-          const value = getValue<string>()
-          return (
-            <span className="font-mono text-xs text-foreground" title={value}>
-              {value}
-            </span>
-          )
-        },
+        cell: ({ getValue }) => <OrderNumberCell orderNumber={getValue<string>()} />,
       },
       {
         accessorKey: 'orderDate',
         header: t('reports:financial.columns.date'),
-        cell: ({ getValue }) => (
-          <span className="font-mono text-xs tabular-nums text-muted-foreground">
-            {format.date(getValue<string>())}
-          </span>
-        ),
+        cell: ({ getValue }) => <DateCell iso={getValue<string>()} />,
       },
       {
         accessorKey: 'customerName',
         header: t('reports:financial.columns.customer'),
-        cell: ({ getValue }) => {
-          const value = getValue<string>()
-          return (
-            <span className="block max-w-40 truncate text-sm text-foreground" title={value}>
-              {value}
-            </span>
-          )
-        },
+        cell: ({ getValue }) => <TruncatedTextCell text={getValue<string>()} className="max-w-40" />,
       },
       {
         accessorKey: 'storeName',
         header: t('reports:financial.columns.store'),
-        cell: ({ getValue }) => {
-          const value = getValue<string>()
-          return (
-            <span className="block max-w-40 truncate text-sm text-foreground" title={value}>
-              {value}
-            </span>
-          )
-        },
+        cell: ({ getValue }) => <TruncatedTextCell text={getValue<string>()} className="max-w-40" />,
       },
       money('storeProfit', 'reports:financial.columns.store_profit'),
       money('taxValue', 'reports:financial.columns.tax'),

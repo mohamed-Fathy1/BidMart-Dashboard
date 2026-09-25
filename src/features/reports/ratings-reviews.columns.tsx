@@ -5,6 +5,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import type { RatingsReviewRow } from '@/types/api'
 import { format } from '@/lib/format'
 import { localizedPair } from '@/lib/localized-name'
+import { DateCell, TruncatedTextCell } from '@/features/reports/report-cells'
 
 export function useRatingsReviewsColumns(): ColumnDef<RatingsReviewRow>[] {
   const { t, i18n } = useTranslation()
@@ -28,14 +29,7 @@ export function useRatingsReviewsColumns(): ColumnDef<RatingsReviewRow>[] {
       {
         accessorKey: 'sellerName',
         header: t('reports:ratings.columns.seller'),
-        cell: ({ getValue }) => {
-          const name = getValue<string>()
-          return (
-            <span className="block max-w-52 truncate text-sm text-foreground" title={name}>
-              {name}
-            </span>
-          )
-        },
+        cell: ({ getValue }) => <TruncatedTextCell text={getValue<string>()} className="max-w-52" />,
       },
       {
         id: 'product',
@@ -43,17 +37,9 @@ export function useRatingsReviewsColumns(): ColumnDef<RatingsReviewRow>[] {
         cell: ({ row }) => {
           const title = row.original.productTitle
           if (!title) {
-            return (
-              <span className="block max-w-72 truncate text-sm text-muted-foreground">
-                {t('reports:common.none')}
-              </span>
-            )
+            return <span className="text-sm text-muted-foreground">{t('reports:common.none')}</span>
           }
-          return (
-            <span className="block max-w-72 truncate text-sm text-foreground" title={title}>
-              {title}
-            </span>
-          )
+          return <TruncatedTextCell text={title} className="max-w-72" />
         },
       },
       {
@@ -65,11 +51,7 @@ export function useRatingsReviewsColumns(): ColumnDef<RatingsReviewRow>[] {
           if (!label) {
             return <span className="text-sm text-muted-foreground">{t('reports:common.none')}</span>
           }
-          return (
-            <span className="block max-w-52 truncate text-sm text-foreground" title={label}>
-              {label}
-            </span>
-          )
+          return <TruncatedTextCell text={label} className="max-w-52" />
         },
       },
       {
@@ -96,21 +78,13 @@ export function useRatingsReviewsColumns(): ColumnDef<RatingsReviewRow>[] {
           if (!review) {
             return <span className="text-sm text-muted-foreground">{t('reports:common.none')}</span>
           }
-          return (
-            <span className="block max-w-72 truncate text-sm text-foreground" title={review}>
-              {review}
-            </span>
-          )
+          return <TruncatedTextCell text={review} className="max-w-72" />
         },
       },
       {
         accessorKey: 'createdAt',
         header: t('reports:ratings.columns.date'),
-        cell: ({ getValue }) => (
-          <span className="font-mono text-xs tabular-nums text-muted-foreground">
-            {format.date(getValue<string>())}
-          </span>
-        ),
+        cell: ({ getValue }) => <DateCell iso={getValue<string>()} />,
       },
     ],
     [t, i18n.language],

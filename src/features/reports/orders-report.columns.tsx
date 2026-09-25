@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import type { ColumnDef } from '@tanstack/react-table'
 import type { OrderReportRow } from '@/types/api'
 import { StatusBadge } from '@/components/shared/status-badge'
+import { DateCell, OrderNumberCell, TruncatedTextCell } from '@/features/reports/report-cells'
 import { format } from '@/lib/format'
 
 export function useOrdersReportColumns(): ColumnDef<OrderReportRow>[] {
@@ -13,38 +14,17 @@ export function useOrdersReportColumns(): ColumnDef<OrderReportRow>[] {
       {
         accessorKey: 'orderNumber',
         header: t('reports:orders.columns.order_number'),
-        cell: ({ getValue }) => {
-          const value = getValue<string>()
-          return (
-            <span className="font-mono text-xs text-foreground" title={value}>
-              {value}
-            </span>
-          )
-        },
+        cell: ({ getValue }) => <OrderNumberCell orderNumber={getValue<string>()} />,
       },
       {
         accessorKey: 'buyerName',
         header: t('reports:orders.columns.buyer'),
-        cell: ({ getValue }) => {
-          const value = getValue<string>()
-          return (
-            <span className="block max-w-40 truncate text-sm text-foreground" title={value}>
-              {value}
-            </span>
-          )
-        },
+        cell: ({ getValue }) => <TruncatedTextCell text={getValue<string>()} className="max-w-40" />,
       },
       {
         accessorKey: 'sellerName',
         header: t('reports:orders.columns.seller'),
-        cell: ({ getValue }) => {
-          const value = getValue<string>()
-          return (
-            <span className="block max-w-40 truncate text-sm text-foreground" title={value}>
-              {value}
-            </span>
-          )
-        },
+        cell: ({ getValue }) => <TruncatedTextCell text={getValue<string>()} className="max-w-40" />,
       },
       {
         id: 'status',
@@ -61,11 +41,7 @@ export function useOrdersReportColumns(): ColumnDef<OrderReportRow>[] {
       {
         accessorKey: 'statusDate',
         header: t('reports:orders.columns.status_date'),
-        cell: ({ getValue }) => (
-          <span className="font-mono text-xs tabular-nums text-muted-foreground">
-            {format.dateTime(getValue<string>())}
-          </span>
-        ),
+        cell: ({ getValue }) => <DateCell iso={getValue<string>()} withTime />,
       },
       {
         accessorKey: 'total',
@@ -81,11 +57,7 @@ export function useOrdersReportColumns(): ColumnDef<OrderReportRow>[] {
       {
         accessorKey: 'createdAt',
         header: t('reports:orders.columns.created'),
-        cell: ({ getValue }) => (
-          <span className="font-mono text-xs tabular-nums text-muted-foreground">
-            {format.date(getValue<string>())}
-          </span>
-        ),
+        cell: ({ getValue }) => <DateCell iso={getValue<string>()} />,
       },
     ],
     [t],

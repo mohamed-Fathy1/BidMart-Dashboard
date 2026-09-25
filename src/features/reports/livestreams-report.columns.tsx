@@ -4,6 +4,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import type { LivestreamReportRow, ShowStatus } from '@/types/api'
 import { StatusBadge } from '@/components/shared/status-badge'
 import { format } from '@/lib/format'
+import { DateCell, TruncatedTextCell } from '@/features/reports/report-cells'
 
 export function useLivestreamsReportColumns(): ColumnDef<LivestreamReportRow>[] {
   const { t } = useTranslation()
@@ -16,12 +17,7 @@ export function useLivestreamsReportColumns(): ColumnDef<LivestreamReportRow>[] 
         enableSorting: false,
         cell: ({ row }) => (
           <div className="min-w-0">
-            <p
-              className="text-sm font-medium truncate max-w-64"
-              title={row.original.title}
-            >
-              {row.original.title}
-            </p>
+            <TruncatedTextCell text={row.original.title} className="max-w-64 font-medium" />
             <p className="text-xs text-muted-foreground">{row.original.hostName}</p>
           </div>
         ),
@@ -36,11 +32,7 @@ export function useLivestreamsReportColumns(): ColumnDef<LivestreamReportRow>[] 
         accessorKey: 'broadcastDate',
         header: t('reports:livestreams.columns.broadcast'),
         enableSorting: false,
-        cell: ({ getValue }) => (
-          <span className="text-sm text-muted-foreground">
-            {format.dateTime(getValue<string>())}
-          </span>
-        ),
+        cell: ({ getValue }) => <DateCell iso={getValue<string>()} withTime />,
       },
       {
         accessorKey: 'durationMinutes',

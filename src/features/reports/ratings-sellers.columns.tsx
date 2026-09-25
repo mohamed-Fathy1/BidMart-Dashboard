@@ -54,7 +54,7 @@ export function useRatingsSellersColumns(): ColumnDef<RatingsSellerRow>[] {
       },
       {
         accessorKey: 'reviewCount',
-        header: t('reports:ratings.columns.reviews'),
+        header: () => <span className="block text-end">{t('reports:ratings.columns.reviews')}</span>,
         cell: ({ getValue }) => (
           <span className="block text-end font-mono text-sm tabular-nums text-foreground">
             {format.number(getValue<number>())}
