@@ -107,6 +107,7 @@ export function OrdersReportPage() {
 
       <OrdersGroupTiles
         summary={response?.meta?.summary}
+        isLoading={isLoading}
         activeGroup={search.group}
         onGroupChange={(g) => setFilter('group', g)}
       />

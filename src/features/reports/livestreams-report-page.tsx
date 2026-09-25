@@ -131,7 +131,7 @@ export function LivestreamsReportPage() {
         </Select>
       </TableFiltersShell>
 
-      <LivestreamsSummary summary={response?.meta.summary} />
+      <LivestreamsSummary summary={response?.meta.summary} isLoading={isLoading} />
 
       <DataTable
         columns={columns}

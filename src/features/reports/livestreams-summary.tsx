@@ -7,10 +7,13 @@ import { format } from '@/lib/format'
 
 interface LivestreamsSummaryProps {
   summary: LivestreamsReportSummary | undefined
+  isLoading: boolean
 }
 
-export function LivestreamsSummary({ summary }: LivestreamsSummaryProps) {
+export function LivestreamsSummary({ summary, isLoading }: LivestreamsSummaryProps) {
   const { t } = useTranslation()
+
+  if (!summary && !isLoading) return null
 
   if (!summary) {
     return (

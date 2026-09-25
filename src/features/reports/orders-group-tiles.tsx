@@ -8,6 +8,7 @@ import type { OrdersReportSummary, OrderReportGroup } from '@/types/api'
 
 interface OrdersGroupTilesProps {
   summary: OrdersReportSummary | undefined
+  isLoading: boolean
   activeGroup?: OrderReportGroup
   onGroupChange: (group: OrderReportGroup | undefined) => void
 }
@@ -19,12 +20,19 @@ const TILES: { group: OrderReportGroup; key: keyof OrdersReportSummary; labelKey
   { group: 'REFUNDED', key: 'refunded', labelKey: 'refunded' },
 ]
 
-export function OrdersGroupTiles({ summary, activeGroup, onGroupChange }: OrdersGroupTilesProps) {
+export function OrdersGroupTiles({
+  summary,
+  isLoading,
+  activeGroup,
+  onGroupChange,
+}: OrdersGroupTilesProps) {
   const { t } = useTranslation()
+
+  if (!summary && !isLoading) return null
 
   return (
     <div className="space-y-3">
-      {summary === undefined ? (
+      {!summary ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-[92px] rounded-lg" />
