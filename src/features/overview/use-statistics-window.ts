@@ -1,14 +1,10 @@
 import { getRouteApi } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import type { StatisticsQuery } from '@/features/overview/overview.api'
-import { DEFAULT_STATISTICS_PERIOD, isFutureIso } from '@/lib/report-period'
-import type { StatisticsPeriod } from '@/types/api'
+import { DEFAULT_STATISTICS_PERIOD, isFutureIso, type StatisticsQuery } from '@/lib/report-period'
 
 const overviewRoute = getRouteApi('/_authed/overview')
 
-export interface StatisticsWindow {
-  period: StatisticsPeriod
-  date?: string
+interface StatisticsWindow {
   /** Exactly the keys the server accepts; `date` is omitted rather than sent as undefined. */
   params: StatisticsQuery
   /** Set when the anchor is after today. The layout then renders no tab. */
@@ -24,11 +20,13 @@ export function useStatisticsWindow(): StatisticsWindow {
   const { t } = useTranslation()
   const search = overviewRoute.useSearch()
 
-  const period = search.period ?? DEFAULT_STATISTICS_PERIOD
   const date = search.date
-  const params: StatisticsQuery = { period, ...(date ? { date } : {}) }
+  const params: StatisticsQuery = {
+    period: search.period ?? DEFAULT_STATISTICS_PERIOD,
+    ...(date ? { date } : {}),
+  }
   const anchorError =
     date && isFutureIso(date) ? t('overview:errors.REPORT_DATE_IN_FUTURE') : undefined
 
-  return { period, date, params, anchorError }
+  return { params, anchorError }
 }

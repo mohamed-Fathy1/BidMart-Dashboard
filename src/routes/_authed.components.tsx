@@ -27,7 +27,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { DataTable, type RowActionItem } from '@/components/data-table/data-table'
 import { format } from '@/lib/format'
 import { rangeValidationError } from '@/lib/report-range'
-import { DEFAULT_STATISTICS_PERIOD } from '@/lib/report-period'
+import { DEFAULT_STATISTICS_PERIOD, type StatisticsQuery } from '@/lib/report-period'
 
 import { StatusBadge } from '@/components/shared/status-badge'
 import { SearchInput } from '@/components/shared/search-input'
@@ -44,7 +44,7 @@ import { PasswordInput } from '@/components/shared/password-input'
 import { OtpInput } from '@/components/shared/otp-input'
 import { ImagePreview } from '@/components/shared/image-preview'
 import { SectionTabs } from '@/components/shared/section-tabs'
-import { PeriodFilter, type PeriodFilterValue } from '@/components/shared/period-filter'
+import { PeriodFilter } from '@/components/shared/period-filter'
 import { ReportDateRangeFilter } from '@/components/shared/report-date-range-filter'
 import { ProportionBar } from '@/components/shared/proportion-bar'
 import { RankedList } from '@/components/shared/ranked-list'
@@ -408,7 +408,7 @@ function ComponentsShowcasePage() {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
 
   // Reporting primitives state
-  const [periodDemo, setPeriodDemo] = useState<PeriodFilterValue>({
+  const [periodDemo, setPeriodDemo] = useState<StatisticsQuery>({
     period: DEFAULT_STATISTICS_PERIOD,
   })
   const [rangeDemo, setRangeDemo] = useState<{ from?: string; to?: string }>({})
@@ -532,14 +532,18 @@ function ComponentsShowcasePage() {
       <SectionTitle>Period Filter</SectionTitle>
 
       <SubSection label="Interactive">
-        <PeriodFilter period={periodDemo.period} date={periodDemo.date} onChange={setPeriodDemo} />
+        <PeriodFilter value={periodDemo} onChange={setPeriodDemo} />
         <p className="text-xs text-muted-foreground">
           Selected: {periodDemo.period} / {periodDemo.date ?? 'today'}
         </p>
       </SubSection>
 
       <SubSection label="With error">
-        <PeriodFilter period="MONTHLY" onChange={() => {}} error="Pick a date up to today." />
+        <PeriodFilter
+          value={{ period: 'MONTHLY' }}
+          onChange={() => {}}
+          error="Pick a date up to today."
+        />
       </SubSection>
 
       {/* ---- Date Range Filter ---- */}

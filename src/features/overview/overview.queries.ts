@@ -3,8 +3,8 @@ import {
   getBusinessActivity,
   getFinancialOverview,
   getStatisticsOverview,
-  type StatisticsQuery,
 } from '@/features/overview/overview.api'
+import type { StatisticsQuery } from '@/lib/report-period'
 
 /**
  * Keys are scoped per tab so a period change refetches only the visible tab.

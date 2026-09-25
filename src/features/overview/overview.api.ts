@@ -5,17 +5,8 @@ import {
   type StatisticsBusinessActivity,
   type StatisticsFinancialOverview,
   type StatisticsOverview,
-  type StatisticsPeriod,
 } from '@/types/api'
-
-/**
- * Contract A: one `{ period, date }` object shared by all three statistics
- * tabs. `date` is the optional `YYYY-MM-DD` anchor (defaults to today, UTC).
- */
-export interface StatisticsQuery {
-  period: StatisticsPeriod
-  date?: string
-}
+import type { StatisticsQuery } from '@/lib/report-period'
 
 export async function getStatisticsOverview(params: StatisticsQuery): Promise<StatisticsOverview> {
   const res = await api.get<ApiEnvelope<StatisticsOverview> | StatisticsOverview>(

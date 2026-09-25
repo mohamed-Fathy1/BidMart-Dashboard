@@ -17,6 +17,12 @@ export const STATISTICS_PERIODS: readonly StatisticsPeriod[] = [
 
 export const DEFAULT_STATISTICS_PERIOD: StatisticsPeriod = 'MONTHLY'
 
+/** The window a statistics request asks for. `date` is the anchor; absent means today (UTC). */
+export interface StatisticsQuery {
+  period: StatisticsPeriod
+  date?: string
+}
+
 function pad(n: number): string {
   return String(n).padStart(2, '0')
 }

@@ -37,7 +37,7 @@ function StatisticsLayoutRoute() {
   const allowed = usePermission(PERMISSIONS.reports.view)
   const navigate = Route.useNavigate()
   const pathname = useRouterState({ select: (state) => state.location.pathname })
-  const { period, date, anchorError } = useStatisticsWindow()
+  const { params, anchorError } = useStatisticsWindow()
 
   if (!allowed) return <PermissionDenied />
 
@@ -73,8 +73,7 @@ function StatisticsLayoutRoute() {
         />
 
         <PeriodFilter
-          period={period}
-          date={date}
+          value={params}
           error={anchorError}
           onChange={(next) =>
             navigate({

@@ -3,25 +3,26 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { RadioGroup as RadioGroupPrimitive } from 'radix-ui'
 import { useTranslation } from 'react-i18next'
 import type { StatisticsPeriod } from '@/types/api'
-import { isFutureIso, shiftAnchor, STATISTICS_PERIODS, todayIso } from '@/lib/report-period'
+import {
+  isFutureIso,
+  shiftAnchor,
+  STATISTICS_PERIODS,
+  todayIso,
+  type StatisticsQuery,
+} from '@/lib/report-period'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
-export interface PeriodFilterValue {
-  period: StatisticsPeriod
-  date?: string
-}
-
 interface PeriodFilterProps {
-  period: StatisticsPeriod
-  date?: string
-  onChange(next: PeriodFilterValue): void
+  value: StatisticsQuery
+  onChange(next: StatisticsQuery): void
   error?: string
 }
 
-export function PeriodFilter({ period, date, onChange, error }: PeriodFilterProps) {
+export function PeriodFilter({ value, onChange, error }: PeriodFilterProps) {
   const { t } = useTranslation()
+  const { period, date } = value
   const errorId = useId()
   const anchor = date ?? todayIso()
   const nextAnchor = shiftAnchor(period, anchor, 1)
@@ -32,9 +33,7 @@ export function PeriodFilter({ period, date, onChange, error }: PeriodFilterProp
         orientation="horizontal"
         aria-label={t('components:period_filter.label')}
         value={period}
-        onValueChange={(value) =>
-          onChange({ period: value as StatisticsPeriod, date })
-        }
+        onValueChange={(next) => onChange({ period: next as StatisticsPeriod, date })}
         className="inline-flex rounded-lg border border-border bg-background p-1"
       >
         <div className="relative flex flex-wrap gap-1">
