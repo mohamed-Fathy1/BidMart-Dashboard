@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { Link } from '@tanstack/react-router'
 import {
@@ -13,7 +14,6 @@ import {
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Sheet,
   SheetContent,
@@ -22,7 +22,6 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
-import { DetailCard } from '@/components/shared/detail-card'
 import { DetailField } from '@/components/shared/detail-field'
 import { EmptyState } from '@/components/shared/empty-state'
 import { StatusBadge } from '@/components/shared/status-badge'
@@ -66,7 +65,7 @@ export function OrderDetailSheet({ orderId, onClose }: OrderDetailSheetProps) {
     >
       <SheetContent
         side={i18n.dir() === 'rtl' ? 'left' : 'right'}
-        className="w-full overflow-y-auto sm:max-w-xl"
+        className="w-full gap-0 overflow-y-auto bg-card sm:max-w-xl"
       >
         {isPending ? (
           <>
@@ -80,7 +79,7 @@ export function OrderDetailSheet({ orderId, onClose }: OrderDetailSheetProps) {
               </SheetDescription>
               <Skeleton className="h-4 w-56" />
             </SheetHeader>
-            <div className="space-y-4 px-4 pb-6">
+            <div className="space-y-4 px-6 pb-6">
               <Skeleton className="h-24 w-full" />
               <Skeleton className="h-24 w-full" />
               <Skeleton className="h-24 w-full" />
@@ -113,8 +112,8 @@ export function OrderDetailSheet({ orderId, onClose }: OrderDetailSheetProps) {
           </>
         ) : data ? (
           <>
-            <SheetHeader>
-              <SheetTitle className="flex flex-wrap items-center gap-2">
+            <SheetHeader className="px-6 pt-6 pb-5">
+              <SheetTitle className="flex flex-wrap items-center gap-2 pe-8 text-lg">
                 <Trans
                   i18nKey="reports:order_detail.title"
                   values={{ number: data.orderNumber }}
@@ -123,33 +122,28 @@ export function OrderDetailSheet({ orderId, onClose }: OrderDetailSheetProps) {
                 <StatusBadge type="orderStatus" status={data.status} />
               </SheetTitle>
               <SheetDescription>{t('reports:order_detail.description')}</SheetDescription>
-              <p className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                <span>
-                  {t('reports:order_detail.fields.sale_type')}
-                  <span className="text-foreground">
-                    {' '}
-                    {t(`reports:sale_type.${data.saleType}`, { defaultValue: data.saleType })}
-                  </span>
-                </span>
-                <span>
-                  {t('reports:order_detail.fields.created_at')}
-                  <span className="font-mono tabular-nums text-foreground">
-                    {' '}
-                    {format.dateTime(data.createdAt)}
-                  </span>
-                </span>
-                <span>
-                  {t('reports:order_detail.fields.paid_at')}
-                  {data.paidAt ? (
-                    <span className="font-mono tabular-nums text-foreground">
-                      {' '}
-                      {format.dateTime(data.paidAt)}
-                    </span>
-                  ) : (
-                    <span> {t('reports:order_detail.fields.never_paid')}</span>
-                  )}
-                </span>
-              </p>
+              <dl className="mt-3 grid grid-cols-3 gap-4">
+                <DetailField
+                  label={t('reports:order_detail.fields.sale_type')}
+                  value={t(`reports:sale_type.${data.saleType}`, { defaultValue: data.saleType })}
+                />
+                <DetailField
+                  label={t('reports:order_detail.fields.created_at')}
+                  value={format.dateTime(data.createdAt)}
+                />
+                <DetailField
+                  label={t('reports:order_detail.fields.paid_at')}
+                  value={
+                    data.paidAt ? (
+                      format.dateTime(data.paidAt)
+                    ) : (
+                      <span className="text-muted-foreground">
+                        {t('reports:order_detail.fields.never_paid')}
+                      </span>
+                    )
+                  }
+                />
+              </dl>
             </SheetHeader>
             <OrderDetailSheetBody data={data} />
           </>
@@ -166,7 +160,6 @@ interface OrderDetailSheetBodyProps {
 function OrderDetailSheetBody({ data }: OrderDetailSheetBodyProps) {
   const { t } = useTranslation()
   const money = (value: number) => format.currency(value, { currency: data.money.currencyCode })
-  const muted = (text: string) => <span className="text-muted-foreground">{text}</span>
 
   const historyItems: TimelineItem[] = data.statusHistory.map((entry, index) => {
     // A step the client does not know yet still renders, as a neutral event.
@@ -181,89 +174,50 @@ function OrderDetailSheetBody({ data }: OrderDetailSheetBodyProps) {
   })
 
   return (
-    <div className="space-y-4 px-4 pb-6">
-      <DetailCard
-        title={t('reports:order_detail.sections.customer')}
-        columns={2}
-        actions={
-          <Button variant="link" size="sm" asChild>
-            <Link to="/users/$userId" params={{ userId: data.customer.id }}>
-              {t('reports:common.view_customer')}
-            </Link>
-          </Button>
-        }
-      >
-        {data.customer.fullName && (
-          <DetailField label={t('reports:order_detail.fields.full_name')} value={data.customer.fullName} />
-        )}
-        <DetailField label={t('reports:order_detail.fields.username')} value={`@${data.customer.username}`} mono />
-        <DetailField label={t('reports:order_detail.fields.email')} value={data.customer.email} />
-        <DetailField label={t('reports:order_detail.fields.phone')} value={data.customer.phoneNumber} mono />
-      </DetailCard>
-
-      <DetailCard
-        title={t('reports:order_detail.sections.store')}
-        columns={2}
-        actions={
-          <Button variant="link" size="sm" asChild>
-            <Link to="/users/$userId" params={{ userId: data.store.sellerId }}>
-              {t('reports:common.view_seller')}
-            </Link>
-          </Button>
-        }
-      >
-        <div className="flex items-center gap-3 sm:col-span-2">
-          <Avatar>
-            <AvatarImage src={data.store.profilePicture ?? undefined} />
-            <AvatarFallback>{data.store.storeName.charAt(0)}</AvatarFallback>
-          </Avatar>
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-foreground">{data.store.storeName}</p>
-            <p className="font-mono text-xs text-muted-foreground">@{data.store.username}</p>
+    <div className="divide-y divide-border border-t border-border">
+      <SheetSection title={t('reports:order_detail.sections.money')}>
+        <dl className="space-y-2 text-sm">
+          <LedgerRow label={t('reports:order_detail.fields.subtotal')} value={money(data.money.subtotal)} />
+          <LedgerRow
+            label={t('reports:order_detail.fields.discount')}
+            value={money(data.money.discountAmount > 0 ? -data.money.discountAmount : 0)}
+            quiet={data.money.discountAmount === 0}
+          />
+          <LedgerRow
+            label={t('reports:order_detail.fields.shipping')}
+            value={money(data.money.shippingFee)}
+            quiet={data.money.shippingFee === 0}
+          />
+          <LedgerRow
+            label={t('reports:order_detail.fields.tax')}
+            value={money(data.money.taxAmount)}
+            quiet={data.money.taxAmount === 0}
+          />
+          <div className="flex items-baseline justify-between gap-4 border-t border-border pt-3">
+            <dt className="font-medium text-foreground">{t('reports:order_detail.fields.total')}</dt>
+            <dd className="text-base font-semibold tabular-nums text-foreground">
+              {money(data.money.total)}
+            </dd>
           </div>
-        </div>
-        <DetailField
-          label={t('reports:order_detail.fields.product')}
-          span={2}
-          value={
-            <span className="flex items-center gap-3">
-              {data.store.productImage && (
-                <img
-                  src={data.store.productImage}
-                  alt={data.store.productTitle}
-                  className="size-12 rounded-md object-cover"
-                />
-              )}
-              <span className="min-w-0">{data.store.productTitle}</span>
-            </span>
-          }
-        />
-        <DetailField label={t('reports:order_detail.fields.quantity')} value={format.number(data.store.quantity)} mono />
-        <DetailField label={t('reports:order_detail.fields.unit_price')} value={money(data.store.unitPrice)} mono />
-        <DetailField label={t('reports:order_detail.fields.goods')} value={money(data.store.amount)} mono />
-      </DetailCard>
+        </dl>
+        <p className="mt-5 text-xs font-medium text-muted-foreground">
+          {t('reports:order_detail.split')}
+        </p>
+        <dl className="mt-2 space-y-2 text-sm">
+          <LedgerRow
+            label={t('reports:order_detail.fields.commission')}
+            value={money(data.money.commissionAmount)}
+          />
+          <LedgerRow
+            label={t('reports:order_detail.fields.seller_net')}
+            value={money(data.money.sellerNet)}
+          />
+        </dl>
+      </SheetSection>
 
-      <DetailCard title={t('reports:order_detail.sections.money')} columns={2}>
-        <DetailField label={t('reports:order_detail.fields.subtotal')} value={money(data.money.subtotal)} mono />
-        <DetailField label={t('reports:order_detail.fields.discount')} value={money(data.money.discountAmount)} mono />
-        <DetailField label={t('reports:order_detail.fields.shipping')} value={money(data.money.shippingFee)} mono />
-        <DetailField label={t('reports:order_detail.fields.tax')} value={money(data.money.taxAmount)} mono />
-        <DetailField label={t('reports:order_detail.fields.commission')} value={money(data.money.commissionAmount)} mono />
-        <DetailField
-          label={t('reports:order_detail.fields.total')}
-          mono
-          value={<span className="font-semibold">{money(data.money.total)}</span>}
-        />
-        <DetailField label={t('reports:order_detail.fields.seller_net')} value={money(data.money.sellerNet)} mono />
-      </DetailCard>
-
-      <DetailCard title={t('reports:order_detail.sections.refund')} columns={2}>
-        {data.refund === null ? (
-          <p className="text-sm text-muted-foreground sm:col-span-2">
-            {t('reports:order_detail.no_refund')}
-          </p>
-        ) : (
-          <>
+      {data.refund !== null && (
+        <SheetSection title={t('reports:order_detail.sections.refund')}>
+          <dl className="grid gap-4 sm:grid-cols-2">
             <DetailField
               label={t('reports:order_detail.fields.refund_status')}
               value={t(`reports:refund_status.${data.refund.status}`, {
@@ -272,41 +226,145 @@ function OrderDetailSheetBody({ data }: OrderDetailSheetBodyProps) {
             />
             <DetailField
               label={t('reports:order_detail.fields.refund_amount')}
-              mono
               value={
-                data.refund.refundAmount === null
-                  ? muted(t('reports:order_detail.fields.refund_not_agreed'))
-                  : money(data.refund.refundAmount)
+                data.refund.refundAmount === null ? (
+                  <span className="text-muted-foreground">
+                    {t('reports:order_detail.fields.refund_not_agreed')}
+                  </span>
+                ) : (
+                  <span className="tabular-nums">{money(data.refund.refundAmount)}</span>
+                )
               }
             />
             <DetailField
               label={t('reports:order_detail.fields.requested_at')}
               value={format.dateTime(data.refund.requestedAt)}
-              mono
             />
             <DetailField
               label={t('reports:order_detail.fields.resolved_at')}
-              mono
               value={
-                data.refund.resolvedAt === null
-                  ? muted(t('reports:order_detail.fields.unresolved'))
-                  : format.dateTime(data.refund.resolvedAt)
+                data.refund.resolvedAt === null ? (
+                  <span className="text-muted-foreground">
+                    {t('reports:order_detail.fields.unresolved')}
+                  </span>
+                ) : (
+                  format.dateTime(data.refund.resolvedAt)
+                )
               }
             />
-          </>
-        )}
-      </DetailCard>
+          </dl>
+        </SheetSection>
+      )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-[length:var(--type-h3-size)] font-[number:var(--type-h3-weight)]">
-            {t('reports:order_detail.sections.history')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Timeline items={historyItems} emptyLabel={t('reports:order_detail.history_empty')} />
-        </CardContent>
-      </Card>
+      <SheetSection title={t('reports:order_detail.sections.history')}>
+        <Timeline items={historyItems} emptyLabel={t('reports:order_detail.history_empty')} />
+      </SheetSection>
+
+      <SheetSection
+        title={t('reports:order_detail.sections.customer')}
+        action={
+          <Button variant="link" size="sm" className="h-auto px-0" asChild>
+            <Link to="/users/$userId" params={{ userId: data.customer.id }}>
+              {t('reports:common.view_customer')}
+            </Link>
+          </Button>
+        }
+      >
+        <dl className="grid gap-4 sm:grid-cols-2">
+          {data.customer.fullName && (
+            <DetailField label={t('reports:order_detail.fields.full_name')} value={data.customer.fullName} />
+          )}
+          <DetailField label={t('reports:order_detail.fields.username')} value={`@${data.customer.username}`} />
+          <DetailField label={t('reports:order_detail.fields.email')} value={data.customer.email} />
+          <DetailField
+            label={t('reports:order_detail.fields.phone')}
+            value={data.customer.phoneNumber && <bdi className="tabular-nums">{data.customer.phoneNumber}</bdi>}
+          />
+        </dl>
+      </SheetSection>
+
+      <SheetSection
+        title={t('reports:order_detail.sections.store')}
+        action={
+          <Button variant="link" size="sm" className="h-auto px-0" asChild>
+            <Link to="/users/$userId" params={{ userId: data.store.sellerId }}>
+              {t('reports:common.view_seller')}
+            </Link>
+          </Button>
+        }
+      >
+        <div className="flex items-center gap-3">
+          <Avatar className="size-9">
+            <AvatarImage src={data.store.profilePicture ?? undefined} />
+            <AvatarFallback>{data.store.storeName.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium text-foreground">{data.store.storeName}</p>
+            <p className="truncate text-xs text-muted-foreground">@{data.store.username}</p>
+          </div>
+        </div>
+        <div className="mt-4 flex items-center gap-3 rounded-lg border border-border p-3">
+          {data.store.productImage ? (
+            <img
+              src={data.store.productImage}
+              alt=""
+              className="size-12 shrink-0 rounded-md object-cover"
+            />
+          ) : (
+            <span aria-hidden className="size-12 shrink-0 rounded-md bg-muted" />
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-foreground" title={data.store.productTitle}>
+              {data.store.productTitle}
+            </p>
+            <p className="mt-0.5 text-xs tabular-nums text-muted-foreground">
+              {t('reports:order_detail.quantity_times_price', {
+                quantity: data.store.quantity,
+                price: money(data.store.unitPrice),
+              })}
+            </p>
+          </div>
+          <p className="shrink-0 text-sm font-medium tabular-nums text-foreground">
+            {money(data.store.amount)}
+          </p>
+        </div>
+      </SheetSection>
+    </div>
+  )
+}
+
+interface SheetSectionProps {
+  title: string
+  action?: ReactNode
+  children: ReactNode
+}
+
+function SheetSection({ title, action, children }: SheetSectionProps) {
+  return (
+    <section className="px-6 py-5">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+        {action}
+      </div>
+      {children}
+    </section>
+  )
+}
+
+interface LedgerRowProps {
+  label: string
+  value: string
+  /** Zero lines recede so the amounts that moved the total stand out. */
+  quiet?: boolean
+}
+
+function LedgerRow({ label, value, quiet = false }: LedgerRowProps) {
+  return (
+    <div className="flex items-baseline justify-between gap-4">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className={quiet ? 'tabular-nums text-muted-foreground' : 'tabular-nums text-foreground'}>
+        {value}
+      </dd>
     </div>
   )
 }

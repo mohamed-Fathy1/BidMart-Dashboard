@@ -82,11 +82,7 @@
       "sale_type": "Sale type",
       "created_at": "Created",
       "paid_at": "Paid",
-      "never_paid": "Never paid",
-      "product": "Product",
-      "quantity": "Quantity",
-      "unit_price": "Unit price",
-      "goods": "Goods",
+      "never_paid": "Not paid",
       "subtotal": "Subtotal",
       "discount": "Discount",
       "shipping": "Shipping",
@@ -101,8 +97,9 @@
       "resolved_at": "Resolved",
       "unresolved": "Pending"
     },
-    "no_refund": "No refund was requested.",
-    "history_empty": "No history yet."
+    "history_empty": "No history yet.",
+    "split": "Split of the total",
+    "quantity_times_price": "{{quantity, number}} × {{price}}"
   },
   "financial": {
     "title": "Financial Report",

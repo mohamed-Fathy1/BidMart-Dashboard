@@ -83,10 +83,6 @@
       "created_at": "أُنشئ",
       "paid_at": "دُفع",
       "never_paid": "لم يُدفع",
-      "product": "المنتج",
-      "quantity": "الكمية",
-      "unit_price": "سعر الوحدة",
-      "goods": "البضاعة",
       "subtotal": "المجموع الفرعي",
       "discount": "الخصم",
       "shipping": "الشحن",
@@ -101,8 +97,9 @@
       "resolved_at": "حُسم",
       "unresolved": "قيد الانتظار"
     },
-    "no_refund": "لم يُطلب أي استرداد.",
-    "history_empty": "لا يوجد سجل بعد."
+    "history_empty": "لا يوجد سجل بعد.",
+    "split": "توزيع الإجمالي",
+    "quantity_times_price": "{{quantity, number}} × {{price}}"
   },
   "financial": {
     "title": "التقرير المالي",
