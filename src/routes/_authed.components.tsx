@@ -562,8 +562,8 @@ function ComponentsShowcasePage() {
 
       <div className="max-w-sm space-y-3">
         <ProportionBar value={68} max={100} />
-        <ProportionBar value={34} max={100} tone="muted" />
-        <ProportionBar value={12} max={100} tone="destructive" />
+        <ProportionBar value={34} max={100} />
+        <ProportionBar value={12} max={100} />
       </div>
 
       {/* ---- Ranked List ---- */}

@@ -43,7 +43,7 @@ export function parseIsoDateUtc(iso: string): Date | undefined {
  * date-only string to `Date` parses it as UTC and can print the previous day
  * west of Greenwich.
  */
-export function parseIsoDateLocal(iso: string): Date | undefined {
+function parseIsoDateLocal(iso: string): Date | undefined {
   const utc = parseIsoDateUtc(iso)
   if (!utc) return undefined
   return new Date(utc.getUTCFullYear(), utc.getUTCMonth(), utc.getUTCDate())

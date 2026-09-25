@@ -1,5 +1,5 @@
 import { useId } from 'react'
-import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { RadioGroup as RadioGroupPrimitive } from 'radix-ui'
 import { useTranslation } from 'react-i18next'
 import type { StatisticsPeriod } from '@/types/api'
@@ -18,31 +18,22 @@ interface PeriodFilterProps {
   date?: string
   onChange(next: PeriodFilterValue): void
   error?: string
-  isFetching?: boolean
-  className?: string
 }
 
-export function PeriodFilter({
-  period,
-  date,
-  onChange,
-  error,
-  isFetching,
-  className,
-}: PeriodFilterProps) {
+export function PeriodFilter({ period, date, onChange, error }: PeriodFilterProps) {
   const { t } = useTranslation()
   const errorId = useId()
   const anchor = date ?? todayIso()
   const nextAnchor = shiftAnchor(period, anchor, 1)
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-2', className)}>
+    <div className="flex flex-wrap items-center gap-2">
       <RadioGroupPrimitive.Root
         orientation="horizontal"
         aria-label={t('components:period_filter.label')}
         value={period}
         onValueChange={(value) =>
-          onChange({ period: value as StatisticsPeriod, date: date || undefined })
+          onChange({ period: value as StatisticsPeriod, date })
         }
         className="inline-flex rounded-lg border border-border bg-background p-1"
       >
@@ -106,10 +97,6 @@ export function PeriodFilter({
           </p>
         )}
       </div>
-
-      {isFetching && (
-        <Loader2 aria-hidden className="size-4 animate-spin text-muted-foreground" />
-      )}
     </div>
   )
 }

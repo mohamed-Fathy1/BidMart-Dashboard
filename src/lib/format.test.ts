@@ -28,13 +28,6 @@ describe('format.duration', () => {
   })
 })
 
-describe('format.compactNumber', () => {
-  it('uses compact notation', () => {
-    expect(format.compactNumber(1234)).toBe('1.2K')
-    expect(format.compactNumber(950)).toBe('950')
-  })
-})
-
 describe('format.month', () => {
   const originalTz = process.env.TZ
   beforeAll(() => {

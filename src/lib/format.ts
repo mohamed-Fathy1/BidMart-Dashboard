@@ -41,14 +41,6 @@ export const format = {
     }).format(value / 100)
   },
 
-  /** Compact notation for big counts and money in tight tiles ("1.2K", "3.4M"). */
-  compactNumber(value: number): string {
-    return new Intl.NumberFormat(getLocale(), {
-      notation: 'compact',
-      maximumFractionDigits: 1,
-    }).format(value)
-  },
-
   /** Whole minutes as "1 hr 18 min" (or just "42 min" under an hour). */
   duration(minutes: number): string {
     const total = Math.max(0, Math.round(minutes))

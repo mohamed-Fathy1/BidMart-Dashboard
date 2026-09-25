@@ -14,7 +14,7 @@ import type { StatisticsPeriod } from '@/types/api'
  * Contract A filter, shared by the three statistics tabs. It lives on the
  * layout so switching tabs, reloading and back/forward keep the window.
  */
-export interface StatisticsSearch {
+interface StatisticsSearch {
   /** Absent means `DEFAULT_STATISTICS_PERIOD`; the default is not written to the URL. */
   period?: StatisticsPeriod
   /** `YYYY-MM-DD` anchor; absent means today (UTC). */
