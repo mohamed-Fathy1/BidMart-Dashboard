@@ -21,7 +21,6 @@ export function CategoriesSectionTabs() {
       to: '/categories/sub-categories',
       label: t('categories:tabs.sub_categories'),
       active: isSubArea,
-      search: true,
     },
   ]
 
