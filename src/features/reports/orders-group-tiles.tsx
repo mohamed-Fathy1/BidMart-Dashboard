@@ -1,9 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
-import { StatCard } from '@/components/shared/stat-card'
+import { MetricBandSkeleton, metricBandClass } from '@/components/shared/metric-band'
+import { MetricValue } from '@/components/shared/metric-value'
 import { cn } from '@/lib/utils'
-import { format } from '@/lib/format'
 import { ORDER_REPORT_GROUPS } from '@/features/reports/report-options'
 import type { OrdersReportSummary, OrderReportGroup } from '@/types/api'
 
@@ -21,6 +20,13 @@ const SUMMARY_KEY: Record<OrderReportGroup, keyof OrdersReportSummary> = {
   REFUNDED: 'refunded',
 }
 
+const CELL = 'flex min-w-0 flex-col bg-card px-5 py-4 text-start'
+
+/**
+ * The four groups are toggles that filter the table; the last two cells are
+ * plain figures. All six describe the whole window, so a toggle never changes
+ * a number here.
+ */
 export function OrdersGroupTiles({
   summary,
   isLoading,
@@ -30,58 +36,60 @@ export function OrdersGroupTiles({
   const { t } = useTranslation()
 
   if (!summary && !isLoading) return null
+  if (!summary) return <MetricBandSkeleton count={6} columns={6} />
 
   return (
-    <div className="space-y-3">
-      {!summary ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-[92px] rounded-lg" />
-          ))}
-        </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
-          {ORDER_REPORT_GROUPS.map((group) => {
-            const pressed = activeGroup === group
-            return (
-              <button
-                key={group}
-                type="button"
-                aria-pressed={pressed}
-                onClick={() => onGroupChange(pressed ? undefined : group)}
+    <div className="space-y-2">
+      <div className={metricBandClass(6)}>
+        {ORDER_REPORT_GROUPS.map((group) => {
+          const pressed = activeGroup === group
+          return (
+            <button
+              key={group}
+              type="button"
+              aria-pressed={pressed}
+              onClick={() => onGroupChange(pressed ? undefined : group)}
+              className={cn(
+                CELL,
+                'outline-none transition-[background-color,color] duration-(--duration-hover) ease-(--ease-default) focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50',
+                pressed ? 'bg-primary/10' : 'hover:bg-muted/60',
+              )}
+            >
+              <span
                 className={cn(
-                  'rounded-lg border border-border bg-card px-5 py-4 text-start shadow-rest',
-                  'transition-colors duration-(--duration-hover) ease-(--ease-default)',
-                  'focus-visible:ring-[3px] focus-visible:ring-ring/50 outline-none',
-                  pressed
-                    ? 'bg-primary/10 text-primary ring-1 ring-primary/30'
-                    : 'hover:bg-muted/50',
+                  'text-xs font-medium',
+                  pressed ? 'text-primary' : 'text-muted-foreground',
                 )}
               >
-                <p className="text-xs font-medium text-muted-foreground">
-                  {t(`reports:orders.tiles.${group.toLowerCase()}`)}
-                </p>
-                <p className="mt-1.5 text-2xl font-semibold font-mono tabular-nums">
-                  {format.number(summary[SUMMARY_KEY[group]])}
-                </p>
-              </button>
-            )
-          })}
+                {t(`reports:orders.tiles.${group.toLowerCase()}`)}
+              </span>
+              <MetricValue
+                value={summary[SUMMARY_KEY[group]]}
+                className={cn('mt-2.5', pressed && 'text-primary')}
+              />
+            </button>
+          )
+        })}
 
-          <StatCard
-            label={t('reports:orders.tiles.total_orders')}
-            value={format.number(summary.totalOrders)}
-          />
-
-          <StatCard
-            label={t('reports:orders.tiles.average_order_value')}
-            value={format.currency(summary.averageOrderValue)}
-            hint={t('reports:orders.tiles.average_hint')}
-          />
+        <div className={CELL}>
+          <span className="text-xs font-medium text-muted-foreground">
+            {t('reports:orders.tiles.total_orders')}
+          </span>
+          <MetricValue value={summary.totalOrders} className="mt-2.5" />
         </div>
-      )}
 
-      <div className="flex flex-wrap items-center gap-3">
+        <div className={CELL}>
+          <span className="text-xs font-medium text-muted-foreground">
+            {t('reports:orders.tiles.average_order_value')}
+          </span>
+          <MetricValue value={summary.averageOrderValue} currency className="mt-2.5" />
+          <span className="mt-2 text-xs text-muted-foreground">
+            {t('reports:orders.tiles.average_hint')}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex min-h-8 flex-wrap items-center gap-3">
         <p className="text-xs text-muted-foreground">{t('reports:orders.tiles.filter_hint')}</p>
         {activeGroup && (
           <Button type="button" variant="ghost" size="sm" onClick={() => onGroupChange(undefined)}>

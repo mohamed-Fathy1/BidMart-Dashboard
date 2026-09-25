@@ -21,7 +21,7 @@ export function TableFiltersShell({ children, meta, className }: TableFiltersShe
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex min-w-0 flex-wrap items-center gap-3">{children}</div>
         {meta != null && (
-          <p className="text-sm text-muted-foreground lg:text-end">{meta}</p>
+          <p className="shrink-0 whitespace-nowrap text-sm tabular-nums text-muted-foreground lg:text-end">{meta}</p>
         )}
       </div>
     </div>

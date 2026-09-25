@@ -29,7 +29,7 @@ export function useRatingsReviewsColumns(): ColumnDef<RatingsReviewRow>[] {
       {
         accessorKey: 'sellerName',
         header: t('reports:ratings.columns.seller'),
-        cell: ({ getValue }) => <TruncatedTextCell text={getValue<string>()} className="max-w-52" />,
+        cell: ({ getValue }) => <TruncatedTextCell text={getValue<string>()} className="max-w-40" />,
       },
       {
         id: 'product',
@@ -39,7 +39,7 @@ export function useRatingsReviewsColumns(): ColumnDef<RatingsReviewRow>[] {
           if (!title) {
             return <span className="text-sm text-muted-foreground">{t('reports:common.none')}</span>
           }
-          return <TruncatedTextCell text={title} className="max-w-72" />
+          return <TruncatedTextCell text={title} className="max-w-56" />
         },
       },
       {
@@ -51,7 +51,7 @@ export function useRatingsReviewsColumns(): ColumnDef<RatingsReviewRow>[] {
           if (!label) {
             return <span className="text-sm text-muted-foreground">{t('reports:common.none')}</span>
           }
-          return <TruncatedTextCell text={label} className="max-w-52" />
+          return <TruncatedTextCell text={label} className="max-w-40" />
         },
       },
       {
@@ -78,7 +78,7 @@ export function useRatingsReviewsColumns(): ColumnDef<RatingsReviewRow>[] {
           if (!review) {
             return <span className="text-sm text-muted-foreground">{t('reports:common.none')}</span>
           }
-          return <TruncatedTextCell text={review} className="max-w-72" />
+          return <TruncatedTextCell text={review} className="max-w-60" />
         },
       },
       {

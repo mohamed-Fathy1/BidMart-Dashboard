@@ -101,7 +101,9 @@ export function ReportDateRangeFilter({
         </SelectContent>
       </Select>
 
-      <DateRangeField
+      {/* Below `sm` the dates take their own row, so the reset sits beside the preset instead of alone on a third. */}
+      <div className="order-2 sm:order-none">
+        <DateRangeField
         from={draft.from}
         to={draft.to}
         onFromChange={setDraftFrom}
@@ -111,13 +113,15 @@ export function ReportDateRangeFilter({
         max={today}
         invalid={!!error}
         describedBy={error ? errorId : undefined}
-      />
+        />
+      </div>
 
       {(from || to) && (
         <Button
           type="button"
           variant="ghost"
           size="icon-sm"
+          className="order-1 sm:order-none"
           aria-label={t('common:buttons.reset')}
           onClick={() => onChange({})}
         >
@@ -126,7 +130,7 @@ export function ReportDateRangeFilter({
       )}
 
       {error && (
-        <p id={errorId} role="alert" className="w-full text-xs text-destructive">
+        <p id={errorId} role="alert" className="order-3 w-full text-xs text-destructive sm:order-none">
           {error}
         </p>
       )}

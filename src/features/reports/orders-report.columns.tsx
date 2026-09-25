@@ -30,11 +30,15 @@ export function useOrdersReportColumns(): ColumnDef<OrderReportRow>[] {
         id: 'status',
         header: t('reports:orders.columns.status'),
         cell: ({ row }) => (
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col items-start gap-1">
             <StatusBadge type="orderGroup" status={row.original.group} />
-            <span className="text-xs text-muted-foreground">
-              {t(`reports:order_status.${row.original.status}`)}
-            </span>
+            {/* The exact status only when it says more than the group does. */}
+            {t(`reports:order_status.${row.original.status}`) !==
+              t(`reports:order_group.${row.original.group}`) && (
+              <span className="text-xs text-muted-foreground">
+                {t(`reports:order_status.${row.original.status}`)}
+              </span>
+            )}
           </div>
         ),
       },
