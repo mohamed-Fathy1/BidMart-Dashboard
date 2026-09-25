@@ -25,10 +25,6 @@ import type { LivestreamsReportSearch } from '@/routes/_authed.reports.livestrea
 
 const livestreamsRoute = getRouteApi('/_authed/reports/livestreams')
 
-function compact<T extends Record<string, unknown>>(obj: T): Partial<T> {
-  return Object.fromEntries(Object.entries(obj).filter(([, value]) => value !== undefined)) as Partial<T>
-}
-
 export function LivestreamsReportPage() {
   const { t } = useTranslation()
 
@@ -46,12 +42,12 @@ export function LivestreamsReportPage() {
   const rangeError = rangeValidationError(search.startDate, search.endDate)
   const range = rangeParamsFor(search.startDate, search.endDate)
 
-  const queryParams: LivestreamsReportParams = compact({
+  const queryParams: LivestreamsReportParams = {
     ...range,
     sortBy: search.sortBy,
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
-  })
+  }
 
   const { data: response, isLoading } = useLivestreamsReportQuery(queryParams, {
     enabled: !rangeError,

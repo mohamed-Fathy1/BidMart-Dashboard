@@ -22,10 +22,6 @@ import type { FinancialReportSearch } from '@/routes/_authed.reports.financial'
 
 const financialRoute = getRouteApi('/_authed/reports/financial')
 
-function compact<T extends Record<string, unknown>>(params: T): T {
-  return Object.fromEntries(Object.entries(params).filter(([, value]) => value !== undefined)) as T
-}
-
 export function FinancialReportPage() {
   const { t } = useTranslation()
 
@@ -37,19 +33,15 @@ export function FinancialReportPage() {
 
   const rangeError = rangeValidationError(search.startDate, search.endDate)
 
-  const filters: FinancialReportFilters = compact({
+  const filters: FinancialReportFilters = {
     storeName: search.storeName,
     customerName: search.customerName,
     status: search.status,
     ...rangeParamsFor(search.startDate, search.endDate),
-  })
+  }
 
   const { data: response, isLoading } = useFinancialReportQuery(
-    compact({
-      ...filters,
-      page: pagination.pageIndex + 1,
-      limit: pagination.pageSize,
-    }),
+    { ...filters, page: pagination.pageIndex + 1, limit: pagination.pageSize },
     { enabled: !rangeError },
   )
 

@@ -17,16 +17,6 @@ import type { OrdersReportSearch } from '@/routes/_authed.reports.orders'
 
 const ordersReportRoute = getRouteApi('/_authed/reports/orders')
 
-function compact<T extends Record<string, unknown>>(obj: T): T {
-  const result = {} as T
-  for (const key in obj) {
-    if (obj[key] !== undefined) {
-      result[key] = obj[key]
-    }
-  }
-  return result
-}
-
 export function OrdersReportPage() {
   const { t } = useTranslation()
 
@@ -39,12 +29,12 @@ export function OrdersReportPage() {
   const rangeError = rangeValidationError(search.startDate, search.endDate)
   const range = rangeParamsFor(search.startDate, search.endDate)
 
-  const queryParams: OrdersReportParams = compact({
+  const queryParams: OrdersReportParams = {
     ...range,
     group: search.group,
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
-  })
+  }
 
   const { data: response, isLoading } = useOrdersReportQuery(queryParams, {
     enabled: !rangeError,

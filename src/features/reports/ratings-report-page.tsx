@@ -17,16 +17,10 @@ import { useCategoriesQuery } from '@/features/categories/categories.queries'
 import { useRatingsReviewsColumns } from '@/features/reports/ratings-reviews.columns'
 import { useRatingsSellersColumns } from '@/features/reports/ratings-sellers.columns'
 import { RatingsSummary } from '@/features/reports/ratings-summary'
+import type { RatingsReviewsParams, RatingsSellersParams } from '@/features/reports/reports.api'
 import type { RatingsReportSearch, RatingsTab } from '@/routes/_authed.reports.ratings'
 
 const ratingsRoute = getRouteApi('/_authed/reports/ratings')
-
-function compact(params: Record<string, string | number | undefined>): Record<string, string | number> {
-  return Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined)) as Record<
-    string,
-    string | number
-  >
-}
 
 export function RatingsReportPage() {
   const { t, i18n } = useTranslation()
@@ -41,21 +35,21 @@ export function RatingsReportPage() {
   const rangeError = rangeValidationError(search.startDate, search.endDate)
   const range = rangeParamsFor(search.startDate, search.endDate)
 
-  const reviewsParams = compact({
+  const reviewsParams: RatingsReviewsParams = {
     ...range,
     sellerName: search.sellerName,
     rating: search.rating,
     categoryId: search.categoryId,
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
-  })
+  }
 
-  const sellersParams = compact({
+  const sellersParams: RatingsSellersParams = {
     ...range,
     sellerName: search.sellerName,
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
-  })
+  }
 
   const {
     data: reviewsResponse,
