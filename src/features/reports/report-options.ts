@@ -11,3 +11,6 @@ export const LIVESTREAM_SORT_OPTIONS: readonly LivestreamSortBy[] = ['DATE', 'SA
 
 export const RATINGS_TABS = ['reviews', 'sellers'] as const
 export type RatingsTab = (typeof RATINGS_TABS)[number]
+
+export const REPORT_DEFAULT_LIMIT = 20
+export const REPORT_PAGE_SIZES = [REPORT_DEFAULT_LIMIT, 50, 100]

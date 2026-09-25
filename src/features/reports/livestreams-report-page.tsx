@@ -20,7 +20,11 @@ import { DataTable } from '@/components/data-table/data-table'
 import { useLivestreamsReportQuery } from '@/features/reports/reports.queries'
 import { useLivestreamsReportColumns } from '@/features/reports/livestreams-report.columns'
 import { LivestreamsSummary } from '@/features/reports/livestreams-summary'
-import { LIVESTREAM_SORT_OPTIONS } from '@/features/reports/report-options'
+import {
+  LIVESTREAM_SORT_OPTIONS,
+  REPORT_DEFAULT_LIMIT,
+  REPORT_PAGE_SIZES,
+} from '@/features/reports/report-options'
 import { readEnum } from '@/lib/list-search'
 import type { LivestreamsReportSearch } from '@/routes/_authed.reports.livestreams'
 
@@ -37,7 +41,7 @@ export function LivestreamsReportPage() {
     setFilters,
   } = useUrlListState<LivestreamsReportSearch>({
     route: livestreamsRoute,
-    defaultLimit: 20,
+    defaultLimit: REPORT_DEFAULT_LIMIT,
   })
 
   const rangeError = rangeValidationError(search.startDate, search.endDate)
@@ -114,7 +118,7 @@ export function LivestreamsReportPage() {
         columns={columns}
         data={rows}
         {...tableProps}
-        pageSizeOptions={[20, 50, 100]}
+        pageSizeOptions={REPORT_PAGE_SIZES}
         getRowId={(row) => row.showId}
         emptyKeyPrefix="reports:livestreams.empty"
       />

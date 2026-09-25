@@ -18,7 +18,11 @@ import { useRatingsReviewsColumns } from '@/features/reports/ratings-reviews.col
 import { useRatingsSellersColumns } from '@/features/reports/ratings-sellers.columns'
 import { RatingsSummary } from '@/features/reports/ratings-summary'
 import type { RatingsReviewsParams, RatingsSellersParams } from '@/features/reports/reports.api'
-import { RATINGS_TABS } from '@/features/reports/report-options'
+import {
+  RATINGS_TABS,
+  REPORT_DEFAULT_LIMIT,
+  REPORT_PAGE_SIZES,
+} from '@/features/reports/report-options'
 import { readEnum } from '@/lib/list-search'
 import type { RatingsReportSearch } from '@/routes/_authed.reports.ratings'
 
@@ -31,7 +35,7 @@ export function RatingsReportPage() {
   const { search, pagination, setPagination, setFilter, setFilters } =
     useUrlListState<RatingsReportSearch>({
       route: ratingsRoute,
-      defaultLimit: 20,
+      defaultLimit: REPORT_DEFAULT_LIMIT,
     })
 
   const rangeError = rangeValidationError(search.startDate, search.endDate)
@@ -187,7 +191,7 @@ export function RatingsReportPage() {
             columns={reviewsColumns}
             data={reviewRows}
             {...reviewsTableProps}
-            pageSizeOptions={[20, 50, 100]}
+            pageSizeOptions={REPORT_PAGE_SIZES}
             getRowId={(row) => row.ratingId}
             emptyKeyPrefix="reports:ratings.empty_reviews"
           />
@@ -198,7 +202,7 @@ export function RatingsReportPage() {
             columns={sellersColumns}
             data={sellerRows}
             {...sellersTableProps}
-            pageSizeOptions={[20, 50, 100]}
+            pageSizeOptions={REPORT_PAGE_SIZES}
             getRowId={(row) => row.sellerId}
             rowLabel={(row) => row.sellerName}
             onRowClick={(row) => navigate({ to: '/users/$userId', params: { userId: row.sellerId } })}

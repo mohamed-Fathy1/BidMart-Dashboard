@@ -16,6 +16,7 @@ import { useFinancialReportQuery } from '@/features/reports/reports.queries'
 import type { FinancialReportFilters } from '@/features/reports/reports.api'
 import { readEnum } from '@/lib/list-search'
 import { useListPageData } from '@/lib/use-list-page-data'
+import { REPORT_DEFAULT_LIMIT, REPORT_PAGE_SIZES } from '@/features/reports/report-options'
 import { useUrlListState } from '@/lib/use-url-list-state'
 import { rangeParamsFor, rangeValidationError } from '@/lib/report-range'
 import type { FinancialReportSearch } from '@/routes/_authed.reports.financial'
@@ -28,7 +29,7 @@ export function FinancialReportPage() {
   const { search, pagination, setPagination, setFilter, setFilters, setParam } =
     useUrlListState<FinancialReportSearch>({
       route: financialRoute,
-      defaultLimit: 20,
+      defaultLimit: REPORT_DEFAULT_LIMIT,
     })
 
   const rangeError = rangeValidationError(search.startDate, search.endDate)
@@ -115,7 +116,7 @@ export function FinancialReportPage() {
         columns={columns}
         data={rows}
         {...tableProps}
-        pageSizeOptions={[20, 50, 100]}
+        pageSizeOptions={REPORT_PAGE_SIZES}
         getRowId={(row) => row.orderId}
         rowLabel={(row) => row.orderNumber}
         onRowClick={(row) => setParam('order', row.orderId)}

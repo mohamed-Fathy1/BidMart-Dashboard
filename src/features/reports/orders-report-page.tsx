@@ -11,6 +11,7 @@ import { ResolvedRangeLabel } from '@/components/shared/resolved-range-label'
 import { ReportDateRangeFilter } from '@/components/shared/report-date-range-filter'
 import { TableFiltersShell } from '@/components/shared/table-filters-shell'
 import { useListPageData } from '@/lib/use-list-page-data'
+import { REPORT_DEFAULT_LIMIT, REPORT_PAGE_SIZES } from '@/features/reports/report-options'
 import { useUrlListState } from '@/lib/use-url-list-state'
 import { rangeParamsFor, rangeValidationError } from '@/lib/report-range'
 import type { OrdersReportSearch } from '@/routes/_authed.reports.orders'
@@ -23,7 +24,7 @@ export function OrdersReportPage() {
   const { search, pagination, setPagination, setFilter, setFilters, setParam } =
     useUrlListState<OrdersReportSearch>({
       route: ordersReportRoute,
-      defaultLimit: 20,
+      defaultLimit: REPORT_DEFAULT_LIMIT,
     })
 
   const rangeError = rangeValidationError(search.startDate, search.endDate)
@@ -85,7 +86,7 @@ export function OrdersReportPage() {
         columns={columns}
         data={rows}
         {...tableProps}
-        pageSizeOptions={[20, 50, 100]}
+        pageSizeOptions={REPORT_PAGE_SIZES}
         getRowId={(row) => row.orderId}
         rowLabel={(row) => row.orderNumber}
         onRowClick={(row) => setParam('order', row.orderId)}
