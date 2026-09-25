@@ -7,7 +7,6 @@
     "financial_overview": "Financial Overview"
   },
   "window": {
-    "showing": "Showing <range>{{range}}</range>",
     "loading": "Resolving the window…"
   },
   "general": {

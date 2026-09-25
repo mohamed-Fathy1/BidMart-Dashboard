@@ -4,8 +4,8 @@ import { AlertCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { ResolvedRangeLabel } from '@/components/shared/resolved-range-label'
 import { Skeleton } from '@/components/ui/skeleton'
-import { StatisticsWindowLabel } from '@/features/overview/statistics-window-label'
 import { extractApiErrorCode } from '@/lib/axios'
 import { cn } from '@/lib/utils'
 import type { ReportDateRange } from '@/types/api'
@@ -26,6 +26,7 @@ export function StatisticsTabFrame<T extends { dateRange: ReportDateRange }>({
   skeletonCount,
   children,
 }: StatisticsTabFrameProps<T>) {
+  const { t } = useTranslation()
   const refreshing = query.isFetching && !query.isPending
 
   return (
@@ -36,7 +37,9 @@ export function StatisticsTabFrame<T extends { dateRange: ReportDateRange }>({
       )}
       aria-busy={refreshing}
     >
-      <StatisticsWindowLabel range={query.data?.dateRange} isPending={query.isPending} />
+      <p className="text-sm text-muted-foreground">
+        <ResolvedRangeLabel range={query.data?.dateRange} fallback={t('overview:window.loading')} />
+      </p>
 
       {query.isPending ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -53,7 +56,12 @@ export function StatisticsTabFrame<T extends { dateRange: ReportDateRange }>({
   )
 }
 
-function StatisticsErrorCard({ error, onRetry }: { error: unknown; onRetry: () => void }) {
+interface StatisticsErrorCardProps {
+  error: unknown
+  onRetry: () => void
+}
+
+function StatisticsErrorCard({ error, onRetry }: StatisticsErrorCardProps) {
   const { t } = useTranslation()
   const message =
     extractApiErrorCode(error) === 'REPORT_DATE_IN_FUTURE'
