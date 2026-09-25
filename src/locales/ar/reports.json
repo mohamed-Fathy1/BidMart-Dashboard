@@ -6,13 +6,8 @@
     "view_customer": "عرض العميل",
     "view_seller": "عرض البائع"
   },
-  "range": {
-    "default_hint": "آخر 30 يومًا بما فيها اليوم"
-  },
   "errors": {
-    "REPORT_DATE_IN_FUTURE": "التاريخ في المستقبل. اختر تاريخًا حتى اليوم.",
-    "REPORT_EXPORT_TOO_LARGE": "هذا التصدير كبير جدًا. ضيّق عوامل التصفية وحاول مرة أخرى.",
-    "ORDER_NOT_FOUND": "الطلب غير موجود."
+    "REPORT_EXPORT_TOO_LARGE": "هذا التصدير كبير جدًا. ضيّق عوامل التصفية وحاول مرة أخرى."
   },
   "financial_bucket": {
     "COMPLETED": "مكتمل",
@@ -121,8 +116,7 @@
     "filters": {
       "store": "اسم المتجر",
       "customer": "اسم العميل",
-      "status": "الحالة",
-      "all_statuses": "كل الحالات"
+      "status": "الحالة"
     },
     "columns": {
       "order_number": "الطلب",
@@ -137,7 +131,6 @@
       "status": "الحالة"
     },
     "totals": {
-      "title": "الإجماليات",
       "caption_zero": "إجماليات {{count, number}} طلب مطابق",
       "caption_one": "إجماليات الطلب المطابق الوحيد",
       "caption_two": "إجماليات الطلبين المطابقين",
@@ -187,15 +180,13 @@
     "filters": {
       "seller": "اسم البائع",
       "rating": "التقييم",
-      "all_ratings": "كل التقييمات",
       "stars_zero": "{{count, number}} نجمة",
       "stars_one": "نجمة واحدة",
       "stars_two": "نجمتان",
       "stars_few": "{{count, number}} نجوم",
       "stars_many": "{{count, number}} نجمة",
       "stars_other": "{{count, number}} نجمة",
-      "category": "التصنيف",
-      "all_categories": "كل التصنيفات"
+      "category": "التصنيف"
     },
     "summary": {
       "average": "متوسط التقييم",
@@ -293,7 +284,6 @@
     },
     "columns": {
       "show": "البث",
-      "host": "المضيف",
       "status": "الحالة",
       "broadcast": "موعد البث",
       "duration": "المدة",

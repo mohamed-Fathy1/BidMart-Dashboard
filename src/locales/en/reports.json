@@ -6,13 +6,8 @@
     "view_customer": "View customer",
     "view_seller": "View seller"
   },
-  "range": {
-    "default_hint": "Last 30 days including today"
-  },
   "errors": {
-    "REPORT_DATE_IN_FUTURE": "The date is in the future. Pick a date up to today.",
-    "REPORT_EXPORT_TOO_LARGE": "This export is too large. Narrow the filters and try again.",
-    "ORDER_NOT_FOUND": "Order not found."
+    "REPORT_EXPORT_TOO_LARGE": "This export is too large. Narrow the filters and try again."
   },
   "financial_bucket": {
     "COMPLETED": "Completed",
@@ -117,8 +112,7 @@
     "filters": {
       "store": "Store name",
       "customer": "Customer name",
-      "status": "Status",
-      "all_statuses": "All statuses"
+      "status": "Status"
     },
     "columns": {
       "order_number": "Order",
@@ -133,7 +127,6 @@
       "status": "Status"
     },
     "totals": {
-      "title": "Totals",
       "caption_one": "Totals for the {{count, number}} filtered order",
       "caption_other": "Totals for all {{count, number}} filtered orders",
       "store_profit": "Store profit",
@@ -171,11 +164,9 @@
     "filters": {
       "seller": "Seller name",
       "rating": "Rating",
-      "all_ratings": "All ratings",
       "stars_one": "{{count, number}} star",
       "stars_other": "{{count, number}} stars",
-      "category": "Category",
-      "all_categories": "All categories"
+      "category": "Category"
     },
     "summary": {
       "average": "Average rating",
@@ -265,7 +256,6 @@
     },
     "columns": {
       "show": "Show",
-      "host": "Host",
       "status": "Status",
       "broadcast": "Broadcast",
       "duration": "Duration",
