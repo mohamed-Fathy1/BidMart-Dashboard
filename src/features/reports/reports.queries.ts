@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { createResourceKeys } from '@/lib/query-keys'
+import { createResourceKeys, type ResourceKeys } from '@/lib/query-keys'
 import {
   getOrderDrilldown,
   listFinancialReport,
@@ -14,34 +14,51 @@ import {
   type RatingsSellersParams,
 } from '@/features/reports/reports.api'
 
+const financialReportKeys = createResourceKeys<ListFinancialReportParams>('financial-report')
+const orderDrilldownKeys = createResourceKeys('order-drilldown')
+const ratingsReviewsKeys = createResourceKeys<RatingsReviewsParams>('ratings-reviews')
+const ratingsSellersKeys = createResourceKeys<RatingsSellersParams>('ratings-sellers')
+const ordersReportKeys = createResourceKeys<OrdersReportParams>('orders-report')
+const livestreamsReportKeys = createResourceKeys<LivestreamsReportParams>('livestreams-report')
+
 /*
  * Report lists keep TanStack defaults (stale immediately, refetch on focus),
  * which is what the livestreams contract asks for when the window includes
  * today. `keepPreviousData` holds the rows while a filter change loads.
+ * Pages pass `enabled: false` while the range is invalid so no request is sent.
  */
-
-export const financialReportKeys = createResourceKeys<ListFinancialReportParams>('financial-report')
-export const orderDrilldownKeys = createResourceKeys('order-drilldown')
-export const ratingsReviewsKeys = createResourceKeys<RatingsReviewsParams>('ratings-reviews')
-export const ratingsSellersKeys = createResourceKeys<RatingsSellersParams>('ratings-sellers')
-export const ordersReportKeys = createResourceKeys<OrdersReportParams>('orders-report')
-export const livestreamsReportKeys = createResourceKeys<LivestreamsReportParams>('livestreams-report')
-
-interface ReportQueryOptions {
-  /** Pass `false` while the range is invalid so no request is sent. */
-  enabled?: boolean
-}
-
-export function useFinancialReportQuery(
-  params: ListFinancialReportParams,
-  options: ReportQueryOptions = {},
+function useReportListQuery<TParams, TData>(
+  keys: ResourceKeys<TParams>,
+  fetchList: (params: TParams) => Promise<TData>,
+  params: TParams,
+  enabled: boolean,
 ) {
   return useQuery({
-    queryKey: financialReportKeys.list(params),
-    queryFn: () => listFinancialReport(params),
+    queryKey: keys.list(params),
+    queryFn: () => fetchList(params),
     placeholderData: keepPreviousData,
-    enabled: options.enabled ?? true,
+    enabled,
   })
+}
+
+export function useFinancialReportQuery(params: ListFinancialReportParams, enabled: boolean) {
+  return useReportListQuery(financialReportKeys, listFinancialReport, params, enabled)
+}
+
+export function useRatingsReviewsQuery(params: RatingsReviewsParams, enabled: boolean) {
+  return useReportListQuery(ratingsReviewsKeys, listRatingsReviews, params, enabled)
+}
+
+export function useRatingsSellersQuery(params: RatingsSellersParams, enabled: boolean) {
+  return useReportListQuery(ratingsSellersKeys, listRatingsSellers, params, enabled)
+}
+
+export function useOrdersReportQuery(params: OrdersReportParams, enabled: boolean) {
+  return useReportListQuery(ordersReportKeys, listOrdersReport, params, enabled)
+}
+
+export function useLivestreamsReportQuery(params: LivestreamsReportParams, enabled: boolean) {
+  return useReportListQuery(livestreamsReportKeys, listLivestreamsReport, params, enabled)
 }
 
 /** Live detail: never served from cache, fetched whenever a sheet opens. */
@@ -52,50 +69,5 @@ export function useOrderDrilldownQuery(orderId: string | undefined) {
     enabled: !!orderId,
     staleTime: 0,
     gcTime: 0,
-  })
-}
-
-export function useRatingsReviewsQuery(
-  params: RatingsReviewsParams,
-  options: ReportQueryOptions = {},
-) {
-  return useQuery({
-    queryKey: ratingsReviewsKeys.list(params),
-    queryFn: () => listRatingsReviews(params),
-    placeholderData: keepPreviousData,
-    enabled: options.enabled ?? true,
-  })
-}
-
-export function useRatingsSellersQuery(
-  params: RatingsSellersParams,
-  options: ReportQueryOptions = {},
-) {
-  return useQuery({
-    queryKey: ratingsSellersKeys.list(params),
-    queryFn: () => listRatingsSellers(params),
-    placeholderData: keepPreviousData,
-    enabled: options.enabled ?? true,
-  })
-}
-
-export function useOrdersReportQuery(params: OrdersReportParams, options: ReportQueryOptions = {}) {
-  return useQuery({
-    queryKey: ordersReportKeys.list(params),
-    queryFn: () => listOrdersReport(params),
-    placeholderData: keepPreviousData,
-    enabled: options.enabled ?? true,
-  })
-}
-
-export function useLivestreamsReportQuery(
-  params: LivestreamsReportParams,
-  options: ReportQueryOptions = {},
-) {
-  return useQuery({
-    queryKey: livestreamsReportKeys.list(params),
-    queryFn: () => listLivestreamsReport(params),
-    placeholderData: keepPreviousData,
-    enabled: options.enabled ?? true,
   })
 }

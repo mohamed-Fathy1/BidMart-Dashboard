@@ -36,9 +36,7 @@ export function OrdersReportPage() {
     limit: pagination.pageSize,
   }
 
-  const { data: response, isLoading } = useOrdersReportQuery(queryParams, {
-    enabled: !rangeError,
-  })
+  const { data: response, isLoading } = useOrdersReportQuery(queryParams, !rangeError)
 
   const hasActiveFilters = search.group !== undefined || search.startDate !== undefined
 

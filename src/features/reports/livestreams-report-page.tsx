@@ -50,9 +50,7 @@ export function LivestreamsReportPage() {
     limit: pagination.pageSize,
   }
 
-  const { data: response, isLoading } = useLivestreamsReportQuery(queryParams, {
-    enabled: !rangeError,
-  })
+  const { data: response, isLoading } = useLivestreamsReportQuery(queryParams, !rangeError)
 
   const { rows, meta, tableProps } = useListPageData<LivestreamReportRow>({
     response,

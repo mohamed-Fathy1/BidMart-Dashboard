@@ -56,12 +56,12 @@ export function RatingsReportPage() {
   const {
     data: reviewsResponse,
     isLoading: isLoadingReviews,
-  } = useRatingsReviewsQuery(reviewsParams, { enabled: search.tab === 'reviews' && !rangeError })
+  } = useRatingsReviewsQuery(reviewsParams, search.tab === 'reviews' && !rangeError)
 
   const {
     data: sellersResponse,
     isLoading: isLoadingSellers,
-  } = useRatingsSellersQuery(sellersParams, { enabled: search.tab === 'sellers' && !rangeError })
+  } = useRatingsSellersQuery(sellersParams, search.tab === 'sellers' && !rangeError)
 
   const { data: categoriesResponse } = useCategoriesQuery({ limit: 100 })
 

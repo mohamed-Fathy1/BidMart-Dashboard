@@ -42,7 +42,7 @@ export function FinancialReportPage() {
 
   const { data: response, isLoading } = useFinancialReportQuery(
     { ...filters, page: pagination.pageIndex + 1, limit: pagination.pageSize },
-    { enabled: !rangeError },
+    !rangeError,
   )
 
   const { rows, meta, tableProps } = useListPageData({
