@@ -2,11 +2,6 @@
   "title": "Settings",
   "description": "Platform-wide configuration that affects every account.",
   "read_only_hint": "You have view-only access. Contact an administrator to change these settings.",
-  "tabs": {
-    "aria": "Settings sections",
-    "system": "System",
-    "complaint_types": "Complaint Types"
-  },
   "system": {
     "title": "System settings",
     "description": "Exchange rate, commissions, contact channels, and social links.",
