@@ -19,6 +19,7 @@ import { saveBlob } from '@/lib/download'
 
 interface FinancialReportExportProps {
   filters: FinancialReportFilters
+  disabled?: boolean
 }
 
 interface ExportRejection {
@@ -31,7 +32,7 @@ interface ExportRejection {
  * empty table. The server refuses above 10,000 rows with
  * `REPORT_EXPORT_TOO_LARGE`, which gets its own message.
  */
-export function FinancialReportExport({ filters }: FinancialReportExportProps) {
+export function FinancialReportExport({ filters, disabled = false }: FinancialReportExportProps) {
   const { t } = useTranslation()
 
   const exportMutation = useMutation<ExportedFile, ExportRejection, FinancialExportFormat>({
@@ -53,7 +54,7 @@ export function FinancialReportExport({ filters }: FinancialReportExportProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" disabled={isExporting}>
+        <Button variant="outline" size="sm" disabled={disabled || isExporting}>
           {isExporting ? (
             <Loader2 className="size-4 animate-spin" />
           ) : (

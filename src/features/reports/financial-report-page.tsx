@@ -99,7 +99,7 @@ export function FinancialReportPage() {
             t('reports:financial.description')
           )
         }
-        actions={<FinancialReportExport filters={filters} />}
+        actions={<FinancialReportExport filters={filters} disabled={!!rangeError} />}
       />
 
       <TableFiltersShell meta={t('reports:financial.meta', { count: meta?.total ?? 0 })}>
