@@ -11,7 +11,7 @@ export interface StatisticsWindow {
   date?: string
   /** Exactly the keys the server accepts; `date` is omitted rather than sent as undefined. */
   params: StatisticsQuery
-  /** Set when the anchor is after today. Tabs pass `enabled: !anchorError`. */
+  /** Set when the anchor is after today. The layout then renders no tab. */
   anchorError?: string
 }
 

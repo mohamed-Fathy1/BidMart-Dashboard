@@ -87,7 +87,7 @@ function StatisticsLayoutRoute() {
         />
       </div>
 
-      <Outlet />
+      {!anchorError && <Outlet />}
     </div>
   )
 }

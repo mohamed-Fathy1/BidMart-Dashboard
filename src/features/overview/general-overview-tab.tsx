@@ -13,11 +13,8 @@ import { cn } from '@/lib/utils'
 
 export function GeneralOverviewTab() {
   const { t } = useTranslation()
-  const { params, anchorError } = useStatisticsWindow()
-  const { data, isPending, isFetching, isError, error, refetch } = useStatisticsOverviewQuery(
-    params,
-    { enabled: !anchorError },
-  )
+  const { params } = useStatisticsWindow()
+  const { data, isPending, isFetching, isError, error, refetch } = useStatisticsOverviewQuery(params)
 
   const engagement = data?.engagement
   const engagementRows = engagement

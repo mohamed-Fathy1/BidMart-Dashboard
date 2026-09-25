@@ -21,46 +21,29 @@ export const statisticsKeys = {
 
 const STATISTICS_STALE_TIME = 30_000
 
-interface StatisticsQueryOptions {
-  /** Pass `false` while the anchor is invalid so no request is sent. */
-  enabled?: boolean
-}
-
-export function useStatisticsOverviewQuery(
-  params: StatisticsQuery,
-  options: StatisticsQueryOptions = {},
-) {
+export function useStatisticsOverviewQuery(params: StatisticsQuery) {
   return useQuery({
     queryKey: statisticsKeys.overview(params),
     queryFn: () => getStatisticsOverview(params),
     staleTime: STATISTICS_STALE_TIME,
     placeholderData: keepPreviousData,
-    enabled: options.enabled ?? true,
   })
 }
 
-export function useBusinessActivityQuery(
-  params: StatisticsQuery,
-  options: StatisticsQueryOptions = {},
-) {
+export function useBusinessActivityQuery(params: StatisticsQuery) {
   return useQuery({
     queryKey: statisticsKeys.businessActivity(params),
     queryFn: () => getBusinessActivity(params),
     staleTime: STATISTICS_STALE_TIME,
     placeholderData: keepPreviousData,
-    enabled: options.enabled ?? true,
   })
 }
 
-export function useFinancialOverviewQuery(
-  params: StatisticsQuery,
-  options: StatisticsQueryOptions = {},
-) {
+export function useFinancialOverviewQuery(params: StatisticsQuery) {
   return useQuery({
     queryKey: statisticsKeys.financialOverview(params),
     queryFn: () => getFinancialOverview(params),
     staleTime: STATISTICS_STALE_TIME,
     placeholderData: keepPreviousData,
-    enabled: options.enabled ?? true,
   })
 }

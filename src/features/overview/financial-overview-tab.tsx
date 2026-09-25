@@ -39,11 +39,8 @@ const MONEY_CELL = 'text-end font-mono tabular-nums'
 
 export function FinancialOverviewTab() {
   const { t, i18n } = useTranslation()
-  const { params, anchorError } = useStatisticsWindow()
-  const { data, isPending, isFetching, isError, error, refetch } = useFinancialOverviewQuery(
-    params,
-    { enabled: !anchorError },
-  )
+  const { params } = useStatisticsWindow()
+  const { data, isPending, isFetching, isError, error, refetch } = useFinancialOverviewQuery(params)
 
   return (
     <div
