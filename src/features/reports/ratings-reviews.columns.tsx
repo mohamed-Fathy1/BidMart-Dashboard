@@ -31,7 +31,7 @@ export function useRatingsReviewsColumns(): ColumnDef<RatingsReviewRow>[] {
         cell: ({ getValue }) => {
           const name = getValue<string>()
           return (
-            <span className="max-w-52 truncate text-sm text-foreground" title={name}>
+            <span className="block max-w-52 truncate text-sm text-foreground" title={name}>
               {name}
             </span>
           )
@@ -44,13 +44,13 @@ export function useRatingsReviewsColumns(): ColumnDef<RatingsReviewRow>[] {
           const title = row.original.productTitle
           if (!title) {
             return (
-              <span className="max-w-72 truncate text-sm text-muted-foreground">
+              <span className="block max-w-72 truncate text-sm text-muted-foreground">
                 {t('reports:common.none')}
               </span>
             )
           }
           return (
-            <span className="max-w-72 truncate text-sm text-foreground" title={title}>
+            <span className="block max-w-72 truncate text-sm text-foreground" title={title}>
               {title}
             </span>
           )
@@ -66,7 +66,7 @@ export function useRatingsReviewsColumns(): ColumnDef<RatingsReviewRow>[] {
             return <span className="text-sm text-muted-foreground">{t('reports:common.none')}</span>
           }
           return (
-            <span className="max-w-52 truncate text-sm text-foreground" title={label}>
+            <span className="block max-w-52 truncate text-sm text-foreground" title={label}>
               {label}
             </span>
           )
@@ -97,7 +97,7 @@ export function useRatingsReviewsColumns(): ColumnDef<RatingsReviewRow>[] {
             return <span className="text-sm text-muted-foreground">{t('reports:common.none')}</span>
           }
           return (
-            <span className="max-w-72 truncate text-sm text-foreground" title={review}>
+            <span className="block max-w-72 truncate text-sm text-foreground" title={review}>
               {review}
             </span>
           )
