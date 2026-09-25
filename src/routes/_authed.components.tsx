@@ -49,7 +49,7 @@ import { ReportDateRangeFilter } from '@/components/shared/report-date-range-fil
 import { ProportionBar } from '@/components/shared/proportion-bar'
 import { RankedList } from '@/components/shared/ranked-list'
 import { Timeline, type TimelineItem } from '@/components/shared/timeline'
-import { LazyMonthlyFinancialChart } from '@/features/overview/lazy-monthly-financial-chart'
+import { MonthlyFinancialChart } from '@/features/overview/monthly-financial-chart'
 import type { MonthlyFinancialRow } from '@/types/api'
 
 export const Route = createFileRoute('/_authed/components')({
@@ -500,7 +500,7 @@ function ComponentsShowcasePage() {
       {/* ---- Monthly Financial Chart ---- */}
       <SectionTitle>Monthly Financial Chart</SectionTitle>
 
-      <LazyMonthlyFinancialChart rows={MOCK_MONTHLY_FINANCIALS} />
+      <MonthlyFinancialChart rows={MOCK_MONTHLY_FINANCIALS} />
 
       {/* ---- Stat Cards ---- */}
       <SectionTitle>Stat Cards</SectionTitle>

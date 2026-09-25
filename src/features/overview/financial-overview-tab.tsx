@@ -9,7 +9,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { StatCard } from '@/components/shared/stat-card'
-import { LazyMonthlyFinancialChart } from '@/features/overview/lazy-monthly-financial-chart'
+import { MonthlyFinancialChart } from '@/features/overview/monthly-financial-chart'
 import { useStatisticsQuery } from '@/features/overview/overview.queries'
 import { StatisticsTabFrame } from '@/features/overview/statistics-tab-frame'
 import { format } from '@/lib/format'
@@ -68,7 +68,7 @@ export function FinancialOverviewTab() {
               <CardDescription>{t('overview:financial.monthly.hint')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <LazyMonthlyFinancialChart rows={data.monthlyReports} />
+              <MonthlyFinancialChart rows={data.monthlyReports} />
 
               <div className="overflow-x-auto">
                 <Table>
