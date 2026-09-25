@@ -1,6 +1,6 @@
 import { getRouteApi } from '@tanstack/react-router'
 import { Trans, useTranslation } from 'react-i18next'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DataTable } from '@/components/data-table/data-table'
 import { PageHeader } from '@/components/shared/page-header'
 import { SearchInput } from '@/components/shared/search-input'
@@ -73,7 +73,6 @@ export function RatingsReportPage() {
 
   const {
     rows: reviewRows,
-    meta: reviewsMeta,
     tableProps: reviewsTableProps,
   } = useListPageData({
     response: reviewsResponse,
@@ -92,7 +91,6 @@ export function RatingsReportPage() {
 
   const {
     rows: sellerRows,
-    meta: sellersMeta,
     tableProps: sellersTableProps,
   } = useListPageData({
     response: sellersResponse,
@@ -151,59 +149,62 @@ export function RatingsReportPage() {
             }),
           })
         }
+        className="gap-6"
       >
         <TabsList variant="line">
           <TabsTrigger value="reviews">{t('reports:ratings.tabs.reviews')}</TabsTrigger>
           <TabsTrigger value="sellers">{t('reports:ratings.tabs.sellers')}</TabsTrigger>
         </TabsList>
-      </Tabs>
 
-      {search.tab === 'reviews' ? (
-        <div className="space-y-6">
-          <TableFiltersShell
-            meta={
-              reviewsMeta != null
-                ? t('reports:ratings.meta_reviews', { count: reviewsMeta.total })
-                : undefined
+        <TableFiltersShell
+          meta={
+            activeMeta
+              ? t(`reports:ratings.meta_${search.tab}`, { count: activeMeta.total })
+              : undefined
+          }
+        >
+          <SearchInput
+            value={search.sellerName ?? ''}
+            onChange={(v) => setFilter('sellerName', v || undefined)}
+            placeholder={t('reports:ratings.filters.seller')}
+            className="w-full min-w-[min(100%,220px)] sm:w-80"
+          />
+          {search.tab === 'reviews' && (
+            <>
+              <FilterSelect
+                value={search.rating ? String(search.rating) : ''}
+                onChange={(v) => setFilter('rating', v ? Number(v) : undefined)}
+                options={ratingOptions}
+                placeholder={t('reports:ratings.filters.rating')}
+                className="min-w-[140px]"
+              />
+              <FilterSelect
+                value={search.categoryId ?? ''}
+                onChange={(v) => setFilter('categoryId', v || undefined)}
+                options={categoryOptions}
+                placeholder={t('reports:ratings.filters.category')}
+                className="min-w-[160px]"
+              />
+            </>
+          )}
+          <ReportDateRangeFilter
+            from={search.startDate}
+            to={search.endDate}
+            onChange={(next) =>
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  startDate: next.from,
+                  endDate: next.to,
+                  page: undefined,
+                }),
+              })
             }
-          >
-            <SearchInput
-              value={search.sellerName ?? ''}
-              onChange={(v) => setFilter('sellerName', v || undefined)}
-              placeholder={t('reports:ratings.filters.seller')}
-              className="w-full min-w-[min(100%,220px)] sm:w-80"
-            />
-            <FilterSelect
-              value={search.rating ? String(search.rating) : ''}
-              onChange={(v) => setFilter('rating', v ? Number(v) : undefined)}
-              options={ratingOptions}
-              placeholder={t('reports:ratings.filters.rating')}
-              className="min-w-[140px]"
-            />
-            <FilterSelect
-              value={search.categoryId ?? ''}
-              onChange={(v) => setFilter('categoryId', v || undefined)}
-              options={categoryOptions}
-              placeholder={t('reports:ratings.filters.category')}
-              className="min-w-[160px]"
-            />
-            <ReportDateRangeFilter
-              from={search.startDate}
-              to={search.endDate}
-              onChange={(next) =>
-                navigate({
-                  search: (prev) => ({
-                    ...prev,
-                    startDate: next.from,
-                    endDate: next.to,
-                    page: undefined,
-                  }),
-                })
-              }
-              error={rangeError ? t(`components:date_range.errors.${rangeError}`) : undefined}
-            />
-          </TableFiltersShell>
+            error={rangeError ? t(`components:date_range.errors.${rangeError}`) : undefined}
+          />
+        </TableFiltersShell>
 
+        <TabsContent value="reviews" className="space-y-6">
           {reviewsResponse?.meta.summary && <RatingsSummary summary={reviewsResponse.meta.summary} />}
 
           <DataTable
@@ -214,39 +215,9 @@ export function RatingsReportPage() {
             getRowId={(row) => row.ratingId}
             emptyKeyPrefix="reports:ratings.empty_reviews"
           />
-        </div>
-      ) : (
-        <div className="space-y-6">
-          <TableFiltersShell
-            meta={
-              sellersMeta != null
-                ? t('reports:ratings.meta_sellers', { count: sellersMeta.total })
-                : undefined
-            }
-          >
-            <SearchInput
-              value={search.sellerName ?? ''}
-              onChange={(v) => setFilter('sellerName', v || undefined)}
-              placeholder={t('reports:ratings.filters.seller')}
-              className="w-full min-w-[min(100%,220px)] sm:w-80"
-            />
-            <ReportDateRangeFilter
-              from={search.startDate}
-              to={search.endDate}
-              onChange={(next) =>
-                navigate({
-                  search: (prev) => ({
-                    ...prev,
-                    startDate: next.from,
-                    endDate: next.to,
-                    page: undefined,
-                  }),
-                })
-              }
-              error={rangeError ? t(`components:date_range.errors.${rangeError}`) : undefined}
-            />
-          </TableFiltersShell>
+        </TabsContent>
 
+        <TabsContent value="sellers">
           <DataTable
             columns={sellersColumns}
             data={sellerRows}
@@ -257,8 +228,8 @@ export function RatingsReportPage() {
             onRowClick={(row) => navigate({ to: '/users/$userId', params: { userId: row.sellerId } })}
             emptyKeyPrefix="reports:ratings.empty_sellers"
           />
-        </div>
-      )}
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
