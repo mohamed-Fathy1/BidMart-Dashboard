@@ -48,11 +48,11 @@ export function RecentActivityList({ items }: RecentActivityListProps) {
               const Icon = TYPE_ICONS[item.type]
               const body = (
                 <>
-                  <span
-                    className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground"
-                    aria-label={t(`overview:general.recent_activity.type.${item.type}`)}
-                  >
-                    <Icon className="size-4" />
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                    <Icon aria-hidden className="size-4" />
+                    <span className="sr-only">
+                      {t(`overview:general.recent_activity.type.${item.type}`)}
+                    </span>
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-foreground">{item.title}</p>

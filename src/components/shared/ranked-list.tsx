@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { useTranslation } from 'react-i18next'
 import { ProportionBar } from '@/components/shared/proportion-bar'
+import { format } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
 interface RankedListProps<T> {
@@ -32,8 +32,6 @@ export function RankedList<T>({
   ariaLabel,
   className,
 }: RankedListProps<T>) {
-  const { t } = useTranslation()
-
   if (items.length === 0) {
     return (
       <p className={cn('py-6 text-center text-sm text-muted-foreground', className)}>
@@ -48,14 +46,10 @@ export function RankedList<T>({
   return (
     <ol className={cn('space-y-1', className)} aria-label={ariaLabel}>
       {items.map((item, index) => {
-        const rank = index + 1
         const body = (
           <>
-            <span
-              aria-label={t('components:ranked_list.rank', { rank })}
-              className="w-5 shrink-0 text-end font-mono tabular-nums text-sm text-muted-foreground"
-            >
-              {rank}
+            <span className="w-5 shrink-0 text-end font-mono tabular-nums text-sm text-muted-foreground">
+              {format.number(index + 1)}
             </span>
             {leading && (
               <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md">

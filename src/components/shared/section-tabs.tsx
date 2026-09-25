@@ -16,7 +16,7 @@ interface SectionTabsProps {
 
 function segmentClasses(active: boolean) {
   return cn(
-    'group/tab relative z-10 inline-flex min-h-9 shrink-0 items-center justify-center overflow-hidden rounded-md px-4 py-2 text-sm font-medium transition-[color,opacity] duration-(--duration-hover) ease-(--ease-default)',
+    'group/tab relative z-10 inline-flex min-h-9 shrink-0 items-center justify-center overflow-hidden rounded-md px-4 py-2 text-sm font-medium outline-none transition-[color,opacity] duration-(--duration-hover) ease-(--ease-default) focus-visible:ring-[3px] focus-visible:ring-ring/50',
     active ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
   )
 }
@@ -34,9 +34,8 @@ export function SectionTabs({ tabs, ariaLabel, className }: SectionTabsProps) {
   if (tabs.length < 2) return null
 
   return (
-    <div
+    <nav
       className={cn('inline-flex rounded-lg border border-border bg-background p-1', className)}
-      role="tablist"
       aria-label={ariaLabel}
     >
       <div className="relative flex flex-wrap gap-1">
@@ -46,14 +45,13 @@ export function SectionTabs({ tabs, ariaLabel, className }: SectionTabsProps) {
             to={tab.to}
             search={tab.search}
             className={segmentClasses(tab.active)}
-            role="tab"
-            aria-selected={tab.active}
+            aria-current={tab.active ? 'page' : undefined}
           >
             <span className={highlightClasses(tab.active)} aria-hidden />
             <span className="relative">{tab.label}</span>
           </Link>
         ))}
       </div>
-    </div>
+    </nav>
   )
 }
