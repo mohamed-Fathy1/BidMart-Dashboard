@@ -16,6 +16,9 @@ export const RANGE_PRESETS = [
 
 export type RangePreset = (typeof RANGE_PRESETS)[number]
 
+/** The preset the server applies when neither date is sent. */
+export const DEFAULT_RANGE_PRESET: RangePreset = 'last_30_days'
+
 export interface DateRangeValue {
   from: string
   to: string
@@ -44,6 +47,22 @@ export function presetToRange(preset: RangePreset, today: string = todayIso()): 
         to: toIsoDateUtc(new Date(Date.UTC(y, m, 0))),
       }
   }
+}
+
+/**
+ * The preset a URL range stands for: the default when neither date is set,
+ * the preset whose dates match exactly, or `undefined` for a custom range.
+ */
+export function presetForRange(
+  from: string | undefined,
+  to: string | undefined,
+  today: string = todayIso(),
+): RangePreset | undefined {
+  if (!from && !to) return DEFAULT_RANGE_PRESET
+  return RANGE_PRESETS.find((preset) => {
+    const range = presetToRange(preset, today)
+    return range.from === from && range.to === to
+  })
 }
 
 /** True when both ends are present. */

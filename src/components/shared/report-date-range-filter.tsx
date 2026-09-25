@@ -1,7 +1,12 @@
 import { useId, useState } from 'react'
 import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { presetToRange, RANGE_PRESETS, type RangePreset } from '@/lib/report-range'
+import {
+  presetForRange,
+  presetToRange,
+  RANGE_PRESETS,
+  type RangePreset,
+} from '@/lib/report-range'
 import { todayIso } from '@/lib/report-period'
 import { Button } from '@/components/ui/button'
 import {
@@ -50,10 +55,7 @@ export function ReportDateRangeFilter({
   }
 
   const today = todayIso()
-  const matchedPreset = RANGE_PRESETS.find((preset) => {
-    const range = presetToRange(preset, today)
-    return range.from === from && range.to === to
-  })
+  const matchedPreset = presetForRange(from, to, today)
 
   function commit(next: { from: string; to: string }) {
     if (!next.from && !next.to) onChange({})

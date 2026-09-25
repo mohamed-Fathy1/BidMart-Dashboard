@@ -4,6 +4,7 @@ vi.mock('@/lib/i18n', () => ({ i18n: { language: 'en' } }))
 
 import {
   isCompleteRange,
+  presetForRange,
   presetToRange,
   rangeParamsFor,
   rangeValidationError,
@@ -29,6 +30,19 @@ describe('presetToRange', () => {
       from: '2025-12-01',
       to: '2025-12-31',
     })
+  })
+})
+
+describe('presetForRange', () => {
+  it('reads an empty URL range as the server default of the last 30 days', () => {
+    expect(presetForRange(undefined, undefined, TODAY)).toBe('last_30_days')
+  })
+  it('names the preset whose dates match exactly', () => {
+    expect(presetForRange('2026-09-10', TODAY, TODAY)).toBe('last_7_days')
+    expect(presetForRange('2026-08-01', '2026-08-31', TODAY)).toBe('last_month')
+  })
+  it('leaves a custom range unnamed', () => {
+    expect(presetForRange('2026-09-02', TODAY, TODAY)).toBeUndefined()
   })
 })
 
