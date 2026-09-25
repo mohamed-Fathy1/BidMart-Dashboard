@@ -24,7 +24,8 @@
       "saved": "العناصر المحفوظة",
       "comments": "التعليقات",
       "shares": "المشاركات",
-      "shares_hint": "نية المشاركة"
+      "shares_hint": "نية المشاركة",
+      "interactions_on_views": "{{interactions, number}} تفاعلًا عبر {{views, number}} مشاهدة"
     },
     "recent_activity": {
       "title": "النشاط الأخير",

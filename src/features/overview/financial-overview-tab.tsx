@@ -8,7 +8,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { StatCard } from '@/components/shared/stat-card'
+import { MetricBand } from '@/components/shared/metric-band'
+import { MetricValue } from '@/components/shared/metric-value'
 import { MonthlyFinancialChart } from '@/features/overview/monthly-financial-chart'
 import { useStatisticsQuery } from '@/features/overview/overview.queries'
 import { StatisticsTabFrame } from '@/features/overview/statistics-tab-frame'
@@ -16,6 +17,17 @@ import { format } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
 const MONEY_CELL = 'text-end font-mono tabular-nums'
+
+const BUCKET_LABEL = {
+  pendingPayment: 'pending_payment',
+  delivered: 'delivered',
+  refunds: 'refunds',
+} as const
+
+/** Zero months recede so the months with activity carry the table. */
+function moneyCell(value: number) {
+  return cn(MONEY_CELL, value === 0 && 'text-muted-foreground/70')
+}
 
 export function FinancialOverviewTab() {
   const { t } = useTranslation()
@@ -25,42 +37,41 @@ export function FinancialOverviewTab() {
     <StatisticsTabFrame query={query} skeletonCount={4}>
       {(data) => (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard
-              label={t('overview:financial.commission_revenue')}
-              value={format.currency(data.totalCommissionRevenue)}
-            />
-            <StatCard
-              label={t('overview:financial.total_sales')}
-              value={format.currency(data.totalSales)}
-            />
-            <StatCard
-              label={t('overview:financial.tax_collected')}
-              value={format.currency(data.totalTaxCollected)}
-            />
-            <StatCard
-              label={t('overview:financial.shipping_collected')}
-              value={format.currency(data.totalShippingCollected)}
-            />
-          </div>
+          <MetricBand
+            columns={4}
+            items={[
+              {
+                key: 'commission_revenue',
+                label: t('overview:financial.commission_revenue'),
+                value: <MetricValue value={data.totalCommissionRevenue} currency />,
+              },
+              {
+                key: 'total_sales',
+                label: t('overview:financial.total_sales'),
+                value: <MetricValue value={data.totalSales} currency />,
+              },
+              {
+                key: 'tax_collected',
+                label: t('overview:financial.tax_collected'),
+                value: <MetricValue value={data.totalTaxCollected} currency />,
+              },
+              {
+                key: 'shipping_collected',
+                label: t('overview:financial.shipping_collected'),
+                value: <MetricValue value={data.totalShippingCollected} currency />,
+              },
+            ]}
+          />
 
-          <div className="grid gap-4 sm:grid-cols-3">
-            <StatCard
-              label={t('overview:financial.pending_payment')}
-              value={format.currency(data.pendingPayment.value)}
-              hint={t('overview:financial.orders_count', { count: data.pendingPayment.count })}
-            />
-            <StatCard
-              label={t('overview:financial.delivered')}
-              value={format.currency(data.delivered.value)}
-              hint={t('overview:financial.orders_count', { count: data.delivered.count })}
-            />
-            <StatCard
-              label={t('overview:financial.refunds')}
-              value={format.currency(data.refunds.value)}
-              hint={t('overview:financial.orders_count', { count: data.refunds.count })}
-            />
-          </div>
+          <MetricBand
+            columns={3}
+            items={(['pendingPayment', 'delivered', 'refunds'] as const).map((key) => ({
+              key,
+              label: t(`overview:financial.${BUCKET_LABEL[key]}`),
+              value: <MetricValue value={data[key].value} currency />,
+              hint: t('overview:financial.orders_count', { count: data[key].count }),
+            }))}
+          />
 
           <Card>
             <CardHeader>
@@ -104,22 +115,22 @@ export function FinancialOverviewTab() {
                         <TableCell className="whitespace-nowrap text-sm">
                           {format.month(row.month, { withYear: true })}
                         </TableCell>
-                        <TableCell className={MONEY_CELL}>
+                        <TableCell className={moneyCell(row.grossSales)}>
                           {format.currency(row.grossSales)}
                         </TableCell>
-                        <TableCell className={MONEY_CELL}>
+                        <TableCell className={moneyCell(row.commission)}>
                           {format.currency(row.commission)}
                         </TableCell>
-                        <TableCell className={MONEY_CELL}>{format.currency(row.tax)}</TableCell>
-                        <TableCell className={MONEY_CELL}>
+                        <TableCell className={moneyCell(row.tax)}>{format.currency(row.tax)}</TableCell>
+                        <TableCell className={moneyCell(row.shipping)}>
                           {format.currency(row.shipping)}
                         </TableCell>
-                        <TableCell className={MONEY_CELL}>{format.currency(row.refunds)}</TableCell>
-                        <TableCell className={MONEY_CELL}>
+                        <TableCell className={moneyCell(row.refunds)}>{format.currency(row.refunds)}</TableCell>
+                        <TableCell className={moneyCell(row.platformRevenue)}>
                           {format.currency(row.platformRevenue)}
                         </TableCell>
                         <TableCell
-                          className={cn(MONEY_CELL, 'font-medium', row.net < 0 && 'text-destructive')}
+                          className={cn(moneyCell(row.net), 'font-medium', row.net < 0 && 'text-destructive')}
                         >
                           {format.currency(row.net)}
                         </TableCell>

@@ -24,7 +24,8 @@
       "saved": "Saved items",
       "comments": "Comments",
       "shares": "Shares",
-      "shares_hint": "Share intent"
+      "shares_hint": "Share intent",
+      "interactions_on_views": "{{interactions, number}} interactions across {{views, number}} views"
     },
     "recent_activity": {
       "title": "Recent activity",

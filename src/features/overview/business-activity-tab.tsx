@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { RankedList } from '@/components/shared/ranked-list'
-import { StatCard } from '@/components/shared/stat-card'
+import { MetricBand } from '@/components/shared/metric-band'
+import { MetricValue } from '@/components/shared/metric-value'
 import { useStatisticsQuery } from '@/features/overview/overview.queries'
 import { StatisticsTabFrame } from '@/features/overview/statistics-tab-frame'
 import { format } from '@/lib/format'
@@ -18,20 +19,26 @@ export function BusinessActivityTab() {
     <StatisticsTabFrame query={query} skeletonCount={3}>
       {(data) => (
         <>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <StatCard
-              label={t('overview:business.live_shows')}
-              value={format.number(data.liveShows)}
-            />
-            <StatCard
-              label={t('overview:business.completed_deals')}
-              value={format.number(data.completedDeals)}
-            />
-            <StatCard
-              label={t('overview:business.total_sales')}
-              value={format.currency(data.totalSales)}
-            />
-          </div>
+          <MetricBand
+            columns={3}
+            items={[
+              {
+                key: 'live_shows',
+                label: t('overview:business.live_shows'),
+                value: <MetricValue value={data.liveShows} />,
+              },
+              {
+                key: 'completed_deals',
+                label: t('overview:business.completed_deals'),
+                value: <MetricValue value={data.completedDeals} />,
+              },
+              {
+                key: 'total_sales',
+                label: t('overview:business.total_sales'),
+                value: <MetricValue value={data.totalSales} currency />,
+              },
+            ]}
+          />
 
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>

@@ -4,8 +4,8 @@ import { AlertCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { MetricBandSkeleton } from '@/components/shared/metric-band'
 import { ResolvedRangeLabel } from '@/components/shared/resolved-range-label'
-import { Skeleton } from '@/components/ui/skeleton'
 import { extractApiErrorCode } from '@/lib/axios'
 import { cn } from '@/lib/utils'
 import type { ReportDateRange } from '@/types/api'
@@ -42,11 +42,7 @@ export function StatisticsTabFrame<T extends { dateRange: ReportDateRange }>({
       </p>
 
       {query.isPending ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: skeletonCount }, (_, index) => (
-            <Skeleton key={index} className="h-[92px] rounded-lg" />
-          ))}
-        </div>
+        <MetricBandSkeleton count={skeletonCount} columns={skeletonCount % 3 === 0 ? 3 : 4} />
       ) : query.isError ? (
         <StatisticsErrorCard error={query.error} onRetry={() => void query.refetch()} />
       ) : (

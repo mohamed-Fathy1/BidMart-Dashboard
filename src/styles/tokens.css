@@ -44,6 +44,8 @@
   --chart-3: var(--color-foreground);
   --chart-4: var(--color-destructive);
   --chart-5: var(--color-muted-foreground);
+  /* De-emphasis gray for context series (emphasis charts: one accent, the rest gray) */
+  --chart-context: #D6D3D1;
 
   /* Typography */
   --font-sans: 'Inter', system-ui, sans-serif;

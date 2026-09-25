@@ -48,7 +48,7 @@ export function RankedList<T>({
       {items.map((item, index) => {
         const body = (
           <>
-            <span className="w-5 shrink-0 text-end font-mono tabular-nums text-sm text-muted-foreground">
+            <span className="w-5 shrink-0 text-end text-sm tabular-nums text-muted-foreground">
               {format.number(index + 1)}
             </span>
             {leading && (
@@ -63,8 +63,9 @@ export function RankedList<T>({
               )}
               <ProportionBar className="mt-1.5" value={metrics[index] ?? 0} max={maxMetric} />
             </div>
-            <div className="flex shrink-0 flex-col items-end gap-0.5 text-end">
-              <span className="font-mono tabular-nums text-sm text-foreground">
+            {/* Fixed width so every bar ends at the same edge. */}
+            <div className="flex w-32 shrink-0 flex-col items-end gap-0.5 text-end">
+              <span className="text-sm font-medium tabular-nums text-foreground">
                 {value(item)}
               </span>
               {count && (
