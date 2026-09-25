@@ -79,6 +79,22 @@ export const format = {
     }).format(d)
   },
 
+  /**
+   * A `YYYY-MM` month key as a short month name. The key is built at UTC
+   * midnight, so it is formatted in UTC or it prints the previous month west of
+   * Greenwich. Malformed keys are returned unchanged.
+   */
+  month(yyyyMm: string, opts?: { withYear?: boolean }): string {
+    const match = /^(\d{4})-(\d{2})$/.exec(yyyyMm)
+    if (!match) return yyyyMm
+    const d = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, 1))
+    return new Intl.DateTimeFormat(getDateLocale(), {
+      month: 'short',
+      year: opts?.withYear ? 'numeric' : undefined,
+      timeZone: 'UTC',
+    }).format(d)
+  },
+
   dateTime(iso: string | Date): string {
     const d = typeof iso === 'string' ? new Date(iso) : iso
     return new Intl.DateTimeFormat(getDateLocale(), {

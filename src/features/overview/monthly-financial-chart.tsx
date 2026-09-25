@@ -10,19 +10,10 @@ import {
 } from '@/components/ui/chart'
 import { cn } from '@/lib/utils'
 import { format } from '@/lib/format'
-import { i18n } from '@/lib/i18n'
 import type { MonthlyFinancialRow } from '@/types/api'
 
 interface MonthlyFinancialChartProps {
   rows: MonthlyFinancialRow[]
-}
-
-/** `YYYY-MM` → short localized month name; same locale rule as `lib/format.ts`. */
-function formatMonthShort(month: string): string {
-  const [year, mon] = month.split('-')
-  const date = new Date(Date.UTC(Number(year), Number(mon) - 1, 1))
-  const locale = i18n.language === 'ar' ? 'ar-SA-u-ca-gregory' : 'en-SA'
-  return new Intl.DateTimeFormat(locale, { month: 'short' }).format(date)
 }
 
 /** Indicator dots for the tooltip rows; ChartStyle injects `--color-<key>`. */
@@ -52,7 +43,7 @@ export function MonthlyFinancialChart({ rows }: MonthlyFinancialChartProps) {
             tickLine={false}
             axisLine={false}
             tickMargin={8}
-            tickFormatter={formatMonthShort}
+            tickFormatter={(month: string) => format.month(month)}
           />
           <YAxis
             hide
@@ -64,7 +55,7 @@ export function MonthlyFinancialChart({ rows }: MonthlyFinancialChartProps) {
           <ChartTooltip
             content={
               <ChartTooltipContent
-                labelFormatter={(label) => formatMonthShort(String(label))}
+                labelFormatter={(label) => format.month(String(label))}
                 formatter={(value, name) => {
                   const key = String(name)
                   const isRefunds = key === 'refunds'

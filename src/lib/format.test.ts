@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { afterAll, beforeAll, describe, it, expect, vi } from 'vitest'
 
 vi.mock('@/lib/i18n', () => ({ i18n: { language: 'en' } }))
 
@@ -32,5 +32,23 @@ describe('format.compactNumber', () => {
   it('uses compact notation', () => {
     expect(format.compactNumber(1234)).toBe('1.2K')
     expect(format.compactNumber(950)).toBe('950')
+  })
+})
+
+describe('format.month', () => {
+  const originalTz = process.env.TZ
+  beforeAll(() => {
+    process.env.TZ = 'America/New_York'
+  })
+  afterAll(() => {
+    process.env.TZ = originalTz
+  })
+
+  it('keeps the month of the key west of UTC', () => {
+    expect(format.month('2026-09')).toBe('Sep')
+    expect(format.month('2026-01', { withYear: true })).toBe('Jan 2026')
+  })
+  it('returns a malformed key unchanged', () => {
+    expect(format.month('2026-9')).toBe('2026-9')
   })
 })

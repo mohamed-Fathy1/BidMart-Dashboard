@@ -18,27 +18,10 @@ import { useFinancialOverviewQuery } from '@/features/overview/overview.queries'
 import { format } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
-/**
- * `YYYY-MM` as a short month and year. Built here rather than in `format.ts`
- * because this table is the only surface that renders a bare month key. The
- * locale rule mirrors `format.ts`: Arabic is pinned to the Gregorian calendar.
- */
-function monthLabel(month: string, language: string): string {
-  const match = /^(\d{4})-(\d{2})$/.exec(month)
-  if (!match) return month
-  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, 1))
-  const locale = language === 'ar' ? 'ar-SA-u-ca-gregory' : 'en-SA'
-  return new Intl.DateTimeFormat(locale, {
-    month: 'short',
-    year: 'numeric',
-    timeZone: 'UTC',
-  }).format(date)
-}
-
 const MONEY_CELL = 'text-end font-mono tabular-nums'
 
 export function FinancialOverviewTab() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const { params } = useStatisticsWindow()
   const { data, isPending, isFetching, isError, error, refetch } = useFinancialOverviewQuery(params)
 
@@ -135,7 +118,7 @@ export function FinancialOverviewTab() {
                     {data.monthlyReports.map((row) => (
                       <TableRow key={row.month}>
                         <TableCell className="whitespace-nowrap text-sm">
-                          {monthLabel(row.month, i18n.language)}
+                          {format.month(row.month, { withYear: true })}
                         </TableCell>
                         <TableCell className={MONEY_CELL}>
                           {format.currency(row.grossSales)}
