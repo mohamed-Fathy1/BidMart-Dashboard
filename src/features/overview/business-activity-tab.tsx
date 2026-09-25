@@ -4,36 +4,19 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { RankedList } from '@/components/shared/ranked-list'
 import { StatCard } from '@/components/shared/stat-card'
-import { StatisticsErrorCard } from '@/features/overview/statistics-error-card'
-import { StatisticsTileSkeleton } from '@/features/overview/statistics-tab-skeleton'
-import { StatisticsWindowLabel } from '@/features/overview/statistics-window-label'
-import { useStatisticsWindow } from '@/features/overview/use-statistics-window'
-import { useBusinessActivityQuery } from '@/features/overview/overview.queries'
+import { useStatisticsQuery } from '@/features/overview/overview.queries'
+import { StatisticsTabFrame } from '@/features/overview/statistics-tab-frame'
 import { format } from '@/lib/format'
 import { localizedPair } from '@/lib/localized-name'
-import { cn } from '@/lib/utils'
 
 export function BusinessActivityTab() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
-  const { params } = useStatisticsWindow()
-  const { data, isPending, isFetching, isError, error, refetch } = useBusinessActivityQuery(params)
+  const query = useStatisticsQuery('business-activity')
 
   return (
-    <div
-      className={cn(
-        'space-y-6 transition-opacity duration-(--duration-hover) ease-(--ease-default)',
-        isFetching && !isPending && 'opacity-60',
-      )}
-      aria-busy={isFetching && !isPending}
-    >
-      <StatisticsWindowLabel range={data?.dateRange} isPending={isPending} />
-
-      {isPending ? (
-        <StatisticsTileSkeleton count={3} />
-      ) : isError ? (
-        <StatisticsErrorCard error={error} onRetry={() => void refetch()} />
-      ) : data ? (
+    <StatisticsTabFrame query={query} skeletonCount={3}>
+      {(data) => (
         <>
           <div className="grid gap-4 sm:grid-cols-3">
             <StatCard
@@ -118,7 +101,7 @@ export function BusinessActivityTab() {
             </Card>
           </div>
         </>
-      ) : null}
-    </div>
+      )}
+    </StatisticsTabFrame>
   )
 }

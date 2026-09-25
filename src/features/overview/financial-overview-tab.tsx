@@ -10,11 +10,8 @@ import {
 } from '@/components/ui/table'
 import { StatCard } from '@/components/shared/stat-card'
 import { LazyMonthlyFinancialChart } from '@/features/overview/lazy-monthly-financial-chart'
-import { StatisticsErrorCard } from '@/features/overview/statistics-error-card'
-import { StatisticsTileSkeleton } from '@/features/overview/statistics-tab-skeleton'
-import { StatisticsWindowLabel } from '@/features/overview/statistics-window-label'
-import { useStatisticsWindow } from '@/features/overview/use-statistics-window'
-import { useFinancialOverviewQuery } from '@/features/overview/overview.queries'
+import { useStatisticsQuery } from '@/features/overview/overview.queries'
+import { StatisticsTabFrame } from '@/features/overview/statistics-tab-frame'
 import { format } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
@@ -22,24 +19,11 @@ const MONEY_CELL = 'text-end font-mono tabular-nums'
 
 export function FinancialOverviewTab() {
   const { t } = useTranslation()
-  const { params } = useStatisticsWindow()
-  const { data, isPending, isFetching, isError, error, refetch } = useFinancialOverviewQuery(params)
+  const query = useStatisticsQuery('financial-overview')
 
   return (
-    <div
-      className={cn(
-        'space-y-6 transition-opacity duration-(--duration-hover) ease-(--ease-default)',
-        isFetching && !isPending && 'opacity-60',
-      )}
-      aria-busy={isFetching && !isPending}
-    >
-      <StatisticsWindowLabel range={data?.dateRange} isPending={isPending} />
-
-      {isPending ? (
-        <StatisticsTileSkeleton count={4} />
-      ) : isError ? (
-        <StatisticsErrorCard error={error} onRetry={() => void refetch()} />
-      ) : data ? (
+    <StatisticsTabFrame query={query} skeletonCount={4}>
+      {(data) => (
         <>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
@@ -147,7 +131,7 @@ export function FinancialOverviewTab() {
             </CardContent>
           </Card>
         </>
-      ) : null}
-    </div>
+      )}
+    </StatisticsTabFrame>
   )
 }

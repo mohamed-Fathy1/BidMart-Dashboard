@@ -1,48 +1,19 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import {
-  getBusinessActivity,
-  getFinancialOverview,
-  getStatisticsOverview,
-} from '@/features/overview/overview.api'
-import type { StatisticsQuery } from '@/lib/report-period'
-
-/**
- * Keys are scoped per tab so a period change refetches only the visible tab.
- * `keepPreviousData` keeps the last tiles on screen while the next window loads.
- */
-export const statisticsKeys = {
-  all: ['statistics'] as const,
-  overview: (params: StatisticsQuery) => ['statistics', 'overview', params] as const,
-  businessActivity: (params: StatisticsQuery) =>
-    ['statistics', 'business-activity', params] as const,
-  financialOverview: (params: StatisticsQuery) =>
-    ['statistics', 'financial-overview', params] as const,
-}
+import { getStatistics, type StatisticsEndpoint } from '@/features/overview/overview.api'
+import { useStatisticsWindow } from '@/features/overview/use-statistics-window'
 
 const STATISTICS_STALE_TIME = 30_000
 
-export function useStatisticsOverviewQuery(params: StatisticsQuery) {
+/**
+ * The visible tab's statistics for the shared window. Keys are scoped per
+ * endpoint so a period change refetches only the visible tab.
+ * `keepPreviousData` keeps the last tiles on screen while the next window loads.
+ */
+export function useStatisticsQuery<E extends StatisticsEndpoint>(endpoint: E) {
+  const { params } = useStatisticsWindow()
   return useQuery({
-    queryKey: statisticsKeys.overview(params),
-    queryFn: () => getStatisticsOverview(params),
-    staleTime: STATISTICS_STALE_TIME,
-    placeholderData: keepPreviousData,
-  })
-}
-
-export function useBusinessActivityQuery(params: StatisticsQuery) {
-  return useQuery({
-    queryKey: statisticsKeys.businessActivity(params),
-    queryFn: () => getBusinessActivity(params),
-    staleTime: STATISTICS_STALE_TIME,
-    placeholderData: keepPreviousData,
-  })
-}
-
-export function useFinancialOverviewQuery(params: StatisticsQuery) {
-  return useQuery({
-    queryKey: statisticsKeys.financialOverview(params),
-    queryFn: () => getFinancialOverview(params),
+    queryKey: ['statistics', endpoint, params],
+    queryFn: () => getStatistics(endpoint, params),
     staleTime: STATISTICS_STALE_TIME,
     placeholderData: keepPreviousData,
   })

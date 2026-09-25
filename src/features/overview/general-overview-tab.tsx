@@ -3,53 +3,34 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ProportionBar } from '@/components/shared/proportion-bar'
 import { StatCard } from '@/components/shared/stat-card'
 import { RecentActivityList } from '@/features/overview/recent-activity-list'
-import { StatisticsErrorCard } from '@/features/overview/statistics-error-card'
-import { StatisticsTileSkeleton } from '@/features/overview/statistics-tab-skeleton'
-import { StatisticsWindowLabel } from '@/features/overview/statistics-window-label'
-import { useStatisticsWindow } from '@/features/overview/use-statistics-window'
-import { useStatisticsOverviewQuery } from '@/features/overview/overview.queries'
+import { useStatisticsQuery } from '@/features/overview/overview.queries'
+import { StatisticsTabFrame } from '@/features/overview/statistics-tab-frame'
 import { format } from '@/lib/format'
-import { cn } from '@/lib/utils'
+import type { StatisticsOverview } from '@/types/api'
 
 export function GeneralOverviewTab() {
   const { t } = useTranslation()
-  const { params } = useStatisticsWindow()
-  const { data, isPending, isFetching, isError, error, refetch } = useStatisticsOverviewQuery(params)
+  const query = useStatisticsQuery('overview')
 
-  const engagement = data?.engagement
-  const engagementRows = engagement
-    ? [
-        { key: 'views', label: t('overview:general.engagement.views'), value: engagement.views },
-        { key: 'saved', label: t('overview:general.engagement.saved'), value: engagement.savedItems },
-        {
-          key: 'comments',
-          label: t('overview:general.engagement.comments'),
-          value: engagement.comments,
-        },
-        {
-          key: 'shares',
-          label: t('overview:general.engagement.shares'),
-          value: engagement.shares,
-          hint: t('overview:general.engagement.shares_hint'),
-        },
-      ]
-    : []
+  const engagementRows = (engagement: StatisticsOverview['engagement']) => [
+    { key: 'views', label: t('overview:general.engagement.views'), value: engagement.views },
+    { key: 'saved', label: t('overview:general.engagement.saved'), value: engagement.savedItems },
+    {
+      key: 'comments',
+      label: t('overview:general.engagement.comments'),
+      value: engagement.comments,
+    },
+    {
+      key: 'shares',
+      label: t('overview:general.engagement.shares'),
+      value: engagement.shares,
+      hint: t('overview:general.engagement.shares_hint'),
+    },
+  ]
 
   return (
-    <div
-      className={cn(
-        'space-y-6 transition-opacity duration-(--duration-hover) ease-(--ease-default)',
-        isFetching && !isPending && 'opacity-60',
-      )}
-      aria-busy={isFetching && !isPending}
-    >
-      <StatisticsWindowLabel range={data?.dateRange} isPending={isPending} />
-
-      {isPending ? (
-        <StatisticsTileSkeleton count={6} />
-      ) : isError ? (
-        <StatisticsErrorCard error={error} onRetry={() => void refetch()} />
-      ) : data ? (
+    <StatisticsTabFrame query={query} skeletonCount={6}>
+      {(data) => (
         <>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <StatCard
@@ -94,7 +75,7 @@ export function GeneralOverviewTab() {
                   </p>
                 </div>
                 <div className="space-y-3">
-                  {engagementRows.map((row) => (
+                  {engagementRows(data.engagement).map((row) => (
                     <div key={row.key}>
                       <div className="flex items-baseline justify-between gap-3">
                         <span className="text-sm text-foreground">{row.label}</span>
@@ -121,7 +102,7 @@ export function GeneralOverviewTab() {
             </Card>
           </div>
         </>
-      ) : null}
-    </div>
+      )}
+    </StatisticsTabFrame>
   )
 }

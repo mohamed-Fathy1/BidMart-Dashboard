@@ -1,4 +1,5 @@
 import { api } from '@/lib/axios'
+import type { StatisticsQuery } from '@/lib/report-period'
 import {
   unwrap,
   type ApiEnvelope,
@@ -6,31 +7,23 @@ import {
   type StatisticsFinancialOverview,
   type StatisticsOverview,
 } from '@/types/api'
-import type { StatisticsQuery } from '@/lib/report-period'
 
-export async function getStatisticsOverview(params: StatisticsQuery): Promise<StatisticsOverview> {
-  const res = await api.get<ApiEnvelope<StatisticsOverview> | StatisticsOverview>(
-    '/admin/statistics/overview',
-    { params },
-  )
-  return unwrap(res.data)
+/** Each statistics tab's endpoint under `/admin/statistics/` and the payload it returns. */
+interface StatisticsResponses {
+  overview: StatisticsOverview
+  'business-activity': StatisticsBusinessActivity
+  'financial-overview': StatisticsFinancialOverview
 }
 
-export async function getBusinessActivity(
+export type StatisticsEndpoint = keyof StatisticsResponses
+
+export async function getStatistics<E extends StatisticsEndpoint>(
+  endpoint: E,
   params: StatisticsQuery,
-): Promise<StatisticsBusinessActivity> {
-  const res = await api.get<ApiEnvelope<StatisticsBusinessActivity> | StatisticsBusinessActivity>(
-    '/admin/statistics/business-activity',
+): Promise<StatisticsResponses[E]> {
+  const res = await api.get<ApiEnvelope<StatisticsResponses[E]> | StatisticsResponses[E]>(
+    `/admin/statistics/${endpoint}`,
     { params },
   )
-  return unwrap(res.data)
-}
-
-export async function getFinancialOverview(
-  params: StatisticsQuery,
-): Promise<StatisticsFinancialOverview> {
-  const res = await api.get<
-    ApiEnvelope<StatisticsFinancialOverview> | StatisticsFinancialOverview
-  >('/admin/statistics/financial-overview', { params })
   return unwrap(res.data)
 }
