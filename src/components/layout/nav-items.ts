@@ -208,3 +208,19 @@ export const navSections: NavSection[] = [
     ],
   },
 ]
+
+/**
+ * The first sidebar page the admin can open, in sidebar order. Used as the
+ * landing page after login so an admin without Overview access does not land
+ * on a permission error. `/profile` is open to every admin.
+ */
+export function firstPermittedPath(check: (permission?: Permission) => boolean): string {
+  for (const section of navSections) {
+    for (const entry of section.entries) {
+      const leaves = entry.kind === 'leaf' ? [entry] : entry.children
+      const leaf = leaves.find((candidate) => check(candidate.permission))
+      if (leaf) return leaf.to
+    }
+  }
+  return '/profile'
+}

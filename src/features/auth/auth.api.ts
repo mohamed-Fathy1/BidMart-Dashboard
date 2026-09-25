@@ -76,7 +76,7 @@ function extractAccessToken(body: unknown): string {
   return token
 }
 
-function buildSessionFromToken(token: string): { user: User; permissions: string[] } {
+export function buildSessionFromToken(token: string): { user: User; permissions: string[] } {
   const payload = decodeJwtPayload<AdminJwtPayload>(token)
 
   const user: User = {

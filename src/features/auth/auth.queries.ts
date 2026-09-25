@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { extractApiErrorMessage } from "@/lib/axios";
+import { permissionCheck } from "@/lib/permissions";
+import { firstPermittedPath } from "@/components/layout/nav-items";
 import { useAuthStore } from "@/features/auth/auth.store";
 import {
   loginRequest,
@@ -52,7 +54,9 @@ export function useLoginMutation() {
     mutationFn: loginRequest,
     onSuccess: (data) => {
       setSession(data);
-      navigate({ to: "/overview" });
+      navigate({
+        to: firstPermittedPath(permissionCheck(data.permissions, data.user.isSuperAdmin)),
+      });
     },
   });
 }

@@ -96,6 +96,14 @@ export function can(permissions: string[], required: Permission): boolean {
   return permissions.includes(required);
 }
 
+/** Whether an admin with these grants may open something gated by `permission`; ungated is allowed. */
+export function permissionCheck(
+  permissions: string[],
+  isSuperAdmin: boolean | undefined,
+): (permission?: Permission) => boolean {
+  return (permission) => !permission || !!isSuperAdmin || can(permissions, permission);
+}
+
 export function usePermission(permission: Permission): boolean {
   const permissions = useAuthStore((s) => s.permissions);
   const isSuperAdmin = useAuthStore((s) => s.user?.isSuperAdmin);
