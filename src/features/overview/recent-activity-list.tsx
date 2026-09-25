@@ -1,4 +1,4 @@
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { Radio, ShoppingBag, UserPlus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { LucideIcon } from 'lucide-react'
@@ -29,7 +29,6 @@ const INTERACTIVE_CLASSES =
  */
 export function RecentActivityList({ items }: RecentActivityListProps) {
   const { t } = useTranslation()
-  const navigate = useNavigate()
 
   return (
     <>
@@ -80,15 +79,13 @@ export function RecentActivityList({ items }: RecentActivityListProps) {
               return (
                 <li key={`${item.type}-${item.id}`}>
                   {item.type === 'ORDER' ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        navigate({ to: '/reports/financial', search: { order: item.id } })
-                      }
+                    <Link
+                      to="/reports/financial"
+                      search={{ order: item.id }}
                       className={cn(ROW_CLASSES, INTERACTIVE_CLASSES)}
                     >
                       {body}
-                    </button>
+                    </Link>
                   ) : item.type === 'NEW_USER' ? (
                     <Link
                       to="/users/$userId"
