@@ -1,4 +1,4 @@
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { getRouteApi } from '@tanstack/react-router'
 import type { OrdersReportParams } from '@/features/reports/reports.api'
 import { useOrdersReportQuery } from '@/features/reports/reports.queries'
@@ -7,12 +7,12 @@ import { useOrdersReportColumns } from '@/features/reports/orders-report.columns
 import { OrderDetailSheet } from '@/features/reports/order-detail-sheet'
 import { DataTable } from '@/components/data-table/data-table'
 import { PageHeader } from '@/components/shared/page-header'
+import { ResolvedRangeLabel } from '@/components/shared/resolved-range-label'
 import { ReportDateRangeFilter } from '@/components/shared/report-date-range-filter'
 import { TableFiltersShell } from '@/components/shared/table-filters-shell'
 import { useListPageData } from '@/lib/use-list-page-data'
 import { useUrlListState } from '@/lib/use-url-list-state'
 import { rangeParamsFor, rangeValidationError } from '@/lib/report-range'
-import { resolvedRangeLabel } from '@/lib/report-period'
 import type { OrdersReportSearch } from '@/routes/_authed.reports.orders'
 
 const ordersReportRoute = getRouteApi('/_authed/reports/orders')
@@ -69,15 +69,10 @@ export function OrdersReportPage() {
       <PageHeader
         title={t('reports:orders.title')}
         description={
-          response?.meta?.dateRange ? (
-            <Trans
-              i18nKey="reports:range.showing"
-              values={{ range: resolvedRangeLabel(response.meta.dateRange) }}
-              components={{ range: <span className="font-medium text-foreground" /> }}
-            />
-          ) : (
-            t('reports:orders.description')
-          )
+          <ResolvedRangeLabel
+            range={response?.meta?.dateRange}
+            fallback={t('reports:orders.description')}
+          />
         }
       />
 

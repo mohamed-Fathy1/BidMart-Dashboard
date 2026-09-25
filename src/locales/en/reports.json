@@ -7,7 +7,6 @@
     "view_seller": "View seller"
   },
   "range": {
-    "showing": "Showing <range>{{range}}</range>",
     "default_hint": "Last 30 days including today"
   },
   "errors": {

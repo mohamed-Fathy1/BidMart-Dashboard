@@ -142,6 +142,9 @@
       "to_in_future": "لا يمكن أن يكون تاريخ النهاية في المستقبل."
     }
   },
+  "range": {
+    "showing": "عرض <range>{{range}}</range>"
+  },
   "ranked_list": {
     "empty": "لا شيء للترتيب بعد."
   },

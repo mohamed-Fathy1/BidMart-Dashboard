@@ -1,8 +1,9 @@
 import { getRouteApi } from '@tanstack/react-router'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { DataTable } from '@/components/data-table/data-table'
 import { FilterSelect } from '@/components/shared/filter-select'
 import { PageHeader } from '@/components/shared/page-header'
+import { ResolvedRangeLabel } from '@/components/shared/resolved-range-label'
 import { ReportDateRangeFilter } from '@/components/shared/report-date-range-filter'
 import { SearchInput } from '@/components/shared/search-input'
 import { TableFiltersShell } from '@/components/shared/table-filters-shell'
@@ -17,7 +18,6 @@ import { readEnum } from '@/lib/list-search'
 import { useListPageData } from '@/lib/use-list-page-data'
 import { useUrlListState } from '@/lib/use-url-list-state'
 import { rangeParamsFor, rangeValidationError } from '@/lib/report-range'
-import { resolvedRangeLabel } from '@/lib/report-period'
 import type { FinancialReportSearch } from '@/routes/_authed.reports.financial'
 
 const financialRoute = getRouteApi('/_authed/reports/financial')
@@ -84,15 +84,10 @@ export function FinancialReportPage() {
       <PageHeader
         title={t('reports:financial.title')}
         description={
-          response?.meta.dateRange ? (
-            <Trans
-              i18nKey="reports:range.showing"
-              values={{ range: resolvedRangeLabel(response.meta.dateRange) }}
-              components={{ range: <span className="font-medium text-foreground" /> }}
-            />
-          ) : (
-            t('reports:financial.description')
-          )
+          <ResolvedRangeLabel
+            range={response?.meta.dateRange}
+            fallback={t('reports:financial.description')}
+          />
         }
         actions={<FinancialReportExport filters={filters} disabled={!!rangeError} />}
       />

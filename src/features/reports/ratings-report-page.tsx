@@ -1,16 +1,16 @@
 import { getRouteApi } from '@tanstack/react-router'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DataTable } from '@/components/data-table/data-table'
 import { PageHeader } from '@/components/shared/page-header'
 import { SearchInput } from '@/components/shared/search-input'
 import { FilterSelect } from '@/components/shared/filter-select'
 import { TableFiltersShell } from '@/components/shared/table-filters-shell'
+import { ResolvedRangeLabel } from '@/components/shared/resolved-range-label'
 import { ReportDateRangeFilter } from '@/components/shared/report-date-range-filter'
 import { useUrlListState } from '@/lib/use-url-list-state'
 import { useListPageData } from '@/lib/use-list-page-data'
 import { rangeParamsFor, rangeValidationError } from '@/lib/report-range'
-import { resolvedRangeLabel } from '@/lib/report-period'
 import { localizedName } from '@/lib/localized-name'
 import { useRatingsReviewsQuery, useRatingsSellersQuery } from '@/features/reports/reports.queries'
 import { useCategoriesQuery } from '@/features/categories/categories.queries'
@@ -123,15 +123,10 @@ export function RatingsReportPage() {
       <PageHeader
         title={t('reports:ratings.title')}
         description={
-          activeMeta?.dateRange ? (
-            <Trans
-              i18nKey="reports:range.showing"
-              values={{ range: resolvedRangeLabel(activeMeta.dateRange) }}
-              components={{ range: <span className="font-medium text-foreground" /> }}
-            />
-          ) : (
-            t('reports:ratings.description')
-          )
+          <ResolvedRangeLabel
+            range={activeMeta?.dateRange}
+            fallback={t('reports:ratings.description')}
+          />
         }
       />
 

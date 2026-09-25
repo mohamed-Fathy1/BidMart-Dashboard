@@ -142,6 +142,9 @@
       "to_in_future": "To cannot be in the future."
     }
   },
+  "range": {
+    "showing": "Showing <range>{{range}}</range>"
+  },
   "ranked_list": {
     "empty": "Nothing to rank yet."
   },

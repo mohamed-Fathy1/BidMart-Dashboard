@@ -1,13 +1,13 @@
 import { getRouteApi } from '@tanstack/react-router'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import type { LivestreamReportRow, LivestreamSortBy } from '@/types/api'
 import type { LivestreamsReportParams } from '@/features/reports/reports.api'
 import { useUrlListState } from '@/lib/use-url-list-state'
 import { useListPageData } from '@/lib/use-list-page-data'
 import { rangeParamsFor, rangeValidationError } from '@/lib/report-range'
-import { resolvedRangeLabel } from '@/lib/report-period'
 import { PageHeader } from '@/components/shared/page-header'
 import { TableFiltersShell } from '@/components/shared/table-filters-shell'
+import { ResolvedRangeLabel } from '@/components/shared/resolved-range-label'
 import { ReportDateRangeFilter } from '@/components/shared/report-date-range-filter'
 import {
   Select,
@@ -68,21 +68,16 @@ export function LivestreamsReportPage() {
 
   const columns = useLivestreamsReportColumns()
 
-  const description = response?.meta.dateRange ? (
-    <Trans
-      i18nKey="reports:range.showing"
-      values={{ range: resolvedRangeLabel(response.meta.dateRange) }}
-      components={{ range: <span className="font-medium text-foreground" /> }}
-    />
-  ) : (
-    t('reports:livestreams.description')
-  )
-
   return (
     <div className="space-y-6">
       <PageHeader
         title={t('reports:livestreams.title')}
-        description={description}
+        description={
+          <ResolvedRangeLabel
+            range={response?.meta.dateRange}
+            fallback={t('reports:livestreams.description')}
+          />
+        }
       />
 
       <TableFiltersShell
