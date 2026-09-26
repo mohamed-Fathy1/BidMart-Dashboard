@@ -107,8 +107,8 @@
     "meta_one": "{{count, number}} order",
     "meta_other": "{{count, number}} orders",
     "filters": {
-      "store": "Store name",
-      "customer": "Customer name",
+      "store": "Store name…",
+      "customer": "Customer name…",
       "status": "Status"
     },
     "columns": {
@@ -159,7 +159,7 @@
     "meta_sellers_one": "{{count, number}} seller",
     "meta_sellers_other": "{{count, number}} sellers",
     "filters": {
-      "seller": "Seller name",
+      "seller": "Seller name…",
       "rating": "Rating",
       "stars_one": "{{count, number}} star",
       "stars_other": "{{count, number}} stars",

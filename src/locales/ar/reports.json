@@ -111,8 +111,8 @@
     "meta_many": "{{count, number}} طلبًا",
     "meta_other": "{{count, number}} طلب",
     "filters": {
-      "store": "اسم المتجر",
-      "customer": "اسم العميل",
+      "store": "اسم المتجر…",
+      "customer": "اسم العميل…",
       "status": "الحالة"
     },
     "columns": {
@@ -175,7 +175,7 @@
     "meta_sellers_many": "{{count, number}} بائعًا",
     "meta_sellers_other": "{{count, number}} بائع",
     "filters": {
-      "seller": "اسم البائع",
+      "seller": "اسم البائع…",
       "rating": "التقييم",
       "stars_zero": "{{count, number}} نجمة",
       "stars_one": "نجمة واحدة",
