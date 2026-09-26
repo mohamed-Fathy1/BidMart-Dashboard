@@ -2,6 +2,8 @@
  * Browser-side file saving for endpoints that answer with a file body.
  */
 
+import type { ReportDateRange } from '@/types/api'
+
 /**
  * Read the filename out of a `Content-Disposition` header. Supports the
  * RFC 6266 `filename*=UTF-8''...` form first, then the quoted and bare
@@ -25,6 +27,20 @@ export function parseContentDispositionFilename(
   const bare = /filename\s*=\s*([^;]+)/.exec(header)
   if (bare?.[1]) return bare[1].trim()
   return fallback
+}
+
+/**
+ * The name for a report export when `Content-Disposition` is unreadable (the
+ * API does not expose it to CORS). Follows the server's
+ * `<base>_<startDate>_<endDate>.<ext>` pattern when the window is known.
+ */
+export function reportExportFilename(
+  base: string,
+  extension: string,
+  resolvedWindow: ReportDateRange | undefined,
+): string {
+  if (!resolvedWindow) return `${base}.${extension}`
+  return `${base}_${resolvedWindow.startDate}_${resolvedWindow.endDate}.${extension}`
 }
 
 /** Trigger a download of `blob` under `filename` and release the object URL. */

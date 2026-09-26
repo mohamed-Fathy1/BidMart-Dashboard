@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseContentDispositionFilename } from './download'
+import { parseContentDispositionFilename, reportExportFilename } from './download'
 
 describe('parseContentDispositionFilename', () => {
   it('reads a quoted filename', () => {
@@ -29,5 +29,28 @@ describe('parseContentDispositionFilename', () => {
   it('falls back when the header is missing or has no filename', () => {
     expect(parseContentDispositionFilename(undefined, 'fallback.xlsx')).toBe('fallback.xlsx')
     expect(parseContentDispositionFilename('inline', 'fallback.xlsx')).toBe('fallback.xlsx')
+  })
+})
+
+describe('reportExportFilename', () => {
+  it('names the file after the resolved window like the server does', () => {
+    expect(
+      reportExportFilename('financial-report', 'xlsx', {
+        startDate: '2026-08-10',
+        endDate: '2026-09-08',
+      }),
+    ).toBe('financial-report_2026-08-10_2026-09-08.xlsx')
+    expect(
+      reportExportFilename('financial-report', 'pdf', {
+        startDate: '2026-09-01',
+        endDate: '2026-09-01',
+      }),
+    ).toBe('financial-report_2026-09-01_2026-09-01.pdf')
+  })
+
+  it('drops the dates when the window is not known yet', () => {
+    expect(reportExportFilename('financial-report', 'xlsx', undefined)).toBe(
+      'financial-report.xlsx',
+    )
   })
 })

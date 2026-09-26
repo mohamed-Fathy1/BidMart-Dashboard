@@ -1,5 +1,5 @@
 import { api, fileApi } from '@/lib/axios'
-import { parseContentDispositionFilename } from '@/lib/download'
+import { parseContentDispositionFilename, reportExportFilename } from '@/lib/download'
 import {
   unwrap,
   unwrapPaginatedWithMeta,
@@ -18,6 +18,7 @@ import {
   type RatingsReportMeta,
   type RatingsReviewRow,
   type RatingsSellerRow,
+  type ReportDateRange,
   type ReportMeta,
 } from '@/types/api'
 
@@ -85,17 +86,20 @@ export interface ExportedFile {
 /**
  * The export takes the table's filters (never `page` / `limit`) and answers
  * with the file body. Errors arrive as a Blob and are decoded by `fileApi`,
- * so `REPORT_EXPORT_TOO_LARGE` surfaces as `error.code`.
+ * so `REPORT_EXPORT_TOO_LARGE` surfaces as `error.code`. `resolvedWindow` is the
+ * resolved window the page shows; it names the file when the server's name
+ * is unreadable.
  */
 export async function exportFinancialReport(
   filters: FinancialReportFilters,
   format: FinancialExportFormat,
+  resolvedWindow: ReportDateRange | undefined,
 ): Promise<ExportedFile> {
   const res = await fileApi.get<Blob>('/admin/reports/financial/export', {
     params: { ...filters, format },
     responseType: 'blob',
   })
-  const fallback = `financial-report.${format}`
+  const fallback = reportExportFilename('financial-report', format, resolvedWindow)
   const disposition = res.headers['content-disposition'] as string | undefined
   return { blob: res.data, filename: parseContentDispositionFilename(disposition, fallback) }
 }

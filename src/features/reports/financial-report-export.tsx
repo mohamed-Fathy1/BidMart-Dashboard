@@ -15,11 +15,13 @@ import {
   type FinancialExportFormat,
   type FinancialReportFilters,
 } from '@/features/reports/reports.api'
+import type { ReportDateRange } from '@/types/api'
 import type { ApiRejection } from '@/lib/axios'
 import { saveBlob } from '@/lib/download'
 
 interface FinancialReportExportProps {
   filters: FinancialReportFilters
+  resolvedWindow: ReportDateRange | undefined
   disabled?: boolean
 }
 
@@ -28,11 +30,15 @@ interface FinancialReportExportProps {
  * empty table. The server refuses above 10,000 rows with
  * `REPORT_EXPORT_TOO_LARGE`, which gets its own message.
  */
-export function FinancialReportExport({ filters, disabled = false }: FinancialReportExportProps) {
+export function FinancialReportExport({
+  filters,
+  resolvedWindow,
+  disabled = false,
+}: FinancialReportExportProps) {
   const { t } = useTranslation()
 
   const exportMutation = useMutation<ExportedFile, ApiRejection, FinancialExportFormat>({
-    mutationFn: (format) => exportFinancialReport(filters, format),
+    mutationFn: (format) => exportFinancialReport(filters, format, resolvedWindow),
     onSuccess: ({ blob, filename }) => {
       saveBlob(blob, filename)
       toast.success(t('reports:financial.export.started'))

@@ -41,7 +41,7 @@ export function FinancialReportPage() {
     ...rangeParamsFor(search.startDate, search.endDate),
   }
 
-  const { data, isLoading, isError, refetch } = useFinancialReportQuery(
+  const { data, isLoading, isError, isPlaceholderData, refetch } = useFinancialReportQuery(
     { ...filters, page: pagination.pageIndex + 1, limit: pagination.pageSize },
     !rangeError,
   )
@@ -86,7 +86,13 @@ export function FinancialReportPage() {
             fallback={t('reports:financial.description')}
           />
         }
-        actions={<FinancialReportExport filters={filters} disabled={!!rangeError} />}
+        actions={
+          <FinancialReportExport
+            filters={filters}
+            resolvedWindow={isPlaceholderData ? undefined : response?.meta.dateRange}
+            disabled={!!rangeError}
+          />
+        }
       />
 
       <TableFiltersShell
