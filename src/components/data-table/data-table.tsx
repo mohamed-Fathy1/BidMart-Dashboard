@@ -10,8 +10,8 @@ import {
   type OnChangeFn,
   type Row,
 } from '@tanstack/react-table'
-import { useTranslation } from 'react-i18next'
-import { AlertCircle, EllipsisVertical, Inbox } from 'lucide-react'
+import { Trans, useTranslation } from 'react-i18next'
+import { AlertCircle, ChevronLeft, ChevronRight, EllipsisVertical, Inbox } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -34,8 +34,6 @@ import {
   Pagination,
   PaginationContent,
   PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
 } from '@/components/ui/pagination'
 import {
   Select,
@@ -44,6 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { format } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
 /* ------------------------------------------------------------------ */
@@ -552,15 +551,17 @@ export function DataTable<TData, TValue>({
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             {totalRecords !== undefined && (
               <span className="text-sm text-muted-foreground whitespace-nowrap">
-                {t('common:labels.showing')}{' '}
-                <span className="font-mono tabular-nums font-medium text-foreground">
-                  {pagination.pageIndex * pagination.pageSize + 1}
-                  &ndash;
-                  {Math.min((pagination.pageIndex + 1) * pagination.pageSize, totalRecords)}
-                </span>
-                {' '}{t('common:labels.of')}{' '}
-                <span className="font-mono tabular-nums font-medium text-foreground">{totalRecords}</span>
-                {' '}{t('common:labels.results')}
+                <Trans
+                  i18nKey="components:data_table.pagination.summary"
+                  count={totalRecords}
+                  values={{
+                    range: `${format.number(pagination.pageIndex * pagination.pageSize + 1)}–${format.number(
+                      Math.min((pagination.pageIndex + 1) * pagination.pageSize, totalRecords),
+                    )}`,
+                    total: format.number(totalRecords),
+                  }}
+                  components={{ num: <span className="font-mono tabular-nums font-medium text-foreground" /> }}
+                />
               </span>
             )}
             {pageSizeOptions.length > 1 && (
@@ -580,7 +581,7 @@ export function DataTable<TData, TValue>({
                   <SelectContent>
                     {pageSizeOptions.map((size) => (
                       <SelectItem key={size} value={String(size)}>
-                        {size}
+                        {format.number(size)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -593,37 +594,46 @@ export function DataTable<TData, TValue>({
             <Pagination className="mx-0 w-auto">
               <PaginationContent>
                 <PaginationItem>
-                  <PaginationPrevious
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="gap-1 px-2.5 sm:ps-2.5"
+                    aria-label={t('components:data_table.pagination.go_to_previous')}
+                    disabled={pagination.pageIndex === 0}
                     onClick={() =>
-                      onPaginationChange((prev) =>
-                        typeof prev === 'function'
-                          ? prev
-                          : { ...pagination, pageIndex: Math.max(0, pagination.pageIndex - 1) },
-                      )
+                      onPaginationChange({ ...pagination, pageIndex: pagination.pageIndex - 1 })
                     }
-                  />
+                  >
+                    <ChevronLeft className="rtl:rotate-180" />
+                    <span className="hidden sm:block">{t('components:data_table.pagination.previous')}</span>
+                  </Button>
                 </PaginationItem>
                 <PaginationItem>
                   <span className="text-sm text-muted-foreground">
-                    {t('common:labels.page')}{' '}
-                    <span className="font-mono tabular-nums">{pagination.pageIndex + 1}</span>
-                    {' '}{t('common:labels.of')}{' '}
-                    <span className="font-mono tabular-nums">{pageCount}</span>
+                    <Trans
+                      i18nKey="components:data_table.pagination.page_of"
+                      values={{
+                        page: format.number(pagination.pageIndex + 1),
+                        pages: format.number(pageCount),
+                      }}
+                      components={{ num: <span className="font-mono tabular-nums" /> }}
+                    />
                   </span>
                 </PaginationItem>
                 <PaginationItem>
-                  <PaginationNext
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="gap-1 px-2.5 sm:pe-2.5"
+                    aria-label={t('components:data_table.pagination.go_to_next')}
+                    disabled={pagination.pageIndex >= pageCount - 1}
                     onClick={() =>
-                      onPaginationChange((prev) =>
-                        typeof prev === 'function'
-                          ? prev
-                          : {
-                            ...pagination,
-                            pageIndex: Math.min(pageCount - 1, pagination.pageIndex + 1),
-                          },
-                      )
+                      onPaginationChange({ ...pagination, pageIndex: pagination.pageIndex + 1 })
                     }
-                  />
+                  >
+                    <span className="hidden sm:block">{t('components:data_table.pagination.next')}</span>
+                    <ChevronRight className="rtl:rotate-180" />
+                  </Button>
                 </PaginationItem>
               </PaginationContent>
             </Pagination>

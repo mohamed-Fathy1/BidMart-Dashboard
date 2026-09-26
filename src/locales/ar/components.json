@@ -106,7 +106,14 @@
       "next": "التالي",
       "go_to_previous": "الانتقال للصفحة السابقة",
       "go_to_next": "الانتقال للصفحة التالية",
-      "more_pages": "صفحات إضافية"
+      "more_pages": "صفحات إضافية",
+      "summary_zero": "عرض <num>{{range}}</num> من <num>{{total}}</num> نتيجة",
+      "summary_one": "عرض <num>{{range}}</num> من <num>{{total}}</num> نتيجة",
+      "summary_two": "عرض <num>{{range}}</num> من <num>{{total}}</num> نتيجتين",
+      "summary_few": "عرض <num>{{range}}</num> من <num>{{total}}</num> نتائج",
+      "summary_many": "عرض <num>{{range}}</num> من <num>{{total}}</num> نتيجة",
+      "summary_other": "عرض <num>{{range}}</num> من <num>{{total}}</num> نتيجة",
+      "page_of": "صفحة <num>{{page}}</num> من <num>{{pages}}</num>"
     }
   },
   "period_filter": {

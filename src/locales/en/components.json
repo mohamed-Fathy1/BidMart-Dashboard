@@ -106,7 +106,10 @@
       "next": "Next",
       "go_to_previous": "Go to previous page",
       "go_to_next": "Go to next page",
-      "more_pages": "More pages"
+      "more_pages": "More pages",
+      "summary_one": "Showing <num>{{range}}</num> of <num>{{total}}</num> result",
+      "summary_other": "Showing <num>{{range}}</num> of <num>{{total}}</num> results",
+      "page_of": "Page <num>{{page}}</num> of <num>{{pages}}</num>"
     }
   },
   "period_filter": {

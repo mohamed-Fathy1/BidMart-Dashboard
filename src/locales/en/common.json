@@ -78,11 +78,7 @@
     "password": "Password",
     "phone": "Phone",
     "total": "Total",
-    "page": "Page",
-    "of": "of",
     "all": "All",
-    "showing": "Showing",
-    "results": "results",
     "rows_per_page": "Rows per page"
   }
 }
