@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { Link } from '@tanstack/react-router'
 import {
@@ -52,6 +52,13 @@ export function OrderDetailSheet({ orderId, onClose }: OrderDetailSheetProps) {
   const { t } = useTranslation()
   const { data, isPending, error, refetch } = useOrderDrilldownQuery(orderId)
 
+  // `orderId` is already cleared when the close animation ends, so keep the
+  // last one to find the row that opened the sheet.
+  const lastOrderId = useRef(orderId)
+  useEffect(() => {
+    if (orderId) lastOrderId.current = orderId
+  }, [orderId])
+
   const requestError = error as ApiRejection | null
   const notFound =
     requestError?.code === 'ORDER_NOT_FOUND' || requestError?.status === 404
@@ -66,6 +73,15 @@ export function OrderDetailSheet({ orderId, onClose }: OrderDetailSheetProps) {
       <SheetContent
         side={i18n.dir() === 'rtl' ? 'left' : 'right'}
         className="w-full gap-0 overflow-y-auto bg-card sm:max-w-xl"
+        onCloseAutoFocus={(event) => {
+          const id = lastOrderId.current
+          const row = id
+            ? document.querySelector<HTMLElement>(`[data-row-id="${CSS.escape(id)}"]`)
+            : null
+          if (!row) return
+          event.preventDefault()
+          row.focus()
+        }}
       >
         {isPending ? (
           <>
