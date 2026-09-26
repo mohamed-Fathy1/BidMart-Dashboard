@@ -8,6 +8,8 @@ interface SearchInputProps {
   value: string
   onChange: (value: string) => void
   placeholder?: string
+  /** Accessible name. Defaults to the placeholder. */
+  label?: string
   debounceMs?: number
   className?: string
 }
@@ -16,12 +18,14 @@ export function SearchInput({
   value,
   onChange,
   placeholder,
+  label,
   debounceMs = 300,
   className,
 }: SearchInputProps) {
   const { t } = useTranslation()
   const [internal, setInternal] = useState(value)
   const timerRef = useRef<ReturnType<typeof setTimeout>>(null)
+  const resolvedPlaceholder = placeholder ?? t('components:search.placeholder')
 
   useEffect(() => {
     setInternal(value)
@@ -53,7 +57,8 @@ export function SearchInput({
         type="text"
         value={internal}
         onChange={(e) => handleChange(e.target.value)}
-        placeholder={placeholder ?? t('components:search.placeholder')}
+        placeholder={resolvedPlaceholder}
+        aria-label={label ?? resolvedPlaceholder}
         className={cn(
           'h-9 w-full rounded-md border border-input bg-transparent ps-9 placeholder-shown:pe-3 pe-9 text-sm shadow-xs outline-none transition-[color,border-color,box-shadow] duration-(--duration-hover) ease-(--ease-default)',
           'placeholder:text-muted-foreground',

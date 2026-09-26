@@ -19,6 +19,8 @@ interface FilterSelectProps {
   onChange: (value: string) => void
   options: FilterOption[]
   placeholder: string
+  /** Accessible name kept after a value is chosen. Defaults to the placeholder. */
+  label?: string
   className?: string
   /** Coalesce rapid switches before notifying the parent. Defaults to 250ms. */
   debounceMs?: number
@@ -29,6 +31,7 @@ export function FilterSelect({
   onChange,
   options,
   placeholder,
+  label,
   className,
   debounceMs = 250,
 }: FilterSelectProps) {
@@ -64,6 +67,7 @@ export function FilterSelect({
     >
       <SelectTrigger
         data-slot="filter-select"
+        aria-label={label ?? placeholder}
         size="sm"
         className={cn('min-w-[120px]', className)}
       >
