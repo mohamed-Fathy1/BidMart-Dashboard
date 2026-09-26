@@ -105,6 +105,33 @@ describe('useResourceMutation', () => {
     expect(toast.error).toHaveBeenCalledWith('admins:errors.generic', expect.any(Object))
   })
 
+  it('skips the toast for silent codes and still runs onError', async () => {
+    const { Wrapper } = wrapper()
+    const onError = vi.fn()
+    vi.mocked(toast.error).mockClear()
+    const { result } = renderHook(
+      () =>
+        useResourceMutation<void, void>({
+          mutationFn: async () => {
+            throw { message: 'This email is already in use.', code: 'ADMIN_EMAIL_ALREADY_EXISTS' }
+          },
+          errorKey: 'admins:errors.generic',
+          silentCodes: ['ADMIN_EMAIL_ALREADY_EXISTS'],
+          onError,
+        }),
+      { wrapper: Wrapper },
+    )
+    await act(async () => {
+      try {
+        await result.current.mutateAsync()
+      } catch {
+        // expected
+      }
+    })
+    expect(toast.error).not.toHaveBeenCalled()
+    expect(onError).toHaveBeenCalledTimes(1)
+  })
+
   it('runs the consumer onSuccess callback after the toast + invalidate', async () => {
     const { Wrapper } = wrapper()
     const order: string[] = []

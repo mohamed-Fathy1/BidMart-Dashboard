@@ -40,6 +40,7 @@
     "back_to_email": "Use a different email",
     "password_placeholder": "Enter your password",
     "login_failed": "Email or password is incorrect.",
+    "account_disabled": "Your account has been disabled. Contact an administrator.",
     "invalid_email": "Enter a valid email address",
     "password_length": "Password must be 8–20 characters",
     "otp_length": "OTP must be 6 digits",

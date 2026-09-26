@@ -11,8 +11,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { PasswordInput } from "@/components/shared/password-input";
 import { AuthShell } from "@/components/layout/auth-shell";
 import { onFormEnterKeyDown } from "@/lib/form-enter-submit";
+import { extractApiErrorCode } from "@/lib/axios";
+
+interface LoginSearch {
+  reason?: "account_disabled";
+}
 
 export const Route = createFileRoute("/login")({
+  validateSearch: (search: Record<string, unknown>): LoginSearch => ({
+    reason: search.reason === "account_disabled" ? "account_disabled" : undefined,
+  }),
   component: LoginPage,
 });
 
@@ -30,6 +38,15 @@ type LoginForm = z.infer<typeof loginSchema>;
 function LoginPage() {
   const { t } = useTranslation();
   const login = useLoginMutation();
+  const { reason } = Route.useSearch();
+  const accountDisabled = login.isError
+    ? extractApiErrorCode(login.error) === "ACCOUNT_DISABLED"
+    : reason === "account_disabled";
+  let loginError: string | undefined;
+  if (accountDisabled) loginError = t("common:auth.account_disabled");
+  else if (login.isError) {
+    loginError = rejectionMessage(login.error, t("common:auth.login_failed"));
+  }
 
   const {
     register,
@@ -128,12 +145,12 @@ function LoginPage() {
           </label>
         </div>
 
-        {login.isError && (
+        {loginError && (
           <div
             role="alert"
             className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive"
           >
-            {rejectionMessage(login.error, t("common:auth.login_failed"))}
+            {loginError}
           </div>
         )}
 

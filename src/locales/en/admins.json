@@ -34,11 +34,12 @@
     "delete": "Delete",
     "block": "Block",
     "unblock": "Unblock",
-    "create_success": "Administrator added",
+    "create_success": "Administrator added. A welcome email with sign-in details was sent to {{email}}.",
     "update_success": "Administrator updated",
     "delete_success": "Administrator deleted",
     "block_success": "Administrator blocked",
-    "unblock_success": "Administrator unblocked"
+    "unblock_success": "Administrator unblocked",
+    "create_success_email_failed": "Administrator added, but the welcome email could not be sent. Ask them to use Forgot password? on the sign-in page to set a password."
   },
   "form": {
     "create_title": "Add administrator",
@@ -86,8 +87,12 @@
     "delete_failed": "Could not delete the administrator.",
     "block_failed": "Could not block the administrator.",
     "unblock_failed": "Could not unblock the administrator.",
-    "validation_name": "Enter a full name.",
+    "validation_name": "Enter a full name of 2 to 100 characters.",
     "validation_email": "Enter an email address.",
-    "validation_role": "Select a role."
+    "validation_role": "Select a role.",
+    "validation_phone": "Enter a phone number.",
+    "email_taken": "This email is already in use.",
+    "phone_taken": "This phone number is already in use.",
+    "role_not_found": "The selected role no longer exists. Choose another role."
   }
 }

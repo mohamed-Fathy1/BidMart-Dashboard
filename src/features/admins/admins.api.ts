@@ -1,5 +1,6 @@
 import { api } from '@/lib/axios'
 import {
+  unwrap,
   unwrapPaginated,
   type AdminAccountDetail,
   type AdminAccountListItem,
@@ -24,7 +25,7 @@ export interface ListAdminsParams {
 
 export interface CreateAdminPayload {
   fullName: string
-  phone?: string | null
+  phone: string
   email: string
   roleId: string
 }
@@ -33,15 +34,15 @@ export type UpdateAdminPayload = Partial<
   Pick<CreateAdminPayload, 'fullName' | 'phone' | 'email' | 'roleId'>
 >
 
-/* ------------------------------------------------------------------ */
-/*  Unwrap helpers                                                     */
-/* ------------------------------------------------------------------ */
+interface AdminMutationBody {
+  message?: string
+  admin: AdminAccountDetail
+}
 
-function unwrapAdmin(
-  body: AdminAccountDetail | { message?: string; admin: AdminAccountDetail },
-): AdminAccountDetail {
-  if ('admin' in body && body.admin) return body.admin
-  return body as AdminAccountDetail
+export interface CreateAdminResult {
+  admin: AdminAccountDetail
+  /** `false` means the admin exists but the welcome email with their password was not queued. */
+  welcomeEmailQueued: boolean
 }
 
 /* ------------------------------------------------------------------ */
@@ -55,23 +56,22 @@ export async function listAdmins(
   return unwrapPaginated(res.data)
 }
 
-export async function createAdmin(payload: CreateAdminPayload): Promise<AdminAccountDetail> {
-  const res = await api.post<{ message?: string; admin: AdminAccountDetail }>(
+export async function createAdmin(payload: CreateAdminPayload): Promise<CreateAdminResult> {
+  const res = await api.post<ApiEnvelope<AdminMutationBody & { welcomeEmailQueued?: boolean }>>(
     '/admin/admins',
     payload,
   )
-  return unwrapAdmin(res.data)
+  const body = unwrap(res.data)
+  // Backends that predate the flag always queued the email.
+  return { admin: body.admin, welcomeEmailQueued: body.welcomeEmailQueued !== false }
 }
 
 export async function updateAdmin(
   adminId: string,
   payload: UpdateAdminPayload,
 ): Promise<AdminAccountDetail> {
-  const res = await api.patch<{ message?: string; admin: AdminAccountDetail }>(
-    `/admin/admins/${adminId}`,
-    payload,
-  )
-  return unwrapAdmin(res.data)
+  const res = await api.patch<ApiEnvelope<AdminMutationBody>>(`/admin/admins/${adminId}`, payload)
+  return unwrap(res.data).admin
 }
 
 export async function deleteAdmin(adminId: string): Promise<void> {

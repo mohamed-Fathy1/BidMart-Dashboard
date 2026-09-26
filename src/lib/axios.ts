@@ -118,24 +118,51 @@ function toPlainRejection(error: unknown): ApiRejection {
   }
 }
 
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (axios.isAxiosError(error)) {
-      const status = error.response?.status
-      if (status === 401 && !requestIsPublicAdminAuth(error.config)) {
-        useAuthStore.getState().clearSession()
-        window.location.href = '/login'
-        return Promise.reject(error)
-      }
-      if (status === 403 && !requestIsPublicAdminAuth(error.config)) {
-        toast.error(i18n.t('common:errors.permission_denied'))
-        return Promise.reject(error)
-      }
-    }
-    return Promise.reject(toPlainRejection(error))
-  },
-)
+export type SessionEndReason = 'expired' | 'account_disabled'
+
+/**
+ * Any 401 (`UNAUTHORIZED`, `TOKEN_REVOKED`) and a 403 `ACCOUNT_DISABLED` (the admin
+ * was blocked or deleted) end the session. A 403 `FORBIDDEN` is a missing permission
+ * and keeps the admin signed in. Public auth endpoints report these on the form.
+ * `null` means the error is handled normally.
+ */
+export function sessionEndReason(error: unknown): SessionEndReason | null {
+  if (!axios.isAxiosError(error) || requestIsPublicAdminAuth(error.config)) return null
+  const status = error.response?.status
+  if (status === 401) return 'expired'
+  if (status === 403 && extractApiErrorCode(error) === 'ACCOUNT_DISABLED') {
+    return 'account_disabled'
+  }
+  return null
+}
+
+/**
+ * Clears the session and hard-navigates to sign-in. The returned promise never
+ * settles, so no caller toasts or retries with the old token while the page unloads.
+ */
+function endSession(reason: SessionEndReason): Promise<never> {
+  useAuthStore.getState().clearSession()
+  window.location.replace(
+    reason === 'account_disabled' ? '/login?reason=account_disabled' : '/login',
+  )
+  return new Promise<never>(() => {})
+}
+
+function handleResponseError(error: unknown): Promise<never> {
+  const reason = sessionEndReason(error)
+  if (reason) return endSession(reason)
+  if (
+    axios.isAxiosError(error) &&
+    error.response?.status === 403 &&
+    !requestIsPublicAdminAuth(error.config)
+  ) {
+    toast.error(i18n.t('common:errors.permission_denied'))
+    return Promise.reject(error)
+  }
+  return Promise.reject(toPlainRejection(error))
+}
+
+api.interceptors.response.use((response) => response, handleResponseError)
 
 /**
  * Instance for endpoints that answer with a file body (`responseType: 'blob'`).
@@ -175,19 +202,7 @@ fileApi.interceptors.response.use(
   (response) => response,
   async (error) => {
     await decodeBlobErrorBody(error)
-    if (axios.isAxiosError(error)) {
-      const status = error.response?.status
-      if (status === 401) {
-        useAuthStore.getState().clearSession()
-        window.location.href = '/login'
-        return Promise.reject(error)
-      }
-      if (status === 403) {
-        toast.error(i18n.t('common:errors.permission_denied'))
-        return Promise.reject(error)
-      }
-    }
-    return Promise.reject(toPlainRejection(error))
+    return handleResponseError(error)
   },
 )
 

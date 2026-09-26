@@ -15,13 +15,17 @@ import type { AdminsSearch } from '@/routes/_authed.admins'
 const adminsRoute = getRouteApi('/_authed/admins')
 
 const adminFormSchema = z.object({
-  fullName: z.string().trim().min(1, { message: 'admins:errors.validation_name' }),
+  fullName: z
+    .string()
+    .trim()
+    .min(2, { message: 'admins:errors.validation_name' })
+    .max(100, { message: 'admins:errors.validation_name' }),
   email: z
     .string()
     .trim()
     .min(1, { message: 'admins:errors.validation_email' })
     .email({ message: 'admins:errors.validation_email' }),
-  phone: z.string().trim(),
+  phone: z.string().trim().min(1, { message: 'admins:errors.validation_phone' }),
   roleId: z.string().trim().min(1, { message: 'admins:errors.validation_role' }),
 })
 
@@ -60,6 +64,7 @@ import {
   useDeleteAdminMutation,
   useBlockAdminMutation,
   useUnblockAdminMutation,
+  type AdminFormField,
 } from '@/features/admins/admins.queries'
 import { format } from '@/lib/format'
 import { localizedName } from '@/lib/localized-name'
@@ -92,8 +97,16 @@ export function AdminsListPage() {
     control,
     handleSubmit: rhfHandleSubmit,
     reset,
+    setError,
+    setValue,
     formState: { errors },
   } = form
+
+  function showFieldError(field: AdminFormField, messageKey: string) {
+    // The role was deleted, so the stale selection must not be resubmitted.
+    if (field === 'roleId') setValue('roleId', '')
+    setError(field, { type: 'server', message: messageKey }, { shouldFocus: true })
+  }
 
   const { data: response, isLoading } = useAdminsQuery({
     search: searchValue || undefined,
@@ -126,8 +139,8 @@ export function AdminsListPage() {
 
   const columns = useAdminColumns()
 
-  const createMutation = useCreateAdminMutation()
-  const updateMutation = useUpdateAdminMutation()
+  const createMutation = useCreateAdminMutation(showFieldError)
+  const updateMutation = useUpdateAdminMutation(showFieldError)
   const deleteMutation = useDeleteAdminMutation()
   const blockMutation = useBlockAdminMutation()
   const unblockMutation = useUnblockAdminMutation()
@@ -159,40 +172,12 @@ export function AdminsListPage() {
   }
 
   const onSubmit = (values: AdminFormValues) => {
-    const phonePayload = values.phone.trim() ? values.phone.trim() : undefined
     if (editTarget) {
-      updateMutation.mutate(
-        {
-          id: editTarget.id,
-          payload: {
-            fullName: values.fullName,
-            phone: phonePayload ?? null,
-            email: values.email,
-            roleId: values.roleId,
-          },
-        },
-        { onSuccess: closeForm },
-      )
+      updateMutation.mutate({ id: editTarget.id, payload: values }, { onSuccess: closeForm })
     } else {
-      createMutation.mutate(
-        {
-          fullName: values.fullName,
-          email: values.email,
-          roleId: values.roleId,
-          ...(phonePayload ? { phone: phonePayload } : {}),
-        },
-        { onSuccess: closeForm },
-      )
+      createMutation.mutate(values, { onSuccess: closeForm })
     }
   }
-
-  const firstErrorKey = (
-    ['fullName', 'email', 'phone', 'roleId'] as const
-  ).find((k) => errors[k]?.message)
-  const firstErrorMessage =
-    firstErrorKey && typeof errors[firstErrorKey]?.message === 'string'
-      ? t(errors[firstErrorKey]!.message as string)
-      : undefined
 
   const activeFilterOptions = useMemo(
     () => [
@@ -332,7 +317,6 @@ export function AdminsListPage() {
         isLoading={isSubmitting}
         submitDisabled={!editTarget && (rolesLoading || roles.length === 0)}
         onSubmit={rhfHandleSubmit(onSubmit)}
-        errorMessage={firstErrorMessage}
         size="md"
         suppressInitialFocus
       >
@@ -366,6 +350,9 @@ export function AdminsListPage() {
                   className="h-10"
                   aria-invalid={errors.fullName ? true : undefined}
                 />
+                {errors.fullName?.message && (
+                  <p className="text-xs text-destructive">{t(errors.fullName.message)}</p>
+                )}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="admin-email">{t('admins:form.email')}</Label>
@@ -378,6 +365,9 @@ export function AdminsListPage() {
                   className="h-10"
                   aria-invalid={errors.email ? true : undefined}
                 />
+                {errors.email?.message && (
+                  <p className="text-xs text-destructive">{t(errors.email.message)}</p>
+                )}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="admin-phone">{t('admins:form.phone')}</Label>
@@ -388,7 +378,11 @@ export function AdminsListPage() {
                   dir="ltr"
                   className="h-10 font-mono tabular-nums"
                   autoComplete="tel"
+                  aria-invalid={errors.phone ? true : undefined}
                 />
+                {errors.phone?.message && (
+                  <p className="text-xs text-destructive">{t(errors.phone.message)}</p>
+                )}
               </div>
             </div>
           </section>
@@ -437,10 +431,11 @@ export function AdminsListPage() {
                   control={control}
                   render={({ field }) => (
                     <Select
-                      value={field.value || undefined}
+                      value={field.value}
                       onValueChange={field.onChange}
                     >
                       <SelectTrigger
+                        ref={field.ref}
                         id="admin-role-trigger"
                         data-slot="admin-role-select"
                         className="h-10 w-full bg-card"
@@ -458,6 +453,9 @@ export function AdminsListPage() {
                     </Select>
                   )}
                 />
+              )}
+              {errors.roleId?.message && (
+                <p className="mt-2 text-xs text-destructive">{t(errors.roleId.message)}</p>
               )}
             </div>
           </section>

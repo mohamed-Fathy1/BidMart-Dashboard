@@ -28,6 +28,8 @@ export interface ResourceMutationOptions<TArgs, TData> {
    * lose information.
    */
   preferServerMessageForCodes?: readonly string[]
+  /** Codes the caller reports itself (e.g. as a field error). These skip the toast. */
+  silentCodes?: readonly string[]
   /** Extra onSuccess side effects (close dialog, navigate, …). */
   onSuccess?: (data: TData, args: TArgs) => void
   /** Extra onError side effects. The shared toast still fires. */
@@ -66,8 +68,12 @@ export function useResourceMutation<TArgs, TData = unknown>(
       opts.onSuccess?.(data, args)
     },
     onError: (error, args) => {
-      const fallback = opts.errorKey ? t(opts.errorKey) : t('common:errors.unexpected')
       const code = extractApiErrorCode(error)
+      if (code && opts.silentCodes?.includes(code)) {
+        opts.onError?.(error, args)
+        return
+      }
+      const fallback = opts.errorKey ? t(opts.errorKey) : t('common:errors.unexpected')
       const serverMessage = extractErrorMessage(error)
       let message: string | undefined
 
