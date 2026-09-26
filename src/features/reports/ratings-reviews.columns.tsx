@@ -20,10 +20,14 @@ export function useRatingsReviewsColumns(): ColumnDef<RatingsReviewRow>[] {
           const displayName = reviewerFullName ?? reviewerUsername
           return (
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-foreground">{displayName}</span>
-              <span className="text-xs text-muted-foreground">
-                <bdi dir="ltr">@{reviewerUsername}</bdi>
-              </span>
+              <TruncatedTextCell text={displayName} className="max-w-48 font-medium" />
+              <bdi
+                dir="ltr"
+                className="block w-fit max-w-48 truncate text-xs text-muted-foreground"
+                title={`@${reviewerUsername}`}
+              >
+                @{reviewerUsername}
+              </bdi>
             </div>
           )
         },
@@ -62,12 +66,12 @@ export function useRatingsReviewsColumns(): ColumnDef<RatingsReviewRow>[] {
         cell: ({ getValue }) => {
           const rating = getValue<number>()
           return (
-            <span
-              className="inline-flex items-center gap-1 text-sm text-foreground"
-              aria-label={t('reports:ratings.filters.stars', { count: rating })}
-            >
-              <Star className="size-3.5 fill-current text-amber-500" />
-              <span className="font-mono tabular-nums">{format.number(rating)}</span>
+            <span className="inline-flex items-center gap-1 text-sm text-foreground">
+              <Star aria-hidden className="size-3.5 fill-current text-amber-500" />
+              <span aria-hidden className="font-mono tabular-nums">
+                {format.number(rating)}
+              </span>
+              <span className="sr-only">{t('reports:ratings.filters.stars', { count: rating })}</span>
             </span>
           )
         },

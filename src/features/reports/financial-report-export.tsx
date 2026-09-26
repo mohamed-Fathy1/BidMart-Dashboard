@@ -58,7 +58,7 @@ export function FinancialReportExport({
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" disabled={disabled || isExporting}>
           {isExporting ? (
-            <Loader2 className="size-4 animate-spin" />
+            <Loader2 className="size-4 motion-safe:animate-spin" />
           ) : (
             <Download className="size-4" />
           )}

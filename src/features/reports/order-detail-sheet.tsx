@@ -320,7 +320,7 @@ function OrderDetailSheetBody({ data }: OrderDetailSheetBodyProps) {
       >
         <div className="flex items-center gap-3">
           <Avatar className="size-9">
-            <AvatarImage src={data.store.profilePicture ?? undefined} />
+            <AvatarImage src={data.store.profilePicture ?? undefined} alt="" />
             <AvatarFallback>{data.store.storeName.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">

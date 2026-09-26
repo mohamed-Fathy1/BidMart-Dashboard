@@ -18,7 +18,10 @@ export function useLivestreamsReportColumns(): ColumnDef<LivestreamReportRow>[] 
         cell: ({ row }) => (
           <div className="min-w-0">
             <TruncatedTextCell text={row.original.title} className="max-w-64 font-medium" />
-            <p className="text-xs text-muted-foreground">{row.original.hostName}</p>
+            <TruncatedTextCell
+              text={row.original.hostName}
+              className="max-w-64 text-xs text-muted-foreground"
+            />
           </div>
         ),
       },
