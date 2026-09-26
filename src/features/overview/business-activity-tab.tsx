@@ -1,4 +1,3 @@
-import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,7 +12,6 @@ import { PERMISSIONS, usePermissionCheck } from '@/lib/permissions'
 
 export function BusinessActivityTab() {
   const { t, i18n } = useTranslation()
-  const navigate = useNavigate()
   const query = useStatisticsQuery('business-activity')
   const allowed = usePermissionCheck()
   // The sub-categories route sits under the categories layout, which checks its own permission.
@@ -65,13 +63,12 @@ export function BusinessActivityTab() {
                   count={(category) =>
                     t('overview:business.orders_count', { count: category.orderCount })
                   }
-                  onSelect={
+                  getLink={
                     canOpenCategory
-                      ? (category) =>
-                          navigate({
-                            to: '/categories/$categoryId/sub-categories',
-                            params: { categoryId: category.categoryId },
-                          })
+                      ? (category) => ({
+                          to: '/categories/$categoryId/sub-categories',
+                          params: { categoryId: category.categoryId },
+                        })
                       : undefined
                   }
                   emptyLabel={t('overview:business.empty')}
@@ -107,10 +104,9 @@ export function BusinessActivityTab() {
                   count={(seller) =>
                     t('overview:business.orders_count', { count: seller.orderCount })
                   }
-                  onSelect={
+                  getLink={
                     canOpenSeller
-                      ? (seller) =>
-                          navigate({ to: '/users/$userId', params: { userId: seller.sellerId } })
+                      ? (seller) => ({ to: '/users/$userId', params: { userId: seller.sellerId } })
                       : undefined
                   }
                   emptyLabel={t('overview:business.empty')}
