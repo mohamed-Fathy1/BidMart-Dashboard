@@ -28,21 +28,21 @@ export function PeriodFilter({ value, onChange, error }: PeriodFilterProps) {
   const nextAnchor = shiftAnchor(period, anchor, 1)
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2 max-sm:min-w-0 max-sm:max-w-full">
       <RadioGroupPrimitive.Root
         orientation="horizontal"
         aria-label={t('components:period_filter.label')}
         value={period}
         onValueChange={(next) => onChange({ period: next as StatisticsPeriod, date })}
-        className="inline-flex rounded-lg border border-border bg-background p-1"
+        className="inline-flex rounded-lg border border-border bg-background p-1 max-sm:max-w-full max-sm:overflow-x-auto"
       >
-        <div className="relative flex flex-wrap gap-1">
+        <div className="relative flex gap-1 sm:flex-wrap">
           {STATISTICS_PERIODS.map((entry) => (
             <RadioGroupPrimitive.Item
               key={entry}
               value={entry}
               className={cn(
-                'group/tab relative z-10 inline-flex min-h-9 shrink-0 items-center justify-center overflow-hidden rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-[color,opacity] duration-(--duration-hover) ease-(--ease-default) outline-none data-[state=unchecked]:hover:text-foreground data-[state=checked]:text-primary focus-visible:ring-[3px] focus-visible:ring-ring/50',
+                'group/tab relative z-10 inline-flex min-h-9 shrink-0 items-center whitespace-nowrap justify-center overflow-hidden rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-[color,opacity] duration-(--duration-hover) ease-(--ease-default) outline-none data-[state=unchecked]:hover:text-foreground data-[state=checked]:text-primary focus-visible:ring-[3px] focus-visible:ring-ring/50',
               )}
             >
               <span

@@ -16,7 +16,7 @@ interface SectionTabsProps {
 
 function segmentClasses(active: boolean) {
   return cn(
-    'group/tab relative z-10 inline-flex min-h-9 shrink-0 items-center justify-center overflow-hidden rounded-md px-4 py-2 text-sm font-medium outline-none transition-[color,opacity] duration-(--duration-hover) ease-(--ease-default) focus-visible:ring-[3px] focus-visible:ring-ring/50',
+    'group/tab relative z-10 inline-flex min-h-9 shrink-0 items-center whitespace-nowrap justify-center overflow-hidden rounded-md px-4 py-2 text-sm font-medium outline-none transition-[color,opacity] duration-(--duration-hover) ease-(--ease-default) focus-visible:ring-[3px] focus-visible:ring-ring/50',
     active ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
   )
 }
@@ -35,10 +35,13 @@ export function SectionTabs({ tabs, ariaLabel, className }: SectionTabsProps) {
 
   return (
     <nav
-      className={cn('inline-flex rounded-lg border border-border bg-background p-1', className)}
+      className={cn(
+        'inline-flex rounded-lg border border-border bg-background p-1 max-sm:max-w-full max-sm:overflow-x-auto',
+        className,
+      )}
       aria-label={ariaLabel}
     >
-      <div className="relative flex flex-wrap gap-1">
+      <div className="relative flex gap-1 sm:flex-wrap">
         {tabs.map((tab) => (
           <Link
             key={tab.label}
