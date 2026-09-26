@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { LucideIcon } from 'lucide-react'
 import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { format } from '@/lib/format'
+import { PERMISSIONS, usePermission } from '@/lib/permissions'
 import { cn } from '@/lib/utils'
 import type { RecentActivityItem, RecentActivityType } from '@/types/api'
 
@@ -24,11 +25,12 @@ const INTERACTIVE_CLASSES =
 
 /**
  * The newest events in the window. Order rows open the drill-down sheet on the
- * financial report; new-user rows go to the buyer. Live shows have no admin
- * surface yet, so they stay inert.
+ * financial report; new-user rows go to the buyer when the admin may view
+ * users. Live shows have no admin surface yet, so they stay inert.
  */
 export function RecentActivityList({ items }: RecentActivityListProps) {
   const { t } = useTranslation()
+  const canOpenUser = usePermission(PERMISSIONS.users.view)
 
   return (
     <>
@@ -86,7 +88,7 @@ export function RecentActivityList({ items }: RecentActivityListProps) {
                     >
                       {body}
                     </Link>
-                  ) : item.type === 'NEW_USER' ? (
+                  ) : item.type === 'NEW_USER' && canOpenUser ? (
                     <Link
                       to="/users/$userId"
                       params={{ userId: item.id }}

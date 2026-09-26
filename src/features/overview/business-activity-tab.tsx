@@ -9,11 +9,17 @@ import { useStatisticsQuery } from '@/features/overview/overview.queries'
 import { StatisticsTabFrame } from '@/features/overview/statistics-tab-frame'
 import { format } from '@/lib/format'
 import { localizedPair } from '@/lib/localized-name'
+import { PERMISSIONS, usePermissionCheck } from '@/lib/permissions'
 
 export function BusinessActivityTab() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const query = useStatisticsQuery('business-activity')
+  const allowed = usePermissionCheck()
+  // The sub-categories route sits under the categories layout, which checks its own permission.
+  const canOpenCategory =
+    allowed(PERMISSIONS.categories.view) && allowed(PERMISSIONS.subCategories.view)
+  const canOpenSeller = allowed(PERMISSIONS.users.view)
 
   return (
     <StatisticsTabFrame query={query} skeletonCount={3}>
@@ -59,11 +65,14 @@ export function BusinessActivityTab() {
                   count={(category) =>
                     t('overview:business.orders_count', { count: category.orderCount })
                   }
-                  onSelect={(category) =>
-                    navigate({
-                      to: '/categories/$categoryId/sub-categories',
-                      params: { categoryId: category.categoryId },
-                    })
+                  onSelect={
+                    canOpenCategory
+                      ? (category) =>
+                          navigate({
+                            to: '/categories/$categoryId/sub-categories',
+                            params: { categoryId: category.categoryId },
+                          })
+                      : undefined
                   }
                   emptyLabel={t('overview:business.empty')}
                   ariaLabel={t('overview:business.top_categories')}
@@ -98,8 +107,11 @@ export function BusinessActivityTab() {
                   count={(seller) =>
                     t('overview:business.orders_count', { count: seller.orderCount })
                   }
-                  onSelect={(seller) =>
-                    navigate({ to: '/users/$userId', params: { userId: seller.sellerId } })
+                  onSelect={
+                    canOpenSeller
+                      ? (seller) =>
+                          navigate({ to: '/users/$userId', params: { userId: seller.sellerId } })
+                      : undefined
                   }
                   emptyLabel={t('overview:business.empty')}
                   ariaLabel={t('overview:business.top_sellers')}

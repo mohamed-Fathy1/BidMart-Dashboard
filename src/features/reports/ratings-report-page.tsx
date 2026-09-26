@@ -24,6 +24,7 @@ import {
   REPORT_PAGE_SIZES,
 } from '@/features/reports/report-options'
 import { readEnum } from '@/lib/list-search'
+import { PERMISSIONS, usePermission } from '@/lib/permissions'
 import type { RatingsReportSearch } from '@/routes/_authed.reports.ratings'
 
 const ratingsRoute = getRouteApi('/_authed/reports/ratings')
@@ -31,6 +32,7 @@ const ratingsRoute = getRouteApi('/_authed/reports/ratings')
 export function RatingsReportPage() {
   const { t, i18n } = useTranslation()
   const navigate = ratingsRoute.useNavigate()
+  const canOpenSeller = usePermission(PERMISSIONS.users.view)
 
   const { search, pagination, setPagination, setFilter, setFilters } =
     useUrlListState<RatingsReportSearch>({
@@ -214,7 +216,11 @@ export function RatingsReportPage() {
                 pageSizeOptions={REPORT_PAGE_SIZES}
                 getRowId={(row) => row.sellerId}
                 rowLabel={(row) => row.sellerName}
-                onRowClick={(row) => navigate({ to: '/users/$userId', params: { userId: row.sellerId } })}
+                onRowClick={
+                  canOpenSeller
+                    ? (row) => navigate({ to: '/users/$userId', params: { userId: row.sellerId } })
+                    : undefined
+                }
                 emptyKeyPrefix="reports:ratings.empty_sellers"
               />
             </TabsContent>

@@ -22,6 +22,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Can } from '@/components/permissions/can'
 import { DetailField } from '@/components/shared/detail-field'
 import { EmptyState } from '@/components/shared/empty-state'
 import { StatusBadge } from '@/components/shared/status-badge'
@@ -29,6 +30,7 @@ import { Timeline, type TimelineItem, type TimelineTone } from '@/components/sha
 import type { ApiRejection } from '@/lib/axios'
 import { format } from '@/lib/format'
 import { i18n } from '@/lib/i18n'
+import { PERMISSIONS } from '@/lib/permissions'
 import { useOrderDrilldownQuery } from '@/features/reports/reports.queries'
 import type { OrderDrilldown, OrderHistoryStep } from '@/types/api'
 
@@ -279,11 +281,13 @@ function OrderDetailSheetBody({ data }: OrderDetailSheetBodyProps) {
       <SheetSection
         title={t('reports:order_detail.sections.customer')}
         action={
-          <Button variant="link" size="sm" className="h-auto px-0" asChild>
-            <Link to="/users/$userId" params={{ userId: data.customer.id }}>
-              {t('reports:common.view_customer')}
-            </Link>
-          </Button>
+          <Can permission={PERMISSIONS.users.view}>
+            <Button variant="link" size="sm" className="h-auto px-0" asChild>
+              <Link to="/users/$userId" params={{ userId: data.customer.id }}>
+                {t('reports:common.view_customer')}
+              </Link>
+            </Button>
+          </Can>
         }
       >
         <dl className="grid gap-4 sm:grid-cols-2">
@@ -305,11 +309,13 @@ function OrderDetailSheetBody({ data }: OrderDetailSheetBodyProps) {
       <SheetSection
         title={t('reports:order_detail.sections.store')}
         action={
-          <Button variant="link" size="sm" className="h-auto px-0" asChild>
-            <Link to="/users/$userId" params={{ userId: data.store.sellerId }}>
-              {t('reports:common.view_seller')}
-            </Link>
-          </Button>
+          <Can permission={PERMISSIONS.users.view}>
+            <Button variant="link" size="sm" className="h-auto px-0" asChild>
+              <Link to="/users/$userId" params={{ userId: data.store.sellerId }}>
+                {t('reports:common.view_seller')}
+              </Link>
+            </Button>
+          </Can>
         }
       >
         <div className="flex items-center gap-3">
