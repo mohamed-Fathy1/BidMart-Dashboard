@@ -38,7 +38,7 @@ export function OrdersReportPage() {
   }
 
   const { data, isLoading, isError, refetch } = useOrdersReportQuery(queryParams, !rangeError)
-  const response = isError ? undefined : data
+  const response = isError || rangeError ? undefined : data
 
   const hasActiveFilters = search.group !== undefined || search.startDate !== undefined
 
@@ -79,25 +79,27 @@ export function OrdersReportPage() {
         />
       </TableFiltersShell>
 
-      <div className="space-y-3">
-        <OrdersGroupFilter
-          summary={response?.meta?.summary}
-          isLoading={isLoading}
-          activeGroup={search.group}
-          onGroupChange={(g) => setFilter('group', g)}
-        />
+      {!rangeError && (
+        <div className="space-y-3">
+          <OrdersGroupFilter
+            summary={response?.meta?.summary}
+            isLoading={isLoading}
+            activeGroup={search.group}
+            onGroupChange={(g) => setFilter('group', g)}
+          />
 
-        <DataTable
-          columns={columns}
-          data={rows}
-          {...tableProps}
-          pageSizeOptions={REPORT_PAGE_SIZES}
-          getRowId={(row) => row.orderId}
-          rowLabel={(row) => row.orderNumber}
-          onRowClick={(row) => setParam('order', row.orderId)}
-          emptyKeyPrefix="reports:orders.empty"
-        />
-      </div>
+          <DataTable
+            columns={columns}
+            data={rows}
+            {...tableProps}
+            pageSizeOptions={REPORT_PAGE_SIZES}
+            getRowId={(row) => row.orderId}
+            rowLabel={(row) => row.orderNumber}
+            onRowClick={(row) => setParam('order', row.orderId)}
+            emptyKeyPrefix="reports:orders.empty"
+          />
+        </div>
+      )}
 
       <OrderDetailSheet
         orderId={search.order}

@@ -58,7 +58,7 @@ export function LivestreamsReportPage() {
     queryParams,
     !rangeError,
   )
-  const response = isError ? undefined : data
+  const response = isError || rangeError ? undefined : data
 
   const { rows, meta, tableProps } = useListPageData<LivestreamReportRow>({
     response,
@@ -119,16 +119,20 @@ export function LivestreamsReportPage() {
         </Select>
       </TableFiltersShell>
 
-      <LivestreamsSummary summary={response?.meta.summary} isLoading={isLoading} />
+      {!rangeError && (
+        <>
+          <LivestreamsSummary summary={response?.meta.summary} isLoading={isLoading} />
 
-      <DataTable
-        columns={columns}
-        data={rows}
-        {...tableProps}
-        pageSizeOptions={REPORT_PAGE_SIZES}
-        getRowId={(row) => row.showId}
-        emptyKeyPrefix="reports:livestreams.empty"
-      />
+          <DataTable
+            columns={columns}
+            data={rows}
+            {...tableProps}
+            pageSizeOptions={REPORT_PAGE_SIZES}
+            getRowId={(row) => row.showId}
+            emptyKeyPrefix="reports:livestreams.empty"
+          />
+        </>
+      )}
     </div>
   )
 }

@@ -65,8 +65,8 @@ export function RatingsReportPage() {
     sellersParams,
     search.tab === 'sellers' && !rangeError,
   )
-  const reviewsResponse = reviewsQuery.isError ? undefined : reviewsQuery.data
-  const sellersResponse = sellersQuery.isError ? undefined : sellersQuery.data
+  const reviewsResponse = reviewsQuery.isError || rangeError ? undefined : reviewsQuery.data
+  const sellersResponse = sellersQuery.isError || rangeError ? undefined : sellersQuery.data
 
   const { data: categoriesResponse } = useCategoriesQuery({ limit: 100 })
 
@@ -191,31 +191,35 @@ export function RatingsReportPage() {
           />
         </TableFiltersShell>
 
-        <TabsContent value="reviews" className="space-y-6">
-          {reviewsResponse?.meta.summary && <RatingsSummary summary={reviewsResponse.meta.summary} />}
+        {!rangeError && (
+          <>
+            <TabsContent value="reviews" className="space-y-6">
+              {reviewsResponse?.meta.summary && <RatingsSummary summary={reviewsResponse.meta.summary} />}
 
-          <DataTable
-            columns={reviewsColumns}
-            data={reviewRows}
-            {...reviewsTableProps}
-            pageSizeOptions={REPORT_PAGE_SIZES}
-            getRowId={(row) => row.ratingId}
-            emptyKeyPrefix="reports:ratings.empty_reviews"
-          />
-        </TabsContent>
+              <DataTable
+                columns={reviewsColumns}
+                data={reviewRows}
+                {...reviewsTableProps}
+                pageSizeOptions={REPORT_PAGE_SIZES}
+                getRowId={(row) => row.ratingId}
+                emptyKeyPrefix="reports:ratings.empty_reviews"
+              />
+            </TabsContent>
 
-        <TabsContent value="sellers">
-          <DataTable
-            columns={sellersColumns}
-            data={sellerRows}
-            {...sellersTableProps}
-            pageSizeOptions={REPORT_PAGE_SIZES}
-            getRowId={(row) => row.sellerId}
-            rowLabel={(row) => row.sellerName}
-            onRowClick={(row) => navigate({ to: '/users/$userId', params: { userId: row.sellerId } })}
-            emptyKeyPrefix="reports:ratings.empty_sellers"
-          />
-        </TabsContent>
+            <TabsContent value="sellers">
+              <DataTable
+                columns={sellersColumns}
+                data={sellerRows}
+                {...sellersTableProps}
+                pageSizeOptions={REPORT_PAGE_SIZES}
+                getRowId={(row) => row.sellerId}
+                rowLabel={(row) => row.sellerName}
+                onRowClick={(row) => navigate({ to: '/users/$userId', params: { userId: row.sellerId } })}
+                emptyKeyPrefix="reports:ratings.empty_sellers"
+              />
+            </TabsContent>
+          </>
+        )}
       </Tabs>
     </div>
   )

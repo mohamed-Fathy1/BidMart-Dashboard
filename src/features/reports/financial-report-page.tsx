@@ -45,7 +45,7 @@ export function FinancialReportPage() {
     { ...filters, page: pagination.pageIndex + 1, limit: pagination.pageSize },
     !rangeError,
   )
-  const response = isError ? undefined : data
+  const response = isError || rangeError ? undefined : data
 
   const { rows, meta, tableProps } = useListPageData({
     response,
@@ -118,17 +118,19 @@ export function FinancialReportPage() {
         />
       </TableFiltersShell>
 
-      <DataTable
-        columns={columns}
-        data={rows}
-        {...tableProps}
-        pageSizeOptions={REPORT_PAGE_SIZES}
-        getRowId={(row) => row.orderId}
-        rowLabel={(row) => row.orderNumber}
-        onRowClick={(row) => setParam('order', row.orderId)}
-        emptyKeyPrefix="reports:financial.empty"
-        footer={totals ? <FinancialReportTotals totals={totals} /> : undefined}
-      />
+      {!rangeError && (
+        <DataTable
+          columns={columns}
+          data={rows}
+          {...tableProps}
+          pageSizeOptions={REPORT_PAGE_SIZES}
+          getRowId={(row) => row.orderId}
+          rowLabel={(row) => row.orderNumber}
+          onRowClick={(row) => setParam('order', row.orderId)}
+          emptyKeyPrefix="reports:financial.empty"
+          footer={totals ? <FinancialReportTotals totals={totals} /> : undefined}
+        />
+      )}
 
       <OrderDetailSheet orderId={search.order} onClose={() => setParam('order', undefined)} />
     </div>
