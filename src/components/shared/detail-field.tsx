@@ -23,11 +23,11 @@ export function DetailField({ label, value, mono = false, span, className }: Det
   const isEmpty = value === null || value === undefined || value === ''
 
   return (
-    <div data-slot="detail-field" className={cn('grid gap-1', span && spanClasses[span], className)}>
+    <div data-slot="detail-field" className={cn('grid min-w-0 gap-1', span && spanClasses[span], className)}>
       <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
       <dd
         className={cn(
-          'text-sm text-foreground',
+          'min-w-0 break-words text-sm text-foreground',
           mono && 'font-mono tabular-nums',
           isEmpty && 'text-muted-foreground',
         )}
