@@ -21,7 +21,9 @@ export function useRatingsReviewsColumns(): ColumnDef<RatingsReviewRow>[] {
           return (
             <div className="flex flex-col">
               <span className="text-sm font-medium text-foreground">{displayName}</span>
-              <span className="text-xs text-muted-foreground">@{reviewerUsername}</span>
+              <span className="text-xs text-muted-foreground">
+                <bdi dir="ltr">@{reviewerUsername}</bdi>
+              </span>
             </div>
           )
         },

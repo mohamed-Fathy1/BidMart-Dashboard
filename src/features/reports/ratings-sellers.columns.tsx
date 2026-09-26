@@ -27,7 +27,9 @@ export function useRatingsSellersColumns(): ColumnDef<RatingsSellerRow>[] {
                 <span className="max-w-52 truncate text-sm font-medium text-foreground" title={sellerName}>
                   {sellerName}
                 </span>
-                <span className="text-xs text-muted-foreground">@{username}</span>
+                <span className="text-xs text-muted-foreground">
+                  <bdi dir="ltr">@{username}</bdi>
+                </span>
               </div>
             </div>
           )

@@ -3,13 +3,21 @@ import { cn } from '@/lib/utils'
 
 interface TruncatedTextCellProps {
   text: string
-  /** A `max-w-*` class; the cell truncates at that width and shows the full text on hover. */
+  /**
+   * A `max-w-*` class; the cell truncates at that width and shows the full text on hover.
+   * `dir="auto"` lets a Latin title in RTL truncate at its own end; `w-fit` keeps a short
+   * one on the parent's side instead of aligning to its own start.
+   */
   className?: string
 }
 
 export function TruncatedTextCell({ text, className }: TruncatedTextCellProps) {
   return (
-    <span className={cn('block truncate text-sm text-foreground', className)} title={text}>
+    <span
+      dir="auto"
+      className={cn('block w-fit truncate text-sm text-foreground', className)}
+      title={text}
+    >
       {text}
     </span>
   )

@@ -93,7 +93,7 @@ export function BusinessActivityTab() {
                     </Avatar>
                   )}
                   primary={(seller) => seller.fullName ?? seller.username}
-                  secondary={(seller) => `@${seller.username}`}
+                  secondary={(seller) => <bdi dir="ltr">@{seller.username}</bdi>}
                   value={(seller) => format.currency(seller.revenue)}
                   count={(seller) =>
                     t('overview:business.orders_count', { count: seller.orderCount })

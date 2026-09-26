@@ -290,7 +290,10 @@ function OrderDetailSheetBody({ data }: OrderDetailSheetBodyProps) {
           {data.customer.fullName && (
             <DetailField label={t('reports:order_detail.fields.full_name')} value={data.customer.fullName} />
           )}
-          <DetailField label={t('reports:order_detail.fields.username')} value={`@${data.customer.username}`} />
+          <DetailField
+            label={t('reports:order_detail.fields.username')}
+            value={<bdi dir="ltr">@{data.customer.username}</bdi>}
+          />
           <DetailField label={t('reports:order_detail.fields.email')} value={data.customer.email} />
           <DetailField
             label={t('reports:order_detail.fields.phone')}
@@ -316,7 +319,9 @@ function OrderDetailSheetBody({ data }: OrderDetailSheetBodyProps) {
           </Avatar>
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-foreground">{data.store.storeName}</p>
-            <p className="truncate text-xs text-muted-foreground">@{data.store.username}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              <bdi dir="ltr">@{data.store.username}</bdi>
+            </p>
           </div>
         </div>
         <div className="mt-4 flex items-center gap-3 rounded-lg border border-border p-3">
