@@ -60,7 +60,7 @@ export function PermissionDenied() {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-20 text-muted-foreground">
       <ShieldAlert className="h-12 w-12" />
-      <p className="text-sm">{t('common:errors.permission_denied')}</p>
+      <p className="text-sm">{t('common:errors.page_not_available')}</p>
     </div>
   )
 }
