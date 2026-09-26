@@ -1,4 +1,6 @@
+import { useRef } from 'react'
 import { Link } from '@tanstack/react-router'
+import { useKeepSelectedInView } from '@/lib/use-keep-selected-in-view'
 import { cn } from '@/lib/utils'
 
 export interface SectionTabItem {
@@ -31,10 +33,14 @@ function highlightClasses(active: boolean) {
 }
 
 export function SectionTabs({ tabs, ariaLabel, className }: SectionTabsProps) {
+  const track = useRef<HTMLElement>(null)
+  useKeepSelectedInView(track, tabs.find((tab) => tab.active)?.to)
+
   if (tabs.length < 2) return null
 
   return (
     <nav
+      ref={track}
       className={cn(
         'inline-flex rounded-lg border border-border bg-background p-1 max-sm:max-w-full max-sm:overflow-x-auto',
         className,
@@ -48,6 +54,9 @@ export function SectionTabs({ tabs, ariaLabel, className }: SectionTabsProps) {
             to={tab.to}
             search={tab.search}
             className={segmentClasses(tab.active)}
+            // The router marks any prefix match as current (/overview on
+            // /overview/financial-overview); only the caller's active tab is.
+            activeOptions={{ exact: true, includeSearch: false }}
             aria-current={tab.active ? 'page' : undefined}
           >
             <span className={highlightClasses(tab.active)} aria-hidden />
