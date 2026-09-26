@@ -450,15 +450,16 @@ export function DataTable<TData, TValue>({
                       'group/row h-[var(--table-row-height)]',
                       hasStickyColumns && 'border-b-0',
                       onRowClick &&
-                        'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/60',
+                        'cursor-pointer focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50',
                       isSelected && 'bg-primary/5',
                     )}
+                    data-row-id={getRowId?.(row.original)}
                     onClick={() => onRowClick?.(row.original)}
                     {...(onRowClick
                       ? {
                           tabIndex: 0,
-                          role: 'button',
                           onKeyDown: (e: React.KeyboardEvent<HTMLTableRowElement>) => {
+                            if (e.target !== e.currentTarget) return
                             if (e.key === 'Enter' || e.key === ' ') {
                               e.preventDefault()
                               onRowClick(row.original)

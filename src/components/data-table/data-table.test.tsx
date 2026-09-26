@@ -91,3 +91,39 @@ describe('DataTable pagination', () => {
     expect(screen.getByText(/^صفحة/).textContent).toBe('صفحة ٢ من ٣')
   })
 })
+
+describe('DataTable clickable rows', () => {
+  function renderRows(onRowClick: (row: Item) => void) {
+    render(
+      <DataTable
+        columns={columns}
+        data={items(2)}
+        getRowId={(row) => row.id}
+        onRowClick={onRowClick}
+      />,
+    )
+  }
+
+  it('keeps table row semantics and exposes the row id', () => {
+    renderRows(vi.fn())
+    expect(screen.getAllByRole('row')).toHaveLength(3)
+    expect(screen.queryAllByRole('button')).toHaveLength(0)
+    const row = screen.getByRole('row', { name: 'Item 0' })
+    expect(row.getAttribute('data-row-id')).toBe('id-0')
+    expect(row.tabIndex).toBe(0)
+  })
+
+  it('activates the focused row with Enter and Space', async () => {
+    const onRowClick = vi.fn()
+    renderRows(onRowClick)
+    const row = screen.getByRole('row', { name: 'Item 1' })
+
+    row.focus()
+    await userEvent.keyboard('{Enter}')
+    await userEvent.keyboard(' ')
+    expect(onRowClick.mock.calls).toEqual([
+      [{ id: 'id-1', name: 'Item 1' }],
+      [{ id: 'id-1', name: 'Item 1' }],
+    ])
+  })
+})
