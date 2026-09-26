@@ -127,3 +127,22 @@ describe('DataTable clickable rows', () => {
     ])
   })
 })
+
+describe('DataTable labels', () => {
+  it('names the rows-per-page select and marks the body busy while loading', async () => {
+    await i18n.changeLanguage('en')
+    const { container } = render(
+      <DataTable
+        columns={columns}
+        data={[]}
+        isLoading
+        pagination={{ pageIndex: 0, pageSize: 10 }}
+        onPaginationChange={vi.fn()}
+        pageCount={3}
+        totalRecords={21}
+      />,
+    )
+    expect(screen.getByRole('combobox', { name: 'Rows per page' })).toBeTruthy()
+    expect(container.querySelector('tbody')?.getAttribute('aria-busy')).toBe('true')
+  })
+})

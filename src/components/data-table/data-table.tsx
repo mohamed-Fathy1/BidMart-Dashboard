@@ -1,4 +1,4 @@
-import { type ReactNode, type ElementType, useMemo } from 'react'
+import { type ReactNode, type ElementType, useId, useMemo } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -220,6 +220,7 @@ export function DataTable<TData, TValue>({
   loadError,
 }: DataTableProps<TData, TValue>) {
   const { t } = useTranslation()
+  const rowsPerPageLabelId = useId()
 
   const hasSelect = enableSelection
   const hasActions = !!actions
@@ -411,7 +412,10 @@ export function DataTable<TData, TValue>({
             ))}
           </TableHeader>
 
-          <TableBody className={hasStickyColumns ? '[&_tr:last-child]:border-0' : undefined}>
+          <TableBody
+            aria-busy={isLoading || undefined}
+            className={hasStickyColumns ? '[&_tr:last-child]:border-0' : undefined}
+          >
             {isLoading ? (
               Array.from({ length: Math.min(5, pagination?.pageSize ?? 5) }).map((_, i) => (
                 <TableRow key={i} className={hasStickyColumns ? 'border-b-0' : undefined}>
@@ -567,7 +571,7 @@ export function DataTable<TData, TValue>({
             )}
             {pageSizeOptions.length > 1 && (
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground whitespace-nowrap">
+                <span id={rowsPerPageLabelId} className="text-sm text-muted-foreground whitespace-nowrap">
                   {t('common:labels.rows_per_page')}
                 </span>
                 <Select
@@ -576,7 +580,7 @@ export function DataTable<TData, TValue>({
                     onPaginationChange({ pageIndex: 0, pageSize: Number(v) })
                   }
                 >
-                  <SelectTrigger size="sm" className="w-[70px]">
+                  <SelectTrigger size="sm" className="w-[70px]" aria-labelledby={rowsPerPageLabelId}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
