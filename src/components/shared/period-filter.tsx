@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId, useRef } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { RadioGroup as RadioGroupPrimitive } from 'radix-ui'
 import { useTranslation } from 'react-i18next'
@@ -12,6 +12,7 @@ import {
 } from '@/lib/report-period'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useKeepSelectedInView } from '@/lib/use-keep-selected-in-view'
 import { cn } from '@/lib/utils'
 
 interface PeriodFilterProps {
@@ -26,10 +27,13 @@ export function PeriodFilter({ value, onChange, error }: PeriodFilterProps) {
   const errorId = useId()
   const anchor = date ?? todayIso()
   const nextAnchor = shiftAnchor(period, anchor, 1)
+  const track = useRef<HTMLDivElement>(null)
+  useKeepSelectedInView(track, period)
 
   return (
     <div className="flex flex-wrap items-center gap-2 max-sm:min-w-0 max-sm:max-w-full">
       <RadioGroupPrimitive.Root
+        ref={track}
         orientation="horizontal"
         aria-label={t('components:period_filter.label')}
         value={period}

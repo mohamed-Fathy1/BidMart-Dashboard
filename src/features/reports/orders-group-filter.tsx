@@ -1,7 +1,9 @@
+import { useRef } from 'react'
 import { RadioGroup as RadioGroupPrimitive } from 'radix-ui'
 import { useTranslation } from 'react-i18next'
 import { Skeleton } from '@/components/ui/skeleton'
 import { format } from '@/lib/format'
+import { useKeepSelectedInView } from '@/lib/use-keep-selected-in-view'
 import { cn } from '@/lib/utils'
 import { readEnum } from '@/lib/list-search'
 import { ORDER_REPORT_GROUPS } from '@/features/reports/report-options'
@@ -35,6 +37,9 @@ export function OrdersGroupFilter({
   onGroupChange,
 }: OrdersGroupFilterProps) {
   const { t } = useTranslation()
+  const track = useRef<HTMLDivElement>(null)
+  // Keyed on the summary too: the track only mounts once the counts arrive.
+  useKeepSelectedInView(track, `${activeGroup ?? ALL}:${summary ? 'ready' : 'pending'}`)
 
   if (!summary && !isLoading) return null
   if (!summary) return <Skeleton className="h-11 w-full max-w-2xl rounded-lg" />
@@ -50,7 +55,7 @@ export function OrdersGroupFilter({
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-      <div className="-mx-1 max-w-full overflow-x-auto px-1 py-0.5">
+      <div ref={track} className="-mx-1 max-w-full overflow-x-auto px-1 py-0.5">
         <RadioGroupPrimitive.Root
           orientation="horizontal"
           aria-label={t('reports:orders.groups.label')}
