@@ -25,7 +25,9 @@ const livestreamsReportKeys = createResourceKeys<LivestreamsReportParams>('lives
  * Report lists keep TanStack defaults (stale immediately, refetch on focus),
  * which is what the livestreams contract asks for when the window includes
  * today. `keepPreviousData` holds the rows while a filter change loads.
- * Pages pass `enabled: false` while the range is invalid so no request is sent.
+ * Pages pass `enabled: false` while the range is invalid so no request is sent,
+ * and ignore `data` when `isError`: a failed refetch keeps the last good
+ * response, which must not read as the current report.
  */
 function useReportListQuery<TParams, TData>(
   keys: ResourceKeys<TParams>,

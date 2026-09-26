@@ -37,7 +37,8 @@ export function OrdersReportPage() {
     limit: pagination.pageSize,
   }
 
-  const { data: response, isLoading } = useOrdersReportQuery(queryParams, !rangeError)
+  const { data, isLoading, isError, refetch } = useOrdersReportQuery(queryParams, !rangeError)
+  const response = isError ? undefined : data
 
   const hasActiveFilters = search.group !== undefined || search.startDate !== undefined
 
@@ -49,6 +50,9 @@ export function OrdersReportPage() {
     hasActiveFilters,
     clearFilters: () =>
       setFilters({ group: undefined, startDate: undefined, endDate: undefined }),
+    loadError: isError
+      ? { message: t('reports:common.load_failed'), onRetry: () => void refetch() }
+      : undefined,
   })
 
   const columns = useOrdersReportColumns()
@@ -66,7 +70,7 @@ export function OrdersReportPage() {
       />
 
       <TableFiltersShell
-        meta={t('reports:orders.meta', { count: meta?.total ?? 0 })}
+        meta={meta ? t('reports:orders.meta', { count: meta.total }) : undefined}
       >
         <ReportDateRangeFilter
           from={search.startDate}

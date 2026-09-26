@@ -57,15 +57,16 @@ export function RatingsReportPage() {
     limit: pagination.pageSize,
   }
 
-  const {
-    data: reviewsResponse,
-    isLoading: isLoadingReviews,
-  } = useRatingsReviewsQuery(reviewsParams, search.tab === 'reviews' && !rangeError)
-
-  const {
-    data: sellersResponse,
-    isLoading: isLoadingSellers,
-  } = useRatingsSellersQuery(sellersParams, search.tab === 'sellers' && !rangeError)
+  const reviewsQuery = useRatingsReviewsQuery(
+    reviewsParams,
+    search.tab === 'reviews' && !rangeError,
+  )
+  const sellersQuery = useRatingsSellersQuery(
+    sellersParams,
+    search.tab === 'sellers' && !rangeError,
+  )
+  const reviewsResponse = reviewsQuery.isError ? undefined : reviewsQuery.data
+  const sellersResponse = sellersQuery.isError ? undefined : sellersQuery.data
 
   const { data: categoriesResponse } = useCategoriesQuery({ limit: 100 })
 
@@ -77,7 +78,7 @@ export function RatingsReportPage() {
     tableProps: reviewsTableProps,
   } = useListPageData({
     response: reviewsResponse,
-    isLoading: isLoadingReviews,
+    isLoading: reviewsQuery.isLoading,
     pagination,
     setPagination,
     hasActiveFilters: !!(search.sellerName || search.rating || search.categoryId || search.startDate || search.endDate),
@@ -89,6 +90,9 @@ export function RatingsReportPage() {
         startDate: undefined,
         endDate: undefined,
       }),
+    loadError: reviewsQuery.isError
+      ? { message: t('reports:common.load_failed'), onRetry: () => void reviewsQuery.refetch() }
+      : undefined,
   })
 
   const {
@@ -96,12 +100,15 @@ export function RatingsReportPage() {
     tableProps: sellersTableProps,
   } = useListPageData({
     response: sellersResponse,
-    isLoading: isLoadingSellers,
+    isLoading: sellersQuery.isLoading,
     pagination,
     setPagination,
     hasActiveFilters: !!(search.sellerName || search.startDate || search.endDate),
     clearFilters: () =>
       setFilters({ sellerName: undefined, startDate: undefined, endDate: undefined }),
+    loadError: sellersQuery.isError
+      ? { message: t('reports:common.load_failed'), onRetry: () => void sellersQuery.refetch() }
+      : undefined,
   })
 
   const reviewsColumns = useRatingsReviewsColumns()

@@ -54,7 +54,11 @@ export function LivestreamsReportPage() {
     limit: pagination.pageSize,
   }
 
-  const { data: response, isLoading } = useLivestreamsReportQuery(queryParams, !rangeError)
+  const { data, isLoading, isError, refetch } = useLivestreamsReportQuery(
+    queryParams,
+    !rangeError,
+  )
+  const response = isError ? undefined : data
 
   const { rows, meta, tableProps } = useListPageData<LivestreamReportRow>({
     response,
@@ -63,6 +67,9 @@ export function LivestreamsReportPage() {
     setPagination,
     hasActiveFilters: !!search.startDate,
     clearFilters: () => setFilters({ startDate: undefined, endDate: undefined }),
+    loadError: isError
+      ? { message: t('reports:common.load_failed'), onRetry: () => void refetch() }
+      : undefined,
   })
 
   const columns = useLivestreamsReportColumns()
@@ -80,7 +87,7 @@ export function LivestreamsReportPage() {
       />
 
       <TableFiltersShell
-        meta={t('reports:livestreams.meta', { count: meta?.total ?? 0 })}
+        meta={meta ? t('reports:livestreams.meta', { count: meta.total }) : undefined}
       >
         <ReportDateRangeFilter
           from={search.startDate}

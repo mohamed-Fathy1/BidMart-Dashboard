@@ -41,10 +41,11 @@ export function FinancialReportPage() {
     ...rangeParamsFor(search.startDate, search.endDate),
   }
 
-  const { data: response, isLoading } = useFinancialReportQuery(
+  const { data, isLoading, isError, refetch } = useFinancialReportQuery(
     { ...filters, page: pagination.pageIndex + 1, limit: pagination.pageSize },
     !rangeError,
   )
+  const response = isError ? undefined : data
 
   const { rows, meta, tableProps } = useListPageData({
     response,
@@ -62,6 +63,9 @@ export function FinancialReportPage() {
         startDate: undefined,
         endDate: undefined,
       }),
+    loadError: isError
+      ? { message: t('reports:common.load_failed'), onRetry: () => void refetch() }
+      : undefined,
   })
 
   const columns = useFinancialReportColumns()
@@ -85,7 +89,9 @@ export function FinancialReportPage() {
         actions={<FinancialReportExport filters={filters} disabled={!!rangeError} />}
       />
 
-      <TableFiltersShell meta={t('reports:financial.meta', { count: meta?.total ?? 0 })}>
+      <TableFiltersShell
+        meta={meta ? t('reports:financial.meta', { count: meta.total }) : undefined}
+      >
         <SearchInput
           value={search.storeName ?? ''}
           onChange={(value) => setFilter('storeName', value || undefined)}
