@@ -1,0 +1,455 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-25T08:42:56+00:00",
+  "title": "Design System: BidMart Admin",
+  "extensions": {
+    "colorMeta": {
+      "gavel-violet": {
+        "role": "primary",
+        "displayName": "Gavel Violet",
+        "canonical": "oklch(51.9% 0.28 286)",
+        "tonalRamp": [
+          "oklch(15% 0.25 286)",
+          "oklch(26% 0.25 286)",
+          "oklch(37% 0.25 286)",
+          "oklch(48% 0.25 286)",
+          "oklch(60% 0.25 286)",
+          "oklch(72% 0.25 286)",
+          "oklch(84% 0.25 286)",
+          "oklch(95% 0.087 286)"
+        ]
+      },
+      "gavel-violet-hover": {
+        "role": "primary",
+        "displayName": "Gavel Violet Hover",
+        "canonical": "oklch(59.1% 0.242 292.4)",
+        "tonalRamp": [
+          "oklch(15% 0.242 292.4)",
+          "oklch(26% 0.242 292.4)",
+          "oklch(37% 0.242 292.4)",
+          "oklch(48% 0.242 292.4)",
+          "oklch(60% 0.242 292.4)",
+          "oklch(72% 0.242 292.4)",
+          "oklch(84% 0.242 292.4)",
+          "oklch(95% 0.085 292.4)"
+        ]
+      },
+      "paddle-blue": {
+        "role": "secondary",
+        "displayName": "Paddle Blue",
+        "canonical": "oklch(59.2% 0.171 262.4)",
+        "tonalRamp": [
+          "oklch(15% 0.171 262.4)",
+          "oklch(26% 0.171 262.4)",
+          "oklch(37% 0.171 262.4)",
+          "oklch(48% 0.171 262.4)",
+          "oklch(60% 0.171 262.4)",
+          "oklch(72% 0.171 262.4)",
+          "oklch(84% 0.171 262.4)",
+          "oklch(95% 0.06 262.4)"
+        ]
+      },
+      "paddle-blue-hover": {
+        "role": "secondary",
+        "displayName": "Paddle Blue Hover",
+        "canonical": "oklch(67% 0.135 263.3)",
+        "tonalRamp": [
+          "oklch(15% 0.135 263.3)",
+          "oklch(26% 0.135 263.3)",
+          "oklch(37% 0.135 263.3)",
+          "oklch(48% 0.135 263.3)",
+          "oklch(60% 0.135 263.3)",
+          "oklch(72% 0.135 263.3)",
+          "oklch(84% 0.135 263.3)",
+          "oklch(95% 0.047 263.3)"
+        ]
+      },
+      "ledger-ink": {
+        "role": "neutral",
+        "displayName": "Ledger Ink",
+        "canonical": "oklch(21.6% 0.006 56)",
+        "tonalRamp": [
+          "oklch(15% 0.006 56)",
+          "oklch(26% 0.006 56)",
+          "oklch(37% 0.006 56)",
+          "oklch(48% 0.006 56)",
+          "oklch(60% 0.006 56)",
+          "oklch(72% 0.006 56)",
+          "oklch(84% 0.006 56)",
+          "oklch(95% 0.002 56)"
+        ]
+      },
+      "worn-stone": {
+        "role": "neutral",
+        "displayName": "Worn Stone",
+        "canonical": "oklch(55.3% 0.012 58.1)",
+        "tonalRamp": [
+          "oklch(15% 0.012 58.1)",
+          "oklch(26% 0.012 58.1)",
+          "oklch(37% 0.012 58.1)",
+          "oklch(48% 0.012 58.1)",
+          "oklch(60% 0.012 58.1)",
+          "oklch(72% 0.012 58.1)",
+          "oklch(84% 0.012 58.1)",
+          "oklch(95% 0.004 58.1)"
+        ]
+      },
+      "warm-canvas": {
+        "role": "neutral",
+        "displayName": "Warm Canvas",
+        "canonical": "oklch(96.5% 0.005 78.3)",
+        "tonalRamp": [
+          "oklch(15% 0.005 78.3)",
+          "oklch(26% 0.005 78.3)",
+          "oklch(37% 0.005 78.3)",
+          "oklch(48% 0.005 78.3)",
+          "oklch(60% 0.005 78.3)",
+          "oklch(72% 0.005 78.3)",
+          "oklch(84% 0.005 78.3)",
+          "oklch(95% 0.002 78.3)"
+        ]
+      },
+      "paper-white": {
+        "role": "neutral",
+        "displayName": "Paper White",
+        "canonical": "oklch(100% 0 89.9)",
+        "tonalRamp": [
+          "oklch(15% 0 89.9)",
+          "oklch(26% 0 89.9)",
+          "oklch(37% 0 89.9)",
+          "oklch(48% 0 89.9)",
+          "oklch(60% 0 89.9)",
+          "oklch(72% 0 89.9)",
+          "oklch(84% 0 89.9)",
+          "oklch(95% 0 89.9)"
+        ]
+      },
+      "hairline-stone": {
+        "role": "neutral",
+        "displayName": "Hairline Stone",
+        "canonical": "oklch(92.3% 0.003 48.7)",
+        "tonalRamp": [
+          "oklch(15% 0.003 48.7)",
+          "oklch(26% 0.003 48.7)",
+          "oklch(37% 0.003 48.7)",
+          "oklch(48% 0.003 48.7)",
+          "oklch(60% 0.003 48.7)",
+          "oklch(72% 0.003 48.7)",
+          "oklch(84% 0.003 48.7)",
+          "oklch(95% 0.001 48.7)"
+        ]
+      },
+      "quiet-stone": {
+        "role": "neutral",
+        "displayName": "Quiet Stone",
+        "canonical": "oklch(97% 0.001 106.4)",
+        "tonalRamp": [
+          "oklch(15% 0.001 106.4)",
+          "oklch(26% 0.001 106.4)",
+          "oklch(37% 0.001 106.4)",
+          "oklch(48% 0.001 106.4)",
+          "oklch(60% 0.001 106.4)",
+          "oklch(72% 0.001 106.4)",
+          "oklch(84% 0.001 106.4)",
+          "oklch(95% 0 106.4)"
+        ]
+      },
+      "context-gray": {
+        "role": "neutral",
+        "displayName": "Context Gray",
+        "canonical": "oklch(86.9% 0.004 56.4)",
+        "tonalRamp": [
+          "oklch(15% 0.004 56.4)",
+          "oklch(26% 0.004 56.4)",
+          "oklch(37% 0.004 56.4)",
+          "oklch(48% 0.004 56.4)",
+          "oklch(60% 0.004 56.4)",
+          "oklch(72% 0.004 56.4)",
+          "oklch(84% 0.004 56.4)",
+          "oklch(95% 0.002 56.4)"
+        ]
+      },
+      "stop-red": {
+        "role": "status",
+        "displayName": "Stop Red",
+        "canonical": "oklch(57.7% 0.215 27.3)",
+        "tonalRamp": [
+          "oklch(15% 0.215 27.3)",
+          "oklch(26% 0.215 27.3)",
+          "oklch(37% 0.215 27.3)",
+          "oklch(48% 0.215 27.3)",
+          "oklch(60% 0.215 27.3)",
+          "oklch(72% 0.215 27.3)",
+          "oklch(84% 0.215 27.3)",
+          "oklch(95% 0.075 27.3)"
+        ]
+      },
+      "settled-emerald": {
+        "role": "status",
+        "displayName": "Settled Emerald",
+        "canonical": "oklch(59.6% 0.127 163.2)",
+        "tonalRamp": [
+          "oklch(15% 0.127 163.2)",
+          "oklch(26% 0.127 163.2)",
+          "oklch(37% 0.127 163.2)",
+          "oklch(48% 0.127 163.2)",
+          "oklch(60% 0.127 163.2)",
+          "oklch(72% 0.127 163.2)",
+          "oklch(84% 0.127 163.2)",
+          "oklch(95% 0.045 163.2)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page title, one per page."
+      },
+      "section": {
+        "displayName": "Section",
+        "purpose": "Rare second-level headings."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card and sheet section titles."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Headline numbers in metric bands and stat cards; proportional digits."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running text, table cells, form values."
+      },
+      "body-arabic": {
+        "displayName": "Body (Arabic)",
+        "purpose": "All text when the document language is Arabic."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Metric and field labels, captions, badge text."
+      },
+      "data": {
+        "displayName": "Data",
+        "purpose": "Ids, money, counts and dates in table columns; tabular figures."
+      }
+    },
+    "shadows": [
+      {
+        "name": "rest",
+        "value": "0 0 0 1px rgba(28,25,23,0.03), 0 1px 2px rgba(28,25,23,0.03)",
+        "purpose": "Cards, metric bands and filter shells at rest."
+      },
+      {
+        "name": "raised",
+        "value": "0 0 0 1px rgba(28,25,23,0.03), 0 1px 3px rgba(28,25,23,0.02), 0 4px 12px rgba(28,25,23,0.04), 0 12px 32px -4px rgba(28,25,23,0.03)",
+        "purpose": "The content shell and dialogs."
+      },
+      {
+        "name": "floating",
+        "value": "0 0 0 1px rgba(28,25,23,0.04), 0 2px 6px rgba(28,25,23,0.04), 0 8px 24px -4px rgba(28,25,23,0.08)",
+        "purpose": "Popovers, dropdown menus and toasts."
+      }
+    ],
+    "motion": [
+      {
+        "name": "duration-instant",
+        "value": "90ms",
+        "purpose": "Checkbox, focus ring, icon swap."
+      },
+      {
+        "name": "duration-hover",
+        "value": "150ms",
+        "purpose": "Color, opacity and fill changes."
+      },
+      {
+        "name": "duration-emphasized",
+        "value": "180ms",
+        "purpose": "Tooltip, popover, menu and toast entry."
+      },
+      {
+        "name": "duration-layout",
+        "value": "280ms",
+        "purpose": "Width, height, margin and collapse."
+      },
+      {
+        "name": "ease-default",
+        "value": "ease-out",
+        "purpose": "Pairs with instant and hover."
+      },
+      {
+        "name": "ease-emphasized",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Pairs with emphasized entries."
+      },
+      {
+        "name": "ease-sidebar",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Pairs with layout changes."
+      },
+      {
+        "name": "ease-exit",
+        "value": "ease-in",
+        "purpose": "All exits, faster than entry."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one colored action on a screen: save, approve, create.",
+      "html": "<button class=\"ds-btn-primary\">Approve seller</button>",
+      "css": ".ds-btn-primary{height:36px;padding:0 16px;border:none;border-radius:6px;background:var(--color-primary);color:var(--color-primary-foreground);font:500 14px/1 Inter,system-ui,sans-serif;cursor:pointer;transition:background-color 150ms ease-out,opacity 150ms ease-out}.ds-btn-primary:hover{background:color-mix(in srgb,var(--color-primary) 90%,transparent)}.ds-btn-primary:focus-visible{outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 50%, transparent);}.ds-btn-primary:active{opacity:.95}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary actions beside a primary one: export, cancel, view.",
+      "html": "<button class=\"ds-btn-outline\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 15V3\"/><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/><path d=\"m7 10 5 5 5-5\"/></svg>Export</button>",
+      "css": ".ds-btn-outline{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px;border:1px solid var(--color-border);border-radius:6px;background:var(--color-background);color:var(--color-foreground);font:500 14px/1 Inter,system-ui,sans-serif;box-shadow:0 1px 2px rgba(28,25,23,.05);cursor:pointer;transition:background-color 150ms ease-out}.ds-btn-outline:hover{background:var(--color-accent)}.ds-btn-outline:focus-visible{outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 50%, transparent);}"
+    },
+    {
+      "name": "Destructive Button",
+      "kind": "button",
+      "refersTo": "button-destructive",
+      "description": "Block, reject, delete and ban only; always behind a confirmation.",
+      "html": "<button class=\"ds-btn-destructive\">Block seller</button>",
+      "css": ".ds-btn-destructive{height:36px;padding:0 16px;border:none;border-radius:6px;background:var(--color-destructive);color:#fff;font:500 14px/1 Inter,system-ui,sans-serif;cursor:pointer;transition:background-color 150ms ease-out}.ds-btn-destructive:hover{background:color-mix(in srgb,var(--color-destructive) 90%,transparent)}.ds-btn-destructive:focus-visible{outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--color-destructive) 25%,transparent)}"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Filter fields in the filter shell above a table.",
+      "html": "<label class=\"ds-input-wrap\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg><input class=\"ds-input\" placeholder=\"Store name\"></label>",
+      "css": ".ds-input-wrap{position:relative;display:inline-flex;align-items:center;width:256px;color:var(--color-muted-foreground)}.ds-input-wrap svg{position:absolute;inset-inline-start:10px}.ds-input{width:100%;height:36px;padding-inline:34px 12px;border:1px solid var(--color-input);border-radius:6px;background:transparent;color:var(--color-foreground);font:400 14px/1.5 Inter,system-ui,sans-serif;transition:border-color 150ms ease-out,box-shadow 150ms ease-out}.ds-input::placeholder{color:var(--color-muted-foreground)}.ds-input:focus-visible{border-color:var(--color-ring);outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 50%, transparent);}"
+    },
+    {
+      "name": "Sidebar Navigation",
+      "kind": "nav",
+      "refersTo": "nav-item-active",
+      "description": "Rail rows: hover tint, active violet fill with a 3px edge bar at the inline start.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item is-active\" href=\"#\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1\"/></svg>Statistics</a><a class=\"ds-nav-item\" href=\"#\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" aria-hidden=\"true\"><path d=\"M3 3v16a2 2 0 0 0 2 2h16\"/><path d=\"M18 17V9\"/><path d=\"M13 17V5\"/><path d=\"M8 17v-3\"/></svg>Reports</a></nav>",
+      "css": ".ds-nav{display:flex;flex-direction:column;gap:4px;width:236px;padding:12px;background:var(--sidebar-background)}.ds-nav-item{position:relative;display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:8px;color:var(--color-foreground);font:500 14px/1 Inter,system-ui,sans-serif;text-decoration:none;transition:background-color 150ms ease-out,color 150ms ease-out}.ds-nav-item:hover{background:color-mix(in srgb,var(--color-muted-foreground) 10%,transparent)}.ds-nav-item.is-active{background:color-mix(in srgb,var(--color-primary) 10%,transparent);color:var(--color-primary)}.ds-nav-item.is-active::before{content:\"\";position:absolute;inset-inline-start:-12px;top:50%;width:3px;height:20px;transform:translateY(-50%);border-radius:0 9999px 9999px 0;background:var(--color-primary)}.ds-nav-item:focus-visible{outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 50%, transparent);}"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "status-badge",
+      "description": "Label-width pill with a dot; the status family carries meaning, the text carries it too.",
+      "html": "<span class=\"ds-badge ds-badge-positive\"><span class=\"ds-dot\"></span>Completed</span> <span class=\"ds-badge ds-badge-warning\"><span class=\"ds-dot\"></span>In progress</span> <span class=\"ds-badge ds-badge-neutral\"><span class=\"ds-dot\"></span>Cancelled</span>",
+      "css": ".ds-badge{display:inline-flex;align-items:center;gap:6px;padding:2px 10px 2px 8px;border:1px solid;border-radius:9999px;font:500 12px/20px Inter,system-ui,sans-serif;white-space:nowrap}.ds-dot{width:6px;height:6px;border-radius:9999px}.ds-badge-positive{background:#ecfdf5;color:#047857;border-color:rgba(167,243,208,.7)}.ds-badge-positive .ds-dot{background:#10b981}.ds-badge-warning{background:#fffbeb;color:#b45309;border-color:rgba(253,230,138,.7)}.ds-badge-warning .ds-dot{background:#f59e0b}.ds-badge-neutral{background:#f5f5f4;color:#57534e;border-color:rgba(231,229,228,.7)}.ds-badge-neutral .ds-dot{background:#a8a29e}"
+    },
+    {
+      "name": "Metric Band",
+      "kind": "custom",
+      "refersTo": "metric-cell",
+      "description": "Signature: related figures on one surface split by 1px rules; sans figures with a smaller currency code.",
+      "html": "<dl class=\"ds-band\"><div class=\"ds-cell\"><dt>Total revenue</dt><dd class=\"ds-fig\"><span class=\"ds-code\">SAR</span>11,536.71</dd></div><div class=\"ds-cell\"><dt>Orders</dt><dd class=\"ds-fig\">92</dd></div><div class=\"ds-cell\"><dt>Active sellers</dt><dd class=\"ds-fig\">64</dd><dd class=\"ds-hint\">Right now, not the period</dd></div></dl>",
+      "css": ".ds-band{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:0;overflow:hidden;border:1px solid var(--color-border);border-radius:12px;background:var(--color-border);box-shadow:var(--shadow-rest)}.ds-cell{display:flex;flex-direction:column;padding:16px 20px;background:var(--color-card)}.ds-cell dt{color:var(--color-muted-foreground);font:500 12px/1.4 Inter,system-ui,sans-serif}.ds-fig{display:flex;align-items:baseline;gap:6px;margin:10px 0 0;color:var(--color-foreground);font:600 26px/1 Inter,system-ui,sans-serif;letter-spacing:-.02em}.ds-code{color:var(--color-muted-foreground);font:500 13px/1 Inter,system-ui,sans-serif;letter-spacing:0}.ds-hint{margin:8px 0 0;color:var(--color-muted-foreground);font:400 12px/1.4 Inter,system-ui,sans-serif}"
+    },
+    {
+      "name": "Section Tabs",
+      "kind": "nav",
+      "refersTo": "section-tabs",
+      "description": "Segmented navigation between sibling pages; the current page is a white pill at rest.",
+      "html": "<nav class=\"ds-tabs\" aria-label=\"Statistics\"><a class=\"ds-tab\" aria-current=\"page\" href=\"#\">General Overview</a><a class=\"ds-tab\" href=\"#\">Business Activity</a><a class=\"ds-tab\" href=\"#\">Financial Overview</a></nav>",
+      "css": ".ds-tabs{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--color-border);border-radius:8px;background:var(--color-background)}.ds-tab{display:inline-flex;align-items:center;min-height:36px;padding:0 16px;border-radius:6px;color:var(--color-muted-foreground);font:500 14px/1 Inter,system-ui,sans-serif;text-decoration:none;transition:color 150ms ease-out,background-color 150ms ease-out}.ds-tab:hover{color:var(--color-foreground);background:color-mix(in srgb,var(--color-muted-foreground) 10%,transparent)}.ds-tab[aria-current=page]{background:var(--color-card);color:var(--color-primary);box-shadow:var(--shadow-rest),0 0 0 1px var(--color-border)}.ds-tab:focus-visible{outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 50%, transparent);}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Auction House Ledger",
+    "overview": "Behind every lively auction there is a ledger: calm, exact, and trusted by everyone who reads it. The BidMart admin dashboard is that ledger for a live-streaming marketplace. Its surfaces are warm stone and white paper, its figures are set so they can be read and compared at a glance, and its one strong color, Gavel Violet, marks the decision in front of the admin: the active page, the primary action, the focused control. Everything else stays quiet so the data and the next action can lead.\n\nThe system is built for staff who spend their day in it, mostly in Arabic, on a desktop. Density is deliberate: tables at 48px rows, figures grouped on shared surfaces, filters in one row above the list they scope. Components are precise and restrained: hairline borders, small radii, color only for state, motion only for change. The mood is calm, exact, warm and confident.\n\nIt must never drift toward a generic SaaS template (gradient cards, grids of icon-plus-heading cards, hero metrics with decorative sparklines), a crypto trading terminal (dark neon, flashing tickers, red and green everywhere), or the playful, promotional look of the consumer marketplace app.\n\nMotion is two-speed and never decorative. Color and opacity change on 150ms ease-out; width, height and collapse move on 280ms with a standard ease; tooltip, popover, menu and toast entry use 180ms with an emphasized ease; checkboxes and focus rings respond in 90ms. Exits are faster than entries and ease in. Structure and color never share one timeline. State changes morph existing elements instead of swapping `display`. No springs, no bounces, no staggered entrances.",
+    "keyCharacteristics": [
+      "Warm stone neutrals, white paper surfaces, one violet accent reserved for state and action.",
+      "Borders do the structural work; shadows only mark the depth tier.",
+      "Figures in the UI sans with the currency code set smaller; mono only for columns of data.",
+      "Arabic (RTL) is designed first, never mirrored as an afterthought.",
+      "Two-speed motion: layout moves slowly, color changes quickly, nothing bounces."
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule",
+        "body": "Gavel Violet marks state and the primary action only. If a screen has violet on something that is neither selected, focused, active nor the main action, remove it.",
+        "section": "colors"
+      },
+      {
+        "name": "The Gradient Stays Home Rule",
+        "body": "The Paddle Blue to Gavel Violet gradient (90deg) belongs to the brand logo, the login submit and auth hero CTAs. It never appears on cards, tables, list rows, sidebar items or any repeating element.",
+        "section": "colors"
+      },
+      {
+        "name": "The Warm Gray Rule",
+        "body": "Neutrals come from the stone family. Do not introduce cool slate or zinc grays.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ledger Figure Rule",
+        "body": "A number that stands alone uses the sans with proportional digits. A number that stacks in a column with others uses tabular figures. Never set a headline figure in bold mono.",
+        "section": "typography"
+      },
+      {
+        "name": "The Arabic Digits Rule",
+        "body": "In Arabic every number, including those inside translated sentences and literal copy, uses Arabic-Indic digits, and every date uses the Gregorian calendar.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Filter Row Rule",
+        "body": "Filters live in one row above everything they scope. A chart or table never carries its own private filter.",
+        "section": "layout"
+      },
+      {
+        "name": "The Hover Never Lifts Rule",
+        "body": "Hover changes background, never shadow. A shadow is a depth tier, so it only changes when the surface actually moves to another tier.",
+        "section": "elevation"
+      },
+      {
+        "name": "The No Nested Cards Rule",
+        "body": "A card never sits inside another card or inside a sheet panel. Inside a surface, sections are split by hairline dividers.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Report Or Filter Rule",
+        "body": "A surface either reports numbers or filters the list, never both. If a figure also works as a filter, it belongs in a status filter, not a metric band.",
+        "section": "layout"
+      }
+    ],
+    "dos": [
+      "Do reserve Gavel Violet (#6A23FD) for the selected, focused, active or primary thing on the screen.",
+      "Do group related figures in one metric band with 1px rules, and set them in the sans with a smaller currency code.",
+      "Do separate surfaces with 1px Hairline Stone borders and the canvas-to-paper step, using only the Rest, Raised and Floating shadows.",
+      "Do design every screen in Arabic first: logical properties, flipped directional icons, Arabic-Indic digits, Gregorian dates.",
+      "Do keep status colors paired with a text label, and keep badges as wide as their label.",
+      "Do use 6, 8, 12 and 16px radii for inputs, menus, cards and the shell respectively."
+    ],
+    "donts": [
+      "Don't put the brand gradient on cards, tables, rows, sidebar items or any repeated element.",
+      "Don't add a shadow on hover; change the background instead.",
+      "Don't nest cards, or build pages out of grids of identical icon-plus-heading cards.",
+      "Don't set headline figures in bold mono, or use mono as decoration for non-data text.",
+      "Don't use glass or backdrop blur panels, emoji in the UI, or thick colored side borders.",
+      "Don't drift toward a generic SaaS template, a dark trading terminal, or the consumer app's promotional look."
+    ]
+  }
+}
