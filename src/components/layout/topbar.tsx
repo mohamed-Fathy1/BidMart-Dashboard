@@ -94,7 +94,8 @@ export function Topbar() {
 
       <div className="flex flex-1 items-center gap-2 px-2 sm:gap-4 sm:px-6">
         <div className="min-w-0 flex-1">
-          <div className="hidden sm:block">
+          {/* From md the search pill takes the room, and below xl the crumbs truncate to single letters. */}
+          <div className="hidden sm:block md:hidden xl:block">
             <BreadcrumbTrail />
           </div>
         </div>
