@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Link, type LinkProps } from '@tanstack/react-router'
 import { ProportionBar } from '@/components/shared/proportion-bar'
 import { format } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -12,11 +13,16 @@ interface RankedListProps<T> {
   leading?: (item: T) => ReactNode
   value: (item: T) => ReactNode
   count?: (item: T) => ReactNode
+  /** Renders each row as a link, so it can open in a new tab. Takes precedence over `onSelect`. */
+  getLink?: (item: T) => LinkProps
   onSelect?: (item: T) => void
   emptyLabel: string
   ariaLabel?: string
   className?: string
 }
+
+const interactiveRowClass =
+  'flex w-full items-center gap-3 rounded-md px-2 py-2 text-start transition-[background-color] duration-(--duration-hover) ease-(--ease-default) hover:bg-muted/50 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
 
 export function RankedList<T>({
   items,
@@ -27,6 +33,7 @@ export function RankedList<T>({
   leading,
   value,
   count,
+  getLink,
   onSelect,
   emptyLabel,
   ariaLabel,
@@ -77,12 +84,12 @@ export function RankedList<T>({
 
         return (
           <li key={getKey(item)}>
-            {onSelect ? (
-              <button
-                type="button"
-                onClick={() => onSelect(item)}
-                className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-start transition-[background-color] duration-(--duration-hover) ease-(--ease-default) hover:bg-muted/50 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              >
+            {getLink ? (
+              <Link {...getLink(item)} className={interactiveRowClass}>
+                {body}
+              </Link>
+            ) : onSelect ? (
+              <button type="button" onClick={() => onSelect(item)} className={interactiveRowClass}>
                 {body}
               </button>
             ) : (
