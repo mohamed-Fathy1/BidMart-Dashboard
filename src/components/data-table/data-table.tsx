@@ -11,7 +11,7 @@ import {
   type Row,
 } from '@tanstack/react-table'
 import { useTranslation } from 'react-i18next'
-import { EllipsisVertical, Inbox } from 'lucide-react'
+import { AlertCircle, EllipsisVertical, Inbox } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -186,6 +186,11 @@ interface DataTableProps<TData, TValue> {
    * Use it for a totals row that must stay attached to the table it sums.
    */
   footer?: ReactNode
+  /**
+   * Set when the rows could not be loaded. Replaces rows and the empty state
+   * with the message and a retry, so a failed request never reads as "no data".
+   */
+  loadError?: { message: string; onRetry: () => void }
 }
 
 const defaultPageSizeOptions = [10, 25, 50]
@@ -213,6 +218,7 @@ export function DataTable<TData, TValue>({
   onClearFilters,
   emptyKeyPrefix = 'components:data_table',
   footer,
+  loadError,
 }: DataTableProps<TData, TValue>) {
   const { t } = useTranslation()
 
@@ -434,7 +440,7 @@ export function DataTable<TData, TValue>({
                   })}
                 </TableRow>
               ))
-            ) : rows.length ? (
+            ) : rows.length && !loadError ? (
               rows.map((row, rowIndex) => {
                 const isSelected = row.getIsSelected()
                 const isLastRow = rowIndex === rows.length - 1
@@ -478,6 +484,29 @@ export function DataTable<TData, TValue>({
                   </TableRow>
                 )
               })
+            ) : loadError && !isLoading ? (
+              <TableRow className={hasStickyColumns ? 'border-b-0' : undefined}>
+                <TableCell colSpan={allColumns.length} className="h-64 p-0">
+                  <div
+                    role="alert"
+                    className="flex h-full flex-col items-center justify-center gap-2 px-6 py-10 text-center"
+                  >
+                    <div className="flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                      <AlertCircle aria-hidden className="size-5" />
+                    </div>
+                    <p className="text-sm font-medium text-foreground">{loadError.message}</p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="mt-2"
+                      onClick={loadError.onRetry}
+                    >
+                      {t('common:buttons.retry')}
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
             ) : (
               <TableRow className={hasStickyColumns ? 'border-b-0' : undefined}>
                 <TableCell

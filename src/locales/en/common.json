@@ -12,7 +12,8 @@
     "reset": "Reset",
     "back": "Back",
     "submit": "Submit",
-    "clear_filters": "Clear filters"
+    "clear_filters": "Clear filters",
+    "retry": "Retry"
   },
   "states": {
     "loading": "Loading...",

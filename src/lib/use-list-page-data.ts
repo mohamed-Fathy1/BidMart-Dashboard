@@ -12,6 +12,8 @@ interface UseListPageDataArgs<TRow> {
   hasActiveFilters?: boolean
   /** Called when the operator clicks "Clear filters" inside the empty state. */
   clearFilters?: () => void
+  /** Set when the query failed; the table shows `loadError` instead of rows or the empty state. */
+  loadError?: { message: string; onRetry: () => void }
 }
 
 interface ListPageDataResult<TRow> {
@@ -26,6 +28,7 @@ interface ListPageDataResult<TRow> {
     isLoading: boolean
     hasActiveFilters: boolean
     onClearFilters?: () => void
+    loadError?: { message: string; onRetry: () => void }
   }
 }
 
@@ -53,6 +56,7 @@ export function useListPageData<TRow>({
   setPagination,
   hasActiveFilters = false,
   clearFilters,
+  loadError,
 }: UseListPageDataArgs<TRow>): ListPageDataResult<TRow> {
   const rows = response?.data ?? []
   const meta = response?.meta
@@ -65,8 +69,9 @@ export function useListPageData<TRow>({
       isLoading,
       hasActiveFilters,
       onClearFilters: clearFilters,
+      loadError,
     }),
-    [meta?.totalPages, meta?.total, pagination, setPagination, isLoading, hasActiveFilters, clearFilters],
+    [meta?.totalPages, meta?.total, pagination, setPagination, isLoading, hasActiveFilters, clearFilters, loadError],
   )
   return { rows, meta, tableProps }
 }
