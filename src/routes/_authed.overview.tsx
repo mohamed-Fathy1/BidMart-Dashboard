@@ -75,14 +75,21 @@ function StatisticsLayoutRoute() {
         <PeriodFilter
           value={params}
           error={anchorError}
-          onChange={(next) =>
-            navigate({
-              search: {
-                period: next.period === DEFAULT_STATISTICS_PERIOD ? undefined : next.period,
-                date: next.date,
-              },
-            })
-          }
+          onChange={(next) => {
+            const search = {
+              period: next.period === DEFAULT_STATISTICS_PERIOD ? undefined : next.period,
+              date: next.date,
+            }
+            // `Route.useNavigate()` defaults to the layout path, so pass `to`
+            // explicitly to keep the active tab when the window changes.
+            if (pathname.startsWith('/overview/business-activity')) {
+              navigate({ to: '/overview/business-activity', search })
+            } else if (pathname.startsWith('/overview/financial-overview')) {
+              navigate({ to: '/overview/financial-overview', search })
+            } else {
+              navigate({ to: '/overview', search })
+            }
+          }}
         />
       </div>
 
