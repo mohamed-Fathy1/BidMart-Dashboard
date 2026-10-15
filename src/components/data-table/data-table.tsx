@@ -338,6 +338,26 @@ export function DataTable<TData, TValue>({
     return undefined
   }
 
+  /*
+   * Base TableHead/TableCell pad the first/last child (ps-4/pe-4). The
+   * injected select/actions columns are narrow centered controls, so they
+   * reset to the base padding (same arbitrary variant, so tailwind-merge
+   * drops the base edge class) and the edge spacing moves to the adjacent
+   * data column — the first/last non-fixed column. Logical properties keep
+   * this correct in RTL; nth-child counts DOM order, which follows the
+   * inline direction in both LTR and RTL.
+   */
+  function getEdgeClass(id: string, index: number, total: number) {
+    if (id === 'select') return '[&:first-child:not([colspan])]:ps-2'
+    if (id === 'actions') return '[&:last-child:not([colspan])]:pe-2'
+    return (
+      cn(
+        hasSelect && index === 1 && '[&:nth-child(2)]:ps-4',
+        hasActions && index === total - 2 && '[&:nth-last-child(2)]:pe-4',
+      ) || undefined
+    )
+  }
+
   /* ---------- selection count ---------- */
 
   const selectedCount =
@@ -380,7 +400,7 @@ export function DataTable<TData, TValue>({
           <TableHeader className={cn('sticky top-0 bg-card', hasStickyColumns && '[&_tr]:border-b-0')}>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className={hasStickyColumns ? 'border-b-0' : undefined}>
-                {headerGroup.headers.map((header) => {
+                {headerGroup.headers.map((header, index, headers) => {
                   const canSort = header.column.getCanSort()
                   const sortDir = header.column.getIsSorted()
                   const ariaSort =
@@ -399,6 +419,7 @@ export function DataTable<TData, TValue>({
                         'h-12',
                         getHeadSticky(header.column.id),
                         getWidthClass(header.column.id),
+                        getEdgeClass(header.column.id, index, headers.length),
                         hasStickyColumns && 'border-b border-border',
                       )}
                     >
@@ -427,6 +448,7 @@ export function DataTable<TData, TValue>({
                         className={cn(
                           'h-[var(--table-row-height)]',
                           getWidthClass(colId),
+                          getEdgeClass(colId, j, allColumns.length),
                           hasStickyColumns && i < 4 && 'border-b border-border',
                         )}
                       >
@@ -473,12 +495,13 @@ export function DataTable<TData, TValue>({
                       : {})}
                     data-state={isSelected ? 'selected' : undefined}
                   >
-                    {row.getVisibleCells().map((cell) => (
+                    {row.getVisibleCells().map((cell, cellIndex, cells) => (
                       <TableCell
                         key={cell.id}
                         className={cn(
                           getCellSticky(cell.column.id, isSelected),
                           getWidthClass(cell.column.id),
+                          getEdgeClass(cell.column.id, cellIndex, cells.length),
                           hasStickyColumns && !isLastRow && 'border-b border-border',
                         )}
                       >

@@ -128,6 +128,51 @@ describe('DataTable clickable rows', () => {
   })
 })
 
+describe('DataTable edge spacing', () => {
+  const twoColumns: ColumnDef<Item>[] = [
+    { accessorKey: 'id', header: 'ID' },
+    { accessorKey: 'name', header: 'Name' },
+  ]
+
+  function renderWithActions() {
+    render(
+      <DataTable
+        columns={twoColumns}
+        data={items(1)}
+        actions={() => [{ label: 'Edit', onClick: vi.fn() }]}
+      />,
+    )
+  }
+
+  it('keeps the actions column at base padding and pads the last data column instead', () => {
+    renderWithActions()
+    const headers = screen.getAllByRole('columnheader')
+    const actionsHeader = headers[headers.length - 1]
+    const lastDataHeader = headers[headers.length - 2]
+
+    expect(actionsHeader.className).toContain('[&:last-child:not([colspan])]:pe-2')
+    expect(actionsHeader.className).not.toContain('pe-4')
+    expect(lastDataHeader.className).toContain('[&:nth-last-child(2)]:pe-4')
+  })
+
+  it('applies the same split to body cells', () => {
+    renderWithActions()
+    const cells = screen.getAllByRole('cell')
+    const actionsCell = cells[cells.length - 1]
+    const lastDataCell = cells[cells.length - 2]
+
+    expect(actionsCell.className).toContain('[&:last-child:not([colspan])]:pe-2')
+    expect(actionsCell.className).not.toContain('pe-4')
+    expect(lastDataCell.className).toContain('[&:nth-last-child(2)]:pe-4')
+  })
+
+  it('leaves the first data column on the base first-child padding when no select column exists', () => {
+    renderWithActions()
+    const headers = screen.getAllByRole('columnheader')
+    expect(headers[0].className).toContain('[&:first-child:not([colspan])]:ps-4')
+  })
+})
+
 describe('DataTable labels', () => {
   it('names the rows-per-page select and marks the body busy while loading', async () => {
     await i18n.changeLanguage('en')
