@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertCircle } from 'lucide-react'
 import type { PaginationState } from '@tanstack/react-table'
@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SearchInput } from '@/components/shared/search-input'
 import { FilterSelect } from '@/components/shared/filter-select'
+import { DateRangeField } from '@/components/shared/date-range-field'
 import { TableFiltersShell } from '@/components/shared/table-filters-shell'
 import { DataTable } from '@/components/data-table/data-table'
 import { useListPageData } from '@/lib/use-list-page-data'
@@ -32,13 +33,21 @@ interface WalletPanelProps {
 
 export function WalletPanel({ sellerId }: WalletPanelProps) {
   const { t } = useTranslation()
+  const dateErrorId = useId()
 
   const [typeFilter, setTypeFilter] = useState<WalletTxType | ''>('')
   const [searchTerm, setSearchTerm] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   })
+
+  // Either date can be sent alone (open-ended range). A reversed range is a
+  // form error — it is shown inline and never sent (the backend would answer
+  // with an empty list instead of rejecting it).
+  const dateRangeInvalid = dateFrom !== '' && dateTo !== '' && dateFrom > dateTo
 
   const {
     data: dashboard,
@@ -48,6 +57,8 @@ export function WalletPanel({ sellerId }: WalletPanelProps) {
 
   const txParams = {
     type: typeFilter || undefined,
+    dateFrom: !dateRangeInvalid && dateFrom !== '' ? dateFrom : undefined,
+    dateTo: !dateRangeInvalid && dateTo !== '' ? dateTo : undefined,
     referenceNumber: searchTerm.trim() || undefined,
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
@@ -57,7 +68,8 @@ export function WalletPanel({ sellerId }: WalletPanelProps) {
     txParams,
   )
 
-  const hasActiveFilters = typeFilter !== '' || searchTerm.trim() !== ''
+  const hasActiveFilters =
+    typeFilter !== '' || searchTerm.trim() !== '' || dateFrom !== '' || dateTo !== ''
   const { rows, tableProps } = useListPageData({
     response: txResponse,
     isLoading: txLoading,
@@ -67,6 +79,8 @@ export function WalletPanel({ sellerId }: WalletPanelProps) {
     clearFilters: () => {
       setTypeFilter('')
       setSearchTerm('')
+      setDateFrom('')
+      setDateTo('')
       setPagination((p) => ({ ...p, pageIndex: 0 }))
     },
   })
@@ -105,6 +119,27 @@ export function WalletPanel({ sellerId }: WalletPanelProps) {
         placeholder={t('wallet:transactions.filters.type')}
         className="min-w-[180px]"
       />
+      <DateRangeField
+        from={dateFrom}
+        to={dateTo}
+        onFromChange={(v) => {
+          setDateFrom(v)
+          resetToFirstPage()
+        }}
+        onToChange={(v) => {
+          setDateTo(v)
+          resetToFirstPage()
+        }}
+        fromLabel={t('wallet:transactions.filters.date_from')}
+        toLabel={t('wallet:transactions.filters.date_to')}
+        invalid={dateRangeInvalid}
+        describedBy={dateRangeInvalid ? dateErrorId : undefined}
+      />
+      {dateRangeInvalid ? (
+        <p id={dateErrorId} role="alert" className="w-full text-xs text-destructive">
+          {t('components:date_range.errors.from_after_to')}
+        </p>
+      ) : null}
     </TableFiltersShell>
   )
 

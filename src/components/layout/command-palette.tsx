@@ -12,8 +12,9 @@ import {
   CommandSeparator,
 } from '@/components/ui/command'
 import { useLogoutMutation } from '@/features/auth/auth.queries'
+import { useAuthStore } from '@/features/auth/auth.store'
 import { usePermissionCheck } from '@/lib/permissions'
-import { navLeaves } from '@/components/layout/nav-items'
+import { isNavLeafVisible, navLeaves } from '@/components/layout/nav-items'
 
 interface CommandPaletteProps {
   open: boolean
@@ -24,9 +25,10 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const check = usePermissionCheck()
+  const isSuperAdmin = useAuthStore((s) => s.user?.isSuperAdmin)
   const logout = useLogoutMutation()
 
-  const visible = navLeaves.filter((leaf) => check(leaf.permission))
+  const visible = navLeaves.filter((leaf) => isNavLeafVisible(leaf, check, isSuperAdmin))
 
   function go(to: string) {
     onOpenChange(false)

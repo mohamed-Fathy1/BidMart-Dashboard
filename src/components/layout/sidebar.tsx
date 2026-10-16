@@ -5,9 +5,11 @@ import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { useIsDesktop } from '@/lib/use-media-query'
 import { usePermissionCheck } from '@/lib/permissions'
+import { useAuthStore } from '@/features/auth/auth.store'
 import { useUIStore } from '@/features/ui/ui.store'
 import {
   navSections,
+  isNavLeafVisible,
   type NavLeaf,
   type NavGroup,
   type NavEntry,
@@ -304,10 +306,15 @@ function NavGroupItem({
 
 function FilteredEntry({ entry, collapsed }: { entry: NavEntry; collapsed: boolean }) {
   const check = usePermissionCheck()
+  const isSuperAdmin = useAuthStore((s) => s.user?.isSuperAdmin)
   if (entry.kind === 'leaf') {
-    return check(entry.permission) ? <NavLink item={entry} collapsed={collapsed} /> : null
+    return isNavLeafVisible(entry, check, isSuperAdmin) ? (
+      <NavLink item={entry} collapsed={collapsed} />
+    ) : null
   }
-  const visibleChildren = entry.children.filter((child) => check(child.permission))
+  const visibleChildren = entry.children.filter((child) =>
+    isNavLeafVisible(child, check, isSuperAdmin),
+  )
   if (visibleChildren.length === 0) return null
   if (visibleChildren.length === 1) {
     const only = visibleChildren[0]!

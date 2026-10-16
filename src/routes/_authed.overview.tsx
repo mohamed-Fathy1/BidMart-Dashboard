@@ -1,13 +1,13 @@
 import { Outlet, createFileRoute, useRouterState } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { PERMISSIONS, usePermission } from '@/lib/permissions'
+import { useAuthStore } from '@/features/auth/auth.store'
 import { readEnum, readIsoDate } from '@/lib/list-search'
 import { DEFAULT_STATISTICS_PERIOD, STATISTICS_PERIODS } from '@/lib/report-period'
 import { PageHeader } from '@/components/shared/page-header'
 import { PeriodFilter } from '@/components/shared/period-filter'
 import { SectionTabs } from '@/components/shared/section-tabs'
+import { OverviewHome } from '@/features/overview/overview-home'
 import { useStatisticsWindow } from '@/features/overview/use-statistics-window'
-import { PermissionDenied } from '@/routes/_authed'
 import type { StatisticsPeriod } from '@/types/api'
 
 /**
@@ -34,12 +34,15 @@ export const Route = createFileRoute('/_authed/overview')({
 
 function StatisticsLayoutRoute() {
   const { t } = useTranslation()
-  const allowed = usePermission(PERMISSIONS.reports.view)
+  // Statistics endpoints are super-admin only (any other admin gets 403
+  // FORBIDDEN). Non-super admins get a neutral home — never an error page —
+  // and no statistics query mounts.
+  const isSuperAdmin = useAuthStore((s) => s.user?.isSuperAdmin)
   const navigate = Route.useNavigate()
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const { params, anchorError } = useStatisticsWindow()
 
-  if (!allowed) return <PermissionDenied />
+  if (!isSuperAdmin) return <OverviewHome />
 
   const isGeneral = pathname === '/overview' || pathname === '/overview/'
 

@@ -12,7 +12,10 @@ export const Route = createFileRoute('/')({
     let landing = '/overview'
     try {
       const { user, permissions } = buildSessionFromToken(token)
-      landing = firstPermittedPath(permissionCheck(permissions, user.isSuperAdmin))
+      landing = firstPermittedPath(
+        permissionCheck(permissions, user.isSuperAdmin),
+        user.isSuperAdmin,
+      )
     } catch {
       // A malformed token falls through to the layout, which clears the session.
     }

@@ -55,7 +55,10 @@ export function useLoginMutation() {
     onSuccess: (data) => {
       setSession(data);
       navigate({
-        to: firstPermittedPath(permissionCheck(data.permissions, data.user.isSuperAdmin)),
+        to: firstPermittedPath(
+          permissionCheck(data.permissions, data.user.isSuperAdmin),
+          data.user.isSuperAdmin,
+        ),
       });
     },
   });

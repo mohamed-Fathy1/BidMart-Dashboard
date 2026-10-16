@@ -9,7 +9,6 @@ import {
   ShoppingCart,
   Trash2,
   UserX,
-  Wallet,
 } from 'lucide-react'
 import type { AdminUserDetail } from '@/types/api'
 import { PageHeader } from '@/components/shared/page-header'
@@ -25,10 +24,11 @@ import { DetailPageSkeleton } from '@/components/shared/detail-page-skeleton'
 import { ConfirmDialog } from '@/components/shared/confirm-dialog'
 import { ReasonDialog } from '@/components/shared/reason-dialog'
 import { Can } from '@/components/permissions/can'
-import { PERMISSIONS } from '@/lib/permissions'
+import { PERMISSIONS, usePermission } from '@/lib/permissions'
 import { format } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { providerAccountStatusForSellerBadge } from '@/features/providers/providers.api'
+import { WalletPanel } from '@/features/wallet/wallet-panel'
 import {
   useUserDetailQuery,
   useBanUserMutation,
@@ -65,6 +65,8 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
   const [suspendOpen, setSuspendOpen] = useState(false)
   const [activateOpen, setActivateOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+
+  const canViewWallet = usePermission(PERMISSIONS.wallets.view)
 
   if (isLoading) {
     return <DetailPageSkeleton cards={1} />
@@ -148,7 +150,9 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
         <TabsList>
           <TabsTrigger value="overview">{t('users:detail.tabs.overview')}</TabsTrigger>
           <TabsTrigger value="orders">{t('users:detail.tabs.orders')}</TabsTrigger>
-          <TabsTrigger value="wallet">{t('users:detail.tabs.wallet')}</TabsTrigger>
+          <TabsTrigger value="wallet" disabled={!canViewWallet}>
+            {t('users:detail.tabs.wallet')}
+          </TabsTrigger>
           <TabsTrigger value="sessions">{t('users:detail.tabs.sessions')}</TabsTrigger>
         </TabsList>
 
@@ -235,11 +239,7 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
         </TabsContent>
 
         <TabsContent value="wallet">
-          <ComingSoonCard
-            icon={Wallet}
-            title={t('users:detail.tabs.wallet_empty_title')}
-            message={t('users:detail.tabs.wallet_empty_hint')}
-          />
+          {canViewWallet ? <WalletPanel sellerId={user.id} /> : null}
         </TabsContent>
 
         <TabsContent value="sessions">

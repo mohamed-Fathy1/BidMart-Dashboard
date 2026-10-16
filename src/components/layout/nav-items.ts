@@ -34,6 +34,12 @@ export interface NavLeaf {
   icon: LucideIcon
   to: string
   permission?: Permission
+  /**
+   * When true the entry is visible to super admins only — no role permission
+   * can grant it (e.g. Statistics, whose endpoints reject non-super admins
+   * with 403 FORBIDDEN).
+   */
+  superAdminOnly?: boolean
 }
 
 export interface NavGroup {
@@ -64,7 +70,7 @@ export const navSections: NavSection[] = [
         labelKey: 'shell:nav.overview',
         icon: LayoutDashboard,
         to: '/overview',
-        permission: PERMISSIONS.reports.view,
+        superAdminOnly: true,
       },
       {
         kind: 'group',
@@ -215,10 +221,30 @@ export const navLeaves: NavLeaf[] = navSections.flatMap((section) =>
 )
 
 /**
+ * Whether a sidebar leaf is visible to the signed-in admin. `superAdminOnly`
+ * leaves need `isSuperAdmin`; everything else follows the permission check
+ * (which itself bypasses for super admins).
+ */
+export function isNavLeafVisible(
+  leaf: NavLeaf,
+  check: (permission?: Permission) => boolean,
+  isSuperAdmin: boolean | undefined,
+): boolean {
+  if (leaf.superAdminOnly) return !!isSuperAdmin
+  return check(leaf.permission)
+}
+
+/**
  * The first sidebar page the admin can open. Used as the landing page after
  * login so an admin without Overview access does not land on a permission
  * error. `/profile` is open to every admin.
  */
-export function firstPermittedPath(check: (permission?: Permission) => boolean): string {
-  return navLeaves.find((leaf) => check(leaf.permission))?.to ?? '/profile'
+export function firstPermittedPath(
+  check: (permission?: Permission) => boolean,
+  isSuperAdmin?: boolean,
+): string {
+  return (
+    navLeaves.find((leaf) => isNavLeafVisible(leaf, check, isSuperAdmin))?.to ??
+    '/profile'
+  )
 }

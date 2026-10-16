@@ -1,6 +1,10 @@
 {
   "title": "Statistics",
   "description": "Platform health for the selected period.",
+  "home": {
+    "title": "Welcome",
+    "description": "Open a section below to continue your work."
+  },
   "tabs": {
     "general": "General Overview",
     "business_activity": "Business Activity",
