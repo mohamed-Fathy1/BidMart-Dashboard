@@ -54,7 +54,8 @@ export function ComplaintDetailPage({ complaintId }: ComplaintDetailPageProps) {
   const chat = useComplaintChat(complaintId, {
     enabled: !!complaint,
     selfAdminId,
-    complainantName: complaint?.submitter.full_name ?? null,
+    complainantName:
+      complaint?.submitter.full_name ?? complaint?.submitter.phone_number ?? null,
   })
 
   const startMutation = useStartInvestigationMutation()
@@ -271,7 +272,10 @@ export function ComplaintDetailPage({ complaintId }: ComplaintDetailPageProps) {
                 status={complaint.status}
                 messages={complaint.messages}
                 conversationClosed={complaint.conversation_closed}
-                complainantName={complaint.submitter.full_name}
+                complainantName={
+                  complaint.submitter.full_name ?? complaint.submitter.phone_number
+                }
+                complainantAvatar={complaint.submitter.profile_picture}
                 connectionStatus={chat.connectionStatus}
                 typingActorIds={chat.typingActorIds}
                 onSend={chat.send}

@@ -1,5 +1,10 @@
+import { useState } from 'react'
 import type { TFunction } from 'i18next'
-import type { ComplaintStatus } from '@/types/api'
+import type {
+  ComplaintMessageSender,
+  ComplaintMessageSenderWire,
+  ComplaintStatus,
+} from '@/types/api'
 import { cn } from '@/lib/utils'
 
 const SIZE_CLASSES = {
@@ -14,6 +19,8 @@ type AvatarSize = keyof typeof SIZE_CLASSES
 
 interface InitialAvatarProps {
   name: string | null | undefined
+  /** Photo URL. When set (and loading), it renders instead of the initials. */
+  src?: string | null
   size?: AvatarSize
   tone?: 'neutral' | 'primary'
   className?: string
@@ -22,18 +29,24 @@ interface InitialAvatarProps {
 
 export function InitialAvatar({
   name,
+  src,
   size = 'md',
   tone = 'neutral',
   className,
   title,
 }: InitialAvatarProps) {
+  const [failedSrc, setFailedSrc] = useState<string | null>(null)
   const initials = getInitials(name)
+  // A new URL gets a fresh load attempt; only a URL that already failed
+  // falls back to initials. This matters because the thread header stays
+  // mounted when hopping between complaints.
+  const showPhoto = !!src && src !== failedSrc
   return (
     <span
       title={title ?? name ?? undefined}
       aria-hidden
       className={cn(
-        'inline-flex shrink-0 items-center justify-center rounded-full font-semibold tracking-tight ring-1 ring-inset',
+        'inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full font-semibold tracking-tight ring-1 ring-inset',
         SIZE_CLASSES[size],
         tone === 'primary'
           ? 'bg-primary/10 text-primary ring-primary/20'
@@ -41,9 +54,38 @@ export function InitialAvatar({
         className,
       )}
     >
-      {initials}
+      {showPhoto ? (
+        <img
+          src={src}
+          alt=""
+          loading="lazy"
+          onError={() => setFailedSrc(src ?? null)}
+          className="size-full object-cover"
+        />
+      ) : (
+        initials
+      )}
     </span>
   )
+}
+
+/**
+ * Normalize a raw `sender` value to the canonical uppercase form. The admin
+ * detail/socket payloads may carry lowercase (`"user"` / `"admin"`) while
+ * legacy code paths use uppercase — always compare through this (or
+ * `isCustomerSender`) instead of `=== 'USER'` so customer messages are never
+ * mislabelled as support. Unknown values fall back to `'ADMIN'`.
+ */
+export function normalizeComplaintSender(
+  sender: ComplaintMessageSenderWire | string | null | undefined,
+): ComplaintMessageSender {
+  return String(sender ?? '').toUpperCase() === 'USER' ? 'USER' : 'ADMIN'
+}
+
+export function isCustomerSender(
+  sender: ComplaintMessageSenderWire | string | null | undefined,
+): boolean {
+  return normalizeComplaintSender(sender) === 'USER'
 }
 
 export function getInitials(name: string | null | undefined): string {

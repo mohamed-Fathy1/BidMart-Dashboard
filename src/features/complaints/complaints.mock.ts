@@ -157,7 +157,7 @@ export const MOCK_COMPLAINT_SUMMARIES: ComplaintSummary[] = [
 export const MOCK_COMPLAINT_DETAILS: Record<string, ComplaintDetail> = {
   'aaaa1111-2222-3333-4444-555566667777': {
     id: 'aaaa1111-2222-3333-4444-555566667777',
-    submitter: { id: 'u-1', full_name: 'Omar Al-Rashidi', phone_number: '+966500000001' },
+    submitter: { id: 'u-1', full_name: 'Omar Al-Rashidi', phone_number: '+966500000001', profile_picture: null },
     complaint_type: TYPE_WRONG_ITEM,
     status: 'UNDER_REVIEW',
     description:
@@ -175,7 +175,7 @@ export const MOCK_COMPLAINT_DETAILS: Record<string, ComplaintDetail> = {
   },
   'bbbb1111-2222-3333-4444-555566667777': {
     id: 'bbbb1111-2222-3333-4444-555566667777',
-    submitter: { id: 'u-2', full_name: 'Sara Al-Otaibi', phone_number: '+966500000002' },
+    submitter: { id: 'u-2', full_name: 'Sara Al-Otaibi', phone_number: '+966500000002', profile_picture: null },
     complaint_type: TYPE_SHIPPING,
     status: 'IN_PROGRESS',
     description:
@@ -243,7 +243,7 @@ export const MOCK_COMPLAINT_DETAILS: Record<string, ComplaintDetail> = {
   },
   'cccc1111-2222-3333-4444-555566667777': {
     id: 'cccc1111-2222-3333-4444-555566667777',
-    submitter: { id: 'u-3', full_name: 'Khalid Al-Mansour', phone_number: '+966500000003' },
+    submitter: { id: 'u-3', full_name: 'Khalid Al-Mansour', phone_number: '+966500000003', profile_picture: null },
     complaint_type: TYPE_UNRESPONSIVE,
     status: 'RESOLVED',
     description:
@@ -305,7 +305,7 @@ export const MOCK_COMPLAINT_DETAILS: Record<string, ComplaintDetail> = {
   },
   'dddd1111-2222-3333-4444-555566667777': {
     id: 'dddd1111-2222-3333-4444-555566667777',
-    submitter: { id: 'u-4', full_name: 'Layla Al-Harbi', phone_number: '+966500000004' },
+    submitter: { id: 'u-4', full_name: 'Layla Al-Harbi', phone_number: '+966500000004', profile_picture: null },
     complaint_type: TYPE_PAYMENT,
     status: 'REJECTED',
     description:

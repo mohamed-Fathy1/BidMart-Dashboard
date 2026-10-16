@@ -40,7 +40,7 @@ const SELF_ADMIN_ID = 'admin-self'
 function seedDetail(overrides: Partial<ComplaintDetail> = {}): ComplaintDetail {
   return {
     id: COMPLAINT_ID,
-    submitter: { id: 'u-1', full_name: 'Sara', phone_number: null },
+    submitter: { id: 'u-1', full_name: 'Sara', phone_number: null, profile_picture: null },
     complaint_type: { id: 't-1', name_en: 'Type', name_ar: 'نوع' },
     status: 'IN_PROGRESS',
     description: '',
@@ -151,6 +151,53 @@ describe('useComplaintChat', () => {
     expect(detail.messages).toHaveLength(1)
     expect(detail.messages[0]?.isMe).toBe(false)
     expect(detail.messages[0]?.content).toBe('I need help')
+  })
+
+  it('normalizes lowercase wire senders to the canonical form', () => {
+    queryClient.setQueryData(complaintKeys.detail(COMPLAINT_ID), seedDetail())
+
+    renderHook(() =>
+      useComplaintChat(COMPLAINT_ID, {
+        enabled: true,
+        selfAdminId: SELF_ADMIN_ID,
+        complainantName: 'Sara',
+      }),
+    )
+
+    act(() => {
+      fireServer('complaint:message:new', {
+        id: 'msg-lower-user',
+        complaintId: COMPLAINT_ID,
+        sender: 'user',
+        senderId: 'u-1',
+        messageType: 'TEXT',
+        content: 'lowercase sender',
+        fileUrl: null,
+        status: 'SENT',
+        createdAt: '2026-05-14T12:00:00.000Z',
+      })
+    })
+
+    act(() => {
+      fireServer('complaint:message:new', {
+        id: 'msg-lower-admin',
+        complaintId: COMPLAINT_ID,
+        sender: 'admin',
+        senderId: 'other-admin',
+        messageType: 'TEXT',
+        content: 'lowercase admin',
+        fileUrl: null,
+        status: 'SENT',
+        createdAt: '2026-05-14T12:01:00.000Z',
+      })
+    })
+
+    const detail = getDetail()!
+    expect(detail.messages).toHaveLength(2)
+    expect(detail.messages[0]?.sender).toBe('USER')
+    expect(detail.messages[0]?.isMe).toBe(false)
+    expect(detail.messages[1]?.sender).toBe('ADMIN')
+    expect(detail.messages[1]?.isMe).toBe(false)
   })
 
   it('ignores events targeting a different complaintId', () => {

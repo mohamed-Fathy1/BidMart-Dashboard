@@ -10,6 +10,7 @@ import type {
   ComplaintStatus,
 } from '@/types/api'
 import { complaintKeys } from '@/features/complaints/complaints.queries'
+import { normalizeComplaintSender } from '@/features/complaints/complaint-ui'
 import {
   getComplaintSocket,
   subscribeComplaintSocketStatus,
@@ -30,7 +31,9 @@ interface SendPayload {
 interface IncomingMessage {
   id: string
   complaintId: string
-  sender: 'USER' | 'ADMIN'
+  // Raw wire value — may be lowercase (`"user"` / `"admin"`). Normalized to
+  // the canonical form before entering the cache.
+  sender: string
   senderId: string
   messageType: 'TEXT' | 'MEDIA'
   content: string | null
@@ -128,6 +131,7 @@ export function useComplaintChat(
       }
       const isMine = !!selfAdminId && data.senderId === selfAdminId
       const incomingTs = Date.parse(data.createdAt)
+      const sender = normalizeComplaintSender(data.sender)
       patchDetail((prev) => {
         const messages = prev.messages.slice()
         if (isMine) {
@@ -140,7 +144,7 @@ export function useComplaintChat(
           })
           const merged: ComplaintMessageAdmin = {
             id: data.id,
-            sender: data.sender,
+            sender,
             senderId: data.senderId,
             messageType: data.messageType,
             content: data.content,
@@ -167,7 +171,7 @@ export function useComplaintChat(
         } else {
           messages.push({
             id: data.id,
-            sender: data.sender,
+            sender,
             senderId: data.senderId,
             messageType: data.messageType,
             content: data.content,

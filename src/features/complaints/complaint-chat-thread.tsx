@@ -14,7 +14,7 @@ import type {
 import { Card, CardContent } from '@/components/ui/card'
 import { format } from '@/lib/format'
 import { cn } from '@/lib/utils'
-import { InitialAvatar, complaintStatusTint } from '@/features/complaints/complaint-ui'
+import { InitialAvatar, complaintStatusTint, isCustomerSender } from '@/features/complaints/complaint-ui'
 import { ComplaintComposer } from '@/features/complaints/complaint-composer'
 import type { ComplaintSocketStatus } from '@/features/complaints/complaint-socket'
 
@@ -22,8 +22,10 @@ interface ComplaintChatThreadProps {
   status: ComplaintStatus
   messages: ComplaintMessageAdmin[]
   conversationClosed: boolean
-  /** Name of the complainant, used for the user-side avatar. */
+  /** Name of the complainant (full name, else phone), used for user-side bubbles. */
   complainantName?: string | null
+  /** Customer photo URL from `submitter.profile_picture`. Null → initials. */
+  complainantAvatar?: string | null
   connectionStatus: ComplaintSocketStatus
   typingActorIds: string[]
   onSend: (payload: { text?: string; fileUrl?: string }) => void | Promise<void>
@@ -87,6 +89,7 @@ export function ComplaintChatThread({
   messages,
   conversationClosed,
   complainantName,
+  complainantAvatar,
   connectionStatus,
   typingActorIds,
   onSend,
@@ -149,6 +152,7 @@ export function ComplaintChatThread({
           <div className="flex min-w-0 items-center gap-2">
             <InitialAvatar
               name={complainantName}
+              src={complainantAvatar}
               size="sm"
               tone="neutral"
             />
@@ -195,6 +199,7 @@ export function ComplaintChatThread({
                     key={message.id}
                     message={message}
                     complainantName={complainantName}
+                    complainantAvatar={complainantAvatar}
                     continuation={isContinuation(group.messages[idx - 1], message)}
                   />
                 ))}
@@ -241,17 +246,23 @@ function TypingIndicator({ who }: { who: string }) {
 function MessageRow({
   message,
   complainantName,
+  complainantAvatar,
   continuation,
 }: {
   message: ComplaintMessageAdmin
   complainantName?: string | null
+  complainantAvatar?: string | null
   continuation: boolean
 }) {
   const { t } = useTranslation()
+  // Identity comes from `sender`, not `isMe`: `isMe` is only true for messages
+  // the logged-in admin sent, while another admin's reply has `isMe: false`.
   const isMe = message.isMe
+  const isCustomer = isCustomerSender(message.sender)
+  const isOutgoing = !isCustomer
   const senderLabel = isMe
     ? t('complaints:chat.you')
-    : message.sender === 'USER'
+    : isCustomer
       ? (complainantName ?? t('complaints:chat.complainant'))
       : t('complaints:chat.support')
 
@@ -259,17 +270,18 @@ function MessageRow({
     <div
       className={cn(
         'flex w-full items-end gap-2',
-        isMe ? 'justify-end' : 'justify-start',
+        isOutgoing ? 'justify-end' : 'justify-start',
         continuation ? 'mt-0.5' : 'mt-1.5 first:mt-0',
       )}
     >
-      {!isMe && (
+      {!isOutgoing && (
         <span className="w-8 shrink-0">
           {!continuation && (
             <InitialAvatar
               name={senderLabel}
+              src={complainantAvatar}
               size="sm"
-              tone={message.sender === 'ADMIN' ? 'primary' : 'neutral'}
+              tone="neutral"
             />
           )}
         </span>
@@ -277,11 +289,11 @@ function MessageRow({
       <div
         className={cn(
           'flex max-w-[min(100%,28rem)] flex-col gap-0.5 px-3 py-1.5 ring-1 ring-inset',
-          isMe
+          isOutgoing
             ? 'bg-primary text-primary-foreground ring-primary/30'
             : 'bg-card text-foreground ring-border',
           // Sharper trailing corner only on the run's first bubble — chat tail.
-          isMe
+          isOutgoing
             ? continuation
               ? 'rounded-2xl'
               : 'rounded-2xl rounded-ee-md'
@@ -294,13 +306,13 @@ function MessageRow({
           <div
             className={cn(
               'flex justify-between pe-2 items-baseline gap-2 text-[11px]',
-              isMe ? 'text-primary-foreground/80' : 'text-muted-foreground',
+              isOutgoing ? 'text-primary-foreground/80' : 'text-muted-foreground',
             )}
           >
             <span
               className={cn(
                 'font-semibold',
-                isMe ? 'text-primary-foreground' : 'text-foreground',
+                isOutgoing ? 'text-primary-foreground' : 'text-foreground',
               )}
             >
               {senderLabel}
@@ -318,7 +330,7 @@ function MessageRow({
             rel="noopener noreferrer"
             className={cn(
               'relative block aspect-[4/3] w-64 max-w-full overflow-hidden rounded-md ring-1 ring-inset',
-              isMe ? 'ring-primary-foreground/30' : 'ring-border',
+              isOutgoing ? 'ring-primary-foreground/30' : 'ring-border',
             )}
           >
             <img
@@ -338,7 +350,7 @@ function MessageRow({
           <span
             className={cn(
               'inline-flex items-center gap-1.5 text-xs',
-              isMe ? 'text-primary-foreground/80' : 'text-muted-foreground',
+              isOutgoing ? 'text-primary-foreground/80' : 'text-muted-foreground',
             )}
           >
             <ImageIcon className="size-3.5" aria-hidden />
@@ -351,7 +363,7 @@ function MessageRow({
           </div>
         )}
       </div>
-      {isMe && (
+      {isOutgoing && (
         <span className="w-8 shrink-0">
           {!continuation && (
             <InitialAvatar

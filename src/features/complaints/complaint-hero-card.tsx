@@ -58,6 +58,7 @@ export function ComplaintHeroCard({ complaint, actions }: ComplaintHeroCardProps
             <div className="flex flex-wrap items-center gap-3">
               <InitialAvatar
                 name={complaint.submitter.full_name}
+                src={complaint.submitter.profile_picture}
                 size="md"
                 tone="neutral"
               />

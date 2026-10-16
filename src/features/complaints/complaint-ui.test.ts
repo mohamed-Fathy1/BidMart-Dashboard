@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   formatWaitDuration,
   getInitials,
+  isCustomerSender,
+  normalizeComplaintSender,
   shortComplaintId,
   waitTone,
 } from './complaint-ui'
@@ -34,6 +36,31 @@ describe('getInitials', () => {
 
   it('uses only the first two words even when more are present', () => {
     expect(getInitials('Omar Bin Abdullah Al-Rashidi')).toBe('OB')
+  })
+})
+
+describe('normalizeComplaintSender', () => {
+  it('accepts uppercase and lowercase user/admin', () => {
+    expect(normalizeComplaintSender('USER')).toBe('USER')
+    expect(normalizeComplaintSender('user')).toBe('USER')
+    expect(normalizeComplaintSender('ADMIN')).toBe('ADMIN')
+    expect(normalizeComplaintSender('admin')).toBe('ADMIN')
+  })
+
+  it('falls back to ADMIN for unknown or missing values', () => {
+    expect(normalizeComplaintSender('support')).toBe('ADMIN')
+    expect(normalizeComplaintSender(null)).toBe('ADMIN')
+    expect(normalizeComplaintSender(undefined)).toBe('ADMIN')
+  })
+})
+
+describe('isCustomerSender', () => {
+  it('is true for user in either case, false otherwise', () => {
+    expect(isCustomerSender('USER')).toBe(true)
+    expect(isCustomerSender('user')).toBe(true)
+    expect(isCustomerSender('ADMIN')).toBe(false)
+    expect(isCustomerSender('admin')).toBe(false)
+    expect(isCustomerSender(null)).toBe(false)
   })
 })
 

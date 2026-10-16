@@ -409,7 +409,13 @@ export type ComplaintChatClosedReason =
 
 export type ComplaintMessageType = "TEXT" | "MEDIA";
 export type ComplaintMessageStatus = "SENT" | "DELIVERED" | "READ";
+/** Canonical (normalized) sender. The wire may carry lowercase variants —
+ * normalize with `normalizeComplaintSender` before comparing. */
 export type ComplaintMessageSender = "USER" | "ADMIN";
+/** Raw sender as received from REST / socket payloads. */
+export type ComplaintMessageSenderWire =
+  | ComplaintMessageSender
+  | Lowercase<ComplaintMessageSender>;
 
 export interface ComplaintTypeRef {
   id: string;
@@ -440,6 +446,8 @@ export interface ComplaintSubmitterRef {
 
 export interface ComplaintSubmitterDetail extends ComplaintSubmitterRef {
   phone_number: string | null;
+  /** Full URL of the customer's photo. `null` → default avatar / initials. */
+  profile_picture: string | null;
 }
 
 export interface ComplaintLastMessage {
@@ -462,7 +470,7 @@ export interface ComplaintSummary {
 
 export interface ComplaintMessageAdmin {
   id: string;
-  sender: ComplaintMessageSender;
+  sender: ComplaintMessageSenderWire;
   senderId: string;
   messageType: ComplaintMessageType;
   content: string | null;
